@@ -13,86 +13,93 @@ Cukup **klik dua kali (*double-click*) file `index.html`** pada File Explorer di
 
 ---
 
-## 🛠️ Daftar 17 Alat & Fitur Lengkap
+## 🛠️ Daftar 23 Alat & Fitur Lengkap
 
 | No | Tool / Fitur | File Halaman | Deskripsi Utama |
 |:---:|---|---|---|
-| 1 | **✨ PDF Studio (Editor Lengkap)** | [pages/viewer.html](file:///c:/laragon/www/pdf/pages/viewer.html) | Workspace komprehensif PDF Studio Pro: View, Text Edit, Anotasi, Fill & Sign, Stamp, Redaction, dan OCR. |
-| 2 | **🔀 Merge PDF** | [pages/merge.html](file:///c:/laragon/www/pdf/pages/merge.html) | Gabungkan banyak berkas PDF menjadi satu dengan Visual Page Organizer & tombol *Clear All Pages*. |
-| 3 | **🗜️ Compress PDF** | [pages/compress.html](file:///c:/laragon/www/pdf/pages/compress.html) | Kompresi ukuran dokumen (3 preset) + deteksi tanda tangan digital + **Batch Queue ke ZIP**. |
-| 4 | **✂️ Split PDF** | [pages/split.html](file:///c:/laragon/www/pdf/pages/split.html) | Pisahkan PDF per halaman, berdasarkan rentang (*range*), atau setiap *N* halaman. |
-| 5 | **🖼️ JPG to PDF** | [pages/jpg-to-pdf.html](file:///c:/laragon/www/pdf/pages/jpg-to-pdf.html) | Konversi gambar (JPG, PNG, WebP) ke PDF dengan opsi ukuran kertas (A4, Letter, Fit), orientasi, & margin. |
-| 6 | **🔄 Rotate PDF** | [pages/rotate.html](file:///c:/laragon/www/pdf/pages/rotate.html) | Putar orientasi halaman PDF per halaman (90°, 180°, 270°) atau seluruh dokumen sekaligus. |
-| 7 | **🗑️ Remove Pages** | [pages/remove-pages.html](file:///c:/laragon/www/pdf/pages/remove-pages.html) | Hapus halaman tertentu secara visual dengan mengklik thumbnail halaman yang ingin dibuang. |
-| 8 | **📑 Reorder Pages** | [pages/reorder.html](file:///c:/laragon/www/pdf/pages/reorder.html) | Susun ulang urutan halaman PDF dengan mudah menggunakan antarmuka *drag & drop*. |
-| 9 | **📷 PDF to JPG** | [pages/pdf-to-jpg.html](file:///c:/laragon/www/pdf/pages/pdf-to-jpg.html) | Ekstrak halaman PDF menjadi gambar resolusi tinggi (JPG/PNG) satuan atau sekaligus dalam ZIP. |
-| 10 | **🏷️ Watermark PDF** | [pages/watermark.html](file:///c:/laragon/www/pdf/pages/watermark.html) | Tambahkan cap air teks/stempel dengan kustomisasi sudut, opasitas, warna + **Batch Queue ke ZIP**. |
-| 11 | **🔍 OCR PDF (100% Offline)** | [pages/ocr.html](file:///c:/laragon/www/pdf/pages/ocr.html) | Ekstrak teks (Bahasa Indonesia & English) & buat Searchable PDF tanpa internet menggunakan Tesseract WASM. |
-| 12 | **🔢 Page Numbers** | [pages/page-number.html](file:///c:/laragon/www/pdf/pages/page-number.html) | Tambahkan penomoran halaman otomatis, header, & footer dengan format kustom + **Batch Queue ke ZIP**. |
-| 13 | **🔒 Protect & Unlock PDF** | [pages/protect.html](file:///c:/laragon/www/pdf/pages/protect.html) | Enkripsi sandi dokumen dengan proteksi militer atau buka kunci sandi + **Batch Queue ke ZIP**. |
-| 14 | **🛡️ Flatten PDF (Baru)** | [pages/flatten.html](file:///c:/laragon/www/pdf/pages/flatten.html) | Kunci isian formulir, tanda tangan, dan stempel menjadi lapisan permanen anti-edit (*read-only*). |
-| 15 | **✂️ Crop & Trim Margins (Baru)** | [pages/crop.html](file:///c:/laragon/www/pdf/pages/crop.html) | Potong margin putih berlebih dengan 8 handle visual & tombol cerdas *Auto-Trim Whitespace*. |
-| 16 | **🎨 PDF to Grayscale (Baru)** | [pages/grayscale.html](file:///c:/laragon/www/pdf/pages/grayscale.html) | Ubah dokumen berwarna ke skala abu-abu / fotokopi B&W dengan slider perbandingan *Before/After*. |
-| 17 | **📦 Batch Processing Queue** | *Terintegrasi* | Memproses puluhan berkas PDF sekaligus secara otomatis dan langsung diunduh dalam 1 paket `.zip`. |
+| 1 | **PDF Studio (Editor Lengkap)** | [pages/viewer.html](pages/viewer.html) | Workspace komprehensif: View, Fixed Layout Text Edit, Anotasi, Fill & Sign, Stamp, Redaction permanen, dan OCR inline. |
+| 2 | **Merge PDF** | [pages/merge.html](pages/merge.html) | Gabungkan banyak berkas PDF menjadi satu dengan Visual Page Organizer, reorder halaman, & opsi sanitasi tanda tangan. |
+| 3 | **Split PDF** | [pages/split.html](pages/split.html) | Pisahkan PDF per halaman, berdasarkan rentang (*range*), atau setiap *N* halaman. |
+| 4 | **Compress PDF** | [pages/compress.html](pages/compress.html) | Kompresi ukuran dokumen (3 preset: Extreme, Recommended, Less) + optimasi stream vektor + antrean batch ke ZIP. |
+| 5 | **PDF to Word (DOCX)** | [pages/pdf-to-docx.html](pages/pdf-to-docx.html) | Ekstraksi teks dan tata letak paragraf PDF ke dalam dokumen Microsoft Word (.docx) berbasis XML standar. |
+| 6 | **Word to PDF (DOCX)** | [pages/docx-to-pdf.html](pages/docx-to-pdf.html) | Konversi dokumen Microsoft Word (.docx) ke format PDF berkualitas tinggi secara offline. |
+| 7 | **PDF to Excel (XLSX)** | [pages/pdf-to-xlsx.html](pages/pdf-to-xlsx.html) | Ekstraksi tabel data dan teks berformat kolom dari PDF menjadi lembar kerja spreadsheet Excel (.xlsx). |
+| 8 | **Excel to PDF (XLSX)** | [pages/xlsx-to-pdf.html](pages/xlsx-to-pdf.html) | Konversi lembar kerja Excel (.xlsx) menjadi dokumen tabel PDF secara offline. |
+| 9 | **PDF to JPG** | [pages/pdf-to-jpg.html](pages/pdf-to-jpg.html) | Ekstrak halaman PDF menjadi gambar resolusi tinggi (JPG/PNG) satuan atau sekaligus dalam arsip ZIP. |
+| 10 | **JPG to PDF** | [pages/jpg-to-pdf.html](pages/jpg-to-pdf.html) | Konversi gambar (JPG, PNG, WebP) ke PDF dengan opsi ukuran kertas (A4, Letter, Fit), orientasi, & margin. |
+| 11 | **Rotate PDF** | [pages/rotate.html](pages/rotate.html) | Putar orientasi halaman PDF (90°, 180°, 270°) per halaman atau seluruh dokumen sekaligus. |
+| 12 | **Remove Pages** | [pages/remove-pages.html](pages/remove-pages.html) | Hapus halaman tertentu secara visual dengan memilih thumbnail halaman yang ingin dibuang. |
+| 13 | **Reorder Pages** | [pages/reorder.html](pages/reorder.html) | Susun ulang urutan halaman PDF dengan mudah menggunakan antarmuka *drag & drop*. |
+| 14 | **Crop & Trim Margins** | [pages/crop.html](pages/crop.html) | Potong margin putih berlebih dengan 8 handle visual & tombol cerdas *Auto-Trim Whitespace*. |
+| 15 | **Watermark PDF** | [pages/watermark.html](pages/watermark.html) | Tambahkan cap air teks/stempel dengan kustomisasi sudut rotasi, opasitas, posisi layer, & antrean batch ke ZIP. |
+| 16 | **Page Numbers** | [pages/page-number.html](pages/page-number.html) | Tambahkan penomoran halaman otomatis, header, & footer dengan format kustom + antrean batch ke ZIP. |
+| 17 | **Protect & Unlock PDF** | [pages/protect.html](pages/protect.html) | Enkripsi sandi dokumen dengan algoritma keamanan standar PDF atau buka kunci sandi dokumen. |
+| 18 | **Sign PDF (E-Sign)** | [pages/sign.html](pages/sign.html) | Tanda tangan elektronik offline: gambar tangan (*draw*), ketik dengan font kaligrafi lokal (*type*), atau unggah stempel (*upload*). |
+| 19 | **Fill PDF Forms** | [pages/form-fill.html](pages/form-fill.html) | Isi formulir PDF interaktif AcroForm (teks, checkbox, radio button, dropdown) dengan ekspor data & simpan dokumen. |
+| 20 | **OCR PDF (100% Offline)** | [pages/ocr.html](pages/ocr.html) | Ekstrak teks (Bahasa Indonesia & English) & buat Searchable PDF tanpa internet menggunakan Tesseract WASM. |
+| 21 | **PDF to Grayscale** | [pages/grayscale.html](pages/grayscale.html) | Ubah dokumen berwarna ke skala abu-abu / fotokopi B&W dengan slider perbandingan interaktif *Before/After*. |
+| 22 | **Flatten PDF** | [pages/flatten.html](pages/flatten.html) | Kunci isian formulir, tanda tangan, dan stempel menjadi lapisan permanen anti-edit (*read-only*). |
+| 23 | **Batch Processing** | [pages/batch.html](pages/batch.html) | Memproses puluhan berkas PDF sekaligus secara otomatis (watermark, compress, rotate, number) ke dalam satu file ZIP. |
 
 ---
 
 ## 📖 Panduan Penggunaan Lengkap
 
-### 1. ✨ Mengedit Dokumen di PDF Studio (`pages/viewer.html`)
+### 1. Mengedit Dokumen di PDF Studio (`pages/viewer.html`)
 1. Buka `pages/viewer.html` atau klik tombol **PDF Studio** pada halaman utama.
 2. Drag & drop berkas PDF Anda ke area kerja.
 3. **Fitur Pengeditan**:
-   - **Teks**: Klik tombol `🔤 Add Text` untuk menambah teks baru di mana saja, atau `📝 Edit Text` untuk menyunting teks yang ada.
-   - **Fill & Sign (Tanda Tangan & Formulir)**: Klik tombol `✍️ Fill & Sign`. Gunakan toolbar sekunder untuk meletakkan centang (`✔`), silang (`✖`), titik (`●`), lingkaran (`⭕`), garis (`━`), atau tanggal otomatis (`📅`).
-   - **Tanda Tangan Kaligrafi**: Pilih opsi *Draw* (gambar tangan/touchscreen), *Type* (ketik nama dengan font kaligrafi), atau *Upload* (unggah stempel/tanda tangan transparan).
-   - **OCR Inline**: Klik `🔍 Scan & OCR` di panel kanan untuk mengekstrak teks langsung pada halaman yang sedang dibuka.
-4. Klik `💾 Export / Save` untuk mengunduh dokumen hasil suntingan.
+   - **Teks**: Tambah teks baru di mana saja, atau sunting teks yang ada dengan Fixed Layout Engine.
+   - **Fill & Sign (Tanda Tangan & Formulir)**: Gunakan toolbar sekunder untuk meletakkan centang, silang, titik, lingkaran, garis, atau tanggal otomatis.
+   - **Tanda Tangan Kaligrafi**: Pilih opsi *Draw* (gambar tangan/touchscreen), *Type* (ketik nama dengan font kaligrafi lokal), atau *Upload* (unggah gambar tanda tangan transparan).
+   - **OCR Inline**: Ekstrak teks langsung pada halaman yang sedang dibuka untuk membuat searchable text layer.
+   - **Redaksi Permanen**: Tutup teks/area sensitif dengan blok hitam permanen berbasis rasterisasi resolusi tinggi tanpa kebocoran data.
+4. Klik **Save PDF** di toolbar kanan atas untuk mengunduh dokumen hasil suntingan.
 
-### 2. 🔀 Menggabungkan PDF (`pages/merge.html`)
+### 2. Menggabungkan PDF (`pages/merge.html`)
 1. Buka `pages/merge.html` dan tarik beberapa berkas PDF sekaligus ke dalam dropzone.
 2. Setiap berkas akan otomatis memiliki thumbnail halaman dengan kode warna tersendiri.
 3. Anda dapat menggeser (*drag*) halaman untuk mengatur urutan sesuai kebutuhan, memutar halaman perorangan, atau menghapus halaman tertentu.
-4. Terdapat tombol **"🗑️ Clear All Pages"** untuk mereset seluruh halaman dengan sekali klik.
-5. Klik **"🔀 Merge PDF"** untuk mengunduh dokumen gabungan.
+4. Terdapat tombol **Clear All Pages** untuk mereset seluruh halaman dengan sekali klik.
+5. Klik **Merge PDF** untuk mengunduh dokumen gabungan.
 
-### 3. 🗜️ Mengompres Ukuran Dokumen (`pages/compress.html`)
+### 3. Mengompres Ukuran Dokumen (`pages/compress.html`)
 1. Buka `pages/compress.html` dan masukkan 1 atau banyak berkas PDF.
 2. Pilih tingkat kompresi:
-   - **Extreme Compression**: Ukuran terkecil (cocok untuk upload portal berkas berkuota ketat).
+   - **Extreme Compression**: Ukuran terkecil untuk portal berkuota ketat.
    - **Recommended Compression**: Keseimbangan optimal antara ketajaman teks/gambar dan ukuran file.
    - **Less Compression**: Kualitas grafis tertinggi dengan kompresi ringan.
-3. Klik **"Compress PDF"**. Jika memasukkan banyak file, hasil kompresi otomatis dibundel ke berkas `.zip`.
+3. Klik **Compress PDF**. Jika memasukkan banyak file, hasil kompresi otomatis dibundel ke berkas `.zip`.
 
-### 4. 🛡️ Mengunci Formulir & Tanda Tangan (`pages/flatten.html`)
+### 4. Mengunci Formulir & Tanda Tangan (`pages/flatten.html`)
 1. Buka `pages/flatten.html` dan pilih berkas PDF yang telah diisi formulir atau dibubuhi tanda tangan.
 2. Pilih metode *Flattening*:
-   - **Vector Flatten (Rekomendasi)**: Mengunci isian formulir dan stempel menjadi bagian dari vektor dasar PDF. Teks tetap tajam 100% dan ukuran berkas kecil.
-   - **Raster Image (Anti-Tamper Maksimal)**: Merender setiap halaman menjadi gambar beresolusi tinggi sehingga tidak dapat diekstrak atau diinspeksi oleh pihak ketiga.
-3. Klik **"Flatten & Download PDF"**.
+   - **Vector Flatten (Rekomendasi)**: Mengunci isian formulir dan stempel menjadi bagian dari vektor dasar PDF. Teks tetap tajam dan ukuran berkas kecil.
+   - **Raster Image (Anti-Tamper Maksimal)**: Merender setiap halaman menjadi gambar beresolusi tinggi sehingga teks tidak dapat diinspeksi oleh pihak ketiga.
+3. Klik **Flatten & Download PDF**.
 
-### 5. ✂️ Memotong Margin Halaman (`pages/crop.html`)
+### 5. Memotong Margin Halaman (`pages/crop.html`)
 1. Buka `pages/crop.html` dan masukkan berkas PDF.
-2. Seluruh lembar halaman (*100% Full Page*) akan langsung tampil pada area kerja tanpa terpotong.
-3. Geser kotak pemotong dengan 8 titik handle di sudut dan sisi halaman, atau klik tombol **"✨ Auto-Trim Margins"** untuk mendeteksi batas konten secara otomatis.
+2. Lembar halaman tampil penuh pada area kerja.
+3. Geser kotak pemotong dengan 8 titik handle di sudut dan sisi halaman, atau klik tombol **Auto-Trim Whitespace** untuk mendeteksi batas konten secara otomatis.
 4. Pilih cakupan pemotongan (*All Pages* atau *Current Page Only*).
-5. Klik **"✂️ Crop & Download PDF"**.
+5. Klik **Crop & Download PDF**.
 
-### 6. 🎨 Mengubah PDF ke Grayscale / Hitam Putih (`pages/grayscale.html`)
+### 6. Mengubah PDF ke Grayscale / Hitam Putih (`pages/grayscale.html`)
 1. Buka `pages/grayscale.html` dan masukkan berkas PDF.
-2. Layar akan menampilkan pratinjau interaktif **Before / After Split Slider**. Geser slider tengah `↔` untuk melihat perbedaan warna asli vs hasil grayscale.
+2. Layar akan menampilkan pratinjau interaktif **Before / After Split Slider** untuk melihat perbedaan warna asli vs hasil grayscale.
 3. Pilih mode:
    - **Smooth Grayscale**: Mempertahankan gradasi foto dan shading warna abu-abu yang halus.
    - **Photocopy / Pure B&W**: Mengubah teks menjadi hitam pekat dan latar belakang menjadi putih 100% (sangat hemat tinta printer).
-4. Klik **"🎨 Convert & Download PDF"**.
+4. Klik **Convert & Download PDF**.
 
-### 7. 🔍 OCR PDF Offline (`pages/ocr.html`)
+### 7. OCR PDF Offline (`pages/ocr.html`)
 1. Buka `pages/ocr.html` dan pilih berkas PDF pindaian (*scanned PDF*) atau gambar dokumen.
 2. Pilih bahasa pengenalan teks: *Bahasa Indonesia (ID)*, *English (EN)*, atau keduanya.
 3. Pilih format output:
    - **Searchable PDF**: Dokumen PDF dengan lapisan teks tersembunyi yang bisa disorot, dicari (Ctrl+F), dan disalin (*copy-paste*).
    - **Plain Text (.TXT)**: Mengekstrak teks murni ke file teks.
-4. Klik **"🔍 Start OCR Process"**.
+4. Klik **Start OCR Process**.
 
 ---
 
@@ -113,63 +120,72 @@ Cukup **klik dua kali (*double-click*) file `index.html`** pada File Explorer di
 
 ## 📁 Struktur Direktori Proyek
 
-```
+```text
 pdf/
-├── index.html                  # Halaman Beranda Utama (Akses seluruh 17 tools)
-├── pages/                      # Seluruh Halaman Standalone Tools
+├── index.html                  # Halaman Beranda Utama (Akses seluruh 23 tools)
+├── pages/                      # Seluruh 23 Halaman Standalone Tools
 │   ├── viewer.html             # PDF Studio Pro (View, Edit, Fill & Sign, OCR)
 │   ├── merge.html              # Merge PDF
-│   ├── compress.html           # Compress PDF & Batch Queue
 │   ├── split.html              # Split PDF
+│   ├── compress.html           # Compress PDF & Batch Queue
+│   ├── pdf-to-docx.html        # PDF to Word (DOCX)
+│   ├── docx-to-pdf.html        # Word to PDF
+│   ├── pdf-to-xlsx.html        # PDF to Excel (XLSX)
+│   ├── xlsx-to-pdf.html        # Excel to PDF
+│   ├── pdf-to-jpg.html         # PDF to JPG
 │   ├── jpg-to-pdf.html         # JPG to PDF
 │   ├── rotate.html             # Rotate PDF
 │   ├── remove-pages.html       # Remove Pages
 │   ├── reorder.html            # Reorder Pages
-│   ├── pdf-to-jpg.html         # PDF to JPG
+│   ├── crop.html               # Crop & Trim Margins
 │   ├── watermark.html          # Watermark PDF & Batch Queue
-│   ├── ocr.html                # OCR PDF Offline
 │   ├── page-number.html        # Page Numbers & Batch Queue
-│   ├── protect.html            # Protect & Unlock & Batch Queue
-│   ├── flatten.html            # Flatten PDF (Baru)
-│   ├── crop.html               # Crop & Trim Margins (Baru)
-│   └── grayscale.html          # PDF to Grayscale & B/W (Baru)
-├── css/                        # Desain Sistem & Tema
-│   ├── style.css               # Token warna, typography, dark mode, dropzone
-│   ├── home.css                # Styling landing page
-│   └── tool.css                # Styling kartu alat & form
+│   ├── protect.html            # Protect & Unlock PDF
+│   ├── sign.html               # Sign PDF (E-Sign)
+│   ├── form-fill.html          # Fill PDF Forms
+│   ├── ocr.html                # OCR PDF Offline
+│   ├── grayscale.html          # PDF to Grayscale & B/W
+│   ├── flatten.html            # Flatten PDF
+│   └── batch.html              # Batch PDF Processing ke ZIP
+├── fonts/                      # Font Kaligrafi Lokal (OFL-1.1) untuk E-Sign
+│   ├── fonts.css               # Definisi lokal @font-face
+│   ├── OFL.txt                 # Dokumentasi lisensi SIL Open Font License
+│   └── *.ttf                   # File font lokal (Caveat, Dancing Script, dsb.)
+├── css/                        # Desain Sistem & Tema (style.css, home.css, tool.css)
 ├── js/
-│   ├── app.js                  # Inisialisasi tema & global controller
+│   ├── app.js                  # Inisialisasi tema, header navigasi & mega menu
 │   ├── lib/                    # Vendor lokal offline (PDF-Lib, PDF.js, Tesseract WASM, JSZip, FileSaver)
 │   ├── core/                   # Engine algoritma PDF (merge, compress, crop, flatten, grayscale, ocr)
-│   ├── editor/                 # Mesin manipulasi PDF Studio (font intelligence, coordinates, annotations)
-│   ├── components/             # Reusable UI (dropzone, toast, theme-toggle, i18n)
-│   └── utils/                  # Helper download, format ukuran, file parser
-├── docs/                       # Dokumentasi Arsitektur, PRD & Rekomendasi
-│   ├── PRD.md                  # Product Requirements Document
-│   ├── PRD_PDF_STUDIO_PRO.md   # Spesifikasi PDF Studio Pro
-│   ├── PROJECT_ANALYSIS.md     # Analisis teknis proyek
-│   ├── ocr_recommendations.md  # Analisis & rekomendasi sistem OCR
-│   ├── big_update.md           # Rencana & log pembaruan fitur
-│   ├── RPD_updating.md         # Catatan pembaruan & tracking
-│   └── implementation_plan.md  # Rencana implementasi
-├── tests/                      # Automated Test Harness
-│   └── audit_all_tools.js      # Verifikasi 17 tools (`node tests/audit_all_tools.js`)
+│   ├── editor/                 # 27 modul penyuntingan PDF Studio Pro (text, coordinate, font, redaction)
+│   ├── components/             # Reusable UI (command-palette, dropzone, toast, progress, file-list)
+│   └── utils/                  # Helper download, format ukuran, file parser, i18n
+├── docs/                       # Dokumentasi Resmi Proyek
+│   ├── PRD.md                  # Product Requirements Document (Kondisi Aktual 23 Tools)
+│   ├── svg-library.md          # Pustaka Ikon SVG Standar Terpusat
+│   └── archive/                # Arsip Dokumen Spesifikasi Lama
+├── tests/                      # Automated Quality Gates & Security Tests (13 test suites)
+│   └── run_all.js              # Runner utama pengujian otomatis (`node tests/run_all.js`)
+├── server.js                   # Local static server (127.0.0.1, proteksi path traversal)
+├── PROJECT_RULES.md            # Standar Arsitektur & Kepatuhan Proyek
+├── AGENTS.md                   # Instruksi Wajib AI Coding Assistant
 └── README.md                   # Dokumentasi Resmi Proyek
 ```
 
 ---
 
-## 🧪 Pengujian Otomatis (Test Harness)
+## 🧪 Pengujian Otomatis (Automated Test Suite)
 
-Untuk memvalidasi bahwa seluruh 17 modul dan fungsionalitas PDF berjalan dengan baik tanpa error, jalankan:
+Untuk memvalidasi bahwa seluruh 23 modul, kepatuhan offline, dan keamanan server berjalan tanpa error, jalankan:
 
 ```bash
-node tests/audit_all_tools.js
+node tests/run_all.js
 ```
+
+Rangkaian tes ini mencakup 13 suite pengujian otomatis: validasi sintaks JavaScript, konsistensi SVG, integritas model OCR offline, verifikasi fungsionalitas end-to-end, keamanan enkripsi PDF, pemusnahan kebocoran data pada redaksi permanen, keamanan host server `127.0.0.1`, pencegahan path traversal, dan kepatuhan zero external HTTP(S) URLs.
 
 ---
 
 ## 🔒 Privasi, Keamanan, & Kepatuhan Standalone
 - **100% Berjalan Lokal di Sisi Klien**: Tidak ada data yang dikirim ke server cloud pihak ketiga manapun.
-- **Bebas Ketergantungan**: Seluruh file CSS, font, JavaScript, WASM binary, dan model bahasa Tesseract telah tersimpan di direktori lokal `js/lib/`.
+- **Bebas Ketergantungan Eksternal**: Seluruh file CSS, font kaligrafi, JavaScript, WASM binary, dan model bahasa Tesseract tersimpan lokal di dalam repositori.
 - **Dukungan Protokol `file:///` Penuh**: Dapat dijalankan langsung dari USB Flashdisk, hard drive lokal, atau jaringan lokal tanpa instalasi server.

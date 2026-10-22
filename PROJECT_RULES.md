@@ -6,6 +6,21 @@
 
 ---
 
+## ⚡ Ringkasan 10 Aturan Wajib (Quick Reference)
+
+1. **100% Client-Side Offline**: Seluruh pemrosesan berkas wajib berjalan lokal di browser tanpa server, cloud, atau telemetri.
+2. **Zero External URLs**: Dilarang memuat resource http(s):// eksternal pada kode produksi (wajib lokal offline).
+3. **Larangan Mutlak Emoji**: Tombol, dropzone, toast, header, dan modal wajib menggunakan inline SVG vektor, bukan emoji.
+4. **Konsistensi Tema & Token**: Pertahankan token `--tool-color` resmi serta kompatibilitas penuh Light & Dark theme.
+5. **PDF Studio In-Memory Workflow**: Modul di `pages/viewer.html` memodifikasi `currentDoc` in-memory tanpa unduhan perantara.
+6. **Bilingual i18n Mandat**: Semua teks UI wajib terdaftar di kamus `en` dan `id` pada `js/utils/i18n.js` tanpa emoji.
+7. **Anatomi Halaman 6 Bagian**: Seluruh halaman standalone wajib memiliki struktur Header, Hero, Dropzone, Workspace, Action Bar, Result.
+8. **Bebas Dialog Bawaan Browser**: Dilarang memanggil `alert()`, `confirm()`, atau `prompt()`; gunakan Toast atau modal kustom.
+9. **Verifikasi Hasil Nyata pada Test**: Test harus memverifikasi hasil, bukan keberadaan fungsi.
+10. **Integritas Klaim & Uji Keamanan Wajib**: Dilarang menulis klaim fitur di README, test, toast, atau komentar yang belum dibuktikan oleh test; untuk fitur keamanan (enkripsi, redaksi, tanda tangan), wajib ada test yang membuktikan data benar-benar terlindungi.
+
+---
+
 ## 1. 🛡️ Prinsip Utama Aplikasi (Core Philosophy & Architectural Guarantees)
 
 1. **100% Client-Side & Offline (Zero Server Transfer)**:
@@ -105,87 +120,9 @@ Semua icon harus berupa elemen `<svg>` vektor murni dengan atribut standar:
 
 ### Perpustakaan SVG Standar Proyek (Standard SVG Library):
 
-#### 1. Upload Cloud (Gunakan pada seluruh Dropzone):
-```html
-<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/>
-  <path d="M12 12v9"/>
-  <path d="m16 16-4-4-4 4"/>
-</svg>
-```
-
-#### 2. Rotate Clockwise (Putar Searah Jarum Jam):
-```html
-<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/>
-  <polyline points="21 3 21 8 16 8"/>
-</svg>
-```
-
-#### 3. Rotate Counter-Clockwise / Reset (Putar Berlawanan):
-```html
-<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-  <polyline points="3 3 3 8 8 8"/>
-</svg>
-```
-
-#### 4. Delete / Trash Can (Hapus):
-```html
-<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-  <polyline points="3 6 5 6 21 6"/>
-  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-  <line x1="10" y1="11" x2="10" y2="17"/>
-  <line x1="14" y1="11" x2="14" y2="17"/>
-</svg>
-```
-
-#### 5. Plus / Add (Tambah Berkas / Tambah Halaman):
-```html
-<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-  <line x1="12" y1="5" x2="12" y2="19"/>
-  <line x1="5" y1="12" x2="19" y2="12"/>
-</svg>
-```
-
-#### 6. Checkmark (Selesai / Sukses):
-```html
-<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-  <polyline points="20 6 9 17 4 12"/>
-</svg>
-```
-
-#### 7. Edit in PDF Studio / Pen Tool:
-```html
-<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
-</svg>
-```
-
-#### 8. Download / Simpan:
-```html
-<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-  <polyline points="7 10 12 15 17 10"/>
-  <line x1="12" y1="15" x2="12" y2="3"/>
-</svg>
-```
-
-#### 9. Eye / Quick Preview:
-```html
-<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-  <circle cx="12" cy="12" r="3"/>
-</svg>
-```
-
-#### 10. Lock / Protect:
-```html
-<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-</svg>
-```
+Seluruh kode SVG inline standar (Upload Cloud, Rotate, Delete, Plus, Checkmark, Edit, Download, Eye, Lock) telah dipindahkan ke dokumen terpusat:  
+👉 **[docs/svg-library.md](docs/svg-library.md)**.  
+Gunakan format dan ukuran SVG yang terdokumentasi di sana untuk menjaga konsistensi visual di seluruh komponen aplikasi.
 
 ---
 
@@ -285,7 +222,7 @@ Struktur internal editor PDF Studio Pro dipecah ke dalam modul-modul modular ber
 
 ## 5. 🌐 Aturan Multi-Bahasa (i18n Localization Rules)
 
-Sistem lokalisasi dikelola terpusat di file [`js/utils/i18n.js`](file:///c:/laragon/www/pdf/js/utils/i18n.js).
+Sistem lokalisasi dikelola terpusat di file [`js/utils/i18n.js`](js/utils/i18n.js).
 
 1. **Selalu Tambahkan di Kedua Bahasa**:
    - Setiap kali membuat label, placeholder, atau pesan teks baru, wajib mendaftarkannya di kamus `en` (English) dan `id` (Bahasa Indonesia).
@@ -311,118 +248,36 @@ Sistem lokalisasi dikelola terpusat di file [`js/utils/i18n.js`](file:///c:/lara
 ## 6. 📁 Struktur File & Arsitektur Direktori Lengkap
 
 ```text
-c:\laragon\www\pdf\
-├── index.html                   # Halaman Utama (Tool Grid, Mega Menu, Quick Modal, Smart Drag & Drop)
+pdf/
+├── index.html                   # Halaman Utama (23 Tool Cards, Mega Menu, Quick Modal)
 ├── PROJECT_RULES.md             # Dokumen ini (Single Source of Truth)
-├── AGENTS.md                    # Panduan singkat mandat AI agent
-├── README.md                    # Dokumentasi publik & panduan pengguna
-├── server.js                    # Zero-dependency local server (Laragon port 80 check / standalone 8080)
-├── sw.js                        # Service Worker untuk full offline PWA caching
+├── AGENTS.md                    # Panduan mandat AI agent
+├── README.md                    # Panduan pengguna publik (23 Tools)
+├── server.js                    # Local static server (127.0.0.1, path-traversal protected)
+├── sw.js                        # Service Worker untuk offline caching
 ├── manifest.json                # Web App Manifest PWA
 ├── icon.svg                     # Vector App Logo Icon
+├── docs/                        # Dokumentasi Proyek
+│   ├── PRD.md                   # Product Requirements Document (Kondisi Aktual 23 Tools)
+│   ├── svg-library.md           # Pustaka Ikon SVG Standar Terpusat
+│   └── archive/                 # Arsip Dokumen Spesifikasi Lama
+├── fonts/                       # Font Kaligrafi Offline (OFL-1.1) untuk E-Sign
+│   ├── fonts.css                # Definisi lokal @font-face
+│   ├── OFL.txt                  # Dokumentasi lisensi SIL Open Font License
+│   └── *.ttf                    # File font lokal (Caveat, Dancing Script, dsb.)
 ├── css/
 │   ├── style.css                # Design System Global, Token CSS, Header, Dropzone, Modal, Theme Tokens
 │   ├── home.css                 # Hero Beranda, Filter Kategori, Grid Tool Cards
 │   └── tool.css                 # Styling spesifik Tool (Tool Hero, Toolbars, Action Bars, Thumbnails)
 ├── js/
 │   ├── app.js                   # Header sinkron, Mega Menu, System Theme listener, Navigation Dropdown
-│   ├── components/              # Komponen UI Terstandarisasi:
-│   │   ├── command-palette.js   # Quick Launcher (Ctrl+K) lintas halaman
-│   │   ├── dropzone.js          # Standar Drag-and-Drop file uploader
-│   │   ├── file-list.js         # Pengelola daftar berkas terpilih
-│   │   ├── pdf-preview.js       # Generator thumbnail halaman PDF
-│   │   ├── progress.js          # Progress Bar terpadu
-│   │   └── toast.js             # Notifikasi Toast modern (success, error, warning, info)
-│   ├── core/                    # Engine Pemrosesan Dokumen Client-Side:
-│   │   ├── docx-to-pdf.js       # Word (.docx) ke PDF Converter
-│   │   ├── jpg-to-pdf.js        # JPG/PNG/WebP ke PDF Converter
-│   │   ├── pdf-compress.js      # Vector stream compression engine & Signature stripper
-│   │   ├── pdf-crop.js          # In-memory Crop & Auto-trim calculation
-│   │   ├── pdf-flatten.js       # Flatten Form & Anotasi ke base vector
-│   │   ├── pdf-grayscale.js     # Grayscale & Photocopy B&W Converter
-│   │   ├── pdf-merge.js         # PDF Merge & Visual Page Organizer Engine
-│   │   ├── pdf-ocr.js           # 100% Offline Tesseract OCR Engine (WASM + SIMD)
-│   │   ├── pdf-page-number.js   # Page Numbering & Header/Footer Engine
-│   │   ├── pdf-protect.js       # AES Encryption & Password Protection Engine
-│   │   ├── pdf-remove.js        # Page Deletion Engine
-│   │   ├── pdf-reorder.js       # Page Reordering Engine
-│   │   ├── pdf-rotate.js        # Page Rotation Engine
-│   │   ├── pdf-split.js         # Split Engine (By Page, Range, Every N)
-│   │   ├── pdf-stream-engine.js # Low-level PDF Content Stream Manipulator
-│   │   ├── pdf-studio.js        # Bridge Core Studio Engine
-│   │   ├── pdf-to-docx.js       # PDF ke Word (.docx) Converter
-│   │   ├── pdf-to-jpg.js        # PDF ke Gambar High-DPI Exporter
-│   │   ├── pdf-to-xlsx.js       # PDF ke Spreadsheet (.xlsx) Converter
-│   │   ├── pdf-watermark.js     # Engine stempel & teks tanda air
-│   │   └── xlsx-to-pdf.js       # Excel (.xlsx) ke PDF Converter
-│   ├── editor/                  # 27 Mesin Modular PDF Studio Pro:
-│   │   ├── text-edit-engine.js  # Fixed Layout line-level text editor
-│   │   ├── text-block-detector.js# Word-to-line & line-to-paragraph detector
-│   │   ├── pdf-text-extractor.js# PDF.js glyph & text run extractor
-│   │   ├── text-model.js        # PDFTextRun, PDFLine, PDFParagraph models
-│   │   ├── text-fit-engine.js   # Text auto-scaling & spacing optimizer
-│   │   ├── text-extractor.js    # Alternative fast text extractor
-│   │   ├── paragraph-engine.js  # Paragraph reflow calculator
-│   │   ├── font-normalizer.js   # PostScript Font Name normalizer
-│   │   ├── font-intelligence.js # Font fallback inference engine
-│   │   ├── font-resolver.js     # PDF-Lib Standard 14 font resolver
-│   │   ├── font-registry.js     # Font catalog & system font registry
-│   │   ├── font-engine.js       # Font embedding engine
-│   │   ├── background-sampler.js# Precision pixel color sampler
-│   │   ├── pdf-coordinate-engine.js# Coordinate transform (PDF to DOM/Canvas)
-│   │   ├── command-manager.js   # Undo / Redo command stack
-│   │   ├── signature-inspector.js# Digital signature detector (ByteRange/SigFlags)
-│   │   ├── annotation-engine.js # Highlights, shapes, ink pen
-│   │   ├── comments-engine.js   # Sticky notes & comment threads
-│   │   ├── form-engine.js       # AcroForm fields builder & filler
-│   │   ├── redaction-engine.js  # High-DPI rasterization redaction engine (anti-leak)
-│   │   ├── security-engine.js   # Permissions & security flags analyzer
-│   │   ├── image-edit-engine.js # Image move, replace, resize, delete
-│   │   ├── image-extractor.js   # Embedded raster image extractor
-│   │   ├── accessibility-engine.js# PDF/UA accessibility & reading order
-│   │   ├── compare-engine.js    # Visual & text document comparator
-│   │   ├── page-tools-engine.js # Header, footer, and Bates numbering
-│   │   └── ocr-layout-engine.js # OCR bounding box layout detector
-│   ├── lib/                     # Vendor Libraries (100% Offline Local):
-│   │   ├── pdf-lib.min.js       # PDF-Lib Core
-│   │   ├── pdf.min.js           # PDF.js Main
-│   │   ├── pdf.worker.min.js    # PDF.js Web Worker
-│   │   ├── FileSaver.min.js     # Local FileSaver
-│   │   ├── Sortable.min.js      # Drag-and-drop Page Sorter
-│   │   ├── jszip.min.js         # Zip file packager
-│   │   └── tesseract/           # Offline Tesseract OCR WASM & Language Data
-│   └── utils/
-│       ├── download.js          # Helper download trigger
-│       ├── file-utils.js        # Format ukuran berkas & Pending File Bridge
-│       └── i18n.js              # Kamus terpusat EN & ID
-├── pages/                       # 23 Halaman Berdiri Sendiri (Standalone Tool Pages):
-│   ├── viewer.html              # PDF Studio Pro (Flagship In-Memory Live Editor)
-│   ├── merge.html               # Penggabung PDF & Visual Organizer
-│   ├── split.html               # Pemisah Halaman PDF
-│   ├── compress.html            # Kompresi Ukuran Dokumen + Batch ZIP
-│   ├── docx-to-pdf.html         # Word to PDF Converter
-│   ├── xlsx-to-pdf.html         # Excel to PDF Converter
-│   ├── pdf-to-docx.html         # PDF to Word Converter
-│   ├── pdf-to-xlsx.html         # PDF to Excel Converter
-│   ├── jpg-to-pdf.html          # Gambar ke PDF Converter
-│   ├── pdf-to-jpg.html          # PDF ke Gambar Exporter
-│   ├── rotate.html              # Rotasi Halaman PDF
-│   ├── crop.html                # Pangkas Halaman & Auto-Trim Margins
-│   ├── watermark.html           # Stempel & Tanda Air
-│   ├── protect.html             # Enkripsi Sandi & Dekripsi
-│   ├── flatten.html             # Kunci Form & Anotasi Anti-Tamper
-│   ├── grayscale.html           # PDF Skala Abu-Abu & Photocopy B&W
-│   ├── page-number.html         # Penomoran Halaman, Header & Footer
-│   ├── ocr.html                 # 100% Offline Searchable PDF OCR
-│   ├── sign.html                # Tanda Tangan Digital & Kaligrafi
-│   ├── form-fill.html           # Pengisi Formulir PDF
-│   ├── reorder.html             # Pengatur Urutan Halaman
-│   ├── remove-pages.html        # Penghapus Halaman PDF
-│   └── batch.html               # Pemrosesan Massal (Batch Queue ke ZIP)
-└── tests/                       # Automated Quality Gates & Syntax Tests:
-    ├── validate_repo_syntax.js  # Validasi sintaks seluruh file JavaScript
-    ├── check_icon_consistency.js# Audit konsistensi SVG lintas menu & hero
-    └── audit_all_tools.js       # E2E functional test seluruh 17+ tools
+│   ├── components/              # Komponen UI Terstandarisasi (command-palette, dropzone, toast, dsb.)
+│   ├── core/                    # Engine Pemrosesan Dokumen Client-Side (merge, compress, ocr, dsb.)
+│   ├── editor/                  # 27 Mesin Modular PDF Studio Pro (text-edit, redaction, annotations, dsb.)
+│   ├── lib/                     # Vendor Libraries Lokal (PDF-Lib, PDF.js, Tesseract WASM, JSZip)
+│   └── utils/                   # Helper download, file-utils, dan kamus i18n
+├── pages/                       # 23 Halaman Standalone Tools (viewer, merge, compress, ocr, dsb.)
+└── tests/                       # 13 Automated Test Suites (run_all.js, security, quality gates)
 ```
 
 ---
@@ -498,27 +353,21 @@ Setiap halaman tool berdiri sendiri (*standalone tool page*) di folder `pages/` 
 
 ---
 
-## 9. 🧪 Pengujian Kualitas Otomatis (Automated Quality Gates & Testing)
+## 9. 🧪 Pengujian Kualitas Otomatis & Standar Uji Mutlak
 
-Sebelum menyatakan tugas coding selesai, setiap developer atau AI assistant **WAJIB menjalankan 3 pengujian otomatis berikut** melalui command line Node.js:
-
-1. **Validasi Sintaks JavaScript Seluruh Repositori**:
-   ```bash
-   node tests/validate_repo_syntax.js
-   ```
-   *Harus menghasilkan 0 syntax error di seluruh 68+ berkas JS.*
-
-2. **Audit Konsistensi Icon Lintas Menu & Halaman**:
-   ```bash
-   node tests/check_icon_consistency.js
-   ```
-   *Harus menghasilkan 0 mismatch icon antara index dropdown, mega menu, grid beranda, navbar app.js, dan hero header halaman.*
-
-3. **Uji Fungsionalitas End-to-End Tools**:
-   ```bash
-   node tests/audit_all_tools.js
-   ```
-   *Seluruh 17+ tools harus bertatus PASSED.*
+### Standar Wajib Pengujian (Mandatory Test Rules):
+1. **Verifikasi Hasil Aktual (Bukan Keberadaan Fungsi)**:
+   - Test harus memverifikasi hasil, bukan keberadaan fungsi. Setiap assert wajib menguji mutasi buffer biner, struktur objek PDF, teks yang diekstrak, atau data hasil keluaran nyata, bukan sekadar memeriksa apakah suatu fungsi dideklarasikan (`typeof fn === 'function'`).
+2. **Larangan Klaim Fitur Tanpa Bukti Test**:
+   - Dilarang menulis klaim fitur di README, test, toast, atau komentar yang belum dibuktikan oleh test. Seluruh deskripsi kapabilitas harus faktual dan dapat dipertanggungjawabkan melalui pengujian otomatis.
+3. **Uji Keamanan & Proteksi Data Wajib**:
+   - Untuk fitur keamanan (enkripsi, redaksi, tanda tangan), wajib ada test yang membuktikan data benar-benar terlindungi.
+     - Enkripsi password wajib diuji dengan verifikasi kamus `/Encrypt`, kegagalan akses tanpa password, dan keberhasilan pembukaan dengan password yang benar (`tests/test_pdf_protect.js`).
+     - Redaksi permanen wajib diuji dengan verifikasi zero raw bytes leak, zero stream leak, dan eliminasi teks rahasia pada level canvas dan text layer (`tests/test_redaction_rasterize.js`).
+     - Keamanan server lokal wajib diuji mengikat ke 127.0.0.1, bebas CORS eksternal, dan kebal path traversal (`tests/test_server_security.js`).
+     - Kepatuhan offline wajib diverifikasi dengan audit zero external HTTP/HTTPS URLs (`tests/test_no_external_urls.js`).
+4. **Penyelesaian Tugas**:
+   - Selesaikan tugas dengan menjalankan `node tests/run_all.js` dan menempel outputnya sebagai bukti bahwa seluruh 13 test suites berhasil dilewati (`ALL 13 TEST SUITES PASSED`).
 
 ---
 

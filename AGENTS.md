@@ -3,7 +3,7 @@
 > **CRITICAL INSTRUCTION FOR ALL AI AGENTS & ASSISTANTS:**
 > Before inspecting, modifying, generating, or refactoring ANY code in this repository, you **MUST** first view and strictly adhere to:
 > 
-> 👉 **[PROJECT_RULES.md](file:///c:/laragon/www/pdf/PROJECT_RULES.md)**
+> 👉 **[PROJECT_RULES.md](PROJECT_RULES.md)**
 > 
 > `PROJECT_RULES.md` is the **Single Source of Truth** for:
 > 1. **Zero-Server Client-Side Guarantee**: All processing must remain 100% offline in browser (PDF-Lib, PDF.js, JSZip).
