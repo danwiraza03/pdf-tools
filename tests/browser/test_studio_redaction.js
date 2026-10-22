@@ -2,7 +2,8 @@ const assert = require('assert');
 const { createTestPdf } = require('./helpers');
 
 /**
- * Runs Test 1 (normal rotation), Test 2 (/Rotate 90), and Test 3 (mutation check)
+ * Runs Test 1 (normal rotation), Test 2 (/Rotate 90), Test 3 (mutation check),
+ * Test 4 (real user UI mouse drag - Rotation 0), and Test 5 (real user UI mouse drag - /Rotate 90)
  * for PDF Studio Redaction in browser.
  */
 async function runStudioRedactionTests(browser, baseUrl) {
@@ -321,7 +322,260 @@ async function runStudioRedactionTests(browser, baseUrl) {
     console.log('  ✓ Mutation Check: Kotak hitam redaksi terbukti TIDAK terbentuk saat redaksi dilewati.');
     console.log('  ✓ KEBOCORAN TERDETEKSI: Test sensitif dan terbukti memverifikasi integritas redaksi.');
 
-    console.log('\n✅ [PASS] PDF Studio Redaction (Normal, Rotated, & Mutation Check) Tests PASSED\n');
+    // -----------------------------------------------------------------------
+    // TEST 4: Real User UI Interaction (Rotation 0 - Toolbar click, mouse drag, modal confirm)
+    // -----------------------------------------------------------------------
+    console.log('\n--- [Test 4] Real User UI Redaction: Normal PDF (Rotation 0) ---');
+    const secret4 = 'SUPER_SECRET_REAL_USER_DRAG_ROT0';
+    const srcBytes4 = await createTestPdf({
+      text: secret4,
+      rotation: 0,
+      width: 600,
+      height: 400,
+      textX: 100,
+      textY: 250,
+      textSize: 22
+    });
+
+    await page.goto(`${baseUrl}/pages/viewer.html`, { waitUntil: 'domcontentloaded' });
+    await page.waitForFunction(() => !!(window.PDFTools && window.PDFTools.StudioCore && window.PDFTools.StudioRenderer));
+
+    // Load PDF file into Studio
+    await page.evaluate(async (srcBase64) => {
+      const bin = atob(srcBase64);
+      const bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      const file = new File([bytes], 'test_user_drag_normal.pdf', { type: 'application/pdf' });
+      await window.PDFTools.StudioRenderer.openDocument(file);
+    }, Buffer.from(srcBytes4).toString('base64'));
+
+    // 1. Activate redaction tool from toolbar
+    await page.click('#toolRedact');
+    await page.waitForSelector('#annotationCanvas', { state: 'visible' });
+    await page.waitForFunction(() => {
+      const annGroup = document.getElementById('annRedactGroup');
+      return annGroup && annGroup.style.display !== 'none';
+    });
+
+    // 2. Drag mouse over the secret text using page.mouse (down, move, up)
+    const dragCoords4 = await page.evaluate(async () => {
+      const canvas = document.getElementById('annotationCanvas');
+      const rect = canvas.getBoundingClientRect();
+      const doc = window.PDFTools.StudioCore.getDoc();
+      const page1 = await doc.pdfJsDoc.getPage(1);
+      const vp = page1.getViewport({ scale: rect.width / page1.getViewport({ scale: 1.0 }).width });
+      const vr = vp.convertToViewportRectangle([90, 235, 430, 280]);
+      return {
+        startX: rect.left + Math.min(vr[0], vr[2]),
+        startY: rect.top + Math.min(vr[1], vr[3]),
+        endX: rect.left + Math.max(vr[0], vr[2]),
+        endY: rect.top + Math.max(vr[1], vr[3])
+      };
+    });
+
+    await page.mouse.move(dragCoords4.startX, dragCoords4.startY);
+    await page.mouse.down();
+    await page.mouse.move(dragCoords4.endX, dragCoords4.endY, { steps: 5 });
+    await page.mouse.up();
+
+    // Verify redaction mark count badge
+    await page.waitForFunction(() => {
+      const badge = document.getElementById('annRedactCountBadge');
+      return badge && badge.textContent.includes('1');
+    });
+
+    // 3. Click "Apply" button and confirm in modal
+    await page.click('#annApplyRedactionsBtn');
+    await page.waitForSelector('#redactConfirmModal.active', { state: 'visible' });
+    await page.click('#confirmApplyRedactBtn');
+
+    // Wait for modal to dismiss and rasterization to complete
+    await page.waitForFunction(() => {
+      const modal = document.getElementById('redactConfirmModal');
+      return (!modal || !modal.classList.contains('active')) && !!window.PDFTools.StudioCore.getDoc();
+    });
+    await page.waitForTimeout(600);
+
+    // 4. Verify output (text NOT extracted, solid black pixels in dragged area)
+    const result4 = await page.evaluate(async ({ secretText }) => {
+      const currentDoc = window.PDFTools.StudioCore.getDoc();
+      if (!currentDoc) throw new Error('No active document in StudioCore after user redaction');
+      const exportedBytes = await window.PDFTools.Studio.exportDocument(currentDoc);
+
+      const pdfJsDoc = await window.pdfjsLib.getDocument({ data: new Uint8Array(exportedBytes).slice(0), verbosity: 0 }).promise;
+      const pdfPage = await pdfJsDoc.getPage(1);
+      const textContent = await pdfPage.getTextContent();
+      const extractedText = textContent.items.map(t => t.str).join(' ');
+
+      const viewport = pdfPage.getViewport({ scale: 1.0 });
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(viewport.width);
+      canvas.height = Math.round(viewport.height);
+      const ctx = canvas.getContext('2d');
+      await pdfPage.render({ canvasContext: ctx, viewport }).promise;
+
+      const redactRect = viewport.convertToViewportRectangle([90, 235, 430, 280]);
+      const rx = Math.floor(Math.min(redactRect[0], redactRect[2]));
+      const ry = Math.floor(Math.min(redactRect[1], redactRect[3]));
+      const rw = Math.floor(Math.abs(redactRect[2] - redactRect[0]));
+      const rh = Math.floor(Math.abs(redactRect[3] - redactRect[1]));
+
+      const sampleCenterX = rx + Math.floor(rw / 2) - 10;
+      const sampleCenterY = ry + Math.floor(rh / 2) - 10;
+      const redactPixels = ctx.getImageData(sampleCenterX, sampleCenterY, 20, 20).data;
+      let allBlack = true;
+      for (let i = 0; i < redactPixels.length; i += 4) {
+        const r = redactPixels[i];
+        const g = redactPixels[i + 1];
+        const b = redactPixels[i + 2];
+        if (r > 15 || g > 15 || b > 15) {
+          allBlack = false;
+          break;
+        }
+      }
+
+      const boxData = ctx.getImageData(rx, ry, rw, rh).data;
+      let blackPixelsInBox = 0;
+      for (let i = 0; i < boxData.length; i += 4) {
+        if (boxData[i] < 15 && boxData[i + 1] < 15 && boxData[i + 2] < 15) {
+          blackPixelsInBox++;
+        }
+      }
+
+      await pdfJsDoc.destroy();
+
+      return {
+        extractedText,
+        secretFound: extractedText.includes(secretText),
+        allBlack,
+        blackPixelsInBox
+      };
+    }, { secretText: secret4 });
+
+    assert(!result4.secretFound, `Secret text "${secret4}" must NOT be extracted from user-redacted PDF`);
+    console.log(`  ✓ Teks rahasia "${secret4}" tidak terekstrak dari PDF setelah redaksi pengguna.`);
+    assert(result4.allBlack, 'Center of dragged redaction area must contain solid black pixels');
+    assert(result4.blackPixelsInBox > 500, 'Dragged redaction area must contain significant solid black pixels');
+    console.log(`  ✓ Area seretan redaksi terbukti hitam pekat (${result4.blackPixelsInBox} piksel hitam terdeteksi).`);
+
+    // -----------------------------------------------------------------------
+    // TEST 5: Real User UI Interaction (Rotated PDF /Rotate 90)
+    // -----------------------------------------------------------------------
+    console.log('\n--- [Test 5] Real User UI Redaction: Rotated PDF (/Rotate 90) ---');
+    const secret5 = 'SUPER_SECRET_REAL_USER_DRAG_ROT90';
+    const srcBytes5 = await createTestPdf({
+      text: secret5,
+      rotation: 90,
+      width: 600,
+      height: 400,
+      textX: 100,
+      textY: 250,
+      textSize: 22
+    });
+
+    // Load rotated PDF file into Studio
+    await page.evaluate(async (srcBase64) => {
+      const bin = atob(srcBase64);
+      const bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      const file = new File([bytes], 'test_user_drag_rotated.pdf', { type: 'application/pdf' });
+      await window.PDFTools.StudioRenderer.openDocument(file);
+    }, Buffer.from(srcBytes5).toString('base64'));
+
+    // 1. Activate redaction tool from toolbar
+    await page.click('#toolRedact');
+    await page.waitForSelector('#annotationCanvas', { state: 'visible' });
+    await page.waitForFunction(() => {
+      const annGroup = document.getElementById('annRedactGroup');
+      return annGroup && annGroup.style.display !== 'none';
+    });
+
+    // 2. Drag mouse over the secret text on rotated page
+    const dragCoords5 = await page.evaluate(async () => {
+      const canvas = document.getElementById('annotationCanvas');
+      const rect = canvas.getBoundingClientRect();
+      const doc = window.PDFTools.StudioCore.getDoc();
+      const page1 = await doc.pdfJsDoc.getPage(1);
+      const vp = page1.getViewport({ scale: rect.width / page1.getViewport({ scale: 1.0 }).width });
+      const vr = vp.convertToViewportRectangle([90, 235, 430, 280]);
+      return {
+        startX: rect.left + Math.min(vr[0], vr[2]),
+        startY: rect.top + Math.min(vr[1], vr[3]),
+        endX: rect.left + Math.max(vr[0], vr[2]),
+        endY: rect.top + Math.max(vr[1], vr[3])
+      };
+    });
+
+    await page.mouse.move(dragCoords5.startX, dragCoords5.startY);
+    await page.mouse.down();
+    await page.mouse.move(dragCoords5.endX, dragCoords5.endY, { steps: 5 });
+    await page.mouse.up();
+
+    // Verify redaction mark count badge
+    await page.waitForFunction(() => {
+      const badge = document.getElementById('annRedactCountBadge');
+      return badge && badge.textContent.includes('1');
+    });
+
+    // 3. Click "Apply" button and confirm in modal
+    await page.click('#annApplyRedactionsBtn');
+    await page.waitForSelector('#redactConfirmModal.active', { state: 'visible' });
+    await page.click('#confirmApplyRedactBtn');
+
+    // Wait for modal to dismiss and rasterization to complete
+    await page.waitForFunction(() => {
+      const modal = document.getElementById('redactConfirmModal');
+      return (!modal || !modal.classList.contains('active')) && !!window.PDFTools.StudioCore.getDoc();
+    });
+    await page.waitForTimeout(600);
+
+    // 4. Verify output (text NOT extracted, solid black pixels in dragged area)
+    const result5 = await page.evaluate(async ({ secretText }) => {
+      const currentDoc = window.PDFTools.StudioCore.getDoc();
+      if (!currentDoc) throw new Error('No active document in StudioCore after rotated user redaction');
+      const exportedBytes = await window.PDFTools.Studio.exportDocument(currentDoc);
+
+      const pdfJsDoc = await window.pdfjsLib.getDocument({ data: new Uint8Array(exportedBytes).slice(0), verbosity: 0 }).promise;
+      const pdfPage = await pdfJsDoc.getPage(1);
+      const textContent = await pdfPage.getTextContent();
+      const extractedText = textContent.items.map(t => t.str).join(' ');
+
+      const viewport = pdfPage.getViewport({ scale: 1.0 });
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(viewport.width);
+      canvas.height = Math.round(viewport.height);
+      const ctx = canvas.getContext('2d');
+      await pdfPage.render({ canvasContext: ctx, viewport }).promise;
+
+      const vr = viewport.convertToViewportRectangle([90, 235, 430, 280]);
+      const rx = Math.floor(Math.min(vr[0], vr[2]));
+      const ry = Math.floor(Math.min(vr[1], vr[3]));
+      const rw = Math.floor(Math.abs(vr[2] - vr[0]));
+      const rh = Math.floor(Math.abs(vr[3] - vr[1]));
+
+      const targetArea = ctx.getImageData(rx, ry, rw, rh).data;
+      let blackPixelsInTarget = 0;
+      for (let i = 0; i < targetArea.length; i += 4) {
+        if (targetArea[i] < 15 && targetArea[i + 1] < 15 && targetArea[i + 2] < 15) {
+          blackPixelsInTarget++;
+        }
+      }
+
+      await pdfJsDoc.destroy();
+
+      return {
+        extractedText,
+        secretFound: extractedText.includes(secretText),
+        blackPixelsInTarget
+      };
+    }, { secretText: secret5 });
+
+    assert(!result5.secretFound, `Secret text "${secret5}" must NOT be extracted from rotated user-redacted PDF`);
+    console.log(`  ✓ Teks rahasia "${secret5}" tidak terekstrak dari PDF /Rotate 90 setelah redaksi pengguna.`);
+    assert(result5.blackPixelsInTarget > 500, 'Dragged redaction area on rotated page must contain solid black pixels');
+    console.log(`  ✓ Area seretan redaksi terbukti hitam pekat (${result5.blackPixelsInTarget} piksel hitam terdeteksi).`);
+
+    console.log('\n✅ [PASS] PDF Studio Redaction (API, Rotated, Mutation Check, & Real User UI Drag) Tests PASSED\n');
     return true;
   } finally {
     await page.close();
