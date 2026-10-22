@@ -36,11 +36,11 @@ class TextFitEngine {
     const tolerance = 2.0; // 2pt safety buffer
 
     let state = TextFitEngine.STATE_FIT;
-    let message = 'Fits original area ✓';
+    let message = 'Fits original area';
 
     if (measuredWidth > (originalWidth + tolerance)) {
       state = TextFitEngine.STATE_OVERFLOW;
-      message = '⚠️ Text exceeds original area';
+      message = 'Text exceeds original area';
     } else if (measuredWidth > (originalWidth - 6.0)) {
       state = TextFitEngine.STATE_NEAR_LIMIT;
       message = 'Near boundary limit';

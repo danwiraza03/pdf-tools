@@ -283,7 +283,7 @@
 
                 <!-- Split Divider Bar -->
                 <div class="split-divider-line" id="splitLine">
-                  <div class="split-divider-handle">↔</div>
+                  <div class="split-divider-handle"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="8 17 3 12 8 7"/><polyline points="16 7 21 12 16 17"/><line x1="3" y1="12" x2="21" y2="12"/></svg></div>
                 </div>
               </div>
             </div>
@@ -379,7 +379,7 @@
     <div class="footer-inner">
       <div class="footer-brand">
         <div class="footer-logo">
-          <div class="logo-icon">⚡</div>
+          <div class="logo-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
           <span>PDF Tools</span>
         </div>
         <p class="footer-desc">Professional 100% Offline Client-side PDF Suite (DN.).</p>
@@ -468,7 +468,7 @@
 
           fileSizeLabel.textContent = `${PDFTools.FileUtils.formatSize(file.size)} • ${totalPages} Pages`;
           await renderPreview(currentPage);
-          PDFTools.Toast.success('PDF loaded for grayscale preview! 🎨');
+          PDFTools.Toast.success('PDF loaded for grayscale preview!');
         } catch (err) {
           console.error(err);
           PDFTools.Toast.error('Could not load PDF document.');

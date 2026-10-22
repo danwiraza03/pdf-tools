@@ -1,6 +1,6 @@
 /**
  * PDF Tools — Internationalization (i18n)
- * Full Bilingual support: Indonesian (ID 🇮🇩) + English (EN 🇬🇧)
+ * Full Bilingual support: Indonesian (ID) + English (EN)
  */
 window.PDFTools = window.PDFTools || {};
 
@@ -780,25 +780,25 @@ PDFTools.i18n = (function () {
       'menu.file.close': 'Tutup Dokumen',
 
       'menu.edit': 'Edit',
-      'menu.edit.undo': '↺ Batalkan (Undo)',
-      'menu.edit.redo': '↷ Ulangi (Redo)',
+      'menu.edit.undo': 'Batalkan (Undo)',
+      'menu.edit.redo': 'Ulangi (Redo)',
       'menu.edit.edit_text': 'Edit Teks Dokumen',
       'menu.edit.add_text': 'Tambah Teks Baru',
-      'menu.edit.add_rect': '▭ Tambah Persegi',
+      'menu.edit.add_rect': 'Tambah Persegi',
 
       'menu.view': 'Tampilan',
       'menu.view.zoom_in': 'Perbesar (Zoom In)',
       'menu.view.zoom_out': 'Perkecil (Zoom Out)',
-      'menu.view.fit_width': '↔ Pas Lebar Layar',
+      'menu.view.fit_width': 'Pas Lebar Layar',
       'menu.view.find': 'Cari dalam Dokumen',
-      'menu.view.single': '▣ Tampilan Satu Halaman',
-      'menu.view.continuous': '▤ Aktifkan Gulir Terus',
-      'menu.view.two_page': '▥ Tampilan Dua Halaman',
-      'menu.view.two_scroll': '▥ Gulir Dua Halaman',
+      'menu.view.single': 'Tampilan Satu Halaman',
+      'menu.view.continuous': 'Aktifkan Gulir Terus',
+      'menu.view.two_page': 'Tampilan Dua Halaman',
+      'menu.view.two_scroll': 'Gulir Dua Halaman',
 
       'menu.esign': 'Tanda Tangan',
       'menu.esign.pad': 'Pad Tanda Tangan & Cap',
-      'menu.esign.type': '⌨️ Tanda Tangan Ketik',
+      'menu.esign.type': 'Tanda Tangan Ketik',
 
       'menu.tools': 'Alat',
       'menu.tools.compare': 'Bandingkan Dokumen',
@@ -811,7 +811,7 @@ PDFTools.i18n = (function () {
       'menu.tools.sanitize': 'Bersihkan Metadata',
 
       'menu.help': 'Bantuan',
-      'menu.help.about': 'ℹ️ Tentang PDF Studio',
+      'menu.help.about': 'Tentang PDF Studio',
 
       // Acrobat Toolbar & Action Buttons
       'toolbar.open_title': 'Buka File (Ctrl+O)',
@@ -1394,7 +1394,7 @@ PDFTools.i18n = (function () {
 
     // 5. Update language toggle buttons
     document.querySelectorAll('#langToggle, .lang-toggle, [data-action="toggle-lang"]').forEach(function (langBtn) {
-      langBtn.textContent = currentLang === 'id' ? 'ID 🇮🇩' : 'EN 🇬🇧';
+      langBtn.textContent = currentLang === 'id' ? 'ID' : 'EN';
       langBtn.setAttribute('title', currentLang === 'id' ? 'Klik untuk beralih ke English' : 'Click to switch to Indonesian');
       langBtn.setAttribute('aria-label', currentLang === 'id' ? 'Ganti ke Bahasa Inggris' : 'Switch to Indonesian');
     });

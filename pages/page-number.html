@@ -285,11 +285,11 @@
               totalDocPages = pdfDoc.getPages().length;
 
               if (isBatchMode) {
-                fileMetaLabel.textContent = `📦 Batch Queue: ${files.length} Files Selected • Primary: ${currentFile.name}`;
-                applyPageNumbersBtn.textContent = `⚡ Number ${files.length} Documents & Download (.ZIP)`;
+                fileMetaLabel.textContent = `Batch Queue: ${files.length} Files Selected • Primary: ${currentFile.name}`;
+                applyPageNumbersBtn.textContent = `Number ${files.length} Documents & Download (.ZIP)`;
               } else {
                 fileMetaLabel.textContent = `${currentFile.name} • ${totalDocPages} Pages • ${PDFTools.FileUtils.formatSize(currentFile.size)}`;
-                applyPageNumbersBtn.textContent = '⚡ Apply Page Numbers & Download';
+                applyPageNumbersBtn.textContent = 'Apply Page Numbers & Download';
               }
               startPageInput.max = totalDocPages;
 

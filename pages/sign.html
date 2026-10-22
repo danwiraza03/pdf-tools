@@ -783,12 +783,13 @@
         card.className = 'saved-sig-card';
         card.innerHTML = `
           <img src="${sig}" alt="Saved signature ${idx + 1}">
-          <button class="saved-sig-delete" data-idx="${idx}" title="Delete">✕</button>
+          <button class="saved-sig-delete" data-idx="${idx}" title="Delete"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
         `;
         card.addEventListener('click', (e) => {
-          if (e.target.classList.contains('saved-sig-delete')) {
+          const delBtn = e.target.closest('.saved-sig-delete');
+          if (delBtn) {
             const list = getSavedSignatures();
-            list.splice(parseInt(e.target.dataset.idx), 1);
+            list.splice(parseInt(delBtn.dataset.idx), 1);
             saveSavedSignatures(list);
             renderSavedSignatures();
             return;
@@ -1009,7 +1010,7 @@
 
         el.innerHTML = `
           <img src="${item.dataUrl}" alt="Signature">
-          <button class="sig-delete-btn" title="Remove">✕</button>
+          <button class="sig-delete-btn" title="Remove"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
           <div class="sig-resize-handle" title="Drag corner to resize"></div>
         `;
 
@@ -1156,7 +1157,7 @@
       }
 
       downloadSignedBtn.disabled = true;
-      downloadSignedBtn.textContent = '⏳ Baking signatures into PDF...';
+      downloadSignedBtn.textContent = 'Baking signatures into PDF...';
 
       try {
         const { PDFDocument } = PDFLib;

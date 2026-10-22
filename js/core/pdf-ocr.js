@@ -113,9 +113,9 @@ PDFTools.OCR = (function () {
 
     const optimalCore = getCoreFilename();
     const hasSimd = supportsSimd();
-    console.log(`[OCR Engine] Initializing WASM core: ${optimalCore} (SIMD: ${hasSimd ? 'YES ⚡' : 'NO'})`);
+    console.log(`[OCR Engine] Initializing WASM core: ${optimalCore} (SIMD: ${hasSimd ? 'YES' : 'NO'})`);
 
-    if (typeof onProgress === 'function') onProgress(5, `Initializing local OCR Core (${hasSimd ? 'SIMD ⚡' : 'Standard'})...`);
+    if (typeof onProgress === 'function') onProgress(5, `Initializing local OCR Core (${hasSimd ? 'SIMD' : 'Standard'})...`);
     await sendJob('load', {
       options: {
         lstmOnly: true,

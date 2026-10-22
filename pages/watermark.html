@@ -344,7 +344,7 @@
             optionsPanel.style.display = 'block';
             actionBar.classList.add('active');
             resultArea.classList.remove('active');
-            applyBtn.textContent = isBatchMode ? `🏷️ Apply Watermark to ${queuedFiles.length} Files (ZIP)` : '🏷️ Apply Watermark';
+            applyBtn.textContent = isBatchMode ? `Apply Watermark to ${queuedFiles.length} Files (ZIP)` : 'Apply Watermark';
           } else {
             currentFile = null;
             queuedFiles = [];
@@ -416,7 +416,7 @@
           resultArea.classList.add('active');
 
           if (isBatchMode) {
-            downloadBtn.textContent = `📦 Download ${batchResults.length} Files (.ZIP)`;
+            downloadBtn.textContent = `Download ${batchResults.length} Files (.ZIP)`;
             wmBatchFileSelect.innerHTML = '';
             batchResults.forEach((res, idx) => {
               const opt = document.createElement('option');
@@ -426,7 +426,7 @@
             });
             wmBatchFileSelectorContainer.style.display = 'block';
           } else {
-            downloadBtn.textContent = '⬇️ Download PDF';
+            downloadBtn.textContent = 'Download PDF';
             wmBatchFileSelectorContainer.style.display = 'none';
           }
 
