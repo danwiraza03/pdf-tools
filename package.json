@@ -1,0 +1,13 @@
+{
+  "name": "offline-pdf-tools",
+  "version": "1.0.0",
+  "description": "100% Offline Client-Side PDF Tools & PDF Studio Pro",
+  "private": true,
+  "scripts": {
+    "test": "node tests/run_all.js",
+    "test:browser": "node tests/browser/run_browser_tests.js"
+  },
+  "devDependencies": {
+    "playwright": "^1.50.0"
+  }
+}

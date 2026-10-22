@@ -27,6 +27,8 @@ PDFTools.Grayscale = {
       PDFTools.FileUtils.initPdfJsWorker();
     }
 
+    const arrayBuffer = await PDFTools.FileUtils.readAsArrayBuffer(file);
+
     let pdfJsDoc;
     try {
       const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer.slice(0)) });
