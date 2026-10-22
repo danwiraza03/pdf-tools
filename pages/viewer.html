@@ -4008,6 +4008,7 @@
   <script src="../js/utils/file-utils.js"></script>
   <script src="../js/utils/download.js"></script>
   <script src="../js/components/toast.js"></script>
+  <script src="../js/components/modal.js"></script>
   <script src="../js/components/dropzone.js"></script>
   <script src="../js/core/pdf-stream-engine.js"></script>
   <script src="../js/core/pdf-compress.js"></script>
@@ -4388,7 +4389,10 @@
           const snapshot = await PDFTools.Studio.getRecoverySnapshot();
           if (!snapshot || !snapshot.arrayBuffer) return;
 
-          const shouldRestore = window.confirm(`Recover unsaved changes for "${snapshot.fileName}"?`);
+          let shouldRestore = true;
+          if (window.PDFTools && window.PDFTools.Modal && window.PDFTools.Modal.confirm) {
+            shouldRestore = await window.PDFTools.Modal.confirm(`Recover unsaved changes for "${snapshot.fileName}"?`, { title: 'Restore Session' });
+          }
           if (!shouldRestore) {
             await PDFTools.Studio.clearRecoverySnapshot();
             return;
@@ -5806,8 +5810,12 @@
         }
 
         if (activeMode === 'comment') {
-          const author = window.prompt('Author / Your Name:', 'Reviewer') || 'Reviewer';
-          const commentText = window.prompt('Enter comment or sticky note text:');
+          let author = 'Reviewer';
+          let commentText = '';
+          if (window.PDFTools && window.PDFTools.Modal && window.PDFTools.Modal.prompt) {
+            author = (await window.PDFTools.Modal.prompt('Author / Your Name:', 'Reviewer', { title: 'Comment Author' })) || 'Reviewer';
+            commentText = await window.PDFTools.Modal.prompt('Enter comment or sticky note text:', '', { title: 'Sticky Note' });
+          }
           if (commentText && commentText.trim()) {
             window.PDFTools.CommentsEngine.addComment(currentDoc, currentDoc.currentPage, clickX, clickY, commentText.trim(), author, annCurrentColor || '#F59E0B');
             commentsDrawer.classList.add('active');
@@ -7120,10 +7128,12 @@
               updateBookmarkActiveState();
             });
 
-            // Rename
-            rowEl.querySelector('.bm-edit')?.addEventListener('click', (e) => {
+            rowEl.querySelector('.bm-edit')?.addEventListener('click', async (e) => {
               e.stopPropagation();
-              const newTitle = prompt('Edit Bookmark Title:', bm.title);
+              let newTitle = bm.title;
+              if (window.PDFTools && window.PDFTools.Modal && window.PDFTools.Modal.prompt) {
+                newTitle = await window.PDFTools.Modal.prompt('Edit Bookmark Title:', bm.title, { title: 'Edit Bookmark' });
+              }
               if (newTitle && newTitle.trim()) {
                 bm.title = newTitle.trim();
                 scheduleRecovery();
@@ -7132,9 +7142,13 @@
             });
 
             // Delete
-            rowEl.querySelector('.bm-delete')?.addEventListener('click', (e) => {
+            rowEl.querySelector('.bm-delete')?.addEventListener('click', async (e) => {
               e.stopPropagation();
-              if (confirm(`Delete bookmark "${bm.title}"?`)) {
+              let ok = true;
+              if (window.PDFTools && window.PDFTools.Modal && window.PDFTools.Modal.confirm) {
+                ok = await window.PDFTools.Modal.confirm(`Delete bookmark "${bm.title}"?`, { isDanger: true });
+              }
+              if (ok) {
                 deleteBookmarkById(currentDoc.bookmarks, bm.id);
                 scheduleRecovery();
                 buildSidebarBookmarks();
@@ -7166,13 +7180,16 @@
         });
       }
 
-      function promptAddBookmark() {
+      async function promptAddBookmark() {
         if (!currentDoc) {
           PDFTools.Toast.error('Please open a PDF document first.');
           return;
         }
         const curPage = currentDoc.currentPage || 1;
-        const title = prompt(`Enter title for Bookmark on Page ${curPage}:`, `Page ${curPage} - Bookmark`);
+        let title = `Page ${curPage} - Bookmark`;
+        if (window.PDFTools && window.PDFTools.Modal && window.PDFTools.Modal.prompt) {
+          title = await window.PDFTools.Modal.prompt(`Enter title for Bookmark on Page ${curPage}:`, `Page ${curPage} - Bookmark`, { title: 'Add Bookmark' });
+        }
         if (title && title.trim()) {
           currentDoc.bookmarks = currentDoc.bookmarks || [];
           currentDoc.bookmarks.push({
@@ -7292,8 +7309,12 @@
           });
 
           // Delete Action
-          card.querySelector('.att-delete-btn').addEventListener('click', () => {
-            if (confirm(`Remove attachment "${att.name}" from this PDF?`)) {
+          card.querySelector('.att-delete-btn').addEventListener('click', async () => {
+            let ok = true;
+            if (window.PDFTools && window.PDFTools.Modal && window.PDFTools.Modal.confirm) {
+              ok = await window.PDFTools.Modal.confirm(`Remove attachment "${att.name}" from this PDF?`, { isDanger: true });
+            }
+            if (ok) {
               currentDoc.attachments = currentDoc.attachments.filter(a => a.id !== att.id);
               scheduleRecovery();
               buildSidebarAttachments();
@@ -7344,8 +7365,12 @@
         PDFTools.Toast.info('Document closed.');
       });
 
-      menuHelpAbout.addEventListener('click', () => {
-        alert('PDF Studio Pro — 100% Offline Client-side PDF Suite.\nVersion 2.0\nAll files are processed locally in your browser.');
+      menuHelpAbout.addEventListener('click', async () => {
+        if (window.PDFTools && window.PDFTools.Modal && window.PDFTools.Modal.alert) {
+          await window.PDFTools.Modal.alert('PDF Studio Pro — 100% Offline Client-side PDF Suite.\nVersion 2.0\nAll files are processed locally in your browser.', { title: 'About PDF Studio Pro' });
+        } else if (window.PDFTools && window.PDFTools.Toast) {
+          window.PDFTools.Toast.info('PDF Studio Pro — 100% Offline Client-side PDF Suite.');
+        }
       });
 
       // --- Page Thumbnails, Insert & Drag-and-Drop Combining System ---
@@ -7531,7 +7556,11 @@
           PDFTools.Toast.error(PDFTools.i18n.t('toast.cannot_delete_last') || 'Cannot delete the only page in the document.');
           return;
         }
-        if (!confirm(PDFTools.i18n.t('toast.confirm_delete_page') || `Delete page ${pageNum}?`)) return;
+        let ok = true;
+        if (window.PDFTools && window.PDFTools.Modal && window.PDFTools.Modal.confirm) {
+          ok = await window.PDFTools.Modal.confirm(PDFTools.i18n.t('toast.confirm_delete_page') || `Delete page ${pageNum}?`, { isDanger: true });
+        }
+        if (!ok) return;
 
         recordDocumentState();
         const idx = currentDoc.pageOrder.indexOf(pageNum);
@@ -8407,7 +8436,10 @@
           const totalPages = activePages.length;
           const lang = document.getElementById('ocrLangSelect').value;
 
-          const confirmed = confirm(`Jalankan OCR untuk seluruh dokumen (${totalPages} halaman)?\n\nSetiap halaman scan kertas akan langsung dapat dicari dengan Ctrl+F dan disimpan menjadi Searchable PDF.`);
+          let confirmed = true;
+          if (window.PDFTools && window.PDFTools.Modal && window.PDFTools.Modal.confirm) {
+            confirmed = await window.PDFTools.Modal.confirm(`Jalankan OCR untuk seluruh dokumen (${totalPages} halaman)?\n\nSetiap halaman scan kertas akan langsung dapat dicari dengan Ctrl+F dan disimpan menjadi Searchable PDF.`, { title: 'Batch OCR Offline' });
+          }
           if (!confirmed) return;
 
           isOcrBatchRunning = true;
@@ -9797,15 +9829,18 @@
         });
       }
 
-      // 🧹 Sanitize Metadata
       const menuToolSanitize = document.getElementById('menuToolSanitize');
       if (menuToolSanitize) {
-        menuToolSanitize.addEventListener('click', () => {
+        menuToolSanitize.addEventListener('click', async () => {
           if (!currentDoc) {
             PDFTools.Toast.info('Please open a PDF document first.');
             return;
           }
-          if (confirm('Sanitize and remove all metadata, author names, producer info, and hidden layer tags?')) {
+          let ok = true;
+          if (window.PDFTools && window.PDFTools.Modal && window.PDFTools.Modal.confirm) {
+            ok = await window.PDFTools.Modal.confirm('Sanitize and remove all metadata, author names, producer info, and hidden layer tags?', { title: 'Sanitize Metadata', isDanger: true });
+          }
+          if (ok) {
             currentDoc.sanitized = true;
             scheduleRecovery();
             PDFTools.Toast.success('Document marked for complete metadata sanitization!');

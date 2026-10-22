@@ -2379,3 +2379,217 @@ a {
 .dropzone:focus-visible {
   border-color: var(--tool-color, #6366f1);
 }
+
+/* ============================================
+   Unified Promise-based Modal Component
+   ============================================ */
+.pdftools-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  opacity: 0;
+  transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pdftools-modal-backdrop.active {
+  opacity: 1;
+}
+
+.pdftools-modal-dialog {
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 16px;
+  box-shadow: 0 20px 48px -8px rgba(0, 0, 0, 0.35);
+  width: 440px;
+  max-width: calc(100vw - 32px);
+  padding: 24px;
+  transform: scale(0.95);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+.pdftools-modal-backdrop.active .pdftools-modal-dialog {
+  transform: scale(1);
+}
+
+:root.dark-theme .pdftools-modal-dialog,
+[data-theme="dark"] .pdftools-modal-dialog {
+  background: #1e293b;
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #f8fafc;
+}
+
+.pdftools-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.pdftools-modal-icon-wrap {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.pdftools-modal-icon-wrap.confirm {
+  background: rgba(99, 102, 241, 0.15);
+  color: #6366F1;
+}
+
+.pdftools-modal-icon-wrap.danger {
+  background: rgba(239, 68, 68, 0.15);
+  color: #EF4444;
+}
+
+.pdftools-modal-icon-wrap.info {
+  background: rgba(14, 165, 233, 0.15);
+  color: #0EA5E9;
+}
+
+.pdftools-modal-icon-wrap.prompt {
+  background: rgba(168, 85, 247, 0.15);
+  color: #A855F7;
+}
+
+.pdftools-modal-title {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--text-primary, #0f172a);
+  flex: 1;
+}
+
+:root.dark-theme .pdftools-modal-title,
+[data-theme="dark"] .pdftools-modal-title {
+  color: #f8fafc;
+}
+
+.pdftools-modal-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted, #64748b);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  padding: 0;
+}
+
+.pdftools-modal-close:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #EF4444;
+}
+
+.pdftools-modal-body {
+  margin-bottom: 22px;
+}
+
+.pdftools-modal-message {
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--text-secondary, #475569);
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0;
+}
+
+:root.dark-theme .pdftools-modal-message,
+[data-theme="dark"] .pdftools-modal-message {
+  color: #cbd5e1;
+}
+
+.pdftools-modal-input {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color, #cbd5e1);
+  background: var(--bg-primary, #ffffff);
+  color: var(--text-primary, #0f172a);
+  font-size: 0.95rem;
+  margin-top: 14px;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+:root.dark-theme .pdftools-modal-input,
+[data-theme="dark"] .pdftools-modal-input {
+  background: #0f172a;
+  border-color: #334155;
+  color: #f8fafc;
+}
+
+.pdftools-modal-input:focus {
+  outline: none;
+  border-color: #6366F1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+.pdftools-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.pdftools-modal-footer button {
+  padding: 9px 18px;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: none;
+}
+
+.pdftools-modal-cancel {
+  background: transparent;
+  border: 1px solid var(--border-color, #cbd5e1) !important;
+  color: var(--text-secondary, #475569);
+}
+
+:root.dark-theme .pdftools-modal-cancel,
+[data-theme="dark"] .pdftools-modal-cancel {
+  border-color: #334155 !important;
+  color: #94a3b8;
+}
+
+.pdftools-modal-cancel:hover {
+  background: rgba(148, 163, 184, 0.12);
+  color: var(--text-primary, #0f172a);
+}
+
+.pdftools-modal-confirm {
+  background: #6366F1;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35);
+}
+
+.pdftools-modal-confirm:hover {
+  background: #4f46e5;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.45);
+}
+
+.pdftools-modal-confirm.danger {
+  background: #EF4444;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.35);
+}
+
+.pdftools-modal-confirm.danger:hover {
+  background: #dc2626;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.45);
+}

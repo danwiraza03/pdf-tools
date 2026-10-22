@@ -87,12 +87,13 @@ class SignatureInspector {
    * @returns {Promise<boolean>} Resolves true if user confirms saving a copy
    */
   static async confirmSignedDocModification() {
-    return new Promise((resolve) => {
-      const confirmed = window.confirm(
-        '⚠️ This document contains a digital signature.\n\nEditing the file will invalidate the existing cryptographic signature.\n\nClick OK to Save a Copy and continue, or Cancel to abort.'
+    if (window.PDFTools && window.PDFTools.Modal && window.PDFTools.Modal.confirm) {
+      return await window.PDFTools.Modal.confirm(
+        'This document contains a digital signature.\n\nEditing the file will invalidate the existing cryptographic signature.\n\nClick OK to Save a Copy and continue, or Cancel to abort.',
+        { title: 'Digital Signature Detected', isDanger: true }
       );
-      resolve(confirmed);
-    });
+    }
+    return true;
   }
 }
 
