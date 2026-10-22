@@ -4056,6 +4056,7 @@
   <script src="../js/studio/studio-annotations.js"></script>
   <script src="../js/studio/studio-text-editor.js"></script>
   <script src="../js/studio/studio-text-widgets.js"></script>
+  <script src="../js/studio/studio-toolbar.js"></script>
   <script src="../js/app.js"></script>
 
   <!-- PDF Studio Controller Script -->
@@ -4432,6 +4433,7 @@
       const focusLatestTextWidget = () => window.PDFTools.StudioTextWidgets?.focusLatestTextWidget();
       const commitTextInPlace = (tw, content, item) => window.PDFTools.StudioTextWidgets?.commitTextInPlace(tw, content, item);
       const finishTextEditing = (tw, content, item, pageAnn) => window.PDFTools.StudioTextWidgets?.finishTextEditing(tw, content, item, pageAnn);
+      const switchTool = (m) => window.PDFTools.StudioToolbar?.switchTool(m);
 
       // Listen for line text edits
       document.addEventListener('pdf-text-edited', async (e) => {
@@ -4529,222 +4531,7 @@
 
       // Active page widgets rendering and interactions delegated to StudioTextWidgets
 
-      // Smooth Hand Tool Viewport Pan
-      let isPanning = false;
-      let panStartX, panStartY, scrollStartX, scrollStartY;
-
-      acrobatViewport.addEventListener('mousedown', (e) => {
-        if (activeMode === 'hand') {
-          isPanning = true;
-          panStartX = e.clientX;
-          panStartY = e.clientY;
-          scrollStartX = acrobatViewport.scrollLeft;
-          scrollStartY = acrobatViewport.scrollTop;
-          acrobatViewport.style.cursor = 'grabbing';
-        }
-      });
-
-      window.addEventListener('mousemove', (e) => {
-        if (isPanning && activeMode === 'hand') {
-          const dx = e.clientX - panStartX;
-          const dy = e.clientY - panStartY;
-          acrobatViewport.scrollLeft = scrollStartX - dx;
-          acrobatViewport.scrollTop = scrollStartY - dy;
-        }
-      });
-
-      window.addEventListener('mouseup', () => {
-        if (isPanning) {
-          isPanning = false;
-          acrobatViewport.style.cursor = activeMode === 'hand' ? 'grab' : 'default';
-        }
-      });
-
-      // Canvas Interactive Drawing, Shapes, Redaction, and Text placement
-      annotationCanvas.addEventListener('mousedown', async (e) => {
-        if (!currentDoc) return;
-        const rect = annotationCanvas.getBoundingClientRect();
-        const clickX = (e.clientX - rect.left) / currentScale;
-        const clickY = (e.clientY - rect.top) / currentScale;
-
-        if (activeMode === 'select') {
-          widgetContainer.querySelectorAll('.studio-text-widget').forEach(w => w.classList.remove('selected'));
-          setActiveText(null, null);
-        }
-
-        if (activeMode === 'fillSign') {
-          addFormMarkAtPoint(window.PDFTools.StudioSign ? window.PDFTools.StudioSign.getActiveSubTool() : 'text', clickX, clickY);
-          return;
-        }
-
-        if (activeMode === 'text') {
-          const pageAnn = currentDoc.getPageAnnotation(currentDoc.currentPage);
-          let inferredStyle = window.PDFTools.FontIntelligenceEngine.getDefaultStyle();
-          try {
-            const page = await currentDoc.pdfJsDoc.getPage(currentDoc.currentPage);
-            const textRuns = await window.PDFTools.PDFTextExtractor.extractPageTextRuns(page, currentDoc.currentPage, 0, pdfCanvas);
-            inferredStyle = window.PDFTools.FontIntelligenceEngine.inferStyleAtPoint(textRuns, clickX, clickY);
-            if (inferredStyle.confidence > 0) {
-              PDFTools.Toast.info(`Font matched: ${inferredStyle.family} ${inferredStyle.size}pt`);
-            }
-          } catch (err) {
-            console.warn('Failed to infer text style:', err);
-          }
-
-          const newText = {
-            id: 'text_' + Date.now(),
-            text: 'Type text here...',
-            x: clickX,
-            y: clickY,
-            fontSize: inferredStyle.size || 14,
-            fontFamily: inferredStyle.family || 'Helvetica',
-            bold: inferredStyle.bold || inferredStyle.weight === 'bold',
-            italic: inferredStyle.italic,
-            color: inferredStyle.color || '#000000',
-            headerOffsetY: 0
-          };
-          pageAnn.texts.push(newText);
-          undoStack.push({ pageNum: currentDoc.currentPage, type: 'text', item: newText });
-          scheduleRecovery();
-          renderActivePageWidgets();
-          focusLatestTextWidget();
-          return;
-        }
-
-        if (['comment', 'draw', 'highlight', 'rect', 'circle', 'line', 'redact'].includes(activeMode)) {
-          await window.PDFTools.StudioAnnotations?.handleCanvasMouseDown(e, clickX, clickY);
-          return;
-        }
-      });
-
-      annotationCanvas.addEventListener('dblclick', (e) => {
-        if (!currentDoc) return;
-        if (activeMode !== 'text' && activeMode !== 'edit') return;
-        const rect = annotationCanvas.getBoundingClientRect();
-        const clickX = (e.clientX - rect.left) / currentScale;
-        const clickY = (e.clientY - rect.top) / currentScale;
-
-        const pageAnn = currentDoc.getPageAnnotation(currentDoc.currentPage);
-        const newText = {
-          id: 'text_' + Date.now(),
-          text: 'New text',
-          x: clickX,
-          y: clickY,
-          fontSize: 14,
-          fontFamily: 'Helvetica',
-          bold: false,
-          italic: false,
-          color: '#000000',
-          headerOffsetY: 0
-        };
-        pageAnn.texts.push(newText);
-        undoStack.push({ pageNum: currentDoc.currentPage, type: 'text', item: newText });
-        scheduleRecovery();
-        renderActivePageWidgets();
-        focusLatestTextWidget();
-      });
-
-      // Tool Switchers
-      toolSelect.addEventListener('click', () => switchTool('select'));
-      toolHand.addEventListener('click', () => switchTool('hand'));
-      toolEditPdf.addEventListener('click', () => activateExistingTextEditing());
-      toolText.addEventListener('click', () => activateTextAdding());
-      // Format Panel & Edit Mode Controller - Delegated to StudioTextEditor
-
-      // Annotation Tool Options & Redaction Controller - Delegated to StudioAnnotations
-      const updateAnnotationBar = (mode) => window.PDFTools.StudioAnnotations?.updateAnnotationBar(mode);
-      const updateRedactBadge = () => window.PDFTools.StudioAnnotations?.updateRedactBadge();
-      const updateCommentCountBadge = () => window.PDFTools.StudioAnnotations?.updateCommentCountBadge();
-
-      // Toolbar Buttons Click Listeners
-      toolHighlight.addEventListener('click', () => switchTool('highlight'));
-      toolDraw.addEventListener('click', () => switchTool('draw'));
-      toolRect.addEventListener('click', () => switchTool('rect'));
-      toolCircle.addEventListener('click', () => switchTool('circle'));
-      toolLine.addEventListener('click', () => switchTool('line'));
-      toolComment.addEventListener('click', () => switchTool('comment'));
-      toolRedact.addEventListener('click', () => switchTool('redact'));
-      toolForms.addEventListener('click', () => switchTool('forms'));
-      toolSelect.addEventListener('click', () => switchTool('select'));
-      toolHand.addEventListener('click', () => switchTool('hand'));
-
-
-      menuAddShape.addEventListener('click', () => switchTool('rect'));
-
-      async function switchTool(mode) {
-        activeMode = mode;
-        if (mode !== 'select' && mode !== 'hand' && viewMode !== 'single' && currentDoc) {
-          await setViewMode('single');
-        }
-
-        const allToolBtns = [
-          toolSelect, toolHand, toolEditPdf, toolText, toolHighlight,
-          toolDraw, toolRect, toolCircle, toolLine, toolSign, toolComment,
-          toolRedact, toolForms, toolOcr
-        ];
-        allToolBtns.forEach(btn => { if (btn) btn.classList.remove('active'); });
-
-        if (mode === 'select' && toolSelect) toolSelect.classList.add('active');
-        if (mode === 'hand' && toolHand) toolHand.classList.add('active');
-        if (mode === 'edit' && toolEditPdf) toolEditPdf.classList.add('active');
-        if (mode === 'text' && toolText) toolText.classList.add('active');
-        if (mode === 'highlight' && toolHighlight) toolHighlight.classList.add('active');
-        if (mode === 'draw' && toolDraw) toolDraw.classList.add('active');
-        if (mode === 'rect' && toolRect) toolRect.classList.add('active');
-        if (mode === 'circle' && toolCircle) toolCircle.classList.add('active');
-        if (mode === 'line' && toolLine) toolLine.classList.add('active');
-        if (mode === 'comment' && toolComment) toolComment.classList.add('active');
-        if (mode === 'redact' && toolRedact) toolRedact.classList.add('active');
-        if (mode === 'forms' && toolForms) toolForms.classList.add('active');
-        if (mode === 'fillSign' && toolSign) toolSign.classList.add('active');
-        if (mode === 'ocr' && toolOcr) toolOcr.classList.add('active');
-
-        // Synchronize right sidebar tools highlight
-        document.querySelectorAll('.acrobat-tool-item').forEach(item => item.classList.remove('active'));
-        if (mode === 'edit') document.getElementById('paneEditPdf')?.classList.add('active');
-        if (mode === 'text') document.getElementById('paneAddText')?.classList.add('active');
-        if (mode === 'fillSign') document.getElementById('paneFillSign')?.classList.add('active');
-        if (mode === 'ocr') document.getElementById('paneScanOcr')?.classList.add('active');
-
-        updateAnnotationBar(mode);
-
-        if (mode === 'edit' || mode === 'text') {
-          editModeIsActive = true;
-          if (editModeBar) editModeBar.classList.add('active');
-          showRightFormatPanel(true);
-        } else {
-          editModeIsActive = false;
-          if (editModeBar) editModeBar.classList.remove('active');
-          showRightFormatPanel(false);
-        }
-
-        if (fillSignModeBar) {
-          fillSignModeBar.style.display = (mode === 'fillSign') ? 'flex' : 'none';
-        }
-
-        if (mode === 'edit' || mode === 'text') {
-          annotationCanvas.style.cursor = 'text';
-          acrobatViewport.style.cursor = 'text';
-        } else if (mode === 'draw' || mode === 'highlight' || mode === 'rect' || mode === 'circle' || mode === 'line' || mode === 'redact' || mode === 'fillSign') {
-          annotationCanvas.style.cursor = 'crosshair';
-          acrobatViewport.style.cursor = 'crosshair';
-        } else if (mode === 'comment') {
-          annotationCanvas.style.cursor = 'pointer';
-          acrobatViewport.style.cursor = 'pointer';
-        } else if (mode === 'hand') {
-          annotationCanvas.style.cursor = 'grab';
-          acrobatViewport.style.cursor = 'grab';
-        } else {
-          annotationCanvas.style.cursor = 'default';
-          acrobatViewport.style.cursor = 'default';
-        }
-
-        renderActivePageWidgets();
-        renderExistingTextLayer();
-        redrawAnnotationLayer();
-      }
-
-      // Image Replacement Listener delegated to StudioTextWidgets
+      // Toolbar, hand pan, canvas interactions and tool switching delegated to StudioToolbar
 
       // Command-based Multi-step Undo & Redo
       const performUndo = async () => {
@@ -4796,27 +4583,6 @@
       menuUndo.addEventListener('click', performUndo);
       if (btnRedo) btnRedo.addEventListener('click', performRedo);
       if (menuRedo) menuRedo.addEventListener('click', performRedo);
-
-      // Global Undo/Redo Keyboard Shortcuts
-      window.addEventListener('keydown', (e) => {
-        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
-          if (e.target.tagName === 'INPUT' || (e.target.isContentEditable && e.target.classList.contains('studio-text-content'))) {
-            return; // Let native input handle text typing undo
-          }
-          e.preventDefault();
-          if (e.shiftKey) {
-            performRedo();
-          } else {
-            performUndo();
-          }
-        } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
-          if (e.target.tagName === 'INPUT' || (e.target.isContentEditable && e.target.classList.contains('studio-text-content'))) {
-            return;
-          }
-          e.preventDefault();
-          performRedo();
-        }
-      });
 
       // Page Rotations & Actions - Delegated to StudioThumbnails
       const rotateCurrent = (deg) => window.PDFTools.StudioThumbnails?.rotateCurrent(deg);
@@ -4963,132 +4729,39 @@
       const saveDocument = (name) => window.PDFTools.StudioModalsExport?.saveDocument(name);
       const triggerPrint = () => window.PDFTools.StudioModalsExport?.triggerPrint();
 
-      // In-Studio Combine Files & Organize Pages Trigger
-      document.getElementById('paneCombineFiles')?.addEventListener('click', (e) => {
-        if (currentDoc) {
-          e.preventDefault();
-          triggerInsertPdf(currentDoc.getActivePagesList().length);
-          PDFTools.Toast.info('Select a PDF file to combine into current document...');
-        } else {
-          window.location.href = 'merge.html';
-        }
-      });
-
-      document.getElementById('paneOrganizePages')?.addEventListener('click', (e) => {
-        if (currentDoc) {
-          e.preventDefault();
-          thumbnailSidebar.style.display = 'block';
-          toggleThumbStrip.classList.add('active');
-          toggleBookmarksStrip.classList.remove('active');
-          toggleAttachmentsStrip.classList.remove('active');
-          bookmarksSidebar.style.display = 'none';
-          attachmentsSidebar.style.display = 'none';
-          PDFTools.Toast.info('Organize Pages active: Drag & drop page thumbnails on the left panel to reorder, duplicate, or delete pages.');
-        } else {
-          window.location.href = 'split.html';
-        }
-      });
-      // Direct In-Studio Comments & Sticky Notes - Delegated to StudioAnnotations
-      const renderCommentsList = () => window.PDFTools.StudioAnnotations?.renderCommentsList();
-      if (toolComment) {
-        toolComment.addEventListener('click', () => {
-          if (!currentDoc) {
-            PDFTools.Toast.info('Please open a PDF document first.');
-            return;
-          }
-          if (commentsDrawer) commentsDrawer.classList.toggle('active');
-          renderCommentsList();
+      // --- Toolbar, Tool Switching & Navigation - Delegated to StudioToolbar ---
+      if (window.PDFTools && window.PDFTools.StudioToolbar) {
+        window.PDFTools.StudioToolbar.init({
+          getDoc: () => currentDoc,
+          getScale: () => currentScale,
+          getActiveMode: () => activeMode,
+          onActiveModeChanged: (m) => { activeMode = m; },
+          getViewMode: () => viewMode,
+          setViewMode: async (m) => await setViewMode(m),
+          updateAnnotationBar: (m) => updateAnnotationBar(m),
+          showRightFormatPanel: (s) => showRightFormatPanel(s),
+          renderActivePageWidgets: () => renderActivePageWidgets(),
+          renderExistingTextLayer: () => renderExistingTextLayer(),
+          redrawAnnotationLayer: () => redrawAnnotationLayer(),
+          focusLatestTextWidget: () => focusLatestTextWidget(),
+          scheduleRecovery: () => scheduleRecovery(),
+          getUndoStack: () => undoStack,
+          setActiveText: (item, el) => setActiveText(item, el),
+          addFormMarkAtPoint: (type, x, y) => addFormMarkAtPoint(type, x, y),
+          openSaveAsModal: () => openSaveAsModal(),
+          saveDocument: (name) => saveDocument(name),
+          triggerOpen: () => triggerOpen(),
+          triggerPrint: () => triggerPrint(),
+          toggleFindBar: () => toggleFindBar(),
+          selectSearchMatch: (idx) => selectSearchMatch(idx),
+          performUndo: () => performUndo(),
+          performRedo: () => performRedo(),
+          activateExistingTextEditing: () => activateExistingTextEditing(),
+          activateTextAdding: () => activateTextAdding(),
+          triggerInsertPdf: (idx) => triggerInsertPdf(idx),
+          renderCommentsList: () => renderCommentsList()
         });
       }
-
-      // Interactive Top Dropdown Menus (Click & Hover Switcher)
-      let isAnyMenuOpen = false;
-      const dropdownWrappers = document.querySelectorAll('.acrobat-dropdown-wrapper');
-
-      dropdownWrappers.forEach(wrapper => {
-        const menuItem = wrapper.querySelector('.acrobat-menu-item');
-        if (!menuItem) return;
-
-        menuItem.addEventListener('click', (e) => {
-          e.stopPropagation();
-          const wasActive = wrapper.classList.contains('active');
-          dropdownWrappers.forEach(w => w.classList.remove('active'));
-          if (!wasActive) {
-            wrapper.classList.add('active');
-            isAnyMenuOpen = true;
-          } else {
-            isAnyMenuOpen = false;
-          }
-        });
-
-        wrapper.addEventListener('mouseenter', () => {
-          if (isAnyMenuOpen) {
-            dropdownWrappers.forEach(w => w.classList.remove('active'));
-            wrapper.classList.add('active');
-          }
-        });
-      });
-
-      // Close dropdowns on click outside or clicking any menu item
-      document.addEventListener('click', () => {
-        dropdownWrappers.forEach(w => w.classList.remove('active'));
-        isAnyMenuOpen = false;
-      });
-
-      document.querySelectorAll('.acrobat-menu-link').forEach(link => {
-        link.addEventListener('click', () => {
-          dropdownWrappers.forEach(w => w.classList.remove('active'));
-          isAnyMenuOpen = false;
-        });
-      });
-
-      // Search tools filter in right sidebar
-      searchToolsInput.addEventListener('input', () => {
-        const query = searchToolsInput.value.toLowerCase().trim();
-        document.querySelectorAll('.acrobat-tool-item').forEach(item => {
-          const name = (item.getAttribute('data-name') || '') + item.innerText.toLowerCase();
-          item.style.display = name.includes(query) ? 'flex' : 'none';
-        });
-      });
-
-
-      // Global Keyboard Shortcuts
-      window.addEventListener('keydown', (e) => {
-        if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 's') {
-          e.preventDefault();
-          openSaveAsModal();
-        } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
-          e.preventDefault();
-          saveDocument();
-        } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'o') {
-          e.preventDefault();
-          triggerOpen();
-        } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p') {
-          e.preventDefault();
-          triggerPrint();
-        } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f') {
-          e.preventDefault();
-          toggleFindBar();
-        } else if (e.key === 'F3') {
-          e.preventDefault();
-          const matches = window.PDFTools.StudioSearchOCR ? window.PDFTools.StudioSearchOCR.getSearchMatches() : [];
-          const curIdx = window.PDFTools.StudioSearchOCR ? window.PDFTools.StudioSearchOCR.getCurrentMatchIdx() : -1;
-          if (matches.length > 0) {
-            selectSearchMatch(curIdx + (e.shiftKey ? -1 : 1));
-          } else {
-            toggleFindBar();
-          }
-        } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
-          e.preventDefault();
-          performUndo();
-        } else if (e.key === 'PageDown' || (e.altKey && e.key === 'ArrowDown')) {
-          e.preventDefault();
-          nextPageBtn.click();
-        } else if (e.key === 'PageUp' || (e.altKey && e.key === 'ArrowUp')) {
-          e.preventDefault();
-          prevPageBtn.click();
-        }
-      });
 
       // Refresh thumbnails when language switches
       window.addEventListener('pdftools:langchange', () => {
