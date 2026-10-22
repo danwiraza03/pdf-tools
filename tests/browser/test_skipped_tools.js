@@ -317,8 +317,14 @@ async function runSkippedToolsTests(browser, baseUrl) {
       };
     });
 
-    assert(ocrResult.recognizedText.length > 0, 'OCR must return recognized text');
-    console.log(`  ✓ OCR PDF berhasil mengeksekusi Tesseract.js WASM lokal. Hasil deteksi: "${ocrResult.recognizedText.replace(/\n/g, ' ')}"`);
+    const normalizeText = (s) => (s || '').toLowerCase().replace(/\s+/g, '');
+    const expectedOcrText = 'HELLO OCR';
+    assert(ocrResult.recognizedText.length > 0, 'OCR must return non-empty recognized text');
+    assert(
+      normalizeText(ocrResult.recognizedText).includes(normalizeText(expectedOcrText)),
+      `OCR recognized text must contain expected text "${expectedOcrText}" (ignoring case & whitespace), got: "${ocrResult.recognizedText}"`
+    );
+    console.log(`  ✓ OCR PDF berhasil mengenali teks yang diharapkan ("${expectedOcrText}"). Hasil deteksi: "${ocrResult.recognizedText.replace(/\n/g, ' ')}"`);
 
     // -----------------------------------------------------------------------
     // 6. Sign PDF (Pre-check input white, verify new image object, verify pixels not white)
