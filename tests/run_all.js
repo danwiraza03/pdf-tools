@@ -27,6 +27,7 @@ console.log('                RUNNING ALL PDF TOOLS TEST SUITES                  
 console.log('========================================================================\n');
 
 let failedTests = [];
+let skippedToolsCount = 0;
 
 for (const test of tests) {
   const filePath = path.join(TESTS_DIR, test.file);
@@ -46,6 +47,14 @@ for (const test of tests) {
   }
   if (stderr.trim()) {
     console.error(stderr.trimEnd());
+  }
+
+  // Parse skipped tools if running audit_all_tools.js
+  if (test.file === 'audit_all_tools.js') {
+    const skipMatch = (stdout + '\n' + stderr).match(/(\d+)\s+skipped/i);
+    if (skipMatch) {
+      skippedToolsCount = parseInt(skipMatch[1], 10);
+    }
   }
 
   // Check exit code
@@ -83,12 +92,21 @@ console.log('===================================================================
 console.log('                           FINAL SUMMARY                                ');
 console.log('========================================================================');
 
-if (failedTests.length === 0) {
-  console.log(`🎉 ALL ${tests.length} TEST SUITES PASSED SUCCESSFULLY!`);
+const passedSuites = tests.length - failedTests.length;
+const failedSuites = failedTests.length;
+
+console.log(`Hasil: ${passedSuites} lulus, ${failedSuites} gagal, ${skippedToolsCount} tool dilewati`);
+
+if (failedSuites === 0 && skippedToolsCount === 0) {
+  console.log(`🎉 SEMUA ${tests.length} TEST SUITE LULUS LENGKAP (0 tool dilewati).`);
+  console.log('========================================================================');
+  process.exit(0);
+} else if (failedSuites === 0) {
+  console.log(`ℹ️  ${passedSuites} suite lulus, ${failedSuites} gagal, ${skippedToolsCount} tool dilewati di audit_all_tools.js (diverifikasi terpisah via browser).`);
   console.log('========================================================================');
   process.exit(0);
 } else {
-  console.error(`💥 ${failedTests.length} of ${tests.length} TEST SUITES FAILED:`);
+  console.error(`💥 ${failedSuites} dari ${tests.length} TEST SUITE GAGAL:`);
   for (const f of failedTests) {
     console.error(`  - ${f.name} (${f.file}) [Exit Code: ${f.code}]`);
   }
