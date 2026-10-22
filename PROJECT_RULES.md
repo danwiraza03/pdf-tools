@@ -195,7 +195,7 @@ Struktur internal editor PDF Studio Pro dipecah ke dalam modul-modul modular ber
    - `annotation-engine.js`: Penyorot teks (highlight), garis bawah, coret, pensil bebas, dan bentuk geometris (panah, kotak, lingkaran).
    - `comments-engine.js`: Catatan tempel (*sticky notes*) dan thread komentar.
    - `form-engine.js`: Pembuat dan pengisi AcroForm fields (teks, checkbox, radio, dropdown).
-   - `redaction-engine.js`: Rasterization-based permanent redaction (merasterisasi halaman bertanda redaksi ke canvas resolusi tinggi minimal 200 DPI dengan persegi hitam pekat via `pdf-coordinate-engine.js`, mengganti halaman asli dengan halaman gambar baru serta memusnahkan stream teks `/Contents`, anotasi, dan form field lama dari memori untuk menjamin zero data leak; halaman tanpa tanda redaksi tetap dipertahankan 100% sebagai vektor murni; menampilkan modal konfirmasi kustom sebelum eksekusi).
+   - `redaction-engine.js`: Redaksi permanen berbasis rasterisasi. Halaman bertanda redaksi dirender PDF.js ke canvas (default 200 DPI), diberi persegi hitam, lalu diganti halaman gambar berukuran TAMPILAN (rotasi & CropBox sudah diterapkan, tanpa /Rotate). Setelah itu: form field di halaman tersebut dihapus, semua referensi ke halaman lama (link, bookmark, destinasi) dialihkan ke halaman baru, structure tree (/StructTreeRoot, bisa berisi /ActualText) dihapus, dan SEMUA objek yatim dibuang (`purgeUnreachableObjects`) karena pdf-lib menyimpan objek tak terpakai saat save. Di PDF Studio, redaksi dijalankan sebagai langkah TERAKHIR ekspor (`redactBakedDocument`) agar suntingan pengguna ikut terasterisasi. Tanpa canvas dan tanpa `options.rasterize`, engine melempar error (tidak pernah menghasilkan halaman kosong diam-diam). Halaman tanpa redaksi tetap vektor.
    - `security-engine.js`: Analisis hak akses (*permissions*), enkripsi, dan sanitasi metadata.
    - `signature-inspector.js`: Inspeksi tanda tangan digital (`ByteRange`, `SigFlags`) untuk mencegah kerusakan berkas bertanda tangan.
 
@@ -362,11 +362,15 @@ Setiap halaman tool berdiri sendiri (*standalone tool page*) di folder `pages/` 
 3. **Uji Keamanan & Proteksi Data Wajib**:
    - Untuk fitur keamanan (enkripsi, redaksi, tanda tangan), wajib ada test yang membuktikan data benar-benar terlindungi.
      - Enkripsi password wajib diuji dengan verifikasi kamus `/Encrypt`, kegagalan akses tanpa password, dan keberhasilan pembukaan dengan password yang benar (`tests/test_pdf_protect.js`).
-     - Redaksi permanen wajib diuji dengan verifikasi zero raw bytes leak, zero stream leak, dan eliminasi teks rahasia pada level canvas dan text layer (`tests/test_redaction_rasterize.js`).
+     - Redaksi permanen wajib diuji dengan mendekode SELURUH objek file dan mencari rahasia dalam bentuk teks biasa DAN heksadesimal (pdf-lib menulis teks sebagai hex), termasuk teks di Form XObject, gambar, /ActualText, dan form field (`tests/test_redaction_rasterize.js`, `tests/test_studio_export_redaction.js`).
      - Keamanan server lokal wajib diuji mengikat ke 127.0.0.1, bebas CORS eksternal, dan kebal path traversal (`tests/test_server_security.js`).
      - Kepatuhan offline wajib diverifikasi dengan audit zero external HTTP/HTTPS URLs (`tests/test_no_external_urls.js`).
-4. **Penyelesaian Tugas**:
-   - Selesaikan tugas dengan menjalankan `node tests/run_all.js` dan menempel outputnya sebagai bukti bahwa seluruh 13 test suites berhasil dilewati (`ALL 13 TEST SUITES PASSED`).
+4. **Test Keamanan Wajib Membuktikan Dirinya Sensitif (Mutation Check)**:
+   - Detektor kebocoran wajib dijalankan dulu pada input YANG BELUM dilindungi dan harus MENEMUKAN rahasia.
+   - Setiap mekanisme perlindungan wajib diuji dengan mematikannya secara sengaja di dalam test; test harus mendeteksi kebocoran. Test yang tetap lulus saat perlindungan dimatikan dianggap tidak menguji apa pun.
+   - Perbaikan bug wajib disertai test yang terbukti GAGAL pada kode sebelum perbaikan.
+5. **Penyelesaian Tugas**:
+   - Selesaikan tugas dengan menjalankan `node tests/run_all.js` dan menempel outputnya sebagai bukti bahwa seluruh test suite berhasil dilewati (baris `FINAL SUMMARY` tanpa kegagalan).
 
 ---
 

@@ -785,13 +785,8 @@ PDFTools.Studio = (function () {
         }
       }
 
-      // 4d. Bake Redactions (Rasterizes redacted pages to prevent underlying text leakage)
-      if (pageAnn.redactions && pageAnn.redactions.length > 0 && window.PDFTools.RedactionEngine) {
-        await window.PDFTools.RedactionEngine.applyRedactions(pdfDoc, pageAnn, pageIndex, scaleX, scaleY, pdfHeight, rgb, {
-          pdfjsDoc: doc.pdfJsDoc,
-          doc
-        });
-      }
+      // Redactions are NOT applied here: they run as a final pass (4h) after every
+      // edit, stamp and signature has been baked, so the raster includes them.
     }
 
     // 4e. Bake Form Fields
@@ -829,6 +824,29 @@ PDFTools.Studio = (function () {
           }
         }
       }
+    }
+
+    // 4h. Permanent redaction pass (must run AFTER all baking above).
+    // Page indices in pdfDoc still match the original page numbers at this point.
+    const redactionMap = {};
+    activePageNums.forEach(p => {
+      const pAnn = doc.getPageAnnotation(p);
+      if (pAnn.redactions && pAnn.redactions.length > 0) {
+        redactionMap[p] = { redactions: pAnn.redactions.slice() };
+      }
+    });
+    if (Object.keys(redactionMap).length > 0) {
+      if (!window.PDFTools.RedactionEngine) {
+        throw new Error('Redaction engine not loaded: refusing to export a document with unapplied redactions.');
+      }
+      if (typeof onProgress === 'function') {
+        onProgress(92, 'Applying permanent redactions...');
+      }
+      await window.PDFTools.RedactionEngine.redactBakedDocument(pdfDoc, redactionMap, {
+        dpi: window.PDFTools.RedactionEngine.DEFAULT_DPI,
+        CoordinateEngine: window.PDFTools.PDFCoordinateEngine,
+        clearAnnotations: false
+      });
     }
 
     // 5. Build final document with active page order & duplicates

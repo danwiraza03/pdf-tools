@@ -826,27 +826,10 @@ window.PDFTools.StudioAnnotations = (function () {
         }
 
         try {
-          let buffer = currentDoc.arrayBuffer;
-          if (!buffer || currentDoc.dirty) {
-            const baked = await window.PDFTools.Studio.exportDocument(currentDoc);
-            buffer = baked.buffer || baked;
-          }
-
-          const { PDFDocument } = window.PDFLib;
-          const pdfDoc = await PDFDocument.load(buffer);
-
-          // Rasterize & permanently redact all pages with redaction marks
-          await window.PDFTools.RedactionEngine.applyPermanentRedactionsToDocument(
-            pdfDoc,
-            currentDoc.pdfJsDoc,
-            currentDoc.annotations,
-            {
-              dpi: window.PDFTools.RedactionEngine.DEFAULT_DPI,
-              CoordinateEngine: window.PDFTools.PDFCoordinateEngine
-            }
-          );
-
-          const newBytes = await pdfDoc.save();
+          // exportDocument bakes every edit first and then runs the redaction pass on the
+          // baked result (see pdf-studio.js step 4h). Rasterizing from currentDoc.pdfJsDoc
+          // directly would render the ORIGINAL file and drop the user's unsaved edits.
+          const newBytes = await window.PDFTools.Studio.exportDocument(currentDoc);
           const newFile = new File([newBytes], currentDoc.fileName || 'document.pdf', { type: 'application/pdf' });
           await openDocument(newFile);
           setDocumentDirty(true);
