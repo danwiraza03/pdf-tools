@@ -27,7 +27,7 @@ function checkDir(dir) {
 console.log('=== VALIDATING ALL JAVASCRIPT FILES IN REPO ===');
 checkDir(path.join(ROOT, 'js'));
 checkDir(path.join(ROOT, 'tests'));
-const rootFiles = ['server.js', 'sw.js'];
+const rootFiles = ['server.js'];
 for (const rf of rootFiles) {
   const full = path.join(ROOT, rf);
   if (fs.existsSync(full)) {

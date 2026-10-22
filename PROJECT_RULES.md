@@ -254,7 +254,6 @@ pdf/
 ├── AGENTS.md                    # Panduan mandat AI agent
 ├── README.md                    # Panduan pengguna publik (23 Tools)
 ├── server.js                    # Local static server (127.0.0.1, path-traversal protected)
-├── sw.js                        # Service Worker untuk offline caching
 ├── manifest.json                # Web App Manifest PWA
 ├── icon.svg                     # Vector App Logo Icon
 ├── docs/                        # Dokumentasi Proyek
