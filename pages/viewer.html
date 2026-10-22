@@ -4052,6 +4052,7 @@
   <script src="../js/studio/studio-search-ocr.js"></script>
   <script src="../js/studio/studio-thumbnails.js"></script>
   <script src="../js/studio/studio-modals-export.js"></script>
+  <script src="../js/studio/studio-renderer.js"></script>
   <script src="../js/app.js"></script>
 
   <!-- PDF Studio Controller Script -->
@@ -4309,167 +4310,53 @@
         });
       }
 
-      // Viewport Drag & Drop
-      acrobatViewport.addEventListener('dragover', (e) => e.preventDefault());
-      acrobatViewport.addEventListener('drop', async (e) => {
-        e.preventDefault();
-        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-          await openDocument(e.dataTransfer.files[0]);
-        }
-      });
-
-      async function openDocument(file, recoveryState = null) {
-        try {
-          PDFTools.Toast.info('Opening document in Acrobat View...');
-          currentDoc = await PDFTools.Studio.loadDocument(file);
-          undoStack.length = 0;
-          if (recoveryState) {
-            PDFTools.Studio.restoreDocumentState(currentDoc, recoveryState);
-          } else {
-            setDocumentDirty(false);
-          }
-          if (window.PDFTools && window.PDFTools.StudioSearchOCR) {
-            window.PDFTools.StudioSearchOCR.resetSearchState();
-          }
-
-          tabDocName.textContent = `${file.name}${currentDoc.dirty ? ' *' : ''}`;
-          tabDocName.title = currentDoc.dirty ? 'Recovered unsaved changes' : file.name;
-
-          emptyDropzoneState.style.display = 'none';
-          sheetWrapper.style.display = 'block';
-
-          totalPagesLabel.textContent = currentDoc.getActivePagesList().length;
-          await renderCurrentPageView();
-          await buildSidebarThumbnails();
-          buildSidebarBookmarks();
-          buildSidebarAttachments();
-
-          if (PDFTools.RecentFiles && file) {
-            PDFTools.RecentFiles.add(file.name, file.size, 'PDF Studio', 'studio');
-          }
-
-          PDFTools.Toast.success('Document loaded successfully!');
-          if (recoveryState) {
-            PDFTools.Toast.info('Recovered unsaved changes from the previous session.');
-          }
-        } catch (err) {
-          console.error('Error opening PDF:', err);
-          PDFTools.Toast.error(err.message || 'Failed to open document.');
-        }
-      }
-
-      async function checkForRecovery() {
-        try {
-          const snapshot = await PDFTools.Studio.getRecoverySnapshot();
-          if (!snapshot || !snapshot.arrayBuffer) return;
-
-          let shouldRestore = true;
-          if (window.PDFTools && window.PDFTools.Modal && window.PDFTools.Modal.confirm) {
-            shouldRestore = await window.PDFTools.Modal.confirm(`Recover unsaved changes for "${snapshot.fileName}"?`, { title: 'Restore Session' });
-          }
-          if (!shouldRestore) {
-            await PDFTools.Studio.clearRecoverySnapshot();
-            return;
-          }
-
-          const recoveredFile = new File([snapshot.arrayBuffer], snapshot.fileName, { type: 'application/pdf' });
-          await openDocument(recoveredFile, snapshot.state);
-        } catch (err) {
-          console.warn('Recovery check unavailable:', err);
-        }
-      }
-
-      async function renderCurrentPageView() {
-        if (!currentDoc) return;
-        const renderId = ++viewRenderId;
-        if (viewMode !== 'single') {
-          await renderPageStack(renderId);
-          return;
-        }
-        pageStack.dataset.viewMode = 'single';
-        pageStack.style.display = 'none';
-        acrobatViewport.style.display = 'flex';
-        sheetWrapper.style.display = 'block';
-        acrobatViewport.scrollTop = 0;
-        acrobatViewport.scrollLeft = 0;
-        const activePages = currentDoc.getActivePagesList();
-        totalPagesLabel.textContent = activePages.length;
-
-        const pageIdxInOrder = activePages.indexOf(currentDoc.currentPage);
-        pageNumberInput.value = pageIdxInOrder !== -1 ? pageIdxInOrder + 1 : 1;
-
-        const renderInfo = await PDFTools.Studio.renderPage(currentDoc, currentDoc.currentPage, pdfCanvas, currentScale);
-
-        annotationCanvas.width = renderInfo.width;
-        annotationCanvas.height = renderInfo.height;
-        sheetWrapper.style.width = `${renderInfo.width}px`;
-        sheetWrapper.style.height = `${renderInfo.height}px`;
-
-        renderSinglePageSearchHighlights();
-        redrawAnnotationLayer();
-        renderActivePageWidgets();
-        updateThumbnailActiveState();
-      }
-
-      async function renderPageStack(renderId) {
-        if (!currentDoc) return;
-        const activePages = currentDoc.getActivePagesList();
-        pageStack.dataset.viewMode = viewMode;
-        pageStack.style.display = viewMode === 'two' ? 'grid' : 'flex';
-        pageStack.innerHTML = '';
-        sheetWrapper.style.display = 'none';
-        acrobatViewport.style.display = viewMode === 'two' ? 'flex' : 'block';
-
-        for (const pageNum of activePages) {
-          const pageFrame = document.createElement('div');
-          pageFrame.className = `continuous-page ${pageNum === currentDoc.currentPage ? 'current-page' : ''}`;
-          pageFrame.dataset.page = pageNum;
-          pageFrame.style.position = 'relative';
-          const canvas = document.createElement('canvas');
-          pageFrame.appendChild(canvas);
-
-          const highlightLayer = document.createElement('div');
-          highlightLayer.className = 'search-highlight-layer continuous-highlight-layer';
-          highlightLayer.dataset.page = pageNum;
-          pageFrame.appendChild(highlightLayer);
-
-          pageStack.appendChild(pageFrame);
-          const renderInfo = await PDFTools.Studio.renderPage(currentDoc, pageNum, canvas, currentScale);
-          if (renderInfo) {
-            pageFrame.style.width = `${renderInfo.width}px`;
-            pageFrame.style.height = `${renderInfo.height}px`;
-          }
-          if (renderId !== viewRenderId || viewMode === 'single') return;
-        }
-
-        totalPagesLabel.textContent = activePages.length;
-        pageNumberInput.value = activePages.indexOf(currentDoc.currentPage) + 1;
-        renderContinuousSearchHighlights();
-        syncCurrentPageFromScroll();
-      }
-
-      function syncCurrentPageFromScroll() {
-        if (!currentDoc || viewMode === 'single') return;
-        const viewportRect = acrobatViewport.getBoundingClientRect();
-        let closestPage = null;
-        let closestDistance = Infinity;
-        pageStack.querySelectorAll('.continuous-page').forEach(pageFrame => {
-          const rect = pageFrame.getBoundingClientRect();
-          const distance = Math.abs((rect.top + rect.bottom) / 2 - (viewportRect.top + viewportRect.bottom) / 2);
-          if (distance < closestDistance) {
-            closestDistance = distance;
-            closestPage = pageFrame;
-          }
-          pageFrame.classList.toggle('current-page', false);
+      // --- Viewport Renderer & View Mode Navigation - Delegated to StudioRenderer ---
+      if (window.PDFTools && window.PDFTools.StudioRenderer) {
+        window.PDFTools.StudioRenderer.init({
+          getDoc: () => currentDoc,
+          setDoc: (d) => { currentDoc = d; },
+          getScale: () => currentScale,
+          setScale: (s) => { currentScale = s; },
+          getViewMode: () => viewMode,
+          setViewModeState: (m) => { viewMode = m; },
+          getUndoStack: () => undoStack,
+          setDocumentDirty: (d) => setDocumentDirty(d),
+          scheduleRecovery: () => scheduleRecovery(),
+          redrawAnnotationLayer: () => redrawAnnotationLayer(),
+          renderActivePageWidgets: () => renderActivePageWidgets(),
+          updateThumbnailActiveState: () => updateThumbnailActiveState(),
+          buildSidebarThumbnails: () => buildSidebarThumbnails(),
+          buildSidebarBookmarks: () => buildSidebarBookmarks(),
+          buildSidebarAttachments: () => buildSidebarAttachments(),
+          updateBookmarkActiveState: () => updateBookmarkActiveState(),
+          renderSinglePageSearchHighlights: () => renderSinglePageSearchHighlights(),
+          renderContinuousSearchHighlights: () => renderContinuousSearchHighlights(),
+          getTabDocName: () => tabDocName,
+          getEmptyDropzoneState: () => emptyDropzoneState,
+          getSheetWrapper: () => sheetWrapper,
+          getPageStack: () => pageStack,
+          getAcrobatViewport: () => acrobatViewport,
+          getPdfCanvas: () => pdfCanvas,
+          getAnnotationCanvas: () => annotationCanvas,
+          getTotalPagesLabel: () => totalPagesLabel,
+          getPageNumberInput: () => pageNumberInput
         });
-
-        if (closestPage) {
-          closestPage.classList.add('current-page');
-          currentDoc.currentPage = Number(closestPage.dataset.page);
-          pageNumberInput.value = currentDoc.getActivePagesList().indexOf(currentDoc.currentPage) + 1;
-          updateThumbnailActiveState();
-        }
       }
+      const openDocument = (f, r) => window.PDFTools.StudioRenderer.openDocument(f, r);
+      const checkForRecovery = () => window.PDFTools.StudioRenderer.checkForRecovery();
+      const renderCurrentPageView = () => window.PDFTools.StudioRenderer.renderCurrentPageView();
+      const renderPageStack = (id) => window.PDFTools.StudioRenderer.renderPageStack(id);
+      const syncCurrentPageFromScroll = () => window.PDFTools.StudioRenderer.syncCurrentPageFromScroll();
+      const calculateFitWidthScale = () => window.PDFTools.StudioRenderer.calculateFitWidthScale();
+      const updateZoomIndicator = () => window.PDFTools.StudioRenderer.updateZoomIndicator();
+      const applyZoomIn = () => window.PDFTools.StudioRenderer.applyZoomIn();
+      const applyZoomOut = () => window.PDFTools.StudioRenderer.applyZoomOut();
+      const applyFitWidth = () => window.PDFTools.StudioRenderer.applyFitWidth();
+      const setViewMode = (m) => window.PDFTools.StudioRenderer.setViewMode(m);
+      const navigateToPage = (p) => window.PDFTools.StudioRenderer.navigateToPage(p);
+      const goToPrevPage = () => window.PDFTools.StudioRenderer.goToPrevPage();
+      const goToNextPage = () => window.PDFTools.StudioRenderer.goToNextPage();
+      const goToPageNumber = (v) => window.PDFTools.StudioRenderer.goToPageNumber(v);
 
       // Search highlight & match viewport helpers - Delegated to StudioSearchOCR
       const renderSinglePageSearchHighlights = () => window.PDFTools.StudioSearchOCR?.renderSinglePageSearchHighlights();
@@ -6695,163 +6582,10 @@
         }
       });
 
-      // Page Navigation
-      prevPageBtn.addEventListener('click', async () => {
-        if (!currentDoc) return;
-        const activePages = currentDoc.getActivePagesList();
-        const curIdx = activePages.indexOf(currentDoc.currentPage);
-        if (curIdx > 0) {
-          await navigateToPage(activePages[curIdx - 1]);
-        }
-      });
-
-      nextPageBtn.addEventListener('click', async () => {
-        if (!currentDoc) return;
-        const activePages = currentDoc.getActivePagesList();
-        const curIdx = activePages.indexOf(currentDoc.currentPage);
-        if (curIdx < activePages.length - 1) {
-          await navigateToPage(activePages[curIdx + 1]);
-        }
-      });
-
-      pageNumberInput.addEventListener('change', async () => {
-        const val = parseInt(pageNumberInput.value, 10);
-        const activePages = currentDoc.getActivePagesList();
-        if (!isNaN(val) && val >= 1 && val <= activePages.length) {
-          await navigateToPage(activePages[val - 1]);
-        } else {
-          pageNumberInput.value = activePages.indexOf(currentDoc.currentPage) + 1;
-        }
-      });
-
-      // Zoom Controls
-      const calculateFitWidthScale = async () => {
-        if (!currentDoc) return currentScale;
-        const page = await currentDoc.pdfJsDoc.getPage(currentDoc.currentPage);
-        const baseViewport = page.getViewport({ scale: 1 });
-        const styles = getComputedStyle(acrobatViewport);
-        const horizontalPadding = parseFloat(styles.paddingLeft) + parseFloat(styles.paddingRight);
-        const availableWidth = Math.max(240, acrobatViewport.clientWidth - horizontalPadding);
-        return Math.min(3.0, Math.max(0.5, availableWidth / baseViewport.width));
-      };
-
-      zoomSelect.addEventListener('change', async () => {
-        if (zoomSelect.value === 'fitWidth') {
-          currentScale = await calculateFitWidthScale();
-        } else {
-          currentScale = parseFloat(zoomSelect.value);
-        }
-        await renderCurrentPageView();
-      });
-
-      const applyZoomIn = async () => {
-        currentScale = Math.min(2.5, currentScale + 0.25);
-        zoomSelect.value = currentScale.toFixed(2);
-        await renderCurrentPageView();
-      };
-      const applyZoomOut = async () => {
-        currentScale = Math.max(0.5, currentScale - 0.25);
-        zoomSelect.value = currentScale.toFixed(2);
-        await renderCurrentPageView();
-      };
-      const applyFitWidth = async () => {
-        currentScale = await calculateFitWidthScale();
-        zoomSelect.value = 'fitWidth';
-        await renderCurrentPageView();
-      };
-
-      let resizeTimer = null;
-      const resizeObserver = new ResizeObserver(() => {
-        if (!currentDoc || zoomSelect.value !== 'fitWidth') return;
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(async () => {
-          currentScale = await calculateFitWidthScale();
-          await renderCurrentPageView();
-        }, 120);
-      });
-      resizeObserver.observe(acrobatViewport);
-
-      const updateZoomIndicator = () => {
-        const zoomPercent = `${Math.round(currentScale * 100)}%`;
-        const matchingOption = Array.from(zoomSelect.options).find(option => {
-          return option.value !== 'fitWidth' && Math.abs(parseFloat(option.value) - currentScale) < 0.001;
-        });
-
-        const customOption = zoomSelect.querySelector('[data-custom-zoom]');
-        if (customOption) customOption.remove();
-
-        if (matchingOption) {
-          zoomSelect.value = matchingOption.value;
-          return;
-        }
-
-        const option = document.createElement('option');
-        option.value = 'custom';
-        option.textContent = zoomPercent;
-        option.dataset.customZoom = 'true';
-        zoomSelect.appendChild(option);
-        zoomSelect.value = 'custom';
-      };
-
-      acrobatViewport.addEventListener('wheel', async (event) => {
-        if (!event.ctrlKey || !currentDoc) return;
-        event.preventDefault();
-        const zoomStep = event.deltaY < 0 ? 0.1 : -0.1;
-        currentScale = Math.min(3.0, Math.max(0.5, currentScale + zoomStep));
-        updateZoomIndicator();
-        await renderCurrentPageView();
-      }, { passive: false });
-
-      acrobatViewport.addEventListener('scroll', () => {
-        if (!currentDoc || viewMode === 'single') return;
-        syncCurrentPageFromScroll();
-      });
-
-      zoomInBtn.addEventListener('click', applyZoomIn);
-      zoomOutBtn.addEventListener('click', applyZoomOut);
-      fitWidthBtn.addEventListener('click', applyFitWidth);
-      menuZoomIn.addEventListener('click', applyZoomIn);
-      menuZoomOut.addEventListener('click', applyZoomOut);
-      menuFitWidth.addEventListener('click', applyFitWidth);
-
-      const setViewMode = async (mode) => {
-        viewMode = mode;
-        if (!currentDoc) {
-          pageStack.dataset.viewMode = mode;
-          return;
-        }
-        await renderCurrentPageView();
-      };
-
-      menuViewSingle.addEventListener('click', () => setViewMode('single'));
-      menuViewContinuous.addEventListener('click', () => setViewMode('continuous'));
-      menuViewTwoPage.addEventListener('click', () => setViewMode('two'));
-      menuViewTwoScroll.addEventListener('click', () => setViewMode('twoScroll'));
-
       // Page Rotations & Actions - Delegated to StudioThumbnails
       const rotateCurrent = (deg) => window.PDFTools.StudioThumbnails?.rotateCurrent(deg);
       const duplicateCurrent = () => window.PDFTools.StudioThumbnails?.duplicateCurrent();
       const deleteCurrent = () => window.PDFTools.StudioThumbnails?.deleteCurrent();
-
-      // Jump / Navigate to Page Helper
-      async function navigateToPage(targetPageNum) {
-        if (!currentDoc) return;
-        const activePages = currentDoc.getActivePagesList();
-        if (!activePages.includes(targetPageNum)) return;
-        currentDoc.currentPage = targetPageNum;
-
-        if (viewMode === 'single') {
-          await renderCurrentPageView();
-        } else {
-          const pageFrame = pageStack.querySelector(`.continuous-page[data-page="${targetPageNum}"]`);
-          if (pageFrame) {
-            pageFrame.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            pageNumberInput.value = activePages.indexOf(targetPageNum) + 1;
-            updateThumbnailActiveState();
-            updateBookmarkActiveState();
-          }
-        }
-      }
 
       // --- Left Sidebar Panels (Bookmarks & Attachments) - Delegated to StudioPanels ---
       if (window.PDFTools && window.PDFTools.StudioPanels) {
