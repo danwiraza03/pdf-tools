@@ -1,0 +1,18 @@
+{
+  "name": "PDF Tools — 100% Offline PDF Suite",
+  "short_name": "PDF Tools",
+  "description": "Aplikasi pengolah PDF serbaguna 100% offline & bebas server di browser Anda.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0b0f19",
+  "theme_color": "#6366f1",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "utilities"]
+}

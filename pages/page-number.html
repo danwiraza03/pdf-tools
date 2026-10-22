@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light" class="tool-page-page-number light-theme">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Page Numbers — PDF Tools</title>
+  <meta name="description" content="Add page numbers to your PDF documents with customizable position, format, and font styling 100% offline.">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/tool.css">
+  <style>
+    :root {
+      --tool-color: #10B981;
+    }
+    .position-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .pos-btn {
+      padding: 10px 6px;
+      background: var(--bg-card);
+      border: 1.5px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      font-size: 0.78rem;
+      font-weight: 500;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s ease;
+    }
+    .pos-btn:hover {
+      border-color: var(--tool-color);
+      color: var(--text-primary);
+      background: var(--bg-card-hover);
+    }
+    .pos-btn.active {
+      background: color-mix(in srgb, var(--tool-color), transparent 85%);
+      border-color: var(--tool-color);
+      color: var(--tool-color);
+      font-weight: 600;
+    }
+    .preview-sheet {
+      width: 100%;
+      max-width: 380px;
+      aspect-ratio: 210/297;
+      background: #ffffff;
+      border-radius: 4px;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 16px;
+      color: #333333;
+      border: 1px solid rgba(0,0,0,0.1);
+    }
+    .preview-content-skeleton {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 12px 0;
+      opacity: 0.25;
+    }
+    .skeleton-line {
+      height: 6px;
+      background: #888;
+      border-radius: 3px;
+    }
+    .live-num-marker {
+      font-family: Helvetica, Arial, sans-serif;
+      position: absolute;
+      font-weight: 600;
+      color: #222222;
+      transition: all 0.2s ease;
+    }
+  </style>
+</head>
+<body class="tool-page-page-number">
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <a href="../index.html" class="app-logo">
+        <div class="logo-badge">⚡</div>
+        <div class="logo-title">
+          <span>PDF Tools</span>
+          <span class="logo-status-dot" title="100% Offline & Private"></span>
+        </div>
+      </a>
+      <nav class="header-nav">
+        <a href="merge.html" class="nav-link-item">MERGE PDF</a>
+        <a href="split.html" class="nav-link-item">SPLIT PDF</a>
+        <a href="compress.html" class="nav-link-item">COMPRESS PDF</a>
+        <div class="dropdown-nav-wrapper" id="convertDropdownWrapper">
+          <a href="javascript:void(0)" class="nav-link-item" id="convertPdfTrigger">
+            CONVERT PDF <span class="nav-chevron" id="convertChevron">▾</span>
+          </a>
+        </div>
+        <a href="javascript:void(0)" class="nav-link-item all-tools-toggle" id="allToolsTrigger">
+          ALL PDF TOOLS <span class="nav-chevron" id="allToolsChevron">▾</span>
+        </a>
+      </nav>
+      <div class="header-controls">
+        <button class="theme-toggle" id="themeToggle" title="Toggle Light/Dark Theme">☀️ Light</button>
+        <button class="lang-toggle" id="langToggle">ID 🇮🇩</button>
+        <a href="viewer.html" class="btn-header-studio">✨ PDF Studio</a>
+        <button type="button" class="nine-dots-btn" id="nineDotsBtn" title="All Quick Actions">⠿</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="container">
+      <!-- Breadcrumb -->
+      <div class="breadcrumb">
+        <a href="../index.html" data-i18n="nav.home">Home</a>
+        <span>/</span>
+        <span data-i18n="tool.page_number">Page Numbers</span>
+      </div>
+
+      <!-- Tool Hero Header -->
+      <section class="tool-hero" style="margin-bottom: 24px;">
+        <div class="tool-hero-icon" style="background: #10B981; box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        </div>
+        <h1 class="tool-title" data-i18n="tool.page_number">Page Numbers</h1>
+        <p class="tool-subtitle" data-i18n="tool.page_number.desc">Add page numbers, headers, and footers to your PDF pages easily with customized styles.</p>
+      </section>
+
+      <!-- Upload State -->
+      <div id="uploadState">
+        <div class="dropzone" id="dropzone">
+          <div class="dropzone-icon">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg>
+          </div>
+          <div class="dropzone-title" data-i18n="dropzone.title">Drop your PDF file here</div>
+          <div class="dropzone-subtitle" data-i18n="dropzone.subtitle">Supports standard & scanned PDF files (100% Offline)</div>
+        </div>
+      </div>
+
+      <!-- Workspace State -->
+      <div id="workspaceState" style="display: none;">
+        <div style="display: grid; grid-template-columns: 1fr 340px; gap: 24px; align-items: start;">
+          <!-- Left: Preview Simulation -->
+          <div class="card" style="padding: 24px; text-align: center;">
+            <h3 style="margin-bottom: 16px; font-size: 1rem; color: var(--text-secondary);">Live Placement Preview</h3>
+            <div class="preview-sheet" id="previewSheet">
+              <div class="preview-content-skeleton">
+                <div class="skeleton-line" style="width: 60%; height: 10px; margin-bottom: 8px;"></div>
+                <div class="skeleton-line" style="width: 100%;"></div>
+                <div class="skeleton-line" style="width: 90%;"></div>
+                <div class="skeleton-line" style="width: 95%;"></div>
+                <div class="skeleton-line" style="width: 80%;"></div>
+                <div class="skeleton-line" style="width: 100%;"></div>
+                <div class="skeleton-line" style="width: 88%;"></div>
+              </div>
+              <div id="liveMarker" class="live-num-marker" style="bottom: 16px; right: 16px;">Page 1 of 12</div>
+            </div>
+            <div id="fileMetaLabel" style="margin-top: 16px; font-size: 0.85rem; color: var(--text-muted);"></div>
+          </div>
+
+          <!-- Right: Control Panel -->
+          <div class="card" style="padding: 20px; display: flex; flex-direction: column; gap: 16px;">
+            <!-- Format Selector -->
+            <div>
+              <label class="form-label" style="font-weight: 600; font-size: 0.85rem;">Numbering Format</label>
+              <select id="formatSelect" class="form-select" style="width: 100%;">
+                <option value="page_of_total" selected>Page {n} of {total} (English)</option>
+                <option value="halaman_dari">Halaman {n} dari {total} (Bahasa Indonesia)</option>
+                <option value="number_only">Number only (1, 2, 3...)</option>
+                <option value="custom">Custom Format Template</option>
+              </select>
+            </div>
+
+            <!-- Custom Template Input -->
+            <div id="customTemplateGroup" style="display: none;">
+              <label class="form-label" style="font-size: 0.8rem; color: var(--text-secondary);">Custom Template (use {n} and {total})</label>
+              <input type="text" id="customTextInput" class="form-input" value="Doc - Page {n} of {total}" style="width: 100%;">
+            </div>
+
+            <!-- Position Grid -->
+            <div>
+              <label class="form-label" style="font-weight: 600; font-size: 0.85rem;">Position on Page</label>
+              <div class="position-grid">
+                <button type="button" class="pos-btn" data-pos="top_left">Top Left</button>
+                <button type="button" class="pos-btn" data-pos="top_center">Top Center</button>
+                <button type="button" class="pos-btn" data-pos="top_right">Top Right</button>
+                <button type="button" class="pos-btn" data-pos="bottom_left">Bottom Left</button>
+                <button type="button" class="pos-btn" data-pos="bottom_center">Bottom Center</button>
+                <button type="button" class="pos-btn active" data-pos="bottom_right">Bottom Right</button>
+              </div>
+            </div>
+
+            <!-- Font Styling -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div>
+                <label class="form-label" style="font-size: 0.8rem;">Font Size</label>
+                <select id="fontSizeSelect" class="form-select" style="width: 100%;">
+                  <option value="8">8 pt</option>
+                  <option value="10" selected>10 pt</option>
+                  <option value="12">12 pt</option>
+                  <option value="14">14 pt</option>
+                  <option value="16">16 pt</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label" style="font-size: 0.8rem;">Font Family</label>
+                <select id="fontFamilySelect" class="form-select" style="width: 100%;">
+                  <option value="Helvetica" selected>Helvetica</option>
+                  <option value="TimesRoman">Times New Roman</option>
+                  <option value="Courier">Courier</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Color & Margin -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div>
+                <label class="form-label" style="font-size: 0.8rem;">Text Color</label>
+                <input type="color" id="colorPicker" value="#333333" style="width: 100%; height: 36px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); cursor: pointer;">
+              </div>
+              <div>
+                <label class="form-label" style="font-size: 0.8rem;">Margin (px)</label>
+                <input type="number" id="marginInput" class="form-input" value="25" min="5" max="100" style="width: 100%;">
+              </div>
+            </div>
+
+            <!-- Page Range & Starting Number -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div>
+                <label class="form-label" style="font-size: 0.8rem;">Start Page</label>
+                <input type="number" id="startPageInput" class="form-input" value="1" min="1" style="width: 100%;">
+              </div>
+              <div>
+                <label class="form-label" style="font-size: 0.8rem;">First Number</label>
+                <input type="number" id="startNumberInput" class="form-input" value="1" min="1" style="width: 100%;">
+              </div>
+            </div>
+
+            <!-- Action Button -->
+            <button type="button" id="applyPageNumbersBtn" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 8px; display:inline-flex; align-items:center; justify-content:center; gap:8px;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M12 6v6"/><path d="m10 8 2-2"/></svg>
+              <span>Apply Page Numbers & Download</span>
+            </button>
+            <button type="button" id="openStudioBtn" class="btn btn-secondary btn-md" style="width: 100%; margin-top: 6px; display: none; align-items: center; justify-content: center; gap: 8px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              <span>Open in PDF Studio</span>
+            </button>
+            <button type="button" id="resetBtn" class="btn btn-ghost btn-sm" style="width: 100%; margin-top: 4px;">
+              Choose Another File
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Libraries -->
+  <script src="../js/lib/pdf-lib.min.js"></script>
+  <script src="../js/lib/pdf.min.js"></script>
+  <script src="../js/lib/pdf.worker.min.js"></script>
+  <script src="../js/lib/jszip.min.js"></script>
+  <script src="../js/lib/FileSaver.min.js"></script>
+
+  <!-- Core & Utils -->
+  <script src="../js/utils/i18n.js"></script>
+  <script src="../js/utils/file-utils.js"></script>
+  <script src="../js/utils/download.js"></script>
+  <script src="../js/components/toast.js"></script>
+  <script src="../js/components/dropzone.js"></script>
+  <script src="../js/core/pdf-compress.js"></script>
+  <script src="../js/core/pdf-page-number.js"></script>
+  <script src="../js/app.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      let currentFile = null;
+      let totalDocPages = 1;
+      let selectedPosition = 'bottom_right';
+
+      const uploadState = document.getElementById('uploadState');
+      const workspaceState = document.getElementById('workspaceState');
+      const fileMetaLabel = document.getElementById('fileMetaLabel');
+      const liveMarker = document.getElementById('liveMarker');
+
+      const formatSelect = document.getElementById('formatSelect');
+      const customTemplateGroup = document.getElementById('customTemplateGroup');
+      const customTextInput = document.getElementById('customTextInput');
+      const fontSizeSelect = document.getElementById('fontSizeSelect');
+      const fontFamilySelect = document.getElementById('fontFamilySelect');
+      const colorPicker = document.getElementById('colorPicker');
+      const marginInput = document.getElementById('marginInput');
+      const startPageInput = document.getElementById('startPageInput');
+      const startNumberInput = document.getElementById('startNumberInput');
+      const applyPageNumbersBtn = document.getElementById('applyPageNumbersBtn');
+      const resetBtn = document.getElementById('resetBtn');
+
+      PDFTools.Dropzone('dropzone', {
+        accept: '.pdf',
+        multiple: true,
+        onFiles: async function (files) {
+          if (files.length > 0) {
+            queuedFiles = files;
+            currentFile = files[0];
+            isBatchMode = files.length > 1;
+
+            try {
+              const arrayBuffer = await PDFTools.FileUtils.readAsArrayBuffer(currentFile);
+              const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+              totalDocPages = pdfDoc.getPages().length;
+
+              if (isBatchMode) {
+                fileMetaLabel.textContent = `📦 Batch Queue: ${files.length} Files Selected • Primary: ${currentFile.name}`;
+                applyPageNumbersBtn.textContent = `⚡ Number ${files.length} Documents & Download (.ZIP)`;
+              } else {
+                fileMetaLabel.textContent = `${currentFile.name} • ${totalDocPages} Pages • ${PDFTools.FileUtils.formatSize(currentFile.size)}`;
+                applyPageNumbersBtn.textContent = '⚡ Apply Page Numbers & Download';
+              }
+              startPageInput.max = totalDocPages;
+
+              uploadState.style.display = 'none';
+              workspaceState.style.display = 'block';
+              updateLivePreview();
+            } catch (err) {
+              PDFTools.Toast.error('Could not load PDF file.');
+            }
+          }
+        }
+      });
+
+      // Check for pending handoff file from homepage (B1)
+      if (PDFTools.FileUtils && PDFTools.FileUtils.consumePendingFile) {
+        PDFTools.FileUtils.consumePendingFile().then(async file => {
+          if (file) {
+            queuedFiles = [file];
+            currentFile = file;
+            isBatchMode = false;
+            try {
+              const arrayBuffer = await PDFTools.FileUtils.readAsArrayBuffer(currentFile);
+              const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+              totalDocPages = pdfDoc.getPages().length;
+              fileMetaLabel.textContent = `${currentFile.name} • ${totalDocPages} Pages • ${PDFTools.FileUtils.formatSize(currentFile.size)}`;
+              startPageInput.max = totalDocPages;
+              uploadState.style.display = 'none';
+              workspaceState.style.display = 'block';
+              updateLivePreview();
+            } catch (err) {}
+          }
+        });
+      }
+
+      // Position Buttons
+      document.querySelectorAll('.pos-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.pos-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          selectedPosition = btn.getAttribute('data-pos');
+          updateLivePreview();
+        });
+      });
+
+      formatSelect.addEventListener('change', () => {
+        customTemplateGroup.style.display = formatSelect.value === 'custom' ? 'block' : 'none';
+        updateLivePreview();
+      });
+
+      [customTextInput, fontSizeSelect, fontFamilySelect, colorPicker, startNumberInput].forEach(el => {
+        el.addEventListener('input', updateLivePreview);
+        el.addEventListener('change', updateLivePreview);
+      });
+
+      function updateLivePreview() {
+        const fmt = formatSelect.value;
+        const startNum = parseInt(startNumberInput.value || 1, 10);
+        let previewText = '';
+
+        if (fmt === 'number_only') {
+          previewText = `${startNum}`;
+        } else if (fmt === 'page_of_total') {
+          previewText = `Page ${startNum} of ${totalDocPages}`;
+        } else if (fmt === 'halaman_dari') {
+          previewText = `Halaman ${startNum} dari ${totalDocPages}`;
+        } else {
+          previewText = (customTextInput.value || 'Page {n}')
+            .replace(/\{n\}/g, `${startNum}`)
+            .replace(/\{total\}/g, `${totalDocPages}`);
+        }
+
+        liveMarker.textContent = previewText;
+        liveMarker.style.fontSize = `${Math.min(18, parseInt(fontSizeSelect.value, 10) * 1.2)}px`;
+        liveMarker.style.color = colorPicker.value;
+        liveMarker.style.fontFamily = fontFamilySelect.value === 'TimesRoman' ? 'Times New Roman, serif' : (fontFamilySelect.value === 'Courier' ? 'Courier, monospace' : 'Helvetica, sans-serif');
+
+        // Reset positions
+        liveMarker.style.top = '';
+        liveMarker.style.bottom = '';
+        liveMarker.style.left = '';
+        liveMarker.style.right = '';
+        liveMarker.style.transform = '';
+
+        if (selectedPosition === 'top_left') {
+          liveMarker.style.top = '16px';
+          liveMarker.style.left = '16px';
+        } else if (selectedPosition === 'top_center') {
+          liveMarker.style.top = '16px';
+          liveMarker.style.left = '50%';
+          liveMarker.style.transform = 'translateX(-50%)';
+        } else if (selectedPosition === 'top_right') {
+          liveMarker.style.top = '16px';
+          liveMarker.style.right = '16px';
+        } else if (selectedPosition === 'bottom_left') {
+          liveMarker.style.bottom = '16px';
+          liveMarker.style.left = '16px';
+        } else if (selectedPosition === 'bottom_center') {
+          liveMarker.style.bottom = '16px';
+          liveMarker.style.left = '50%';
+          liveMarker.style.transform = 'translateX(-50%)';
+        } else {
+          liveMarker.style.bottom = '16px';
+          liveMarker.style.right = '16px';
+        }
+      }
+
+      let lastNumberedBytes = null;
+
+      applyPageNumbersBtn.addEventListener('click', async () => {
+        if (!queuedFiles || queuedFiles.length === 0) return;
+
+        applyPageNumbersBtn.disabled = true;
+        applyPageNumbersBtn.textContent = 'Numbering Pages...';
+
+        try {
+          const options = {
+            format: formatSelect.value,
+            customText: customTextInput.value,
+            position: selectedPosition,
+            fontSize: parseInt(fontSizeSelect.value, 10),
+            fontFamily: fontFamilySelect.value,
+            color: colorPicker.value,
+            margin: parseInt(marginInput.value || 25, 10),
+            startPage: parseInt(startPageInput.value || 1, 10),
+            startNumber: parseInt(startNumberInput.value || 1, 10),
+            endPage: totalDocPages
+          };
+
+          if (isBatchMode && queuedFiles.length > 1) {
+            const zip = new JSZip();
+            const total = queuedFiles.length;
+
+            for (let i = 0; i < total; i++) {
+              const f = queuedFiles[i];
+              applyPageNumbersBtn.textContent = `[${i + 1}/${total}] ${f.name}...`;
+              const resBytes = await PDFTools.PageNumber.applyPageNumbers(f, options);
+              const outName = `${f.name.replace(/\.pdf$/i, '')}_numbered.pdf`;
+              zip.file(outName, resBytes);
+            }
+
+            const zipBlob = await zip.generateAsync({ type: 'blob' });
+            saveAs(zipBlob, 'numbered_documents.zip');
+            PDFTools.Toast.success(`All ${total} documents numbered and saved to ZIP!`);
+          } else {
+            const outputBytes = await PDFTools.PageNumber.applyPageNumbers(currentFile, options, (pct, status) => {
+              applyPageNumbersBtn.textContent = `Processing (${pct}%)...`;
+            });
+            lastNumberedBytes = outputBytes;
+
+            const baseName = currentFile.name.replace(/\.pdf$/i, '');
+            PDFTools.Download.save(outputBytes, `${baseName}_numbered.pdf`);
+
+            if (PDFTools.RecentFiles && currentFile) {
+              PDFTools.RecentFiles.add(currentFile.name, currentFile.size, 'Page Numbers', 'number');
+            }
+
+            PDFTools.Toast.success('Page numbers added successfully!');
+          }
+        } catch (err) {
+          console.error(err);
+          PDFTools.Toast.error(err.message || 'Failed to apply page numbers.');
+        } finally {
+          applyPageNumbersBtn.disabled = false;
+          applyPageNumbersBtn.innerHTML = (isBatchMode && queuedFiles.length > 1) 
+            ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M12 6v6"/><path d="m10 8 2-2"/></svg> <span>Number ${queuedFiles.length} Documents (.ZIP)</span>` 
+            : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M12 6v6"/><path d="m10 8 2-2"/></svg> <span>Apply Page Numbers & Download</span>`;
+          if (lastNumberedBytes && openStudioBtn) openStudioBtn.style.display = 'inline-flex';
+        }
+      });
+
+      const openStudioBtn = document.getElementById('openStudioBtn');
+      if (openStudioBtn) {
+        openStudioBtn.addEventListener('click', () => {
+          if (!lastNumberedBytes || !currentFile) return;
+          const baseName = currentFile.name.replace(/\.pdf$/i, '');
+          const blob = new Blob([lastNumberedBytes], { type: 'application/pdf' });
+          const file = new File([blob], `${baseName}_numbered.pdf`, { type: 'application/pdf' });
+          if (PDFTools.FileUtils && PDFTools.FileUtils.setPendingFile) {
+            PDFTools.FileUtils.setPendingFile(file);
+          }
+          window.location.href = 'viewer.html';
+        });
+      }
+
+      resetBtn.addEventListener('click', () => {
+        currentFile = null;
+        lastNumberedBytes = null;
+        if (openStudioBtn) openStudioBtn.style.display = 'none';
+        workspaceState.style.display = 'none';
+        uploadState.style.display = 'block';
+      });
+    });
+  </script>
+</body>
+</html>

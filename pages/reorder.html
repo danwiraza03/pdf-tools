@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light" class="tool-page-reorder light-theme">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reorder Pages — PDF Tools</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/tool.css">
+  <style>
+    :root { --tool-color: #8B5CF6; }
+    .page-grid .page-card {
+      cursor: grab;
+    }
+    .page-grid .page-card:active {
+      cursor: grabbing;
+    }
+    .page-grid .sortable-ghost {
+      opacity: 0.3;
+      transform: scale(0.95);
+    }
+  </style>
+</head>
+<body class="tool-page-reorder">
+  <header class="header">
+    <div class="header-inner">
+      <a href="../index.html" class="header-logo">
+        <div class="logo-icon">⚡</div>
+        <span>PDF Tools</span>
+      </a>
+      <nav class="header-nav">
+        <a href="../index.html" data-i18n="nav.home">Home</a>
+        <a href="viewer.html" data-i18n="tool.studio">✨ PDF Studio</a>
+        <a href="merge.html" data-i18n="tool.merge">Merge PDF</a>
+        <a href="compress.html" data-i18n="tool.compress">Compress PDF</a>
+        <a href="split.html" data-i18n="tool.split">Split PDF</a>
+        <a href="ocr.html" data-i18n="tool.ocr">OCR PDF</a>
+      </nav>
+      <div class="header-controls">
+        <button class="theme-toggle" id="themeToggle" title="Toggle Theme (Ctrl+D)">☀️ Light</button>
+        <button class="lang-toggle" id="langToggle">ID 🇮🇩</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div class="container">
+      <section class="tool-hero">
+        <div class="tool-hero-icon">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+        </div>
+        <h1 data-i18n="tool.reorder">Reorder Pages</h1>
+        <p data-i18n="tool.reorder.desc">Rearrange PDF pages by dragging and dropping.</p>
+      </section>
+
+      <div class="tool-workspace">
+        <div class="dropzone" id="dropzone">
+          <div class="dropzone-icon">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg>
+          </div>
+          <div class="dropzone-title" data-i18n="dropzone.title">Drop your PDF file here</div>
+          <div class="dropzone-subtitle" data-i18n="dropzone.subtitle.pdf">Supports PDF files</div>
+        </div>
+
+        <div id="instructionBanner" class="info-banner" style="display: none;">
+          <span class="info-banner-icon" style="display: flex; align-items: center;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            </span>
+          <span>Drag and drop page cards below to rearrange their sequence.</span>
+        </div>
+
+        <div id="pageGrid" class="page-grid" style="display: none;"></div>
+
+        <div id="progressBar" class="progress-container">
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill"></div>
+          </div>
+          <div class="progress-text" data-i18n="action.processing">Processing...</div>
+        </div>
+
+        <div id="resultArea" class="result-area">
+          <div class="result-icon" style="background: rgba(155, 89, 182, 0.15); color: #9B59B6;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="result-title" data-i18n="result.reorder_success">Pages reordered successfully!</div>
+          <div style="display: flex; gap: 12px; justify-content: center; margin-top: 24px; flex-wrap: wrap;">
+            <button id="downloadBtn" class="btn btn-primary btn-lg" data-i18n="action.download">Download PDF</button>
+            <button id="openStudioBtn" class="btn btn-secondary btn-lg" style="display: inline-flex; align-items: center; gap: 8px;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              <span data-i18n="action.open_studio">Open in PDF Studio</span>
+            </button>
+            <button id="resetBtn" class="btn btn-secondary btn-lg" data-i18n="action.clear">Start Over</button>
+          </div>
+        </div>
+
+        <div id="actionBar" class="action-bar">
+          <button id="saveOrderBtn" class="btn btn-primary btn-lg" data-i18n="action.reorder">Save New Order</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p data-i18n="footer.text">PDF Tools — All processing is done locally in your browser.</p>
+    </div>
+  </footer>
+
+  <script src="../js/lib/pdf-lib.min.js"></script>
+  <script src="../js/lib/pdf.min.js"></script>
+  <script src="../js/lib/pdf.worker.min.js"></script>
+  <script src="../js/lib/Sortable.min.js"></script>
+  <script src="../js/lib/FileSaver.min.js"></script>
+  <script src="../js/utils/i18n.js"></script>
+  <script src="../js/utils/file-utils.js"></script>
+  <script src="../js/utils/download.js"></script>
+  <script src="../js/components/toast.js"></script>
+  <script src="../js/components/progress.js"></script>
+  <script src="../js/components/pdf-preview.js"></script>
+  <script src="../js/components/dropzone.js"></script>
+  <script src="../js/core/pdf-reorder.js"></script>
+  <script src="../js/app.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const dropzoneEl = document.getElementById('dropzone');
+      const instructionBanner = document.getElementById('instructionBanner');
+      const pageGrid = document.getElementById('pageGrid');
+      const actionBar = document.getElementById('actionBar');
+      const saveOrderBtn = document.getElementById('saveOrderBtn');
+      const resultArea = document.getElementById('resultArea');
+      const downloadBtn = document.getElementById('downloadBtn');
+      const resetBtn = document.getElementById('resetBtn');
+
+      let currentFile = null;
+      let reorderedPdfBytes = null;
+      let sortable = null;
+      const progress = PDFTools.Progress('progressBar');
+
+      PDFTools.Dropzone('dropzone', {
+        accept: '.pdf',
+        multiple: false,
+        onFiles: async function (files) {
+          currentFile = files[0];
+          dropzoneEl.style.display = 'none';
+          instructionBanner.style.display = 'flex';
+          pageGrid.style.display = 'grid';
+          actionBar.classList.add('active');
+
+          await PDFTools.Preview.renderAllPages(currentFile, pageGrid, {
+            selectable: false
+          });
+
+          if (typeof Sortable !== 'undefined') {
+            if (sortable) sortable.destroy();
+            sortable = new Sortable(pageGrid, {
+              animation: 200,
+              ghostClass: 'sortable-ghost',
+              dragClass: 'sortable-drag'
+            });
+          }
+        }
+      });
+
+      saveOrderBtn.addEventListener('click', async function () {
+        if (!currentFile) return;
+
+        const cards = pageGrid.querySelectorAll('.page-card');
+        const newOrder = Array.from(cards).map(c => parseInt(c.getAttribute('data-page'), 10) - 1);
+
+        saveOrderBtn.disabled = true;
+        progress.show(PDFTools.i18n.t('action.processing'));
+
+        try {
+          reorderedPdfBytes = await PDFTools.Reorder.reorder(currentFile, newOrder, function (percent, text) {
+            progress.update(percent, text);
+          });
+
+          progress.hide();
+          instructionBanner.style.display = 'none';
+          pageGrid.style.display = 'none';
+          actionBar.classList.remove('active');
+          resultArea.classList.add('active');
+
+          if (PDFTools.RecentFiles && currentFile) {
+            PDFTools.RecentFiles.add(currentFile.name, currentFile.size, 'Reorder Pages', 'reorder');
+          }
+
+          PDFTools.Toast.success(PDFTools.i18n.t('result.reorder_success'));
+        } catch (err) {
+          console.error(err);
+          progress.hide();
+          PDFTools.Toast.error(err.message || PDFTools.i18n.t('toast.error'));
+          saveOrderBtn.disabled = false;
+        }
+      });
+
+      // Check for pending handoff file from homepage (B1)
+      if (PDFTools.FileUtils && PDFTools.FileUtils.consumePendingFile) {
+        PDFTools.FileUtils.consumePendingFile().then(async file => {
+          if (file) {
+            currentFile = file;
+            dropzoneEl.style.display = 'none';
+            instructionBanner.style.display = 'flex';
+            pageGrid.style.display = 'grid';
+            actionBar.classList.add('active');
+            await PDFTools.Preview.renderAllPages(currentFile, pageGrid, { selectable: false });
+            if (typeof Sortable !== 'undefined') {
+              if (sortable) sortable.destroy();
+              sortable = new Sortable(pageGrid, {
+                animation: 200,
+                ghostClass: 'sortable-ghost',
+                dragClass: 'sortable-drag'
+              });
+            }
+          }
+        });
+      }
+
+      downloadBtn.addEventListener('click', function () {
+        if (reorderedPdfBytes) {
+          PDFTools.Download.save(reorderedPdfBytes, `${currentFile.name.replace(/\.pdf$/i, '')}_reordered.pdf`);
+        }
+      });
+
+      const openStudioBtn = document.getElementById('openStudioBtn');
+      if (openStudioBtn) {
+        openStudioBtn.addEventListener('click', () => {
+          if (reorderedPdfBytes && currentFile) {
+            const blob = new Blob([reorderedPdfBytes], { type: 'application/pdf' });
+            const file = new File([blob], `${currentFile.name.replace(/\.pdf$/i, '')}_reordered.pdf`, { type: 'application/pdf' });
+            if (PDFTools.FileUtils && PDFTools.FileUtils.setPendingFile) {
+              PDFTools.FileUtils.setPendingFile(file);
+            }
+            window.location.href = 'viewer.html';
+          }
+        });
+      }
+
+      resetBtn.addEventListener('click', function () {
+        currentFile = null;
+        reorderedPdfBytes = null;
+        if (sortable) {
+          sortable.destroy();
+          sortable = null;
+        }
+        saveOrderBtn.disabled = false;
+        resultArea.classList.remove('active');
+        dropzoneEl.style.display = 'block';
+        instructionBanner.style.display = 'none';
+        pageGrid.style.display = 'none';
+        pageGrid.innerHTML = '';
+      });
+    });
+  </script>
+</body>
+</html>

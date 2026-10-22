@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light" class="tool-page-pdf-jpg light-theme">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDF to JPG — PDF Tools</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/tool.css">
+  <style>
+    :root { --tool-color: #06B6D4; }
+    .image-preview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: var(--space-md);
+      margin: var(--space-lg) 0;
+    }
+    .image-preview-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: all var(--transition-fast);
+    }
+    .image-preview-card:hover {
+      border-color: var(--tool-color);
+      transform: translateY(-2px);
+    }
+    .image-preview-img {
+      aspect-ratio: 210/297;
+      background: white;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .image-preview-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .image-preview-info {
+      padding: var(--space-sm);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      background: var(--bg-glass);
+      border-top: 1px solid var(--border-color);
+    }
+    .image-preview-download {
+      color: var(--tool-color);
+      text-decoration: none;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .image-preview-download:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body class="tool-page-pdf-jpg">
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <a href="../index.html" class="header-logo">
+        <div class="logo-icon">⚡</div>
+        <span>PDF Tools</span>
+      </a>
+      <nav class="header-nav">
+        <a href="../index.html" data-i18n="nav.home">Home</a>
+        <a href="viewer.html" data-i18n="tool.studio">✨ PDF Studio</a>
+        <a href="merge.html" data-i18n="tool.merge">Merge PDF</a>
+        <a href="compress.html" data-i18n="tool.compress">Compress PDF</a>
+        <a href="split.html" data-i18n="tool.split">Split PDF</a>
+        <a href="ocr.html" data-i18n="tool.ocr">OCR PDF</a>
+      </nav>
+      <div class="header-controls">
+        <button class="theme-toggle" id="themeToggle" title="Toggle Theme (Ctrl+D)">☀️ Light</button>
+        <button class="lang-toggle" id="langToggle">ID 🇮🇩</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div class="container">
+      <section class="tool-hero">
+        <div class="tool-hero-icon">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+        </div>
+        <h1 data-i18n="tool.pdf_jpg">PDF to JPG</h1>
+        <p data-i18n="tool.pdf_jpg.desc">Extract PDF pages into high quality JPG images or ZIP.</p>
+      </section>
+
+      <div class="tool-workspace">
+        <!-- Dropzone -->
+        <div class="dropzone" id="dropzone">
+          <div class="dropzone-icon">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg>
+          </div>
+          <div class="dropzone-title" data-i18n="dropzone.title">Drop your PDF file here</div>
+          <div class="dropzone-subtitle" data-i18n="dropzone.subtitle.pdf">Supports PDF files</div>
+        </div>
+
+        <!-- Selected File -->
+        <div id="fileList" class="file-list"></div>
+
+        <!-- Options Panel -->
+        <div id="optionsPanel" class="options-panel" style="display: none;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+            <!-- Quality -->
+            <div>
+              <div class="options-title" data-i18n="pdf_jpg.quality">Image Quality</div>
+              <div class="option-group" id="qualityOptions">
+                <button class="option-btn active" data-quality="standard" data-i18n="pdf_jpg.standard">Standard (150 DPI)</button>
+                <button class="option-btn" data-quality="high" data-i18n="pdf_jpg.high">High Quality (300 DPI)</button>
+              </div>
+            </div>
+
+            <!-- Format -->
+            <div>
+              <div class="options-title" data-i18n="pdf_jpg.format">Format</div>
+              <div class="option-group" id="formatOptions">
+                <button class="option-btn active" data-format="jpeg">JPG</button>
+                <button class="option-btn" data-format="png">PNG</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div id="progressBar" class="progress-container">
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill"></div>
+          </div>
+          <div class="progress-text" data-i18n="action.processing">Processing...</div>
+        </div>
+
+        <!-- Result Area -->
+        <div id="resultArea" class="result-area">
+          <div class="result-icon" style="background: rgba(26, 188, 156, 0.15); color: #1ABC9C;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="result-title" data-i18n="result.pdf_jpg_success">PDF converted to JPG images successfully!</div>
+          <div class="result-stats">
+            <div class="result-stat">
+              <div class="result-stat-value" id="resPageCount" style="color: #1ABC9C;">0</div>
+              <div class="result-stat-label" data-i18n="result.pages">Images Generated</div>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 12px; justify-content: center; margin: 24px 0; flex-wrap: wrap;">
+            <button id="downloadZipBtn" class="btn btn-primary btn-lg" data-i18n="action.download_all">Download All (ZIP)</button>
+            <button id="openStudioBtn" class="btn btn-secondary btn-lg" style="display: inline-flex; align-items: center; gap: 8px;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              <span data-i18n="action.open_studio">Open in PDF Studio</span>
+            </button>
+            <button id="resetBtn" class="btn btn-secondary btn-lg" data-i18n="action.clear">Start Over</button>
+          </div>
+
+          <!-- Preview of Extracted Images -->
+          <div style="text-align: left; margin-top: 32px;">
+            <h3 style="font-size: 1.1rem; margin-bottom: 12px;">Extracted Pages:</h3>
+            <div id="imagePreviewGrid" class="image-preview-grid"></div>
+          </div>
+        </div>
+
+        <!-- Action Bar -->
+        <div id="actionBar" class="action-bar">
+          <button id="convertBtn" class="btn btn-primary btn-lg" data-i18n="action.pdf_jpg">Convert to JPG</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p data-i18n="footer.text">PDF Tools — All processing is done locally in your browser.</p>
+    </div>
+  </footer>
+
+  <!-- Libraries -->
+  <script src="../js/lib/pdf.min.js"></script>
+  <script src="../js/lib/pdf.worker.min.js"></script>
+  <script src="../js/lib/jszip.min.js"></script>
+  <script src="../js/lib/FileSaver.min.js"></script>
+
+  <!-- App Core & Utils -->
+  <script src="../js/utils/i18n.js"></script>
+  <script src="../js/utils/file-utils.js"></script>
+  <script src="../js/utils/download.js"></script>
+  <script src="../js/components/toast.js"></script>
+  <script src="../js/components/progress.js"></script>
+  <script src="../js/components/pdf-preview.js"></script>
+  <script src="../js/components/dropzone.js"></script>
+  <script src="../js/components/file-list.js"></script>
+  <script src="../js/core/pdf-to-jpg.js"></script>
+  <script src="../js/app.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const dropzoneEl = document.getElementById('dropzone');
+      const optionsPanel = document.getElementById('optionsPanel');
+      const actionBar = document.getElementById('actionBar');
+      const convertBtn = document.getElementById('convertBtn');
+      const resultArea = document.getElementById('resultArea');
+      const downloadZipBtn = document.getElementById('downloadZipBtn');
+      const resetBtn = document.getElementById('resetBtn');
+      const imagePreviewGrid = document.getElementById('imagePreviewGrid');
+
+      let currentFile = null;
+      let selectedQuality = 'standard';
+      let selectedFormat = 'jpeg';
+      let convertedImages = [];
+      const progress = PDFTools.Progress('progressBar');
+
+      const fileList = PDFTools.FileList('fileList', {
+        onFilesChange: function (files) {
+          if (files.length > 0) {
+            currentFile = files[0].file;
+            dropzoneEl.style.display = 'none';
+            optionsPanel.style.display = 'block';
+            actionBar.classList.add('active');
+            resultArea.classList.remove('active');
+          } else {
+            currentFile = null;
+            dropzoneEl.style.display = 'block';
+            optionsPanel.style.display = 'none';
+            actionBar.classList.remove('active');
+          }
+        }
+      });
+
+      PDFTools.Dropzone('dropzone', {
+        accept: '.pdf',
+        multiple: false,
+        onFiles: function (files) {
+          fileList.clear();
+          fileList.addFiles([files[0]]);
+        }
+      });
+
+      // Quality Toggle
+      document.querySelectorAll('#qualityOptions .option-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+          document.querySelectorAll('#qualityOptions .option-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          selectedQuality = btn.getAttribute('data-quality');
+        });
+      });
+
+      // Format Toggle
+      document.querySelectorAll('#formatOptions .option-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+          document.querySelectorAll('#formatOptions .option-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          selectedFormat = btn.getAttribute('data-format');
+        });
+      });
+
+      convertBtn.addEventListener('click', async function () {
+        if (!currentFile) return;
+
+        convertBtn.disabled = true;
+        progress.show(PDFTools.i18n.t('action.processing'));
+
+        try {
+          convertedImages = await PDFTools.PdfToJpg.convert(currentFile, {
+            quality: selectedQuality,
+            format: selectedFormat
+          }, function (percent, text) {
+            progress.update(percent, text);
+          });
+
+          progress.hide();
+          optionsPanel.style.display = 'none';
+          document.getElementById('fileList').style.display = 'none';
+          actionBar.classList.remove('active');
+
+          document.getElementById('resPageCount').textContent = convertedImages.length;
+
+          // Render individual image tiles
+          imagePreviewGrid.innerHTML = '';
+          convertedImages.forEach(img => {
+            const card = document.createElement('div');
+            card.className = 'image-preview-card';
+
+            const previewDiv = document.createElement('div');
+            previewDiv.className = 'image-preview-img';
+            const imgEl = document.createElement('img');
+            imgEl.src = img.dataUrl;
+            previewDiv.appendChild(imgEl);
+
+            const info = document.createElement('div');
+            info.className = 'image-preview-info';
+            info.innerHTML = `<span>Page ${img.pageNum}</span>`;
+
+            const dl = document.createElement('span');
+            dl.className = 'image-preview-download';
+            dl.textContent = 'Save ↓';
+            dl.addEventListener('click', () => {
+              PDFTools.Download.save(img.blob, img.name);
+            });
+
+            info.appendChild(dl);
+            card.appendChild(previewDiv);
+            card.appendChild(info);
+            imagePreviewGrid.appendChild(card);
+          });
+
+          resultArea.classList.add('active');
+
+          if (PDFTools.RecentFiles && currentFile) {
+            PDFTools.RecentFiles.add(currentFile.name, currentFile.size, 'PDF to JPG', 'image');
+          }
+
+          PDFTools.Toast.success(PDFTools.i18n.t('result.pdf_jpg_success'));
+        } catch (err) {
+          console.error(err);
+          progress.hide();
+          PDFTools.Toast.error(err.message || PDFTools.i18n.t('toast.error'));
+          convertBtn.disabled = false;
+        }
+      });
+
+      // Check for pending handoff file from homepage (B1)
+      if (PDFTools.FileUtils && PDFTools.FileUtils.consumePendingFile) {
+        PDFTools.FileUtils.consumePendingFile().then(file => {
+          if (file) {
+            fileList.addFiles([file]);
+          }
+        });
+      }
+
+      downloadZipBtn.addEventListener('click', function () {
+        if (convertedImages.length > 0) {
+          const zipFiles = convertedImages.map(img => ({
+            name: img.name,
+            data: img.blob
+          }));
+          const baseName = currentFile ? currentFile.name.replace(/\.pdf$/i, '') : 'images';
+          PDFTools.Download.saveAsZip(zipFiles, `${baseName}_images.zip`);
+        }
+      });
+
+      const openStudioBtn = document.getElementById('openStudioBtn');
+      if (openStudioBtn) {
+        openStudioBtn.addEventListener('click', () => {
+          if (currentFile) {
+            if (PDFTools.FileUtils && PDFTools.FileUtils.setPendingFile) {
+              PDFTools.FileUtils.setPendingFile(currentFile);
+            }
+            window.location.href = 'viewer.html';
+          }
+        });
+      }
+
+      resetBtn.addEventListener('click', function () {
+        fileList.clear();
+        convertedImages = [];
+        currentFile = null;
+        convertBtn.disabled = false;
+        resultArea.classList.remove('active');
+        document.getElementById('fileList').style.display = 'flex';
+        dropzoneEl.style.display = 'block';
+        imagePreviewGrid.innerHTML = '';
+      });
+    });
+  </script>
+</body>
+</html>

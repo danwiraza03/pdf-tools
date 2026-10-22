@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light" class="tool-page-remove light-theme">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Remove Pages — PDF Tools</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/tool.css">
+  <style>
+    .page-card.selected {
+      border-color: #E74C3C;
+      box-shadow: 0 0 16px rgba(231, 76, 60, 0.4);
+      opacity: 0.6;
+    }
+    .page-card.selected .page-card-preview {
+      filter: grayscale(80%) brightness(70%);
+    }
+    .page-card.selected .page-card-check {
+      background: #E74C3C;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .page-card.selected .page-card-check::after {
+      content: '';
+      display: block;
+      width: 12px;
+      height: 12px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='18' y1='6' x2='6' y2='18'/%3E%3Cline x1='6' y1='6' x2='18' y2='18'/%3E%3C/svg%3E");
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+  </style>
+</head>
+<body class="tool-page-remove">
+  <header class="header">
+    <div class="header-inner">
+      <a href="../index.html" class="header-logo">
+        <div class="logo-icon">⚡</div>
+        <span>PDF Tools</span>
+      </a>
+      <nav class="header-nav">
+        <a href="../index.html" data-i18n="nav.home">Home</a>
+        <a href="viewer.html" data-i18n="tool.studio">✨ PDF Studio</a>
+        <a href="merge.html" data-i18n="tool.merge">Merge PDF</a>
+        <a href="compress.html" data-i18n="tool.compress">Compress PDF</a>
+        <a href="split.html" data-i18n="tool.split">Split PDF</a>
+        <a href="ocr.html" data-i18n="tool.ocr">OCR PDF</a>
+      </nav>
+      <div class="header-controls">
+        <button class="theme-toggle" id="themeToggle" title="Toggle Theme (Ctrl+D)">☀️ Light</button>
+        <button class="lang-toggle" id="langToggle">ID 🇮🇩</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div class="container">
+      <section class="tool-hero">
+        <div class="tool-hero-icon" style="display: flex; align-items: center; justify-content: center; width: 56px; height: 56px; margin: 0 auto 16px; background: rgba(239, 68, 68, 0.12); color: #EF4444; border-radius: 16px;">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/></svg>
+        </div>
+        <h1 data-i18n="tool.remove">Remove Pages</h1>
+        <p data-i18n="tool.remove.desc">Delete specific pages from your PDF document.</p>
+      </section>
+
+      <div class="tool-workspace">
+        <div class="dropzone" id="dropzone">
+          <div class="dropzone-icon">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg>
+          </div>
+          <div class="dropzone-title" data-i18n="dropzone.title">Drop your PDF file here</div>
+          <div class="dropzone-subtitle" data-i18n="dropzone.subtitle.pdf">Supports PDF files</div>
+        </div>
+
+        <div id="selectionHeader" style="display: none; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <span style="font-size: 0.9rem; color: var(--text-secondary);">Click pages you want to delete:</span>
+          <div style="display: flex; gap: 8px;">
+            <button id="clearSelectionBtn" class="btn btn-sm btn-secondary">Clear Selection</button>
+          </div>
+        </div>
+
+        <div id="pageGrid" class="page-grid" style="display: none;"></div>
+
+        <div id="progressBar" class="progress-container">
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill"></div>
+          </div>
+          <div class="progress-text" data-i18n="action.processing">Processing...</div>
+        </div>
+
+        <div id="resultArea" class="result-area">
+          <div class="result-icon" style="background: rgba(231, 76, 60, 0.15); color: #E74C3C;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="result-title" data-i18n="result.remove_success">Pages removed successfully!</div>
+          <div class="result-stats">
+            <div class="result-stat">
+              <div class="result-stat-value" id="resRemaining" style="color: #4A90D9;">0</div>
+              <div class="result-stat-label">Remaining Pages</div>
+            </div>
+            <div class="result-stat">
+              <div class="result-stat-value" id="resRemoved" style="color: #E74C3C;">0</div>
+              <div class="result-stat-label">Pages Deleted</div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 12px; justify-content: center; margin-top: 24px; flex-wrap: wrap;">
+            <button id="downloadBtn" class="btn btn-primary btn-lg" data-i18n="action.download">Download PDF</button>
+            <button id="openStudioBtn" class="btn btn-secondary btn-lg" style="display: inline-flex; align-items: center; gap: 8px;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              <span data-i18n="action.open_studio">Open in PDF Studio</span>
+            </button>
+            <button id="resetBtn" class="btn btn-secondary btn-lg" data-i18n="action.clear">Start Over</button>
+          </div>
+        </div>
+
+        <div id="actionBar" class="action-bar">
+          <button id="removeBtn" class="btn btn-primary btn-lg" style="--tool-color: #E74C3C;" data-i18n="action.remove">Remove Selected Pages</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p data-i18n="footer.text">PDF Tools — All processing is done locally in your browser.</p>
+    </div>
+  </footer>
+
+  <script src="../js/lib/pdf-lib.min.js"></script>
+  <script src="../js/lib/pdf.min.js"></script>
+  <script src="../js/lib/pdf.worker.min.js"></script>
+  <script src="../js/lib/FileSaver.min.js"></script>
+  <script src="../js/utils/i18n.js"></script>
+  <script src="../js/utils/file-utils.js"></script>
+  <script src="../js/utils/download.js"></script>
+  <script src="../js/components/toast.js"></script>
+  <script src="../js/components/progress.js"></script>
+  <script src="../js/components/pdf-preview.js"></script>
+  <script src="../js/components/dropzone.js"></script>
+  <script src="../js/core/pdf-remove.js"></script>
+  <script src="../js/app.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const dropzoneEl = document.getElementById('dropzone');
+      const selectionHeader = document.getElementById('selectionHeader');
+      const clearSelectionBtn = document.getElementById('clearSelectionBtn');
+      const pageGrid = document.getElementById('pageGrid');
+      const actionBar = document.getElementById('actionBar');
+      const removeBtn = document.getElementById('removeBtn');
+      const resultArea = document.getElementById('resultArea');
+      const downloadBtn = document.getElementById('downloadBtn');
+      const resetBtn = document.getElementById('resetBtn');
+
+      let currentFile = null;
+      let removeResult = null;
+      const progress = PDFTools.Progress('progressBar');
+
+      PDFTools.Dropzone('dropzone', {
+        accept: '.pdf',
+        multiple: false,
+        onFiles: async function (files) {
+          currentFile = files[0];
+          dropzoneEl.style.display = 'none';
+          selectionHeader.style.display = 'flex';
+          pageGrid.style.display = 'grid';
+          actionBar.classList.add('active');
+
+          await PDFTools.Preview.renderAllPages(currentFile, pageGrid, {
+            selectable: true,
+            initiallySelected: false
+          });
+        }
+      });
+
+      clearSelectionBtn.addEventListener('click', () => {
+        pageGrid.querySelectorAll('.page-card').forEach(c => c.classList.remove('selected'));
+      });
+
+      removeBtn.addEventListener('click', async function () {
+        if (!currentFile) return;
+
+        const selectedCards = pageGrid.querySelectorAll('.page-card.selected');
+        if (selectedCards.length === 0) {
+          PDFTools.Toast.error('Please select at least one page to remove.');
+          return;
+        }
+
+        const pagesToRemove = Array.from(selectedCards).map(c => parseInt(c.getAttribute('data-page'), 10) - 1);
+
+        removeBtn.disabled = true;
+        progress.show(PDFTools.i18n.t('action.processing'));
+
+        try {
+          removeResult = await PDFTools.Remove.removePages(currentFile, pagesToRemove, function (percent, text) {
+            progress.update(percent, text);
+          });
+
+          progress.hide();
+          selectionHeader.style.display = 'none';
+          pageGrid.style.display = 'none';
+          actionBar.classList.remove('active');
+
+          document.getElementById('resRemaining').textContent = removeResult.remainingPages;
+          document.getElementById('resRemoved').textContent = removeResult.removedPagesCount;
+
+          resultArea.classList.add('active');
+
+          if (PDFTools.RecentFiles && currentFile) {
+            PDFTools.RecentFiles.add(currentFile.name, currentFile.size, 'Remove Pages', 'remove');
+          }
+
+          PDFTools.Toast.success(PDFTools.i18n.t('result.remove_success'));
+        } catch (err) {
+          console.error(err);
+          progress.hide();
+          PDFTools.Toast.error(err.message || PDFTools.i18n.t('toast.error'));
+          removeBtn.disabled = false;
+        }
+      });
+
+      // Check for pending handoff file from homepage (B1)
+      if (PDFTools.FileUtils && PDFTools.FileUtils.consumePendingFile) {
+        PDFTools.FileUtils.consumePendingFile().then(async file => {
+          if (file) {
+            currentFile = file;
+            dropzoneEl.style.display = 'none';
+            selectionHeader.style.display = 'flex';
+            pageGrid.style.display = 'grid';
+            actionBar.classList.add('active');
+            await PDFTools.Preview.renderAllPages(currentFile, pageGrid, {
+              selectable: true,
+              initiallySelected: false
+            });
+          }
+        });
+      }
+
+      downloadBtn.addEventListener('click', function () {
+        if (removeResult && removeResult.bytes) {
+          PDFTools.Download.save(removeResult.bytes, `${currentFile.name.replace(/\.pdf$/i, '')}_edited.pdf`);
+        }
+      });
+
+      const openStudioBtn = document.getElementById('openStudioBtn');
+      if (openStudioBtn) {
+        openStudioBtn.addEventListener('click', () => {
+          if (removeResult && removeResult.bytes && currentFile) {
+            const blob = new Blob([removeResult.bytes], { type: 'application/pdf' });
+            const file = new File([blob], `${currentFile.name.replace(/\.pdf$/i, '')}_edited.pdf`, { type: 'application/pdf' });
+            if (PDFTools.FileUtils && PDFTools.FileUtils.setPendingFile) {
+              PDFTools.FileUtils.setPendingFile(file);
+            }
+            window.location.href = 'viewer.html';
+          }
+        });
+      }
+
+      resetBtn.addEventListener('click', function () {
+        currentFile = null;
+        removeResult = null;
+        removeBtn.disabled = false;
+        resultArea.classList.remove('active');
+        dropzoneEl.style.display = 'block';
+        selectionHeader.style.display = 'none';
+        pageGrid.style.display = 'none';
+        pageGrid.innerHTML = '';
+      });
+    });
+  </script>
+</body>
+</html>

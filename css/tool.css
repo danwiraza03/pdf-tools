@@ -1,0 +1,1884 @@
+/* ============================================
+   PDF Tools — Tool Pages Shared Styles
+   ============================================ */
+
+/* --- Tool Page Header --- */
+.tool-hero {
+  text-align: center;
+  padding: var(--space-3xl) 0 var(--space-2xl);
+}
+
+.tool-hero-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 14px;
+  background: var(--tool-color, #6366F1);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  margin: 0 auto var(--space-md);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--tool-color, #6366F1), transparent 50%);
+  transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.25s ease;
+  animation: fadeInUp 0.4s ease-out;
+}
+
+.tool-hero-icon:hover {
+  transform: scale(1.08) rotate(-4deg);
+  box-shadow: 0 12px 30px color-mix(in srgb, var(--tool-color, #6366F1), transparent 40%);
+}
+
+.tool-hero-icon svg {
+  width: 34px;
+  height: 34px;
+  stroke: #ffffff;
+}
+
+.tool-hero h1 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  margin-bottom: var(--space-sm);
+  animation: fadeInUp 0.4s ease-out 0.1s both;
+}
+
+.tool-hero p {
+  font-size: 1.05rem;
+  max-width: 500px;
+  margin: 0 auto;
+  animation: fadeInUp 0.4s ease-out 0.2s both;
+}
+
+/* --- Tool Workspace --- */
+.tool-workspace {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 var(--space-lg) var(--space-4xl);
+  animation: fadeIn 0.5s ease-out 0.3s both;
+}
+
+/* --- Add More Files Button --- */
+.add-more-btn {
+  width: 100%;
+  padding: var(--space-md);
+  border: 2px dashed var(--border-color);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+}
+
+.add-more-btn:hover {
+  border-color: var(--tool-color);
+  color: var(--text-primary);
+  background: color-mix(in srgb, var(--tool-color), transparent 92%);
+}
+
+/* --- Split-specific: Range Input --- */
+.range-input-group {
+  margin: var(--space-md) 0;
+}
+
+.range-input-group label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-sm);
+}
+
+.range-input-group input[type="text"] {
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-family: 'Inter', monospace;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.range-input-group input[type="text"]:focus {
+  border-color: var(--tool-color);
+}
+
+.range-input-group input[type="text"]::placeholder {
+  color: var(--text-muted);
+}
+
+/* --- Compress Level Cards --- */
+.compress-levels {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: var(--space-md);
+  margin: var(--space-lg) 0;
+}
+
+.compress-level {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-lg) var(--space-md);
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--bg-card);
+}
+
+.compress-level:hover {
+  border-color: var(--border-color-hover);
+  background: var(--bg-card-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px -4px rgba(0, 0, 0, 0.08);
+}
+
+.compress-level.active {
+  border-color: var(--tool-color);
+  background: color-mix(in srgb, var(--tool-color), transparent 92%);
+  box-shadow: 0 0 0 1px var(--tool-color), 0 8px 20px -4px rgba(22, 163, 74, 0.25);
+}
+
+.compress-level-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  margin-bottom: var(--space-sm);
+  transition: transform 0.2s ease;
+}
+
+.compress-level:hover .compress-level-icon {
+  transform: scale(1.08);
+}
+
+.compress-level-icon.icon-high {
+  background: rgba(239, 68, 68, 0.12);
+  color: #EF4444;
+}
+
+.compress-level-icon.icon-medium {
+  background: rgba(245, 158, 11, 0.14);
+  color: #D97706;
+}
+
+.compress-level-icon.icon-efiling {
+  background: rgba(2, 132, 199, 0.12);
+  color: #0284C7;
+}
+
+.compress-level-icon.icon-low {
+  background: rgba(22, 163, 74, 0.12);
+  color: #16A34A;
+}
+
+.compress-level-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--text-main);
+  line-height: 1.3;
+}
+
+.compress-level-desc {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* --- Rotate Controls --- */
+.rotate-controls {
+  display: flex;
+  gap: var(--space-sm);
+  margin: var(--space-md) 0;
+  justify-content: center;
+}
+
+.rotate-btn {
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  background: var(--bg-glass);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.rotate-btn:hover {
+  border-color: var(--tool-color);
+  background: color-mix(in srgb, var(--tool-color), transparent 85%);
+}
+
+/* --- JPG to PDF Options --- */
+.page-size-options {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.orientation-toggle {
+  display: flex;
+  background: var(--bg-glass);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.orientation-toggle button {
+  padding: 10px 20px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.orientation-toggle button.active {
+  background: var(--tool-color);
+  color: white;
+}
+
+/* --- Tool Page Specific Theme Colors --- */
+.tool-page-merge, html.tool-page-merge, body.tool-page-merge { --tool-color: var(--color-merge); }
+.tool-page-compress, html.tool-page-compress, body.tool-page-compress { --tool-color: var(--color-compress); }
+.tool-page-split, html.tool-page-split, body.tool-page-split { --tool-color: var(--color-split); }
+.tool-page-jpg-pdf, html.tool-page-jpg-pdf, body.tool-page-jpg-pdf { --tool-color: var(--color-jpg-pdf); }
+.tool-page-rotate, html.tool-page-rotate, body.tool-page-rotate { --tool-color: var(--color-rotate); }
+.tool-page-remove, html.tool-page-remove, body.tool-page-remove { --tool-color: var(--color-remove); }
+.tool-page-reorder, html.tool-page-reorder, body.tool-page-reorder { --tool-color: var(--color-reorder); }
+.tool-page-pdf-jpg, html.tool-page-pdf-jpg, body.tool-page-pdf-jpg { --tool-color: var(--color-pdf-jpg); }
+.tool-page-watermark, html.tool-page-watermark, body.tool-page-watermark { --tool-color: var(--color-watermark); }
+.tool-page-ocr, html.tool-page-ocr, body.tool-page-ocr { --tool-color: var(--color-ocr); }
+.tool-page-crop, html.tool-page-crop, body.tool-page-crop { --tool-color: var(--color-crop); }
+.tool-page-grayscale, html.tool-page-grayscale, body.tool-page-grayscale { --tool-color: var(--color-grayscale); }
+.tool-page-protect, html.tool-page-protect, body.tool-page-protect { --tool-color: var(--color-protect); }
+.tool-page-page-number, html.tool-page-page-number, body.tool-page-page-number { --tool-color: var(--color-page-number); }
+.tool-page-flatten, html.tool-page-flatten, body.tool-page-flatten { --tool-color: var(--color-flatten); }
+.tool-page-viewer, html.tool-page-viewer, body.tool-page-viewer { --tool-color: var(--color-studio); }
+
+/* --- Info Banner --- */
+.info-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  background: color-mix(in srgb, var(--tool-color, #6366f1), transparent 92%);
+  border: 1px solid color-mix(in srgb, var(--tool-color, #6366f1), transparent 75%);
+  border-radius: var(--radius-md);
+  margin: var(--space-lg) 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.info-banner-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+/* --- Tool Workspace --- */
+.tool-workspace {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 0 var(--space-lg) var(--space-4xl);
+  animation: fadeIn 0.5s ease-out 0.3s both;
+}
+
+/* --- Multi-File Results List --- */
+.result-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin: var(--space-xl) 0;
+  text-align: left;
+  max-height: 420px;
+  overflow-y: auto;
+  padding: 2px;
+}
+
+.result-item-card {
+  display: flex;
+  flex-direction: column;
+  padding: 16px 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  gap: 12px;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.result-item-card:hover {
+  border-color: var(--border-color-hover);
+  background: var(--bg-card-hover);
+}
+
+.result-item-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 16px;
+}
+
+.result-item-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  flex: 1;
+}
+
+.result-item-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--tool-color, #10B981), transparent 88%);
+}
+
+.result-item-details {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.result-item-name {
+  font-size: 0.94rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.result-item-sizes {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  row-gap: 4px;
+  column-gap: 8px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.result-item-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.result-item-badge.saved {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10B981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.result-item-badge.optimal {
+  background: rgba(59, 130, 246, 0.15);
+  color: #3B82F6;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.result-item-badge.sig-badge {
+  background: rgba(245, 158, 11, 0.15);
+  color: #F59E0B;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.result-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.result-item-actions .btn {
+  padding: 7px 14px;
+  font-size: 0.82rem;
+  height: 36px;
+  white-space: nowrap;
+}
+
+/* --- Digital Signature Removal Notice --- */
+.sig-notice {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: 10px 22px;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: var(--radius-full);
+  margin: var(--space-md) auto;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #F59E0B;
+  animation: fadeInUp 0.3s ease-out;
+  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.1);
+}
+
+.sig-notice-icon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+/* --- Result Area Action Buttons Group --- */
+.result-actions-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-top: 32px;
+}
+
+.result-actions-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.result-actions-secondary {
+  display: flex;
+  justify-content: center;
+}
+
+.btn-md {
+  padding: 10px 24px;
+  font-size: 0.9rem;
+  border-radius: var(--radius-md);
+}
+
+/* --- Merge Mode Switcher & Page Organizer --- */
+.merge-mode-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+  animation: fadeIn 0.3s ease-out;
+}
+
+.merge-mode-selector {
+  display: flex;
+  background: var(--bg-surface-elevated, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 4px;
+  max-width: 440px;
+  margin: 0 auto;
+  gap: 4px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+.merge-mode-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: var(--radius-md);
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.merge-mode-btn:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.merge-mode-btn.active {
+  background: var(--color-merge, #4A90D9);
+  color: #ffffff;
+  box-shadow: 0 2px 10px rgba(74, 144, 217, 0.35);
+}
+
+.organizer-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-glass);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 10px 16px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.organizer-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.organizer-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.organizer-btn {
+  padding: 6px 14px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* --- Merge PDF Direct Visual Page Organizer --- */
+.merge-organizer-wrapper {
+  margin-top: var(--space-md);
+  animation: fadeIn 0.3s ease-out;
+}
+
+.merge-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-surface-elevated, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 12px 18px;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: var(--space-md);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+}
+
+.merge-toolbar-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.merge-toolbar-info .count-badge {
+  background: color-mix(in srgb, var(--color-merge), transparent 85%);
+  color: var(--color-merge);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.merge-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.merge-toolbar-btn {
+  padding: 8px 16px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.merge-toolbar-btn:hover {
+  border-color: var(--color-merge);
+  color: var(--text-primary);
+  background: color-mix(in srgb, var(--color-merge), transparent 90%);
+  transform: translateY(-1px);
+}
+
+.merge-toolbar-btn.btn-add {
+  background: var(--color-merge);
+  color: #ffffff;
+  border-color: var(--color-merge);
+}
+
+.merge-toolbar-btn.btn-add:hover {
+  background: color-mix(in srgb, var(--color-merge), #000 15%);
+  color: #ffffff;
+}
+
+.merge-toolbar-btn.btn-clear-all {
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #EF4444;
+}
+
+.merge-toolbar-btn.btn-clear-all:hover {
+  border-color: #EF4444;
+  background: rgba(239, 68, 68, 0.12);
+  color: #F87171;
+}
+
+.merge-toolbar-btn:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+  pointer-events: none;
+  transform: none !important;
+}
+
+.merge-page-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 20px;
+  margin: var(--space-lg) 0;
+}
+
+.merge-page-card {
+  position: relative;
+  background: var(--bg-card);
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  cursor: grab;
+  user-select: none;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+
+.merge-page-card:active {
+  cursor: grabbing;
+}
+
+.merge-page-card:hover {
+  border-color: var(--color-merge);
+  box-shadow: 0 8px 24px rgba(74, 144, 217, 0.18);
+  transform: translateY(-3px);
+}
+
+.merge-page-card.sortable-ghost {
+  opacity: 0.25;
+  transform: scale(0.95);
+  border-style: dashed;
+}
+
+.merge-page-card.sortable-drag {
+  opacity: 0.95;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.3);
+  transform: scale(1.04) rotate(2deg);
+}
+
+.merge-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background: var(--bg-surface-elevated, rgba(0, 0, 0, 0.03));
+  border-bottom: 1px solid var(--border-color);
+  gap: 6px;
+}
+
+.merge-card-chip {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 110px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: help;
+  transition: max-width var(--transition-fast, 0.2s) ease, box-shadow var(--transition-fast, 0.2s) ease;
+}
+
+.merge-card-chip:hover {
+  max-width: 135px;
+}
+
+.merge-card-chip .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.merge-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.merge-card-btn {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.72rem;
+  transition: all var(--transition-fast);
+  padding: 0;
+}
+
+.merge-card-btn:hover {
+  color: var(--text-primary);
+  border-color: var(--color-merge);
+  background: color-mix(in srgb, var(--color-merge), transparent 85%);
+  transform: scale(1.15);
+}
+
+.merge-card-btn.delete-btn:hover {
+  color: #EF4444;
+  border-color: #EF4444;
+  background: rgba(239, 68, 68, 0.12);
+}
+
+.merge-card-preview {
+  aspect-ratio: 210/297;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 6px;
+  position: relative;
+}
+
+.merge-card-preview canvas {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 2px;
+  transition: transform 0.25s ease-out;
+}
+
+.merge-card-footer {
+  padding: 8px 10px;
+  background: var(--bg-card);
+  text-align: center;
+  border-top: 1px solid var(--border-color);
+}
+
+.merge-card-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+/* --- Responsive for tool pages --- */
+@media (max-width: 768px) {
+  .tool-hero h1 {
+    font-size: 1.6rem;
+  }
+
+  .compress-levels {
+    grid-template-columns: 1fr;
+  }
+
+  .rotate-controls {
+    flex-wrap: wrap;
+  }
+
+  .page-size-options {
+    flex-direction: column;
+  }
+
+  .result-item-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .result-item-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .merge-page-grid {
+    grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
+    gap: 12px;
+  }
+  
+  .merge-card-chip {
+    max-width: 75px;
+  }
+}
+
+/* Shimmer skeleton for lazy thumbnail loading */
+.merge-card-preview {
+  position: relative;
+}
+
+.merge-card-preview canvas:not([data-rendered="true"]) {
+  opacity: 0;
+}
+
+.merge-card-preview::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    110deg,
+    var(--bg-surface, #151d2f) 30%,
+    var(--bg-surface-elevated, rgba(255,255,255,0.05)) 50%,
+    var(--bg-surface, #151d2f) 70%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 4px;
+  z-index: 0;
+}
+
+.merge-card-preview canvas[data-rendered="true"] {
+  opacity: 1;
+  position: relative;
+  z-index: 1;
+  transition: opacity 0.3s ease;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ============================================
+   Merge PDF — Stacked Document Cards & Reference Design
+   ============================================ */
+
+/* Grid container adjustments */
+.merge-page-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 32px 38px;
+  padding: 16px 24px 32px 12px;
+  overflow: visible !important;
+}
+
+/* Multi-page Stacked Paper Effect (Document Card) */
+.merge-page-card.stacked-doc,
+.merge-page-card.collapsed-file {
+  position: relative;
+  background: var(--bg-card, #ffffff);
+  border-radius: var(--radius-md, 12px);
+  border: 1px solid var(--border-color, #e2e8f0);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s ease;
+  cursor: pointer;
+  user-select: none;
+  overflow: visible !important; /* CRITICAL: Never clip floating pill or stacked sheets */
+}
+
+/* Layer 1 behind (first stacked sheet) */
+.merge-page-card.stacked-doc::before,
+.merge-page-card.collapsed-file::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  right: -5px;
+  bottom: 4px;
+  left: 5px;
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-color, #cbd5e1);
+  border-radius: inherit;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  z-index: -1;
+  pointer-events: none;
+  transition: transform 0.2s ease;
+}
+
+/* Layer 2 behind (second stacked sheet) */
+.merge-page-card.stacked-doc::after,
+.merge-page-card.collapsed-file::after {
+  content: '';
+  position: absolute;
+  top: -8px;
+  right: -10px;
+  bottom: 8px;
+  left: 10px;
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-color, #94a3b8);
+  border-radius: inherit;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+  z-index: -2;
+  pointer-events: none;
+  transition: transform 0.2s ease;
+}
+
+/* Hover elevation & stacked spread */
+.merge-page-card.stacked-doc:hover,
+.merge-page-card.collapsed-file:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.14);
+}
+
+.merge-page-card.stacked-doc:hover::before,
+.merge-page-card.collapsed-file:hover::before {
+  transform: translate(2px, -2px);
+}
+
+.merge-page-card.stacked-doc:hover::after,
+.merge-page-card.collapsed-file:hover::after {
+  transform: translate(4px, -4px);
+}
+
+/* Dark mode adjustments for stacked sheets */
+[data-theme="dark"] .merge-page-card.stacked-doc::before,
+[data-theme="dark"] .merge-page-card.collapsed-file::before,
+.dark-theme .merge-page-card.stacked-doc::before,
+.dark-theme .merge-page-card.collapsed-file::before {
+  background: rgba(30, 41, 59, 0.95);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .merge-page-card.stacked-doc::after,
+[data-theme="dark"] .merge-page-card.collapsed-file::after,
+.dark-theme .merge-page-card.stacked-doc::after,
+.dark-theme .merge-page-card.collapsed-file::after {
+  background: rgba(23, 32, 47, 0.9);
+  border-color: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.5);
+}
+
+/* Page count badge on stacked cards */
+.merge-collapsed-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: rgba(15, 23, 42, 0.78);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 8px;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  pointer-events: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.merge-collapsed-badge svg {
+  flex-shrink: 0;
+}
+
+/* Color indicator bar on left edge */
+.merge-file-color-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  border-radius: var(--radius-md, 12px) 0 0 var(--radius-md, 12px);
+  z-index: 4;
+}
+
+/* Card title below thumbnail matching screenshot */
+.merge-card-title-footer {
+  padding: 8px 10px;
+  text-align: center;
+  background: var(--bg-card, #ffffff);
+  border-radius: 0 0 var(--radius-md, 12px) var(--radius-md, 12px);
+  border-top: 1px solid var(--border-color, #e2e8f0);
+}
+
+.merge-card-title-text {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-primary, #0f172a);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  letter-spacing: -0.01em;
+}
+
+/* ============================================
+   Floating Vertical Pill Action Bar (Reference Design)
+   ============================================ */
+.merge-floating-pill,
+.merge-hover-actions {
+  position: absolute;
+  top: 50%;
+  right: -40px;
+  transform: translateY(-50%);
+  background: #242830;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 8px 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease 0.15s, transform 0.2s ease 0.15s;
+}
+
+/* Invisible hover bridge connecting card to pill so cursor never leaves hover zone */
+.merge-floating-pill::before {
+  content: '';
+  position: absolute;
+  top: -12px;
+  bottom: -12px;
+  left: -24px;
+  right: -12px;
+  z-index: -1;
+}
+
+.merge-page-card.stacked-doc:hover {
+  z-index: 50;
+  outline: 2px solid #3b82f6;
+  outline-offset: 1px;
+  border-color: #3b82f6;
+}
+
+.merge-page-card.stacked-doc:hover .merge-floating-pill,
+.merge-page-card.stacked-doc:focus-within .merge-floating-pill,
+.merge-floating-pill:hover,
+.merge-floating-pill.is-active {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  transform: translateY(-50%) translateX(2px);
+  transition-delay: 0s;
+}
+
+/* Action button inside pill */
+.merge-pill-btn,
+.merge-hover-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: #ffffff;
+  cursor: pointer;
+  padding: 0;
+  position: relative;
+  transition: all 0.15s ease;
+}
+
+.merge-pill-btn svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+  stroke: #ffffff;
+}
+
+.merge-pill-btn:hover,
+.merge-hover-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.14);
+  transform: scale(1.08);
+}
+
+.merge-pill-btn.expand-btn:hover {
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.18);
+}
+
+/* Trash button hover */
+.merge-pill-btn.delete-btn:hover,
+.merge-hover-btn.delete-hover-btn:hover {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.2);
+}
+
+/* Zoom button hover */
+.merge-pill-btn.zoom-btn:hover,
+.merge-hover-btn.zoom-btn:hover {
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.2);
+}
+
+/* Tooltip matching screenshot */
+.merge-pill-tooltip,
+.merge-hover-btn .merge-hover-tooltip {
+  position: absolute;
+  left: calc(100% + 10px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: #fffaea;
+  color: #1e293b;
+  border: 1px solid #e2d9b8;
+  font-size: 0.76rem;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 5px;
+  white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  z-index: 35;
+}
+
+[data-theme="dark"] .merge-pill-tooltip,
+[data-theme="dark"] .merge-hover-btn .merge-hover-tooltip,
+.dark-theme .merge-pill-tooltip,
+.dark-theme .merge-hover-btn .merge-hover-tooltip {
+  background: #1e293b;
+  color: #f8fafc;
+  border-color: #334155;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+.merge-pill-btn:hover .merge-pill-tooltip,
+.merge-hover-btn:hover .merge-hover-tooltip {
+  opacity: 1;
+  transform: translateY(-50%) translateX(2px);
+}
+
+/* ============================================
+   Expanded Page Cards & Dual Badges (New Page vs Old Page)
+   ============================================ */
+.merge-page-card.expanded-page {
+  position: relative;
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.merge-page-card.expanded-page:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+}
+
+.merge-page-card.expanded-page .merge-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  background: var(--bg-subtle, rgba(0,0,0,0.02));
+  border-bottom: 1px solid var(--border-color);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  gap: 6px;
+}
+
+/* Dual Badge: New Page vs Old Page (Halaman Baru & Halaman Asal) */
+.merge-page-badges {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.merge-badge-new {
+  background: var(--color-merge, #e11d48);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(225, 29, 72, 0.35);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.merge-badge-old {
+  background: rgba(0, 0, 0, 0.07);
+  color: var(--text-secondary, #64748b);
+  font-size: 0.67rem;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color, #e2e8f0);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+[data-theme="dark"] .merge-badge-old,
+.dark-theme .merge-badge-old {
+  background: rgba(255, 255, 255, 0.08);
+  color: #94a3b8;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Range badge on stacked cards */
+.merge-stacked-range {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #ffffff;
+  background: rgba(225, 29, 72, 0.88);
+  padding: 1px 6px;
+  border-radius: 4px;
+  margin-left: 4px;
+}
+
+/* File Group Container when expanded */
+.merge-file-group-wrap {
+  grid-column: 1 / -1;
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: var(--radius-lg, 16px);
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  margin-bottom: 16px;
+  transition: all 0.2s ease;
+}
+
+.merge-file-group-wrap.drag-target-active {
+  border-color: var(--color-merge, #e11d48);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-merge, #e11d48), transparent 50%);
+}
+
+.merge-file-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: var(--bg-subtle, rgba(0, 0, 0, 0.02));
+  border-bottom: 1px solid var(--border-color, #e2e8f0);
+  cursor: pointer;
+  user-select: none;
+}
+
+.merge-file-group-header:hover {
+  background: var(--bg-hover, rgba(0, 0, 0, 0.04));
+}
+
+.merge-group-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.merge-group-drag-handle {
+  cursor: grab;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  padding: 2px;
+}
+
+.merge-group-drag-handle:active {
+  cursor: grabbing;
+}
+
+.merge-group-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 300px;
+}
+
+.merge-title-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.merge-title-edit-btn {
+  opacity: 0;
+  padding: 3px 5px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.merge-file-group-header:hover .merge-title-edit-btn,
+.merge-card-title-footer:hover .merge-title-edit-btn {
+  opacity: 0.8;
+}
+
+.merge-title-edit-btn:hover {
+  opacity: 1 !important;
+  color: var(--color-merge, #e11d48);
+  background: color-mix(in srgb, var(--color-merge, #e11d48), transparent 88%);
+}
+
+.merge-title-edit-input {
+  font-family: inherit;
+  font-size: 0.84rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-merge, #e11d48);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  outline: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-merge, #e11d48), transparent 75%);
+  max-width: 240px;
+}
+
+.merge-group-badge-new-range {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--color-merge, #e11d48), transparent 85%);
+  color: var(--color-merge, #e11d48);
+}
+
+.merge-group-count-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .merge-group-count-badge,
+.dark-theme .merge-group-count-badge {
+  background: rgba(255, 255, 255, 0.08);
+  color: #94a3b8;
+}
+
+.merge-group-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.merge-group-header-btn {
+  padding: 5px 10px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.15s ease;
+}
+
+.merge-group-header-btn:hover {
+  color: var(--color-merge);
+  border-color: var(--color-merge);
+  background: color-mix(in srgb, var(--color-merge), transparent 90%);
+}
+
+.merge-group-header-btn.delete-btn:hover {
+  color: #ef4444;
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.merge-group-header-btn.btn-collapse {
+  background: color-mix(in srgb, var(--color-merge, #e11d48), transparent 92%);
+  color: var(--color-merge, #e11d48);
+  border-color: color-mix(in srgb, var(--color-merge, #e11d48), transparent 60%);
+}
+
+.merge-group-header-btn.btn-collapse:hover {
+  background: var(--color-merge, #e11d48);
+  color: #ffffff;
+  border-color: var(--color-merge, #e11d48);
+}
+
+.merge-group-toggle-icon-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.merge-group-toggle-icon-btn:hover {
+  color: var(--color-merge, #e11d48);
+  background: color-mix(in srgb, var(--color-merge, #e11d48), transparent 88%);
+}
+
+.merge-file-group-body {
+  padding: 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 20px 16px;
+  min-height: 120px;
+  background: var(--bg-subtle, rgba(0, 0, 0, 0.01));
+}
+
+.merge-file-group-body:empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed var(--border-color, #e2e8f0);
+  border-radius: 8px;
+  margin: 12px;
+  min-height: 90px;
+}
+
+.merge-file-group-body:empty::after {
+  content: 'Drop pages here';
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: var(--text-tertiary, #94a3b8);
+}
+
+.merge-page-card.expanded-page .merge-card-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+.merge-card-mini-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.merge-card-mini-btn:hover {
+  color: var(--color-merge);
+  background: color-mix(in srgb, var(--color-merge), transparent 85%);
+}
+
+.merge-card-mini-btn.delete-btn:hover {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.15);
+}
+
+/* ============================================
+   Merge PDF — Ctrl+Click Multi-Select
+   ============================================ */
+.merge-page-card.selected {
+  border-color: var(--color-merge, #e11d48) !important;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-merge, #e11d48), transparent 45%), 0 8px 24px rgba(225, 29, 72, 0.22) !important;
+  transform: translateY(-3px);
+}
+
+.merge-page-card.selected .merge-card-preview::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--color-merge, #e11d48), transparent 86%);
+  z-index: 2;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.merge-card-select-check {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--color-merge, #e11d48);
+  color: #ffffff;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 6;
+  box-shadow: 0 2px 8px rgba(225, 29, 72, 0.45);
+  animation: selectPop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.merge-page-card.selected .merge-card-select-check {
+  display: flex;
+}
+
+@keyframes selectPop {
+  0% { transform: scale(0); }
+  100% { transform: scale(1); }
+}
+
+/* Selection counter & batch action bar */
+.merge-selection-bar {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px;
+  background: color-mix(in srgb, var(--color-merge, #e11d48), transparent 92%);
+  border: 1px solid color-mix(in srgb, var(--color-merge, #e11d48), transparent 65%);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-md);
+  animation: fadeIn 0.2s ease-out;
+}
+
+.merge-selection-bar.active {
+  display: flex;
+}
+
+.merge-selection-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--color-merge, #e11d48);
+}
+
+.merge-selection-count-badge {
+  background: var(--color-merge, #e11d48);
+  color: #ffffff;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  min-width: 24px;
+  text-align: center;
+}
+
+.merge-selection-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.merge-selection-btn {
+  padding: 6px 14px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  border: 1px solid color-mix(in srgb, var(--color-merge, #e11d48), transparent 60%);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.merge-selection-btn:hover {
+  border-color: var(--color-merge, #e11d48);
+  color: var(--color-merge, #e11d48);
+  background: color-mix(in srgb, var(--color-merge, #e11d48), transparent 85%);
+  transform: translateY(-1px);
+}
+
+.merge-selection-btn.btn-extract-selected {
+  border-color: color-mix(in srgb, var(--color-merge, #e11d48), transparent 45%);
+  background: color-mix(in srgb, var(--color-merge, #e11d48), transparent 90%);
+  color: var(--color-merge, #e11d48);
+}
+
+.merge-selection-btn.btn-extract-selected:hover {
+  background: var(--color-merge, #e11d48);
+  color: #ffffff;
+  border-color: var(--color-merge, #e11d48);
+}
+
+.merge-selection-btn.btn-delete-selected:hover {
+  border-color: #ef4444;
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* ============================================
+   Sortable Drop Placeholders & Drag Glow
+   ============================================ */
+.merge-page-grid > .sortable-ghost,
+.merge-page-grid > .sortable-chosen {
+  opacity: 0.9 !important;
+  border: 2px dashed var(--color-merge, #e11d48) !important;
+  background: color-mix(in srgb, var(--color-merge, #e11d48), transparent 90%) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: 0 0 20px color-mix(in srgb, var(--color-merge, #e11d48), transparent 72%) !important;
+  transform: scale(0.98);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.merge-file-group-body > .sortable-ghost,
+.merge-file-group-body > .sortable-chosen {
+  opacity: 0.9 !important;
+  border: 2px dashed var(--color-merge, #e11d48) !important;
+  background: color-mix(in srgb, var(--color-merge, #e11d48), transparent 92%) !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: 0 0 16px color-mix(in srgb, var(--color-merge, #e11d48), transparent 75%) !important;
+  transform: scale(0.96);
+}
+
+/* ============================================
+   Quick Preview Modal
+   ============================================ */
+.merge-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.78);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.merge-modal-dialog {
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 860px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.38);
+  overflow: hidden;
+  animation: modalPop 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.merge-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border-color, #e2e8f0);
+  background: var(--bg-card, #ffffff);
+}
+
+.merge-modal-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.merge-modal-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.merge-modal-badge {
+  font-size: 0.76rem;
+  font-weight: 600;
+  padding: 2px 9px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--color-merge, #e11d48), transparent 85%);
+  color: var(--color-merge, #e11d48);
+  flex-shrink: 0;
+}
+
+.merge-modal-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.merge-modal-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color, #e2e8f0);
+  background: transparent;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.merge-modal-btn:hover {
+  background: var(--bg-hover, rgba(0, 0, 0, 0.05));
+  color: var(--text-primary);
+}
+
+.merge-modal-btn.btn-close:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border-color: #ef4444;
+}
+
+.merge-modal-body {
+  position: relative;
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--bg-subtle, rgba(0, 0, 0, 0.03));
+  min-height: 480px;
+}
+
+.merge-modal-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+  transition: all 0.15s ease;
+  z-index: 10;
+}
+
+.merge-modal-nav-btn.prev { left: 16px; }
+.merge-modal-nav-btn.next { right: 16px; }
+
+.merge-modal-nav-btn:hover:not(:disabled) {
+  background: var(--color-merge, #e11d48);
+  color: #ffffff;
+  border-color: var(--color-merge, #e11d48);
+  transform: translateY(-50%) scale(1.08);
+}
+
+.merge-modal-nav-btn:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+}
+
+.merge-modal-canvas-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+  max-height: 72vh;
+}
+
+.merge-modal-canvas-wrap canvas {
+  max-width: 100%;
+  max-height: 72vh;
+  object-fit: contain;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+  border-radius: 6px;
+  background: #ffffff;
+  transition: transform 0.2s ease;
+}
+
+/* ============================================
+   Responsive — Merge Cards & Modal
+   ============================================ */
+@media (max-width: 768px) {
+  .merge-floating-pill,
+  .merge-hover-actions {
+    right: -36px;
+    padding: 6px 4px;
+    gap: 6px;
+  }
+
+  .merge-page-card:hover .merge-floating-pill,
+  .merge-page-card:hover .merge-hover-actions {
+    right: -34px;
+  }
+
+  .merge-pill-btn,
+  .merge-hover-btn {
+    width: 28px;
+    height: 28px;
+  }
+
+  .merge-pill-tooltip,
+  .merge-hover-btn .merge-hover-tooltip {
+    display: none;
+  }
+
+  .merge-selection-bar {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .merge-selection-actions {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .merge-modal-body {
+    min-height: 320px;
+    padding: 12px;
+  }
+}

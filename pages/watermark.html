@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light" class="tool-page-watermark light-theme">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Watermark PDF — PDF Tools</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/tool.css">
+  <style>
+    .watermark-form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .form-field label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+    .form-field input[type="text"],
+    .form-field select {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: var(--radius-md);
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 0.9rem;
+      outline: none;
+    }
+    .form-field input[type="text"]:focus,
+    .form-field select:focus {
+      border-color: var(--tool-color);
+    }
+    .color-swatches {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .color-swatch {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .color-swatch.active {
+      box-shadow: 0 0 0 2px var(--bg-card), 0 0 0 4px var(--tool-color, #EC4899);
+      transform: scale(1.15);
+    }
+
+    /* Watermark Result Preview */
+    .wm-preview-card {
+      margin-top: 20px;
+      width: 100%;
+      max-width: 580px;
+      padding: 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-xl, 16px);
+      box-shadow: var(--shadow-md);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+    .wm-preview-stage {
+      width: 100%;
+      min-height: 380px;
+      background: var(--bg-stage, #1a1a2e);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg, 12px);
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.18);
+    }
+    .wm-page-wrapper {
+      position: relative;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+      background: #ffffff;
+      line-height: 0;
+      border-radius: 3px;
+    }
+    .wm-page-wrapper canvas {
+      display: block;
+      max-width: 100%;
+      height: auto;
+    }
+    .page-nav-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg-tertiary, rgba(255,255,255,0.06));
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+    }
+    .page-nav-pill button {
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 4px;
+      transition: background 0.15s;
+    }
+    .page-nav-pill button:hover:not(:disabled) {
+      background: var(--bg-card-hover, rgba(255,255,255,0.1));
+    }
+    .page-nav-pill button:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body class="tool-page-watermark">
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <a href="../index.html" class="header-logo">
+        <div class="logo-icon">⚡</div>
+        <span>PDF Tools</span>
+      </a>
+      <nav class="header-nav">
+        <a href="../index.html" data-i18n="nav.home">Home</a>
+        <a href="viewer.html" data-i18n="tool.studio">✨ PDF Studio</a>
+        <a href="merge.html" data-i18n="tool.merge">Merge PDF</a>
+        <a href="compress.html" data-i18n="tool.compress">Compress PDF</a>
+        <a href="split.html" data-i18n="tool.split">Split PDF</a>
+        <a href="ocr.html" data-i18n="tool.ocr">OCR PDF</a>
+      </nav>
+      <div class="header-controls">
+        <button class="theme-toggle" id="themeToggle" title="Toggle Theme (Ctrl+D)">☀️ Light</button>
+        <button class="lang-toggle" id="langToggle">ID 🇮🇩</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div class="container">
+      <section class="tool-hero">
+        <div class="tool-hero-icon">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        </div>
+        <h1 data-i18n="tool.watermark">Watermark PDF</h1>
+        <p data-i18n="tool.watermark.desc">Add custom text or stamp watermark with opacity & rotation.</p>
+      </section>
+
+      <div class="tool-workspace">
+        <!-- Dropzone -->
+        <div class="dropzone" id="dropzone">
+          <div class="dropzone-icon">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg>
+          </div>
+          <div class="dropzone-title" data-i18n="dropzone.title">Drop your PDF file here</div>
+          <div class="dropzone-subtitle" data-i18n="dropzone.subtitle.pdf">Supports PDF files</div>
+        </div>
+
+        <!-- Selected File -->
+        <div id="fileList" class="file-list"></div>
+
+        <!-- Options Panel -->
+        <div id="optionsPanel" class="options-panel" style="display: none;">
+          <div class="options-title" data-i18n="tool.watermark">Watermark Settings</div>
+          
+          <div class="watermark-form-grid">
+            <!-- Text input -->
+            <div class="form-field" style="grid-column: 1 / -1;">
+              <label data-i18n="watermark.text">Watermark Text</label>
+              <input type="text" id="wmText" value="CONFIDENTIAL" data-i18n-placeholder="watermark.text_placeholder" placeholder="e.g. CONFIDENTIAL, DRAFT, SAMPLE">
+            </div>
+
+            <!-- Rotation Preset -->
+            <div class="form-field">
+              <label data-i18n="watermark.rotation">Rotation Angle</label>
+              <select id="wmRotation">
+                <option value="45" selected>Diagonal (45°)</option>
+                <option value="0">Horizontal (0°)</option>
+                <option value="90">Vertical (90°)</option>
+                <option value="315">Reverse Diagonal (-45°)</option>
+              </select>
+            </div>
+
+            <!-- Font Size -->
+            <div class="form-field">
+              <label data-i18n="watermark.size">Font Size</label>
+              <select id="wmFontSize">
+                <option value="28">Small (28 pt)</option>
+                <option value="42">Medium (42 pt)</option>
+                <option value="56" selected>Large (56 pt)</option>
+                <option value="72">Extra Large (72 pt)</option>
+              </select>
+            </div>
+
+            <!-- Transparency / Opacity -->
+            <div class="form-field">
+              <label data-i18n="watermark.opacity">Transparency (Opacity)</label>
+              <select id="wmOpacity">
+                <option value="0.15">Light (15%)</option>
+                <option value="0.30" selected>Medium (30%)</option>
+                <option value="0.50">Bold (50%)</option>
+                <option value="0.80">Opaque (80%)</option>
+              </select>
+            </div>
+
+            <!-- Color Palette -->
+            <div class="form-field">
+              <label data-i18n="watermark.color">Color</label>
+              <div class="color-swatches" id="colorSwatches">
+                <div class="color-swatch active" data-color="#e74c3c" style="background: #e74c3c;" title="Red"></div>
+                <div class="color-swatch" data-color="#7f8c8d" style="background: #7f8c8d;" title="Grey"></div>
+                <div class="color-swatch" data-color="#2980b9" style="background: #2980b9;" title="Blue"></div>
+                <div class="color-swatch" data-color="#27ae60" style="background: #27ae60;" title="Green"></div>
+                <div class="color-swatch" data-color="#2c3e50" style="background: #2c3e50;" title="Dark"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div id="progressBar" class="progress-container">
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill"></div>
+          </div>
+          <div class="progress-text" data-i18n="action.processing">Processing...</div>
+        </div>
+
+        <!-- Result Area -->
+        <div id="resultArea" class="result-area">
+          <div class="result-icon" style="background: rgba(232, 67, 147, 0.15); color: #E84393;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="result-title" data-i18n="result.watermark_success">Watermark applied successfully!</div>
+          
+          <!-- Watermark Result Preview Card -->
+          <div id="wmResultPreviewCard" class="wm-preview-card">
+            <!-- Header bar with page navigation -->
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+              <span style="font-size: 0.88rem; font-weight: 700; color: var(--text-primary); display: inline-flex; align-items: center; gap: 6px;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                <span data-i18n="watermark.preview_title">Document Preview</span>
+              </span>
+              <div class="page-nav-pill" id="wmPageNav" style="display: none;">
+                <button type="button" id="prevWmPageBtn" aria-label="Previous Page" style="display: inline-flex; align-items: center; justify-content: center; padding: 4px;">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                </button>
+                <span id="wmPageIndicator" style="font-size: 0.8rem; font-weight: 700;">1 / 1</span>
+                <button type="button" id="nextWmPageBtn" aria-label="Next Page" style="display: inline-flex; align-items: center; justify-content: center; padding: 4px;">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Stage with canvas -->
+            <div class="wm-preview-stage">
+              <div class="wm-page-wrapper">
+                <canvas id="wmResultCanvas"></canvas>
+              </div>
+            </div>
+
+            <!-- Batch selector if multiple files -->
+            <div id="wmBatchFileSelectorContainer" style="display: none; width: 100%; text-align: left;">
+              <label style="font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 4px;">Pilih File Pratinjau:</label>
+              <select id="wmBatchFileSelect" class="form-input" style="width: 100%; padding: 6px 10px; font-size: 0.84rem;"></select>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 12px; justify-content: center; margin-top: 24px; flex-wrap: wrap;">
+            <button id="downloadBtn" class="btn btn-primary btn-lg" data-i18n="action.download">Download Watermarked PDF</button>
+            <button type="button" id="openInStudioBtn" class="btn btn-secondary btn-lg"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px;"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg><span data-i18n="action.open_studio">Buka di PDF Studio</span></button>
+            <button id="resetBtn" class="btn btn-ghost btn-lg" data-i18n="action.clear">Start Over</button>
+          </div>
+        </div>
+
+        <!-- Action Bar -->
+        <div id="actionBar" class="action-bar">
+          <button id="applyBtn" class="btn btn-primary btn-lg" data-i18n="action.watermark">Apply Watermark</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p data-i18n="footer.text">PDF Tools — All processing is done locally in your browser.</p>
+    </div>
+  </footer>
+
+  <!-- Libraries -->
+  <script src="../js/lib/pdf-lib.min.js"></script>
+  <script src="../js/lib/pdf.min.js"></script>
+  <script src="../js/lib/pdf.worker.min.js"></script>
+  <script src="../js/lib/FileSaver.min.js"></script>
+  <script src="../js/lib/Sortable.min.js"></script>
+  <script src="../js/lib/jszip.min.js"></script>
+
+  <!-- App Core & Utils -->
+  <script src="../js/utils/i18n.js"></script>
+  <script src="../js/utils/file-utils.js"></script>
+  <script src="../js/utils/download.js"></script>
+  <script src="../js/components/toast.js"></script>
+  <script src="../js/components/progress.js"></script>
+  <script src="../js/components/pdf-preview.js"></script>
+  <script src="../js/components/dropzone.js"></script>
+  <script src="../js/components/file-list.js"></script>
+  <script src="../js/core/pdf-watermark.js"></script>
+  <script src="../js/app.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const dropzoneEl = document.getElementById('dropzone');
+      const optionsPanel = document.getElementById('optionsPanel');
+      const actionBar = document.getElementById('actionBar');
+      const applyBtn = document.getElementById('applyBtn');
+      const resultArea = document.getElementById('resultArea');
+      const downloadBtn = document.getElementById('downloadBtn');
+      const resetBtn = document.getElementById('resetBtn');
+
+      const wmResultCanvas = document.getElementById('wmResultCanvas');
+      const wmPageNav = document.getElementById('wmPageNav');
+      const wmPageIndicator = document.getElementById('wmPageIndicator');
+      const prevWmPageBtn = document.getElementById('prevWmPageBtn');
+      const nextWmPageBtn = document.getElementById('nextWmPageBtn');
+      const wmBatchFileSelectorContainer = document.getElementById('wmBatchFileSelectorContainer');
+      const wmBatchFileSelect = document.getElementById('wmBatchFileSelect');
+      const openInStudioBtn = document.getElementById('openInStudioBtn');
+
+      let wmResultPdfDoc = null;
+      let currentWmPage = 1;
+      let totalWmPages = 1;
+
+      let currentFile = null;
+      let selectedColor = '#e74c3c';
+      let watermarkedData = null;
+      const progress = PDFTools.Progress('progressBar');
+
+      let queuedFiles = [];
+      let isBatchMode = false;
+      let batchResults = []; // [{ name: string, data: Uint8Array }]
+
+      const fileList = new PDFTools.FileList('fileList', {
+        showPreview: false,
+        onFilesChange: function () {
+          queuedFiles = fileList.getFiles();
+          if (queuedFiles.length > 0) {
+            currentFile = queuedFiles[0];
+            isBatchMode = queuedFiles.length > 1;
+            dropzoneEl.style.display = 'none';
+            optionsPanel.style.display = 'block';
+            actionBar.classList.add('active');
+            resultArea.classList.remove('active');
+            applyBtn.textContent = isBatchMode ? `🏷️ Apply Watermark to ${queuedFiles.length} Files (ZIP)` : '🏷️ Apply Watermark';
+          } else {
+            currentFile = null;
+            queuedFiles = [];
+            dropzoneEl.style.display = 'block';
+            optionsPanel.style.display = 'none';
+            actionBar.classList.remove('active');
+          }
+        }
+      });
+
+      PDFTools.Dropzone('dropzone', {
+        accept: '.pdf',
+        multiple: true,
+        onFiles: function (files) {
+          fileList.clear();
+          fileList.addFiles(files);
+        }
+      });
+
+      // Color Swatches
+      document.querySelectorAll('#colorSwatches .color-swatch').forEach(swatch => {
+        swatch.addEventListener('click', function () {
+          document.querySelectorAll('#colorSwatches .color-swatch').forEach(s => s.classList.remove('active'));
+          swatch.classList.add('active');
+          selectedColor = swatch.getAttribute('data-color');
+        });
+      });
+
+      applyBtn.addEventListener('click', async function () {
+        if (!queuedFiles || queuedFiles.length === 0) return;
+
+        const text = document.getElementById('wmText').value.trim() || 'CONFIDENTIAL';
+        const rotation = parseInt(document.getElementById('wmRotation').value, 10);
+        const fontSize = parseInt(document.getElementById('wmFontSize').value, 10);
+        const opacity = parseFloat(document.getElementById('wmOpacity').value);
+
+        applyBtn.disabled = true;
+        progress.show(PDFTools.i18n.t('action.processing'));
+        batchResults = [];
+
+        try {
+          const total = queuedFiles.length;
+          for (let i = 0; i < total; i++) {
+            const file = queuedFiles[i];
+            const basePct = Math.round((i / total) * 100);
+            progress.update(basePct, `Processing (${i + 1}/${total}): ${file.name}...`);
+
+            const resBytes = await PDFTools.Watermark.applyWatermark(file, {
+              text: text,
+              rotation: rotation,
+              fontSize: fontSize,
+              opacity: opacity,
+              color: selectedColor,
+              position: 'center'
+            }, function (pct, status) {
+              const fileStep = Math.round(basePct + (pct / total));
+              progress.update(fileStep, `[${i + 1}/${total}] ${file.name} - ${status}`);
+            });
+
+            const outName = `${file.name.replace(/\.pdf$/i, '')}_watermarked.pdf`;
+            batchResults.push({ name: outName, data: resBytes });
+            if (i === 0) watermarkedData = resBytes;
+          }
+
+          progress.hide();
+          optionsPanel.style.display = 'none';
+          document.getElementById('fileList').style.display = 'none';
+          actionBar.classList.remove('active');
+          resultArea.classList.add('active');
+
+          if (isBatchMode) {
+            downloadBtn.textContent = `📦 Download ${batchResults.length} Files (.ZIP)`;
+            wmBatchFileSelect.innerHTML = '';
+            batchResults.forEach((res, idx) => {
+              const opt = document.createElement('option');
+              opt.value = idx;
+              opt.textContent = `${idx + 1}. ${res.name}`;
+              wmBatchFileSelect.appendChild(opt);
+            });
+            wmBatchFileSelectorContainer.style.display = 'block';
+          } else {
+            downloadBtn.textContent = '⬇️ Download PDF';
+            wmBatchFileSelectorContainer.style.display = 'none';
+          }
+
+          if (watermarkedData) {
+            await renderWatermarkPreview(watermarkedData);
+          }
+
+          PDFTools.Toast.success(isBatchMode ? `All ${total} files watermarked successfully!` : PDFTools.i18n.t('result.watermark_success'));
+        } catch (err) {
+          console.error(err);
+          progress.hide();
+          PDFTools.Toast.error(err.message || PDFTools.i18n.t('toast.error'));
+          applyBtn.disabled = false;
+        }
+      });
+
+      async function renderWatermarkPreview(bytes) {
+        if (!bytes) return;
+        try {
+          if (PDFTools.FileUtils && PDFTools.FileUtils.initPdfJsWorker) {
+            PDFTools.FileUtils.initPdfJsWorker();
+          }
+          const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(bytes.slice(0)) });
+          wmResultPdfDoc = await loadingTask.promise;
+          totalWmPages = wmResultPdfDoc.numPages;
+          currentWmPage = 1;
+
+          wmPageNav.style.display = totalWmPages > 1 ? 'flex' : 'none';
+          await renderWmPage(currentWmPage);
+        } catch (err) {
+          console.error('Failed to render watermark preview:', err);
+        }
+      }
+
+      async function renderWmPage(pageNum) {
+        if (!wmResultPdfDoc) return;
+        wmPageIndicator.textContent = `${pageNum} / ${totalWmPages}`;
+        prevWmPageBtn.disabled = (pageNum <= 1);
+        nextWmPageBtn.disabled = (pageNum >= totalWmPages);
+
+        const page = await wmResultPdfDoc.getPage(pageNum);
+        const unscaledViewport = page.getViewport({ scale: 1.0 });
+        const maxW = 460;
+        const scale = Math.min(maxW / unscaledViewport.width, 1.25);
+        const viewport = page.getViewport({ scale: scale });
+
+        wmResultCanvas.width = viewport.width;
+        wmResultCanvas.height = viewport.height;
+        const ctx = wmResultCanvas.getContext('2d');
+        await page.render({
+          canvasContext: ctx,
+          viewport: viewport,
+          annotationMode: (typeof pdfjsLib !== 'undefined' && pdfjsLib.AnnotationMode) ? pdfjsLib.AnnotationMode.ENABLE_FORMS : 2
+        }).promise;
+      }
+
+      prevWmPageBtn.addEventListener('click', async function () {
+        if (currentWmPage > 1) {
+          currentWmPage--;
+          await renderWmPage(currentWmPage);
+        }
+      });
+
+      nextWmPageBtn.addEventListener('click', async function () {
+        if (currentWmPage < totalWmPages) {
+          currentWmPage++;
+          await renderWmPage(currentWmPage);
+        }
+      });
+
+      wmBatchFileSelect.addEventListener('change', async function () {
+        const idx = parseInt(wmBatchFileSelect.value, 10);
+        if (batchResults[idx]) {
+          await renderWatermarkPreview(batchResults[idx].data);
+        }
+      });
+
+      openInStudioBtn.addEventListener('click', async function () {
+        let bytesToOpen = watermarkedData;
+        let fileName = (currentFile ? currentFile.name.replace(/\.pdf$/i, '') : 'document') + '_watermarked.pdf';
+        if (isBatchMode && batchResults.length > 0) {
+          const idx = parseInt(wmBatchFileSelect.value || '0', 10);
+          if (batchResults[idx]) {
+            bytesToOpen = batchResults[idx].data;
+            fileName = batchResults[idx].name;
+          }
+        }
+        if (bytesToOpen) {
+          const fileToOpen = new File([bytesToOpen], fileName, { type: 'application/pdf' });
+          if (PDFTools.FileUtils && PDFTools.FileUtils.setPendingFile) {
+            await PDFTools.FileUtils.setPendingFile(fileToOpen);
+          }
+          window.location.href = 'viewer.html';
+        }
+      });
+
+      // Check for pending handoff file from homepage (B1)
+      if (PDFTools.FileUtils && PDFTools.FileUtils.consumePendingFile) {
+        PDFTools.FileUtils.consumePendingFile().then(file => {
+          if (file) {
+            fileList.addFiles([file]);
+          }
+        });
+      }
+
+      downloadBtn.addEventListener('click', async function () {
+        if (isBatchMode && batchResults.length > 1) {
+          const zip = new JSZip();
+          batchResults.forEach(item => {
+            zip.file(item.name, item.data);
+          });
+          const zipBlob = await zip.generateAsync({ type: 'blob' });
+          saveAs(zipBlob, 'watermarked_documents.zip');
+          PDFTools.Toast.success('ZIP package downloaded!');
+        } else if (watermarkedData) {
+          const originalName = currentFile ? currentFile.name.replace(/\.pdf$/i, '') : 'document';
+          PDFTools.Download.save(watermarkedData, `${originalName}_watermarked.pdf`);
+        }
+      });
+
+      resetBtn.addEventListener('click', function () {
+        fileList.clear();
+        watermarkedData = null;
+        currentFile = null;
+        queuedFiles = [];
+        batchResults = [];
+        isBatchMode = false;
+        applyBtn.disabled = false;
+        resultArea.classList.remove('active');
+        document.getElementById('fileList').style.display = 'flex';
+        dropzoneEl.style.display = 'block';
+
+        wmResultPdfDoc = null;
+        wmPageNav.style.display = 'none';
+        wmBatchFileSelectorContainer.style.display = 'none';
+        const ctx = wmResultCanvas.getContext('2d');
+        ctx.clearRect(0, 0, wmResultCanvas.width, wmResultCanvas.height);
+        wmResultCanvas.width = 0;
+        wmResultCanvas.height = 0;
+      });
+    });
+  </script>
+</body>
+</html>

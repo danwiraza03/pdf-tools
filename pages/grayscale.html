@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light" class="tool-page-grayscale light-theme">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDF to Grayscale & B/W — PDF Tools</title>
+  <meta name="description" content="Convert color PDFs to pure grayscale or high-contrast black and white. Save ink and compress documents 100% offline.">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/tool.css">
+  <style>
+    :root {
+      --tool-color: #64748B;
+    }
+    .grayscale-layout {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 24px;
+      align-items: start;
+      margin-top: 24px;
+    }
+    @media (max-width: 960px) {
+      .grayscale-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+    .preview-viewport-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-xl, 16px);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+      box-shadow: var(--shadow-md);
+      color: var(--text-primary);
+    }
+    .preview-canvas-stage {
+      position: relative;
+      width: 100%;
+      max-width: 480px;
+      background: var(--bg-stage);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg, 12px);
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+    .split-compare-box {
+      position: relative;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+      border-radius: 4px;
+      overflow: hidden;
+      line-height: 0;
+      background: #ffffff;
+      user-select: none;
+      cursor: ew-resize;
+    }
+    .split-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .split-layer-base canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+    .split-layer-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      clip-path: inset(0 0 0 50%);
+    }
+    .split-layer-overlay canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+    .split-divider-line {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: 3px;
+      background: #64748B;
+      cursor: ew-resize;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+      z-index: 10;
+    }
+    .split-divider-handle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #64748B;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      pointer-events: none;
+      border: 2px solid #ffffff;
+    }
+    .split-tag {
+      position: absolute;
+      top: 10px;
+      padding: 4px 10px;
+      border-radius: 14px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      z-index: 12;
+      pointer-events: none;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+    .tag-original {
+      left: 10px;
+      background: var(--bg-glass-strong);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      backdrop-filter: blur(4px);
+    }
+    .tag-result {
+      right: 10px;
+      background: #64748B;
+      color: #ffffff;
+    }
+    .page-nav-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--bg-tertiary);
+      padding: 6px 14px;
+      border-radius: 30px;
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+    }
+    .nav-pill-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+    .nav-pill-btn:hover:not(:disabled) {
+      background: var(--bg-card-hover);
+    }
+    .nav-pill-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+    .options-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-xl, 16px);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      box-shadow: var(--shadow-md);
+      color: var(--text-primary);
+    }
+    .file-meta-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .file-icon-box {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: rgba(148, 163, 184, 0.15);
+      color: #94a3b8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+    .mode-choice-card {
+      padding: 12px 14px;
+      border: 1.5px solid var(--border-color);
+      border-radius: var(--radius-md, 10px);
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      cursor: pointer;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      transition: all 0.2s;
+    }
+    .mode-choice-card:hover {
+      border-color: var(--border-color-hover);
+      background: var(--bg-card-hover);
+    }
+    .mode-choice-card.active {
+      border-color: #64748B;
+      background: color-mix(in srgb, #64748B, transparent 88%);
+    }
+  </style>
+</head>
+<body class="tool-page-grayscale">
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <a href="../index.html" class="header-logo">
+        <div class="logo-icon">⚡</div>
+        <span>PDF Tools</span>
+      </a>
+      <nav class="header-nav">
+        <a href="../index.html" data-i18n="nav.home">Home</a>
+        <a href="viewer.html" data-i18n="tool.studio">✨ PDF Studio</a>
+        <a href="merge.html" data-i18n="tool.merge">Merge PDF</a>
+        <a href="compress.html" data-i18n="tool.compress">Compress PDF</a>
+        <a href="split.html" data-i18n="tool.split">Split PDF</a>
+        <a href="ocr.html" data-i18n="tool.ocr">OCR PDF</a>
+      </nav>
+      <div class="header-controls">
+        <button class="theme-toggle" id="themeToggle" title="Toggle Theme (Ctrl+D)">☀️ Light</button>
+        <button class="lang-toggle" id="langToggle">ID 🇮🇩</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="container">
+      <!-- Breadcrumb -->
+      <div class="breadcrumb">
+        <a href="../index.html" data-i18n="nav.home">Home</a>
+        <span>/</span>
+        <span data-i18n="grayscale.title">PDF to Grayscale & B/W</span>
+      </div>
+
+      <!-- Tool Header -->
+      <section class="tool-hero" style="margin-bottom: 24px;">
+        <div class="tool-hero-icon">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 0 0 20z" fill="currentColor"/></svg>
+        </div>
+        <h1 data-i18n="grayscale.title">Convert PDF to Grayscale / Black & White</h1>
+        <p data-i18n="grayscale.desc">Transform color PDFs into clean grayscale or high-contrast monochrome documents. Save printer ink 100% offline.</p>
+      </section>
+
+      <!-- Upload State -->
+      <div id="uploadState">
+        <div class="dropzone" id="dropzone">
+          <div class="dropzone-icon">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg>
+          </div>
+          <div class="dropzone-title" data-i18n="grayscale.drop_title">Drop PDF file here to Convert to Grayscale</div>
+          <div class="dropzone-subtitle" data-i18n="grayscale.drop_subtitle">Save printer ink and reduce archive file size (100% Offline)</div>
+        </div>
+      </div>
+
+      <!-- Workspace State -->
+      <div id="workspaceState" style="display: none;">
+        <div class="grayscale-layout">
+          <!-- Left: Live Before/After Split Viewer -->
+          <div class="preview-viewport-card">
+            <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+              <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); display: inline-flex; align-items: center; gap: 6px;" data-i18n="grayscale.preview_title">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <span>Live Before / After Comparison</span>
+              </span>
+              <span style="font-size: 0.78rem; color: var(--text-muted);" data-i18n="grayscale.drag_hint">
+                Drag center slider to inspect
+              </span>
+            </div>
+
+            <!-- Canvas Split Container -->
+            <div class="preview-canvas-stage">
+              <div class="split-compare-box" id="splitStage">
+                <span class="split-tag tag-original" data-i18n="grayscale.tag_original">Original Color</span>
+                <span class="split-tag tag-result" id="badgeResultLabel" data-i18n="grayscale.tag_result">Grayscale</span>
+                
+                <!-- Base Color Canvas -->
+                <div class="split-layer-base">
+                  <canvas id="canvasBefore"></canvas>
+                </div>
+
+                <!-- Overlay Filtered Canvas -->
+                <div class="split-layer-overlay" id="layerOverlay">
+                  <canvas id="canvasAfter"></canvas>
+                </div>
+
+                <!-- Split Divider Bar -->
+                <div class="split-divider-line" id="splitLine">
+                  <div class="split-divider-handle">↔</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Page Navigation -->
+            <div class="page-nav-bar">
+              <button type="button" id="prevPageBtn" class="nav-pill-btn" style="display:inline-flex;align-items:center;gap:4px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                <span data-i18n="crop.prev">Prev</span>
+              </button>
+              <span style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary);" id="pageIndicator">Page 1 / 1</span>
+              <button type="button" id="nextPageBtn" class="nav-pill-btn" style="display:inline-flex;align-items:center;gap:4px;">
+                <span data-i18n="crop.next">Next</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Right: Controls & Options -->
+          <div class="options-card">
+            <!-- File Info Header -->
+            <div class="file-meta-header">
+              <div class="file-icon-box" style="display:flex;align-items:center;justify-content:center;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              </div>
+              <div style="flex: 1; overflow: hidden;">
+                <div id="fileNameLabel" style="font-weight: 700; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-primary);">document.pdf</div>
+                <div id="fileSizeLabel" style="font-size: 0.8rem; color: var(--text-muted);">2.1 MB • 2 Pages</div>
+              </div>
+              <button type="button" id="changeFileBtn" class="btn btn-ghost btn-sm" data-i18n="common.change_file">Change</button>
+            </div>
+
+            <!-- Conversion Mode -->
+            <div>
+              <label class="form-label" style="font-size: 0.85rem; font-weight: 700; margin-bottom: 10px;" data-i18n="grayscale.mode_label">Select Conversion Mode</label>
+              <div style="display: flex; flex-direction: column; gap: 10px;">
+                <label class="mode-choice-card active" id="cardModeGray">
+                  <input type="radio" name="grayMode" value="grayscale" checked style="margin-top: 3px;">
+                  <div>
+                    <div style="font-weight: 700; font-size: 0.9rem; color: var(--text-primary);" data-i18n="grayscale.mode_smooth_title">Smooth Grayscale</div>
+                    <div style="font-size: 0.76rem; color: var(--text-muted); margin-top: 2px;" data-i18n="grayscale.mode_smooth_desc">Preserves photo shading, illustrations, and subtle gradients</div>
+                  </div>
+                </label>
+
+                <label class="mode-choice-card" id="cardModeMono">
+                  <input type="radio" name="grayMode" value="monochrome" style="margin-top: 3px;">
+                  <div>
+                    <div style="font-weight: 700; font-size: 0.9rem; color: var(--text-primary);" data-i18n="grayscale.mode_mono_title">Photocopy / Pure B&W</div>
+                    <div style="font-size: 0.76rem; color: var(--text-muted); margin-top: 2px;" data-i18n="grayscale.mode_mono_desc">High-contrast deep black text with 100% white background</div>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Quality Preset -->
+            <div>
+              <label class="form-label" style="font-size: 0.85rem; font-weight: 700; margin-bottom: 6px;">Output Quality</label>
+              <select id="qualitySelect" class="form-input" style="width: 100%;">
+                <option value="standard">Standard (150 DPI - Smallest Size)</option>
+                <option value="high" selected>High Quality (200 DPI - Recommended)</option>
+                <option value="print">Ultra Print (300 DPI - Sharpest Text)</option>
+              </select>
+            </div>
+
+            <!-- Progress Bar -->
+            <div id="progressContainer" style="display: none;">
+              <div style="display: flex; justify-content: space-between; font-size: 0.78rem; margin-bottom: 6px;">
+                <span id="progressStatus" style="font-weight: 600;" data-i18n="common.processing">Converting document...</span>
+                <span id="progressPercent" style="font-weight: 700; color: #64748B;">0%</span>
+              </div>
+              <div style="height: 8px; background: var(--bg-tertiary, rgba(255,255,255,0.1)); border-radius: 4px; overflow: hidden;">
+                <div id="progressBar" style="width: 0%; height: 100%; background: #64748B; transition: width 0.2s;"></div>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <button type="button" id="btnConvertGrayscale" class="btn btn-primary btn-lg" style="width: 100%; font-weight: 700; background: var(--tool-color, #64748B); border: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 0 0 20z" fill="currentColor"/></svg>
+              <span data-i18n="grayscale.download_btn">Convert to Grayscale & Download</span>
+            </button>
+            <button type="button" id="openStudioBtn" class="btn btn-secondary btn-md" style="width: 100%; margin-top: 10px; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              <span data-i18n="action.open_studio">Open in PDF Studio</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <div class="logo-icon">⚡</div>
+          <span>PDF Tools</span>
+        </div>
+        <p class="footer-desc">Professional 100% Offline Client-side PDF Suite (DN.).</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="../js/lib/pdf-lib.min.js"></script>
+  <script src="../js/lib/pdf.min.js"></script>
+  <script src="../js/lib/pdf.worker.min.js"></script>
+  <script src="../js/lib/FileSaver.min.js"></script>
+  <script src="../js/utils/i18n.js"></script>
+  <script src="../js/utils/file-utils.js"></script>
+  <script src="../js/utils/download.js"></script>
+  <script src="../js/core/pdf-stream-engine.js"></script>
+  <script src="../js/core/pdf-compress.js"></script>
+  <script src="../js/core/pdf-grayscale.js"></script>
+  <script src="../js/components/toast.js"></script>
+  <script src="../js/components/dropzone.js"></script>
+  <script src="../js/app.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      let selectedFile = null;
+      let pdfJsDoc = null;
+      let currentPage = 1;
+      let totalPages = 1;
+
+      const uploadState = document.getElementById('uploadState');
+      const workspaceState = document.getElementById('workspaceState');
+      const fileNameLabel = document.getElementById('fileNameLabel');
+      const fileSizeLabel = document.getElementById('fileSizeLabel');
+      const changeFileBtn = document.getElementById('changeFileBtn');
+      const splitStage = document.getElementById('splitStage');
+      const canvasBefore = document.getElementById('canvasBefore');
+      const canvasAfter = document.getElementById('canvasAfter');
+      const layerOverlay = document.getElementById('layerOverlay');
+      const splitLine = document.getElementById('splitLine');
+      const badgeResultLabel = document.getElementById('badgeResultLabel');
+      const prevPageBtn = document.getElementById('prevPageBtn');
+      const nextPageBtn = document.getElementById('nextPageBtn');
+      const pageIndicator = document.getElementById('pageIndicator');
+      const cardModeGray = document.getElementById('cardModeGray');
+      const cardModeMono = document.getElementById('cardModeMono');
+      const qualitySelect = document.getElementById('qualitySelect');
+      const progressContainer = document.getElementById('progressContainer');
+      const progressStatus = document.getElementById('progressStatus');
+      const progressPercent = document.getElementById('progressPercent');
+      const progressBar = document.getElementById('progressBar');
+      const btnConvertGrayscale = document.getElementById('btnConvertGrayscale');
+
+      // Dropzone Setup
+      PDFTools.Dropzone('dropzone', {
+        accept: '.pdf',
+        multiple: false,
+        onFiles: async function (files) {
+          if (files && files.length > 0) handleFile(files[0]);
+        }
+      });
+
+      if (PDFTools.FileUtils && PDFTools.FileUtils.consumePendingFile) {
+        PDFTools.FileUtils.consumePendingFile().then(file => {
+          if (file) handleFile(file);
+        });
+      }
+
+      async function handleFile(file) {
+        selectedFile = file;
+        fileNameLabel.textContent = file.name;
+
+        uploadState.style.display = 'none';
+        workspaceState.style.display = 'block';
+
+        if (PDFTools.FileUtils && PDFTools.FileUtils.initPdfJsWorker) {
+          PDFTools.FileUtils.initPdfJsWorker();
+        }
+
+        try {
+          const arrayBuffer = await PDFTools.FileUtils.readAsArrayBuffer(file);
+          const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer.slice(0)) });
+          pdfJsDoc = await loadingTask.promise;
+          totalPages = pdfJsDoc.numPages;
+          currentPage = 1;
+
+          fileSizeLabel.textContent = `${PDFTools.FileUtils.formatSize(file.size)} • ${totalPages} Pages`;
+          await renderPreview(currentPage);
+          PDFTools.Toast.success('PDF loaded for grayscale preview! 🎨');
+        } catch (err) {
+          console.error(err);
+          PDFTools.Toast.error('Could not load PDF document.');
+        }
+      }
+
+      changeFileBtn.addEventListener('click', () => {
+        selectedFile = null;
+        workspaceState.style.display = 'none';
+        uploadState.style.display = 'block';
+      });
+
+      async function renderPreview(pageNum) {
+        if (!pdfJsDoc) return;
+        pageIndicator.textContent = `Page ${pageNum} / ${totalPages}`;
+        prevPageBtn.disabled = (pageNum <= 1);
+        nextPageBtn.disabled = (pageNum >= totalPages);
+
+        const page = await pdfJsDoc.getPage(pageNum);
+        const unscaledViewport = page.getViewport({ scale: 1.0 });
+
+        // Calculate preview width constrained to 440px
+        const targetWidth = Math.min(440, window.innerWidth - 80);
+        const scale = targetWidth / unscaledViewport.width;
+        const viewport = page.getViewport({ scale: scale });
+
+        canvasBefore.width = viewport.width;
+        canvasBefore.height = viewport.height;
+        canvasAfter.width = viewport.width;
+        canvasAfter.height = viewport.height;
+
+        splitStage.style.width = `${viewport.width}px`;
+        splitStage.style.height = `${viewport.height}px`;
+
+        const ctxBefore = canvasBefore.getContext('2d');
+        await page.render({ canvasContext: ctxBefore, viewport: viewport }).promise;
+
+        updateAfterCanvas();
+      }
+
+      function updateAfterCanvas() {
+        const mode = document.querySelector('input[name="grayMode"]:checked').value;
+        badgeResultLabel.textContent = mode === 'monochrome' ? 'Photocopy B&W' : 'Grayscale';
+
+        const ctxBefore = canvasBefore.getContext('2d');
+        const ctxAfter = canvasAfter.getContext('2d');
+
+        const imgData = ctxBefore.getImageData(0, 0, canvasBefore.width, canvasBefore.height);
+        const data = imgData.data;
+        const len = data.length;
+
+        if (mode === 'monochrome') {
+          for (let i = 0; i < len; i += 4) {
+            const luma = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+            const val = luma < 160 ? 0 : 255;
+            data[i] = val; data[i + 1] = val; data[i + 2] = val;
+          }
+        } else {
+          for (let i = 0; i < len; i += 4) {
+            const luma = Math.round(0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]);
+            data[i] = luma; data[i + 1] = luma; data[i + 2] = luma;
+          }
+        }
+        ctxAfter.putImageData(imgData, 0, 0);
+      }
+
+      // Mode toggles
+      document.querySelectorAll('input[name="grayMode"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+          const isGray = radio.value === 'grayscale';
+          cardModeGray.classList.toggle('active', isGray);
+          cardModeMono.classList.toggle('active', !isGray);
+          updateAfterCanvas();
+        });
+      });
+
+      // Split Slider Controller
+      let isSliding = false;
+      const handleSplitMove = (clientX) => {
+        const rect = splitStage.getBoundingClientRect();
+        const offsetX = Math.max(0, Math.min(rect.width, clientX - rect.left));
+        const pct = (offsetX / rect.width) * 100;
+        splitLine.style.left = `${pct}%`;
+        layerOverlay.style.clipPath = `inset(0 0 0 ${pct}%)`;
+      };
+
+      splitStage.addEventListener('mousedown', (e) => {
+        isSliding = true;
+        handleSplitMove(e.clientX);
+      });
+      window.addEventListener('mousemove', (e) => {
+        if (isSliding) handleSplitMove(e.clientX);
+      });
+      window.addEventListener('mouseup', () => { isSliding = false; });
+
+      // Page Navigation
+      prevPageBtn.addEventListener('click', async () => {
+        if (currentPage > 1) {
+          currentPage--;
+          await renderPreview(currentPage);
+        }
+      });
+      nextPageBtn.addEventListener('click', async () => {
+        if (currentPage < totalPages) {
+          currentPage++;
+          await renderPreview(currentPage);
+        }
+      });
+
+      let lastConvertedBytes = null;
+
+      // Action Conversion
+      btnConvertGrayscale.addEventListener('click', async () => {
+        if (!selectedFile) return;
+        btnConvertGrayscale.disabled = true;
+        progressContainer.style.display = 'block';
+
+        const mode = document.querySelector('input[name="grayMode"]:checked').value;
+        const quality = qualitySelect.value;
+
+        try {
+          const grayBytes = await PDFTools.Grayscale.convertToGrayscale(selectedFile, {
+            mode: mode,
+            quality: quality,
+            onProgress: (pct, status) => {
+              progressPercent.textContent = `${pct}%`;
+              progressStatus.textContent = status;
+              progressBar.style.width = `${pct}%`;
+            }
+          });
+
+          lastConvertedBytes = grayBytes;
+          const baseName = selectedFile.name.replace(/\.pdf$/i, '');
+          PDFTools.Download.save(grayBytes, `${baseName}_${mode}.pdf`);
+          PDFTools.Toast.success('PDF converted to grayscale successfully!');
+        } catch (err) {
+          console.error(err);
+          PDFTools.Toast.error(err.message || 'Failed to convert PDF.');
+        } finally {
+          btnConvertGrayscale.disabled = false;
+          setTimeout(() => { progressContainer.style.display = 'none'; }, 1500);
+        }
+      });
+
+      // Open in PDF Studio Action
+      const openStudioBtn = document.getElementById('openStudioBtn');
+      if (openStudioBtn) {
+        openStudioBtn.addEventListener('click', async () => {
+          if (!selectedFile) return;
+
+          let targetBytes = lastConvertedBytes;
+          if (!targetBytes) {
+            openStudioBtn.disabled = true;
+            progressContainer.style.display = 'block';
+            const mode = document.querySelector('input[name="grayMode"]:checked').value;
+            const quality = qualitySelect.value;
+            try {
+              targetBytes = await PDFTools.Grayscale.convertToGrayscale(selectedFile, {
+                mode: mode,
+                quality: quality,
+                onProgress: (pct, status) => {
+                  progressPercent.textContent = `${pct}%`;
+                  progressStatus.textContent = status;
+                  progressBar.style.width = `${pct}%`;
+                }
+              });
+              lastConvertedBytes = targetBytes;
+            } catch (err) {
+              console.error(err);
+              PDFTools.Toast.error('Failed to convert for PDF Studio.');
+              openStudioBtn.disabled = false;
+              progressContainer.style.display = 'none';
+              return;
+            }
+          }
+
+          const baseName = selectedFile.name.replace(/\.pdf$/i, '');
+          const blob = new Blob([targetBytes], { type: 'application/pdf' });
+          const file = new File([blob], `${baseName}_grayscale.pdf`, { type: 'application/pdf' });
+          if (PDFTools.FileUtils && PDFTools.FileUtils.setPendingFile) {
+            PDFTools.FileUtils.setPendingFile(file);
+          }
+          window.location.href = 'viewer.html';
+        });
+      }
+    });
+  </script>
+</body>
+</html>

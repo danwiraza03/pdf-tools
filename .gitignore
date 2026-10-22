@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+
+# Build Output
+dist/
+build/
+*.exe
+
+# Backups & Archives
+backups/
+*.zip
+*.tar.gz
+
+# OS & Editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log
+
+# Trash & Scratch files
+trash/
+scratch/

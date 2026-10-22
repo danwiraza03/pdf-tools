@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light" class="tool-page-docx light-theme">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDF to Word (DOCX) — PDF Tools</title>
+  <meta name="description" content="Convert PDF to editable Microsoft Word (DOCX) documents 100% offline in your browser. Fast, free, and completely private.">
+  <link rel="icon" type="image/svg+xml" href="../icon.svg">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/tool.css">
+  <style>
+    :root { --tool-color: #2563EB; }
+
+    .docx-preview-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-xl);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      box-shadow: var(--shadow-md);
+      max-width: 650px;
+      margin: 0 auto;
+    }
+
+    .docx-file-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      width: 100%;
+      padding: 14px 18px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+    }
+
+    .docx-icon-box {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-md);
+      background: rgba(37, 99, 235, 0.12);
+      color: #2563EB;
+      font-size: 1.6rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .docx-file-details {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .docx-file-name {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .docx-file-sub {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Thumbnail Frame */
+    .docx-thumb-wrapper {
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      border-radius: 4px;
+      overflow: hidden;
+      max-height: 280px;
+      display: inline-block;
+    }
+
+    .docx-thumb-wrapper canvas {
+      display: block;
+      max-height: 280px;
+      width: auto;
+    }
+
+    /* Feature points */
+    .docx-features-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      width: 100%;
+    }
+
+    .docx-feature-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      background: var(--bg-primary);
+      padding: 8px 12px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+    }
+
+    /* Progress Box */
+    .docx-progress-box {
+      width: 100%;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      display: none;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 8px;
+      border-radius: 4px;
+      background: var(--border-color);
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--tool-color);
+      transition: width 0.2s ease;
+    }
+  </style>
+</head>
+<body class="tool-page-docx">
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <a href="../index.html" class="app-logo">
+        <div class="logo-badge">⚡</div>
+        <div class="logo-title">
+          <span>PDF Tools</span>
+          <span class="logo-status-dot" title="100% Offline & Private"></span>
+        </div>
+      </a>
+      <nav class="header-nav">
+        <a href="merge.html" class="nav-link-item">MERGE PDF</a>
+        <a href="split.html" class="nav-link-item">SPLIT PDF</a>
+        <a href="compress.html" class="nav-link-item">COMPRESS PDF</a>
+        <div class="dropdown-nav-wrapper" id="convertDropdownWrapper">
+          <a href="javascript:void(0)" class="nav-link-item active" id="convertPdfTrigger">
+            CONVERT PDF <span class="nav-chevron" id="convertChevron">▾</span>
+          </a>
+        </div>
+        <a href="javascript:void(0)" class="nav-link-item all-tools-toggle" id="allToolsTrigger">
+          ALL PDF TOOLS <span class="nav-chevron" id="allToolsChevron">▾</span>
+        </a>
+      </nav>
+      <div class="header-controls">
+        <button class="theme-toggle" id="themeToggle" title="Toggle Light/Dark Theme">☀️ Light</button>
+        <button class="lang-toggle" id="langToggle">ID 🇮🇩</button>
+        <a href="viewer.html" class="btn-header-studio">✨ PDF Studio</a>
+        <button type="button" class="nine-dots-btn" id="nineDotsBtn" title="All Quick Actions">⠿</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="container">
+      <!-- Hero -->
+      <section class="tool-hero">
+        <div class="tool-hero-icon" style="background: #2563EB; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        </div>
+        <h1 data-i18n="pdf_docx.title">PDF to Word (DOCX)</h1>
+        <p data-i18n="pdf_docx.subtitle">Convert PDF documents into fully editable Microsoft Word (.docx) files. 100% free, private, and offline in your browser.</p>
+      </section>
+
+      <!-- Step 1: Upload Dropzone -->
+      <div id="uploadState" class="tool-workspace">
+        <div class="dropzone" id="dropzone">
+          <div class="dropzone-content">
+            <div class="dropzone-icon">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg>
+          </div>
+            <div class="dropzone-text">
+              <strong data-i18n="pdf_docx.drop_title">Drag & drop your PDF file here</strong>
+              <span data-i18n="pdf_docx.drop_subtitle">or click to browse from your computer</span>
+            </div>
+            <button type="button" class="btn btn-primary btn-sm" data-i18n="home.select_file">Select PDF File</button>
+          </div>
+          <input type="file" id="fileInput" accept=".pdf" style="display:none;">
+        </div>
+      </div>
+
+      <!-- Step 2: Convert Workspace -->
+      <div id="workspaceState" style="display: none;">
+        <div class="docx-preview-card">
+          <!-- File Details Bar -->
+          <div class="docx-file-meta">
+            <div class="docx-icon-box" style="font-weight: 900; font-size: 1.4rem;">W</div>
+            <div class="docx-file-details">
+              <div class="docx-file-name" id="fileNameLabel">document.pdf</div>
+              <div class="docx-file-sub" id="fileMetaLabel">0 KB • 0 pages</div>
+            </div>
+            <button type="button" class="btn btn-ghost btn-sm" id="changeFileBtn" data-i18n="action.change_file">Change File</button>
+          </div>
+
+          <!-- Page 1 Thumbnail Preview -->
+          <div class="docx-thumb-wrapper">
+            <canvas id="thumbCanvas"></canvas>
+          </div>
+
+          <!-- Highlights / Feature list -->
+          <div class="docx-features-list">
+            <div class="docx-feature-badge">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: #2563EB; flex-shrink: 0;"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              <span>Editable Word Paragraphs</span>
+            </div>
+            <div class="docx-feature-badge">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: #2563EB; flex-shrink: 0;"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+              <span>Preserves Fonts & Headings</span>
+            </div>
+            <div class="docx-feature-badge">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: #2563EB; flex-shrink: 0;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <span>Preserves Page Breaks</span>
+            </div>
+            <div class="docx-feature-badge">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: #10B981; flex-shrink: 0;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <span>100% Client-Side Privacy</span>
+            </div>
+          </div>
+
+          <!-- Progress Box -->
+          <div class="docx-progress-box" id="progressBox">
+            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600;">
+              <span id="progressStatusLabel">Converting document...</span>
+              <span id="progressPercentLabel">0%</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" id="progressFill"></div>
+            </div>
+          </div>
+
+          <!-- Convert Button -->
+          <button type="button" class="btn btn-primary btn-lg" id="convertBtn" style="width: 100%; font-size: 1.05rem; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+            <span>Convert to Word (.docx)</span>
+          </button>
+
+          <!-- Download Ready Area -->
+          <div id="downloadReadyArea" style="display: none; width: 100%; text-align: center;">
+            <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+              <button type="button" class="btn btn-primary btn-lg" id="downloadDocxBtn" style="flex: 1; min-width: 200px; background: #10B981; border-color: #10B981; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                <span>Download .DOCX Document</span>
+              </button>
+              <button type="button" id="openStudioBtn" class="btn btn-secondary btn-lg" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                <span data-i18n="action.open_studio">Open in PDF Studio</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p data-i18n="footer.text">PDF Tools — All processing is done locally in your browser.</p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="../js/lib/pdf.min.js"></script>
+  <script src="../js/lib/jszip.min.js"></script>
+  <script src="../js/lib/FileSaver.min.js"></script>
+  <script src="../js/utils/i18n.js"></script>
+  <script src="../js/utils/file-utils.js"></script>
+  <script src="../js/core/pdf-to-docx.js"></script>
+  <script src="../js/components/toast.js"></script>
+  <script src="../js/app.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      let currentFile = null;
+      let convertedDocxBlob = null;
+
+      const uploadState = document.getElementById('uploadState');
+      const workspaceState = document.getElementById('workspaceState');
+      const dropzone = document.getElementById('dropzone');
+      const fileInput = document.getElementById('fileInput');
+      const fileNameLabel = document.getElementById('fileNameLabel');
+      const fileMetaLabel = document.getElementById('fileMetaLabel');
+      const changeFileBtn = document.getElementById('changeFileBtn');
+      const thumbCanvas = document.getElementById('thumbCanvas');
+      const convertBtn = document.getElementById('convertBtn');
+      const progressBox = document.getElementById('progressBox');
+      const progressFill = document.getElementById('progressFill');
+      const progressStatusLabel = document.getElementById('progressStatusLabel');
+      const progressPercentLabel = document.getElementById('progressPercentLabel');
+      const downloadReadyArea = document.getElementById('downloadReadyArea');
+      const downloadDocxBtn = document.getElementById('downloadDocxBtn');
+
+      dropzone.addEventListener('click', () => fileInput.click());
+      fileInput.addEventListener('change', e => {
+        if (e.target.files && e.target.files[0]) handleFile(e.target.files[0]);
+      });
+      ['dragenter', 'dragover'].forEach(evt => {
+        dropzone.addEventListener(evt, e => { e.preventDefault(); dropzone.classList.add('drag-over'); });
+      });
+      ['dragleave', 'drop'].forEach(evt => {
+        dropzone.addEventListener(evt, e => { e.preventDefault(); dropzone.classList.remove('drag-over'); });
+      });
+      dropzone.addEventListener('drop', e => {
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+      });
+
+      changeFileBtn.addEventListener('click', () => {
+        workspaceState.style.display = 'none';
+        uploadState.style.display = 'block';
+        currentFile = null;
+        convertedDocxBlob = null;
+        fileInput.value = '';
+      });
+
+      // Check pending file
+      (async function checkPending() {
+        if (window.PDFTools && PDFTools.FileUtils && PDFTools.FileUtils.getPendingFile) {
+          const pending = await PDFTools.FileUtils.getPendingFile();
+          if (pending) handleFile(pending);
+        }
+      })();
+
+      async function handleFile(file) {
+        if (!file.name.toLowerCase().endsWith('.pdf')) {
+          if (PDFTools.Toast) PDFTools.Toast.error('Please select a valid PDF file.');
+          return;
+        }
+
+        currentFile = file;
+        fileNameLabel.textContent = file.name;
+        downloadReadyArea.style.display = 'none';
+        convertBtn.style.display = 'block';
+        convertBtn.disabled = false;
+        progressBox.style.display = 'none';
+
+        if (PDFTools.FileUtils && PDFTools.FileUtils.initPdfJsWorker) {
+          PDFTools.FileUtils.initPdfJsWorker();
+        }
+
+        // Render page 1 thumbnail
+        try {
+          const arrayBuffer = await file.arrayBuffer();
+          const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer.slice(0)) });
+          const pdf = await loadingTask.promise;
+          const page = await pdf.getPage(1);
+          const viewport = page.getViewport({ scale: 0.5 });
+
+          thumbCanvas.width = viewport.width;
+          thumbCanvas.height = viewport.height;
+          const ctx = thumbCanvas.getContext('2d');
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, viewport.width, viewport.height);
+
+          await page.render({ canvasContext: ctx, viewport }).promise;
+
+          fileMetaLabel.textContent = `${PDFTools.FileUtils.formatSize(file.size)} • ${pdf.numPages} page${pdf.numPages > 1 ? 's' : ''}`;
+        } catch (err) {
+          fileMetaLabel.textContent = `${PDFTools.FileUtils.formatSize(file.size)}`;
+        }
+
+        uploadState.style.display = 'none';
+        workspaceState.style.display = 'block';
+      }
+
+      // Convert Button
+      convertBtn.addEventListener('click', async () => {
+        if (!currentFile) return;
+
+        convertBtn.disabled = true;
+        progressBox.style.display = 'block';
+        progressFill.style.width = '0%';
+        progressPercentLabel.textContent = '0%';
+
+        try {
+          convertedDocxBlob = await PDFTools.PdfToDocx.convertToDocx(currentFile, {
+            onProgress: (percent, message) => {
+              progressFill.style.width = `${percent}%`;
+              progressPercentLabel.textContent = `${percent}%`;
+              progressStatusLabel.textContent = message;
+            }
+          });
+
+          convertBtn.style.display = 'none';
+          downloadReadyArea.style.display = 'block';
+
+          if (PDFTools.Toast) PDFTools.Toast.success('Conversion to Word (.docx) successful!');
+
+          if (PDFTools.RecentFiles) {
+            PDFTools.RecentFiles.add({
+              name: currentFile.name,
+              tool: 'PDF to Word',
+              size: PDFTools.FileUtils.formatSize(convertedDocxBlob.size),
+              icon: 'W'
+            });
+          }
+        } catch (err) {
+          console.error('PDF to Word error:', err);
+          if (PDFTools.Toast) PDFTools.Toast.error('Conversion failed: ' + err.message);
+          convertBtn.disabled = false;
+        }
+      });
+
+      // Download Button
+      downloadDocxBtn.addEventListener('click', () => {
+        if (!convertedDocxBlob || !currentFile) return;
+        const docxName = currentFile.name.replace(/\.pdf$/i, '') + '.docx';
+        saveAs(convertedDocxBlob, docxName);
+        if (PDFTools.Toast) PDFTools.Toast.success(`Downloaded: ${docxName}`);
+      });
+
+      // Open in PDF Studio Button
+      const openStudioBtn = document.getElementById('openStudioBtn');
+      if (openStudioBtn) {
+        openStudioBtn.addEventListener('click', () => {
+          if (currentFile) {
+            if (PDFTools.FileUtils && PDFTools.FileUtils.setPendingFile) {
+              PDFTools.FileUtils.setPendingFile(currentFile);
+            }
+            window.location.href = 'viewer.html';
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>

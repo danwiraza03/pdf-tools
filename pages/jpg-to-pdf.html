@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light" class="tool-page-jpg-pdf light-theme">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JPG to PDF — PDF Tools</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/tool.css">
+  <style>
+    :root { --tool-color: #EAB308; }
+  </style>
+</head>
+<body class="tool-page-jpg-pdf">
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <a href="../index.html" class="header-logo">
+        <div class="logo-icon">⚡</div>
+        <span>PDF Tools</span>
+      </a>
+      <nav class="header-nav">
+        <a href="../index.html" data-i18n="nav.home">Home</a>
+        <a href="viewer.html" data-i18n="tool.studio">✨ PDF Studio</a>
+        <a href="merge.html" data-i18n="tool.merge">Merge PDF</a>
+        <a href="compress.html" data-i18n="tool.compress">Compress PDF</a>
+        <a href="split.html" data-i18n="tool.split">Split PDF</a>
+        <a href="ocr.html" data-i18n="tool.ocr">OCR PDF</a>
+      </nav>
+      <div class="header-controls">
+        <button class="theme-toggle" id="themeToggle" title="Toggle Theme (Ctrl+D)">☀️ Light</button>
+        <button class="lang-toggle" id="langToggle">ID 🇮🇩</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div class="container">
+      <section class="tool-hero">
+        <div class="tool-hero-icon">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><circle cx="9.5" cy="12.5" r="1.5"/><path d="M16 18l-3-3-4 4"/></svg>
+        </div>
+        <h1 data-i18n="tool.jpg_pdf">JPG to PDF</h1>
+        <p data-i18n="tool.jpg_pdf.desc">Convert images (JPG, PNG, WebP) into a PDF document.</p>
+      </section>
+
+      <div class="tool-workspace">
+        <!-- Dropzone -->
+        <div class="dropzone" id="dropzone">
+          <div class="dropzone-icon">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg>
+          </div>
+          <div class="dropzone-title" data-i18n="dropzone.title.images">Drop your images here</div>
+          <div class="dropzone-subtitle" data-i18n="dropzone.subtitle.images">Supports JPG, PNG, WebP</div>
+        </div>
+
+        <!-- File List -->
+        <div id="fileList" class="file-list"></div>
+
+        <!-- Add More Button -->
+        <button id="addMoreBtn" class="add-more-btn" style="display: none;">
+          <span data-i18n="action.add_more">+ Add more images</span>
+        </button>
+
+        <!-- Options Panel -->
+        <div id="optionsPanel" class="options-panel" style="display: none;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+            <!-- Page Size -->
+            <div>
+              <div class="options-title" data-i18n="jpg.page_size">Page Size</div>
+              <div class="option-group" id="sizeOptions">
+                <button class="option-btn active" data-size="A4">A4</button>
+                <button class="option-btn" data-size="Letter">Letter</button>
+                <button class="option-btn" data-size="fit">Fit Image</button>
+              </div>
+            </div>
+
+            <!-- Orientation -->
+            <div>
+              <div class="options-title" data-i18n="jpg.orientation">Orientation</div>
+              <div class="option-group" id="orientOptions">
+                <button class="option-btn active" data-orient="portrait" data-i18n="jpg.portrait">Portrait</button>
+                <button class="option-btn" data-orient="landscape" data-i18n="jpg.landscape">Landscape</button>
+              </div>
+            </div>
+
+            <!-- Margin -->
+            <div>
+              <div class="options-title" data-i18n="jpg.margin">Margin</div>
+              <div class="option-group" id="marginOptions">
+                <button class="option-btn active" data-margin="none" data-i18n="jpg.no_margin">No Margin</button>
+                <button class="option-btn" data-margin="small" data-i18n="jpg.small_margin">Small</button>
+                <button class="option-btn" data-margin="normal" data-i18n="jpg.normal_margin">Normal</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div id="progressBar" class="progress-container">
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill"></div>
+          </div>
+          <div class="progress-text" data-i18n="action.processing">Processing...</div>
+        </div>
+
+        <!-- Result Area -->
+        <div id="resultArea" class="result-area">
+          <div class="result-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="result-title" data-i18n="result.convert_success">Converted to PDF successfully!</div>
+          <div style="display: flex; gap: 12px; justify-content: center; margin-top: 24px; flex-wrap: wrap;">
+            <button id="downloadBtn" class="btn btn-primary btn-lg" data-i18n="action.download">Download PDF</button>
+            <button id="openStudioBtn" class="btn btn-secondary btn-lg" style="display: inline-flex; align-items: center; gap: 8px;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              <span data-i18n="action.open_studio">Open in PDF Studio</span>
+            </button>
+            <button id="resetBtn" class="btn btn-secondary btn-lg" data-i18n="action.clear">Start Over</button>
+          </div>
+        </div>
+
+        <!-- Action Bar -->
+        <div id="actionBar" class="action-bar">
+          <button id="convertBtn" class="btn btn-primary btn-lg" data-i18n="action.convert">Convert to PDF</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p data-i18n="footer.text">PDF Tools — All processing is done locally in your browser.</p>
+    </div>
+  </footer>
+
+  <!-- Libraries -->
+  <script src="../js/lib/pdf-lib.min.js"></script>
+  <script src="../js/lib/Sortable.min.js"></script>
+  <script src="../js/lib/FileSaver.min.js"></script>
+
+  <!-- App Core & Utils -->
+  <script src="../js/utils/i18n.js"></script>
+  <script src="../js/utils/file-utils.js"></script>
+  <script src="../js/utils/download.js"></script>
+  <script src="../js/components/toast.js"></script>
+  <script src="../js/components/progress.js"></script>
+  <script src="../js/components/dropzone.js"></script>
+  <script src="../js/components/file-list.js"></script>
+  <script src="../js/core/jpg-to-pdf.js"></script>
+  <script src="../js/app.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const dropzoneEl = document.getElementById('dropzone');
+      const addMoreBtn = document.getElementById('addMoreBtn');
+      const optionsPanel = document.getElementById('optionsPanel');
+      const actionBar = document.getElementById('actionBar');
+      const convertBtn = document.getElementById('convertBtn');
+      const resultArea = document.getElementById('resultArea');
+      const downloadBtn = document.getElementById('downloadBtn');
+      const resetBtn = document.getElementById('resetBtn');
+
+      let pageSize = 'A4';
+      let orientation = 'portrait';
+      let margin = 'none';
+      let convertedData = null;
+      const progress = PDFTools.Progress('progressBar');
+
+      const fileList = PDFTools.FileList('fileList', {
+        onFilesChange: function (files) {
+          if (files.length > 0) {
+            dropzoneEl.style.display = 'none';
+            addMoreBtn.style.display = 'flex';
+            optionsPanel.style.display = 'block';
+            actionBar.classList.add('active');
+            resultArea.classList.remove('active');
+          } else {
+            dropzoneEl.style.display = 'block';
+            addMoreBtn.style.display = 'none';
+            optionsPanel.style.display = 'none';
+            actionBar.classList.remove('active');
+          }
+        }
+      });
+
+      const dropzone = PDFTools.Dropzone('dropzone', {
+        accept: 'image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp',
+        multiple: true,
+        onFiles: function (files) {
+          fileList.addFiles(files);
+          PDFTools.Toast.success(`${files.length} ${PDFTools.i18n.t('toast.files_added')}`);
+        }
+      });
+
+      addMoreBtn.addEventListener('click', () => dropzone.open());
+
+      function setupOptionGroup(groupId, onChange) {
+        document.querySelectorAll(`#${groupId} .option-btn`).forEach(btn => {
+          btn.addEventListener('click', function () {
+            document.querySelectorAll(`#${groupId} .option-btn`).forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            onChange(btn);
+          });
+        });
+      }
+
+      setupOptionGroup('sizeOptions', (b) => pageSize = b.getAttribute('data-size'));
+      setupOptionGroup('orientOptions', (b) => orientation = b.getAttribute('data-orient'));
+      setupOptionGroup('marginOptions', (b) => margin = b.getAttribute('data-margin'));
+
+      convertBtn.addEventListener('click', async function () {
+        const files = fileList.getFiles();
+        if (files.length === 0) return;
+
+        convertBtn.disabled = true;
+        progress.show(PDFTools.i18n.t('action.processing'));
+
+        try {
+          convertedData = await PDFTools.JpgToPdf.convert(files, {
+            pageSize: pageSize,
+            orientation: orientation,
+            margin: margin
+          }, function (percent, text) {
+            progress.update(percent, text);
+          });
+
+          progress.hide();
+          document.getElementById('fileList').style.display = 'none';
+          addMoreBtn.style.display = 'none';
+          optionsPanel.style.display = 'none';
+          actionBar.classList.remove('active');
+          resultArea.classList.add('active');
+
+          if (PDFTools.RecentFiles && convertedData) {
+            PDFTools.RecentFiles.add('images_converted.pdf', convertedData.byteLength, 'JPG to PDF', 'image');
+          }
+
+          PDFTools.Toast.success(PDFTools.i18n.t('result.convert_success'));
+        } catch (err) {
+          console.error(err);
+          progress.hide();
+          PDFTools.Toast.error(err.message || PDFTools.i18n.t('toast.error'));
+          convertBtn.disabled = false;
+        }
+      });
+
+      // Check for pending handoff file from homepage (B1)
+      if (PDFTools.FileUtils && PDFTools.FileUtils.consumePendingFile) {
+        PDFTools.FileUtils.consumePendingFile().then(file => {
+          if (file) {
+            fileList.addFiles([file]);
+          }
+        });
+      }
+
+      downloadBtn.addEventListener('click', function () {
+        if (convertedData) {
+          PDFTools.Download.save(convertedData, 'images_converted.pdf');
+        }
+      });
+
+      const openStudioBtn = document.getElementById('openStudioBtn');
+      if (openStudioBtn) {
+        openStudioBtn.addEventListener('click', () => {
+          if (convertedData) {
+            const blob = new Blob([convertedData], { type: 'application/pdf' });
+            const file = new File([blob], 'images_converted.pdf', { type: 'application/pdf' });
+            if (PDFTools.FileUtils && PDFTools.FileUtils.setPendingFile) {
+              PDFTools.FileUtils.setPendingFile(file);
+            }
+            window.location.href = 'viewer.html';
+          }
+        });
+      }
+
+      resetBtn.addEventListener('click', function () {
+        fileList.clear();
+        convertedData = null;
+        convertBtn.disabled = false;
+        resultArea.classList.remove('active');
+        document.getElementById('fileList').style.display = 'flex';
+        dropzoneEl.style.display = 'block';
+      });
+    });
+  </script>
+</body>
+</html>
