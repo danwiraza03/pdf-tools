@@ -4049,6 +4049,7 @@
   <script src="../js/core/pdf-studio.js"></script>
   <script src="../js/studio/studio-panels.js"></script>
   <script src="../js/studio/studio-sign.js"></script>
+  <script src="../js/studio/studio-search-ocr.js"></script>
   <script src="../js/app.js"></script>
 
   <!-- PDF Studio Controller Script -->
@@ -4064,15 +4065,7 @@
       let currentDrawPoints = [];
       let _formatPaneMouseDown = false; // Guards blur handler when user clicks format panel
 
-      // Find in Document State
-      let searchMatches = [];
-      let currentMatchIdx = -1;
-      let searchTextCache = new Map();
-      let searchRequestId = 0;
-      let searchQuery = '';
-      let matchCase = false;
-      let wholeWord = false;
-      let highlightRequestId = 0;
+      // Find in Document State (delegated to window.PDFTools.StudioSearchOCR)
 
       // History Stack for Unlimited Undo
       const undoStack = [];
@@ -4353,12 +4346,9 @@
           } else {
             setDocumentDirty(false);
           }
-          searchRequestId++;
-          searchTextCache = new Map();
-          searchMatches = [];
-          currentMatchIdx = -1;
-          searchQuery = '';
-          searchHighlightLayer.innerHTML = '';
+          if (window.PDFTools && window.PDFTools.StudioSearchOCR) {
+            window.PDFTools.StudioSearchOCR.resetSearchState();
+          }
 
           tabDocName.textContent = `${file.name}${currentDoc.dirty ? ' *' : ''}`;
           tabDocName.title = currentDoc.dirty ? 'Recovered unsaved changes' : file.name;
@@ -4499,89 +4489,12 @@
         }
       }
 
-      function renderSinglePageSearchHighlights() {
-        searchHighlightLayer.innerHTML = '';
-        if (!currentDoc || !searchQuery || searchMatches.length === 0) return;
-
-        const pageMatches = searchMatches.filter(m => m.pageNumber === currentDoc.currentPage);
-        const fragment = document.createDocumentFragment();
-
-        pageMatches.forEach(m => {
-          const isCurrentActive = (searchMatches[currentMatchIdx] === m);
-          const el = document.createElement('div');
-          el.className = `search-highlight ${isCurrentActive ? 'active-match' : ''}`;
-          el.style.left = `${m.rect.x * currentScale}px`;
-          el.style.top = `${m.rect.y * currentScale}px`;
-          el.style.width = `${m.rect.width * currentScale}px`;
-          el.style.height = `${m.rect.height * currentScale}px`;
-          if (isCurrentActive) {
-            el.id = 'activeSearchHighlight';
-          }
-          fragment.appendChild(el);
-        });
-
-        searchHighlightLayer.appendChild(fragment);
-      }
-
-      function renderContinuousSearchHighlights() {
-        if (!pageStack) return;
-        pageStack.querySelectorAll('.continuous-highlight-layer').forEach(layer => {
-          const p = parseInt(layer.dataset.page, 10);
-          layer.innerHTML = '';
-          if (!searchQuery || searchMatches.length === 0) return;
-
-          const pageMatches = searchMatches.filter(m => m.pageNumber === p);
-          const fragment = document.createDocumentFragment();
-
-          pageMatches.forEach(m => {
-            const isCurrentActive = (searchMatches[currentMatchIdx] === m);
-            const el = document.createElement('div');
-            el.className = `search-highlight ${isCurrentActive ? 'active-match' : ''}`;
-            el.style.left = `${m.rect.x * currentScale}px`;
-            el.style.top = `${m.rect.y * currentScale}px`;
-            el.style.width = `${m.rect.width * currentScale}px`;
-            el.style.height = `${m.rect.height * currentScale}px`;
-            if (isCurrentActive) {
-              el.id = 'activeContinuousHighlight';
-            }
-            fragment.appendChild(el);
-          });
-
-          layer.appendChild(fragment);
-        });
-      }
-
-      function clearSearchHighlights() {
-        if (searchHighlightLayer) searchHighlightLayer.innerHTML = '';
-        if (pageStack) {
-          pageStack.querySelectorAll('.continuous-highlight-layer').forEach(l => l.innerHTML = '');
-        }
-      }
-
-      function scrollToActiveMatchSingle(match) {
-        const el = document.getElementById('activeSearchHighlight');
-        if (el) {
-          el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-        } else if (match && acrobatViewport) {
-          const matchY = match.rect.y * currentScale;
-          acrobatViewport.scrollTo({
-            top: Math.max(0, matchY - acrobatViewport.clientHeight / 2),
-            behavior: 'smooth'
-          });
-        }
-      }
-
-      function scrollToActiveMatchContinuous(match) {
-        if (!match) return;
-        const pageFrame = pageStack ? pageStack.querySelector(`[data-page="${match.pageNumber}"]`) : null;
-        if (!pageFrame) return;
-        const el = document.getElementById('activeContinuousHighlight');
-        if (el) {
-          el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-        } else {
-          pageFrame.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-      }
+      // Search highlight & match viewport helpers - Delegated to StudioSearchOCR
+      const renderSinglePageSearchHighlights = () => window.PDFTools.StudioSearchOCR?.renderSinglePageSearchHighlights();
+      const renderContinuousSearchHighlights = () => window.PDFTools.StudioSearchOCR?.renderContinuousSearchHighlights();
+      const clearSearchHighlights = () => window.PDFTools.StudioSearchOCR?.clearSearchHighlights();
+      const scrollToActiveMatchSingle = (match) => window.PDFTools.StudioSearchOCR?.scrollToActiveMatchSingle(match);
+      const scrollToActiveMatchContinuous = (match) => window.PDFTools.StudioSearchOCR?.scrollToActiveMatchContinuous(match);
 
       function drawArrowhead(ctx, fromX, fromY, toX, toY, headLength = 12) {
         const angle = Math.atan2(toY - fromY, toX - fromX);
@@ -7699,579 +7612,31 @@
         });
       }
 
-      // Quick Find / Search in Document (Ctrl + F)
-      const toggleFindBar = () => {
-        searchBar.classList.toggle('active');
-        if (searchBar.classList.contains('active')) {
-          findInput.focus();
-          findInput.select();
-          if (findInput.value.trim().length > 0) {
-            executeSearch();
-          }
-        } else {
-          clearSearchHighlights();
-        }
-      };
-
-      const closeFindBar = () => {
-        searchBar.classList.remove('active');
-        searchQuery = '';
-        searchMatches = [];
-        currentMatchIdx = -1;
-        findMatchesLabel.textContent = '0/0';
-        findClearBtn.style.display = 'none';
-        clearSearchHighlights();
-      };
-
-      menuFind.addEventListener('click', toggleFindBar);
-      if (toolbarFindBtn) toolbarFindBtn.addEventListener('click', toggleFindBar);
-      if (paneFindText) paneFindText.addEventListener('click', toggleFindBar);
-      findCloseBtn.addEventListener('click', closeFindBar);
-
-      if (findClearBtn) {
-        findClearBtn.addEventListener('click', () => {
-          findInput.value = '';
-          findClearBtn.style.display = 'none';
-          searchQuery = '';
-          searchMatches = [];
-          currentMatchIdx = -1;
-          findMatchesLabel.textContent = '0/0';
-          clearSearchHighlights();
-          findInput.focus();
+      // --- Document Search & Offline OCR Controller - Delegated to StudioSearchOCR ---
+      if (window.PDFTools && window.PDFTools.StudioSearchOCR) {
+        window.PDFTools.StudioSearchOCR.init({
+          getDoc: () => currentDoc,
+          getCurrentScale: () => currentScale,
+          getViewMode: () => viewMode,
+          renderCurrentPageView: () => renderCurrentPageView(),
+          updateThumbnailActiveState: () => updateThumbnailActiveState(),
+          triggerOpen: () => triggerOpen(),
+          setDocumentDirty: (d) => setDocumentDirty(d),
+          scheduleRecovery: () => scheduleRecovery(),
+          undoStack: undoStack,
+          renderActivePageWidgets: () => renderActivePageWidgets(),
+          getPageNumberInput: () => pageNumberInput,
+          getAcrobatViewport: () => acrobatViewport,
+          getPageStack: () => pageStack,
+          getSearchHighlightLayer: () => searchHighlightLayer,
+          getCommentsDrawer: () => commentsDrawer
         });
       }
-
-      if (findMatchCaseBtn) {
-        findMatchCaseBtn.addEventListener('click', () => {
-          matchCase = !matchCase;
-          findMatchCaseBtn.classList.toggle('active', matchCase);
-          executeSearch();
-        });
-      }
-
-      if (findWholeWordBtn) {
-        findWholeWordBtn.addEventListener('click', () => {
-          wholeWord = !wholeWord;
-          findWholeWordBtn.classList.toggle('active', wholeWord);
-          executeSearch();
-        });
-      }
-
-      const getPageSearchData = async (pageNum) => {
-        if (searchTextCache.has(pageNum)) {
-          return searchTextCache.get(pageNum);
-        }
-        try {
-          const page = await currentDoc.pdfJsDoc.getPage(pageNum);
-          const textContent = await page.getTextContent({ normalizeWhitespace: true });
-          const unscaledViewport = page.getViewport({ scale: 1.0 });
-
-          const items = [];
-          textContent.items.forEach(item => {
-            if (!item.str) return;
-            const tx = pdfjsLib.Util.transform(unscaledViewport.transform, item.transform);
-            const fontHeight = Math.max(8, Math.hypot(tx[2], tx[3]));
-            items.push({
-              str: item.str,
-              transform: tx,
-              unscaledX: tx[4],
-              unscaledY: tx[5] - fontHeight,
-              unscaledWidth: item.width || (item.str.length * fontHeight * 0.52),
-              unscaledHeight: fontHeight,
-              pdfItem: item
-            });
-          });
-
-          const data = { items, unscaledViewport };
-          searchTextCache.set(pageNum, data);
-          return data;
-        } catch (err) {
-          console.warn(`Failed to extract search data for page ${pageNum}:`, err);
-          return { items: [], unscaledViewport: null };
-        }
-      };
-
-      const findMatchesOnPage = async (pageNum, query, caseSensitive, wholeWordOnly) => {
-        const matches = [];
-        const { items } = await getPageSearchData(pageNum);
-        const qLen = query.length;
-        const targetQ = caseSensitive ? query : query.toLowerCase();
-
-        // 1. PDF.js Content Items
-        items.forEach(item => {
-          const rawStr = item.str || '';
-          const str = caseSensitive ? rawStr : rawStr.toLowerCase();
-          let startPos = 0;
-
-          while (startPos < str.length) {
-            const foundIndex = str.indexOf(targetQ, startPos);
-            if (foundIndex === -1) break;
-
-            if (wholeWordOnly) {
-              const beforeChar = foundIndex > 0 ? rawStr[foundIndex - 1] : ' ';
-              const afterChar = (foundIndex + qLen < rawStr.length) ? rawStr[foundIndex + qLen] : ' ';
-              const isWordBoundary = /\W/.test(beforeChar) && /\W/.test(afterChar);
-              if (!isWordBoundary) {
-                startPos = foundIndex + 1;
-                continue;
-              }
-            }
-
-            const totalLen = Math.max(1, rawStr.length);
-            const charWidth = item.unscaledWidth / totalLen;
-            const matchX = item.unscaledX + (foundIndex * charWidth);
-            const matchWidth = Math.max(charWidth * qLen, 4);
-
-            matches.push({
-              pageNumber: pageNum,
-              rect: {
-                x: matchX,
-                y: item.unscaledY,
-                width: matchWidth,
-                height: item.unscaledHeight
-              },
-              text: rawStr.substring(foundIndex, foundIndex + qLen)
-            });
-
-            startPos = foundIndex + qLen;
-          }
-        });
-
-        // 2. Custom User Added Texts & In-Place Edits
-        if (currentDoc) {
-          const pageAnn = currentDoc.getPageAnnotation(pageNum);
-          (pageAnn.texts || []).forEach(tb => {
-            const rawStr = tb.text || '';
-            const str = caseSensitive ? rawStr : rawStr.toLowerCase();
-            let startPos = 0;
-            while (startPos < str.length) {
-              const foundIndex = str.indexOf(targetQ, startPos);
-              if (foundIndex === -1) break;
-              matches.push({
-                pageNumber: pageNum,
-                rect: {
-                  x: tb.x,
-                  y: tb.y,
-                  width: Math.max(60, (tb.text || '').length * (tb.fontSize || 14) * 0.5),
-                  height: (tb.fontSize || 14) * 1.2
-                },
-                text: rawStr.substring(foundIndex, foundIndex + qLen)
-              });
-              startPos = foundIndex + qLen;
-            }
-          });
-
-          (pageAnn.edits || []).forEach(ed => {
-            const rawStr = ed.text || '';
-            const str = caseSensitive ? rawStr : rawStr.toLowerCase();
-            let startPos = 0;
-            while (startPos < str.length) {
-              const foundIndex = str.indexOf(targetQ, startPos);
-              if (foundIndex === -1) break;
-              matches.push({
-                pageNumber: pageNum,
-                rect: {
-                  x: ed.x,
-                  y: ed.y,
-                  width: ed.width || (rawStr.length * (ed.fontSize || 12) * 0.5),
-                  height: ed.height || (ed.fontSize || 12) * 1.2
-                },
-                text: rawStr.substring(foundIndex, foundIndex + qLen)
-              });
-              startPos = foundIndex + qLen;
-            }
-          });
-
-          // 3. Scanned Hardcopy OCR Words (Full document search on scans)
-          if (pageAnn.ocrWords && pageAnn.ocrWords.length > 0) {
-            pageAnn.ocrWords.forEach(w => {
-              const rawStr = w.text || '';
-              const str = caseSensitive ? rawStr : rawStr.toLowerCase();
-              let startPos = 0;
-              while (startPos < str.length) {
-                const foundIndex = str.indexOf(targetQ, startPos);
-                if (foundIndex === -1) break;
-                matches.push({
-                  pageNumber: pageNum,
-                  rect: {
-                    x: w.x,
-                    y: w.y,
-                    width: w.width || (rawStr.length * (w.height || 12) * 0.5),
-                    height: w.height || 14
-                  },
-                  text: rawStr.substring(foundIndex, foundIndex + qLen)
-                });
-                startPos = foundIndex + qLen;
-              }
-            });
-          }
-        }
-
-        return matches;
-      };
-
-      let searchDebounceTimer = null;
-
-      const executeSearch = async () => {
-        const query = findInput.value.trim();
-        const requestId = ++searchRequestId;
-        searchQuery = query;
-        searchMatches = [];
-        currentMatchIdx = -1;
-
-        if (findClearBtn) {
-          findClearBtn.style.display = query.length > 0 ? 'block' : 'none';
-        }
-
-        if (!query || !currentDoc) {
-          findMatchesLabel.textContent = '0/0';
-          clearSearchHighlights();
-          return;
-        }
-
-        findMatchesLabel.textContent = 'Searching...';
-        const activePages = currentDoc.getActivePagesList();
-        const allMatches = [];
-
-        for (const p of activePages) {
-          if (requestId !== searchRequestId) return;
-          try {
-            const pageMatches = await findMatchesOnPage(p, query, matchCase, wholeWord);
-            if (requestId !== searchRequestId) return;
-            allMatches.push(...pageMatches);
-          } catch (e) {
-            console.warn('Search error on page', p, e);
-          }
-        }
-
-        if (requestId !== searchRequestId) return;
-
-        searchMatches = allMatches;
-        if (searchMatches.length > 0) {
-          let startIdx = searchMatches.findIndex(m => m.pageNumber >= currentDoc.currentPage);
-          if (startIdx === -1) startIdx = 0;
-          await selectSearchMatch(startIdx);
-        } else {
-          findMatchesLabel.textContent = '0 of 0';
-          clearSearchHighlights();
-        }
-      };
-
-      const selectSearchMatch = async (matchIdx) => {
-        if (!currentDoc || searchMatches.length === 0) return;
-        currentMatchIdx = (matchIdx + searchMatches.length) % searchMatches.length;
-        findMatchesLabel.textContent = `${currentMatchIdx + 1} of ${searchMatches.length}`;
-
-        const activeMatch = searchMatches[currentMatchIdx];
-        if (!activeMatch) return;
-
-        if (currentDoc.currentPage !== activeMatch.pageNumber) {
-          currentDoc.currentPage = activeMatch.pageNumber;
-          if (viewMode === 'single') {
-            await renderCurrentPageView();
-          } else {
-            pageNumberInput.value = currentDoc.getActivePagesList().indexOf(currentDoc.currentPage) + 1;
-            updateThumbnailActiveState();
-          }
-        }
-
-        if (viewMode === 'single') {
-          renderSinglePageSearchHighlights();
-          scrollToActiveMatchSingle(activeMatch);
-        } else {
-          renderContinuousSearchHighlights();
-          scrollToActiveMatchContinuous(activeMatch);
-        }
-      };
-
-      findInput.addEventListener('input', () => {
-        clearTimeout(searchDebounceTimer);
-        searchDebounceTimer = setTimeout(executeSearch, 120);
-      });
-
-      findInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          selectSearchMatch(currentMatchIdx + (e.shiftKey ? -1 : 1));
-        } else if (e.key === 'Escape') {
-          closeFindBar();
-        }
-      });
-
-      findNextBtn.addEventListener('click', async () => {
-        if (searchMatches.length === 0 && findInput.value.trim().length > 0) {
-          await executeSearch();
-        } else {
-          await selectSearchMatch(currentMatchIdx + 1);
-        }
-      });
-
-      findPrevBtn.addEventListener('click', async () => {
-        if (searchMatches.length === 0 && findInput.value.trim().length > 0) {
-          await executeSearch();
-        } else {
-          await selectSearchMatch(currentMatchIdx - 1);
-        }
-      });
-
-      // OCR Panel & Drawer
-      const toggleOcrDrawer = (forceState) => {
-        const shouldOpen = typeof forceState === 'boolean' ? forceState : !ocrDrawer.classList.contains('active');
-        if (shouldOpen) {
-          ocrDrawer.classList.add('active');
-          if (toolOcr) toolOcr.classList.add('active');
-          if (commentsDrawer) commentsDrawer.classList.remove('active');
-        } else {
-          ocrDrawer.classList.remove('active');
-          if (toolOcr) toolOcr.classList.remove('active');
-        }
-      };
-      toolOcr.addEventListener('click', () => toggleOcrDrawer());
-      paneScanOcr.addEventListener('click', () => toggleOcrDrawer());
-      closeOcrBtn.addEventListener('click', () => toggleOcrDrawer(false));
-
-      startOcrThisPageBtn.addEventListener('click', async () => {
-        if (!currentDoc) {
-          PDFTools.Toast.info('Silakan buka dokumen PDF terlebih dahulu.');
-          return;
-        }
-        const lang = document.getElementById('ocrLangSelect').value;
-
-        startOcrThisPageBtn.disabled = true;
-        startOcrThisPageBtn.textContent = 'Memproses OCR...';
-
-        try {
-          const ocrRenderScale = 2.0;
-          const tempCanvas = document.createElement('canvas');
-          await PDFTools.Studio.renderPage(currentDoc, currentDoc.currentPage, tempCanvas, ocrRenderScale);
-
-          const ocrData = await PDFTools.OCR.recognizeCanvas(tempCanvas, lang, (pct, status) => {
-            startOcrThisPageBtn.textContent = `Memproses ${pct}%...`;
-          });
-
-          const pageText = (ocrData.text || '').trim();
-          ocrOutputBox.value = pageText || '(Tidak ada teks terdeteksi pada halaman ini)';
-
-          // ATTACH OCR WORDS TO CURRENT PAGE ANNOTATION FOR REAL-TIME SEARCH (Ctrl+F)
-          const pageAnn = currentDoc.getPageAnnotation(currentDoc.currentPage);
-          pageAnn.ocrText = pageText;
-          pageAnn.ocrWords = (ocrData.words || []).map(w => ({
-            text: w.text,
-            confidence: w.confidence,
-            x: (w.bbox.x0 || 0) / ocrRenderScale,
-            y: (w.bbox.y0 || 0) / ocrRenderScale,
-            width: ((w.bbox.x1 || 0) - (w.bbox.x0 || 0)) / ocrRenderScale,
-            height: ((w.bbox.y1 || 0) - (w.bbox.y0 || 0)) / ocrRenderScale
-          }));
-          setDocumentDirty(true);
-
-          PDFTools.Toast.success(`OCR Selesai! Halaman ${currentDoc.currentPage} kini 100% dapat dicari (Ctrl+F) dan disalin. Akurasi: ${Math.round(ocrData.confidence || 0)}%`);
-
-          if (typeof executeSearch === 'function' && findInput && findInput.value.trim().length > 0) {
-            executeSearch();
-          }
-        } catch (err) {
-          console.error('OCR Error:', err);
-          PDFTools.Toast.error(err.message || 'OCR gagal.');
-        } finally {
-          startOcrThisPageBtn.disabled = false;
-          startOcrThisPageBtn.innerHTML = '<svg class="btn-svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> OCR Halaman Ini';
-        }
-      });
-
-      let isOcrBatchRunning = false;
-      let shouldCancelBatchOcr = false;
-
-      const startOcrAllPagesBtn = document.getElementById('startOcrAllPagesBtn');
-      if (startOcrAllPagesBtn) {
-        startOcrAllPagesBtn.addEventListener('click', async () => {
-          if (!currentDoc) {
-            PDFTools.Toast.info('Silakan buka dokumen PDF terlebih dahulu.');
-            return;
-          }
-
-          if (isOcrBatchRunning) {
-            shouldCancelBatchOcr = true;
-            startOcrAllPagesBtn.textContent = 'Menghentikan...';
-            return;
-          }
-
-          const activePages = currentDoc.getActivePagesList();
-          const totalPages = activePages.length;
-          const lang = document.getElementById('ocrLangSelect').value;
-
-          let confirmed = true;
-          if (window.PDFTools && window.PDFTools.Modal && window.PDFTools.Modal.confirm) {
-            confirmed = await window.PDFTools.Modal.confirm(`Jalankan OCR untuk seluruh dokumen (${totalPages} halaman)?\n\nSetiap halaman scan kertas akan langsung dapat dicari dengan Ctrl+F dan disimpan menjadi Searchable PDF.`, { title: 'Batch OCR Offline' });
-          }
-          if (!confirmed) return;
-
-          isOcrBatchRunning = true;
-          shouldCancelBatchOcr = false;
-          startOcrAllPagesBtn.classList.remove('btn-primary');
-          startOcrAllPagesBtn.classList.add('btn-danger');
-          startOcrThisPageBtn.disabled = true;
-
-          const ocrRenderScale = 2.0;
-          let completedCount = 0;
-
-          try {
-            for (let i = 0; i < totalPages; i++) {
-              if (shouldCancelBatchOcr) {
-                PDFTools.Toast.info('Batch OCR dihentikan.');
-                break;
-              }
-
-              const pageNum = activePages[i];
-              startOcrAllPagesBtn.textContent = `Batal (${i + 1}/${totalPages})`;
-
-              const tempCanvas = document.createElement('canvas');
-              await PDFTools.Studio.renderPage(currentDoc, pageNum, tempCanvas, ocrRenderScale);
-
-              const ocrData = await PDFTools.OCR.recognizeCanvas(tempCanvas, lang, (pct, status) => {
-                startOcrAllPagesBtn.textContent = `Hal ${i + 1}/${totalPages} (${pct}%)`;
-              });
-
-              const pageText = (ocrData.text || '').trim();
-              const pageAnn = currentDoc.getPageAnnotation(pageNum);
-              pageAnn.ocrText = pageText;
-              pageAnn.ocrWords = (ocrData.words || []).map(w => ({
-                text: w.text,
-                confidence: w.confidence,
-                x: (w.bbox.x0 || 0) / ocrRenderScale,
-                y: (w.bbox.y0 || 0) / ocrRenderScale,
-                width: ((w.bbox.x1 || 0) - (w.bbox.x0 || 0)) / ocrRenderScale,
-                height: ((w.bbox.y1 || 0) - (w.bbox.y0 || 0)) / ocrRenderScale
-              }));
-
-              if (pageNum === currentDoc.currentPage) {
-                ocrOutputBox.value = pageText;
-              }
-
-              completedCount++;
-              setDocumentDirty(true);
-            }
-
-            PDFTools.Toast.success(`Selesai! ${completedCount} halaman berhasil di-OCR. Seluruh dokumen kini dapat dicari (Ctrl+F) dan disimpan.`);
-            if (typeof executeSearch === 'function' && findInput && findInput.value.trim().length > 0) {
-              executeSearch();
-            }
-          } catch (err) {
-            console.error('Batch OCR Error:', err);
-            PDFTools.Toast.error(err.message || 'Batch OCR gagal.');
-          } finally {
-            isOcrBatchRunning = false;
-            shouldCancelBatchOcr = false;
-            startOcrAllPagesBtn.classList.remove('btn-danger');
-            startOcrAllPagesBtn.classList.add('btn-primary');
-            startOcrAllPagesBtn.innerHTML = '<svg class="btn-svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> OCR Semua Halaman';
-            startOcrThisPageBtn.disabled = false;
-          }
-        });
-      }
-
-      startSearchablePdfBtn.addEventListener('click', async () => {
-        if (!currentDoc) {
-          PDFTools.Toast.info('Silakan buka dokumen PDF terlebih dahulu.');
-          return;
-        }
-
-        startSearchablePdfBtn.disabled = true;
-        startSearchablePdfBtn.textContent = 'Menyimpan Searchable PDF...';
-
-        try {
-          // If current page doesn't have OCR yet, run OCR on it first
-          const currentAnn = currentDoc.getPageAnnotation(currentDoc.currentPage);
-          if (!currentAnn.ocrWords || currentAnn.ocrWords.length === 0) {
-            startSearchablePdfBtn.textContent = 'Menjalankan OCR halaman...';
-            const lang = document.getElementById('ocrLangSelect').value;
-            const ocrRenderScale = 2.0;
-            const tempCanvas = document.createElement('canvas');
-            await PDFTools.Studio.renderPage(currentDoc, currentDoc.currentPage, tempCanvas, ocrRenderScale);
-            const ocrData = await PDFTools.OCR.recognizeCanvas(tempCanvas, lang);
-            currentAnn.ocrText = (ocrData.text || '').trim();
-            currentAnn.ocrWords = (ocrData.words || []).map(w => ({
-              text: w.text,
-              confidence: w.confidence,
-              x: (w.bbox.x0 || 0) / ocrRenderScale,
-              y: (w.bbox.y0 || 0) / ocrRenderScale,
-              width: ((w.bbox.x1 || 0) - (w.bbox.x0 || 0)) / ocrRenderScale,
-              height: ((w.bbox.y1 || 0) - (w.bbox.y0 || 0)) / ocrRenderScale
-            }));
-            setDocumentDirty(true);
-          }
-
-          // Export document with embedded invisible searchable text layer
-          const exportedBytes = await PDFTools.Studio.exportDocument(currentDoc, (p) => {
-            startSearchablePdfBtn.textContent = `Menyimpan ${p}%...`;
-          });
-
-          const baseName = (currentDoc.fileName || 'document').replace(/\.pdf$/i, '');
-          const finalName = `${baseName}_searchable.pdf`;
-          PDFTools.Download.save(exportedBytes, finalName);
-          PDFTools.Toast.success(`Searchable PDF berhasil diunduh: "${finalName}"`);
-        } catch (err) {
-          console.error('Searchable PDF Error:', err);
-          PDFTools.Toast.error(err.message || 'Gagal membuat Searchable PDF.');
-        } finally {
-          startSearchablePdfBtn.disabled = false;
-          startSearchablePdfBtn.innerHTML = '<svg class="btn-svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Unduh Searchable PDF';
-        }
-      });
-
-      copyOcrBtn.addEventListener('click', () => {
-        if (ocrOutputBox.value) {
-          navigator.clipboard.writeText(ocrOutputBox.value);
-          PDFTools.Toast.success('OCR text copied to clipboard!');
-        }
-      });
-
-      pasteOcrBtn.addEventListener('click', () => {
-        if (!ocrOutputBox.value || !currentDoc) return;
-        const pageAnn = currentDoc.getPageAnnotation(currentDoc.currentPage);
-        const newText = {
-          id: 'text_ocr_' + Date.now(),
-          text: ocrOutputBox.value,
-          x: 40,
-          y: 40,
-          fontSize: 14,
-          fontFamily: 'Helvetica',
-          bold: false,
-          italic: false,
-          color: '#000000'
-        };
-        pageAnn.texts.push(newText);
-        undoStack.push({ pageNum: currentDoc.currentPage, type: 'text', item: newText });
-        scheduleRecovery();
-        renderActivePageWidgets();
-        PDFTools.Toast.success('OCR text placed on page!');
-      });
-
-      // OCR Drawer Toggle
-      if (toolOcr) {
-        toolOcr.addEventListener('click', () => {
-          if (!currentDoc) {
-            PDFTools.Toast.info('Please open a PDF document first to run OCR.');
-            triggerOpen();
-            return;
-          }
-          const isActive = ocrDrawer.classList.contains('active');
-          ocrDrawer.classList.toggle('active');
-          toolOcr.classList.toggle('active', !isActive);
-          document.getElementById('paneScanOcr')?.classList.toggle('active', !isActive);
-          if (!isActive) {
-            PDFTools.Toast.info('Scan & OCR drawer ready. Choose language & OCR page.');
-          }
-        });
-      }
-      document.getElementById('closeOcrBtn')?.addEventListener('click', () => {
-        ocrDrawer.classList.remove('active');
-        toolOcr.classList.remove('active');
-        document.getElementById('paneScanOcr')?.classList.remove('active');
-      });
-      document.getElementById('paneScanOcr')?.addEventListener('click', () => {
-        if (toolOcr) toolOcr.click();
-      });
+      const toggleFindBar = () => window.PDFTools.StudioSearchOCR.toggleFindBar();
+      const closeFindBar = () => window.PDFTools.StudioSearchOCR.closeFindBar();
+      const executeSearch = () => window.PDFTools.StudioSearchOCR.executeSearch();
+      const selectSearchMatch = (idx) => window.PDFTools.StudioSearchOCR.selectSearchMatch(idx);
+      const toggleOcrDrawer = (force) => window.PDFTools.StudioSearchOCR.toggleOcrDrawer(force);
 
       // --- Fill & Sign Controller - Delegated to StudioSign ---
       if (window.PDFTools && window.PDFTools.StudioSign) {
@@ -9222,8 +8587,10 @@
           toggleFindBar();
         } else if (e.key === 'F3') {
           e.preventDefault();
-          if (searchMatches.length > 0) {
-            selectSearchMatch(currentMatchIdx + (e.shiftKey ? -1 : 1));
+          const matches = window.PDFTools.StudioSearchOCR ? window.PDFTools.StudioSearchOCR.getSearchMatches() : [];
+          const curIdx = window.PDFTools.StudioSearchOCR ? window.PDFTools.StudioSearchOCR.getCurrentMatchIdx() : -1;
+          if (matches.length > 0) {
+            selectSearchMatch(curIdx + (e.shiftKey ? -1 : 1));
           } else {
             toggleFindBar();
           }
