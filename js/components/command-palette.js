@@ -645,8 +645,12 @@
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
       window.PDFCommandPalette = new CommandPalette();
+      window.PDFTools = window.PDFTools || {};
+      window.PDFTools.CommandPalette = window.PDFCommandPalette;
     });
   } else {
     window.PDFCommandPalette = new CommandPalette();
+    window.PDFTools = window.PDFTools || {};
+    window.PDFTools.CommandPalette = window.PDFCommandPalette;
   }
 })();

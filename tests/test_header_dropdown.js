@@ -378,6 +378,89 @@ assert(
   'Clicking outside closes convertDropdownMenu cleanly'
 );
 
+// 5. Nine Dots Button -> Quick Actions Modal Interactions
+const nineDotsBtn = mockDoc.getElementById('nineDotsBtn');
+const quickModalBackdrop = mockDoc.getElementById('quickModalBackdrop');
+const closeQuickModalBtn = mockDoc.getElementById('closeQuickModalBtn');
+
+assert(nineDotsBtn !== null, 'nineDotsBtn element rendered in header');
+assert(quickModalBackdrop !== null, 'quickModalBackdrop element created and attached to body');
+assert(nineDotsBtn.getAttribute('aria-expanded') === 'false', 'nineDotsBtn initial aria-expanded="false"');
+assert(!quickModalBackdrop.classList.contains('active'), 'quickModalBackdrop initially closed');
+
+// Click nineDotsBtn -> Opens Quick Modal
+nineDotsBtn.dispatchEvent({
+  type: 'click',
+  preventDefault: () => {},
+  stopPropagation: () => {}
+});
+
+assert(
+  quickModalBackdrop.classList.contains('active'),
+  'Clicking nineDotsBtn adds .active to quickModalBackdrop'
+);
+assert(
+  nineDotsBtn.getAttribute('aria-expanded') === 'true',
+  'Clicking nineDotsBtn sets aria-expanded="true"'
+);
+
+// Click cancel button -> Closes Quick Modal
+assert(closeQuickModalBtn !== null, 'closeQuickModalBtn element exists in quickModal');
+closeQuickModalBtn.dispatchEvent({
+  type: 'click',
+  preventDefault: () => {},
+  stopPropagation: () => {}
+});
+
+assert(
+  !quickModalBackdrop.classList.contains('active'),
+  'Clicking closeQuickModalBtn removes .active from quickModalBackdrop'
+);
+assert(
+  nineDotsBtn.getAttribute('aria-expanded') === 'false',
+  'Closing quickModal resets nineDotsBtn aria-expanded="false"'
+);
+
+// Re-open and test Escape key
+nineDotsBtn.dispatchEvent({
+  type: 'click',
+  preventDefault: () => {},
+  stopPropagation: () => {}
+});
+assert(quickModalBackdrop.classList.contains('active'), 'Re-opened quickModal for Escape test');
+
+mockDoc.dispatchEvent({
+  type: 'keydown',
+  key: 'Escape'
+});
+
+assert(
+  !quickModalBackdrop.classList.contains('active'),
+  'Pressing Escape closes quickModalBackdrop'
+);
+assert(
+  nineDotsBtn.getAttribute('aria-expanded') === 'false',
+  'Pressing Escape resets nineDotsBtn aria-expanded="false"'
+);
+
+// Re-open and test backdrop click
+nineDotsBtn.dispatchEvent({
+  type: 'click',
+  preventDefault: () => {},
+  stopPropagation: () => {}
+});
+assert(quickModalBackdrop.classList.contains('active'), 'Re-opened quickModal for backdrop click test');
+
+mockDoc.dispatchEvent({
+  type: 'click',
+  target: quickModalBackdrop
+});
+
+assert(
+  !quickModalBackdrop.classList.contains('active'),
+  'Clicking directly on quickModalBackdrop backdrop closes modal'
+);
+
 // ---------------------------------------------------------
 // 4. Active Route Preservation Test (e.g. pages/pdf-to-docx.html)
 // ---------------------------------------------------------

@@ -383,6 +383,7 @@
 
       this.render(headerEl);
       this.ensureMegaMenu();
+      this.ensureQuickModal();
       this.bindEvents(headerEl);
       this.initialized = true;
     },
@@ -464,7 +465,7 @@
               </svg>
               <span>PDF Studio</span>
             </a>
-            <button type="button" class="nine-dots-btn" id="nineDotsBtn" title="All Quick Actions (Ctrl+K)" aria-label="Quick Actions Menu">
+            <button type="button" class="nine-dots-btn" id="nineDotsBtn" title="All Quick Actions" aria-label="Quick Actions Menu" aria-haspopup="true" aria-expanded="false" data-i18n-title="nav.quick_actions">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                 <circle cx="5" cy="5" r="2"/><circle cx="12" cy="5" r="2"/><circle cx="19" cy="5" r="2"/>
                 <circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/>
@@ -522,6 +523,67 @@
       `;
     },
 
+    ensureQuickModal: function () {
+      const { pagesUrl } = getPaths();
+      let quickModal = document.getElementById('quickModalBackdrop');
+      if (!quickModal) {
+        quickModal = document.createElement('div');
+        quickModal.className = 'quick-modal-backdrop';
+        quickModal.id = 'quickModalBackdrop';
+        document.body.appendChild(quickModal);
+      }
+
+      // If quick-modal-content does not exist, inject the standardized 10-tool grid
+      if (!quickModal.querySelector('.quick-modal-content')) {
+        const QUICK_TOOLS = [
+          { id: 'quickBtnStudio', file: 'viewer.html', nameKey: 'tool.studio', name: 'PDF Studio', color: '#9333EA', icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>' },
+          { id: 'quickBtnMerge', file: 'merge.html', nameKey: 'tool.merge', name: 'Merge PDF', color: '#E11D48', icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 9l4-4 4 4M12 5v14M5 19h14"/></svg>' },
+          { id: 'quickBtnCompress', file: 'compress.html', nameKey: 'tool.compress', name: 'Compress PDF', color: '#16A34A', icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14h6m0 0v6m0-6L3 21M20 10h-6m0 0V4m0 6l7-7"/></svg>' },
+          { id: 'quickBtnSplit', file: 'split.html', nameKey: 'tool.split', name: 'Split PDF', color: '#EA580C', icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4L8.12 15.88M14.47 14.48L20 20M8.12 8.12L12 12"/></svg>' },
+          { id: 'quickBtnPdfWord', file: 'pdf-to-docx.html', nameKey: 'tool.pdf_docx', name: 'PDF to Word', color: '#2563EB', icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>' },
+          { id: 'quickBtnPdfExcel', file: 'pdf-to-xlsx.html', nameKey: 'tool.pdf_xlsx', name: 'PDF to Excel', color: '#15803D', icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>' },
+          { id: 'quickBtnSign', file: 'sign.html', nameKey: 'tool.sign', name: 'Sign PDF', color: '#1E3A8A', icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 19.5c0 .8-.7 1.5-1.5 1.5H5.5c-.8 0-1.5-.7-1.5-1.5 0-.8.7-1.5 1.5-1.5h13c.8 0 1.5.7 1.5 1.5zM18.4 4.6a2 2 0 0 1 2.8 2.8L8.8 19.8l-4.2.9.9-4.2L18.4 4.6z"/></svg>' },
+          { id: 'quickBtnWordPdf', file: 'docx-to-pdf.html', nameKey: 'tool.docx_pdf', name: 'Word to PDF', color: '#2563EB', icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><polyline points="7.5 13 9 17 11.5 14 14 17 15.5 13"/></svg>' },
+          { id: 'quickBtnExcelPdf', file: 'xlsx-to-pdf.html', nameKey: 'tool.xlsx_pdf', name: 'Excel to PDF', color: '#15803D', icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8.5" y1="12.5" x2="15.5" y2="17.5"/><line x1="15.5" y1="12.5" x2="8.5" y2="17.5"/></svg>' },
+          { id: 'quickBtnBatch', file: 'batch.html', nameKey: 'tool.batch', name: 'Batch Process', color: '#0D9488', icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>' }
+        ];
+
+        const buttonsHtml = QUICK_TOOLS.map(t => `
+          <button type="button" class="quick-action-btn" id="${t.id}" data-target="${pagesUrl}${t.file}">
+            <span class="quick-action-btn-icon" style="background: ${t.color}1f; color: ${t.color};">
+              ${t.icon}
+            </span>
+            <span class="quick-action-btn-label" data-i18n="${t.nameKey}">${t.name}</span>
+          </button>
+        `).join('');
+
+        quickModal.innerHTML = `
+          <div class="quick-modal-content" id="quickModalContent">
+            <div class="quick-modal-header" id="quickModalHeader">
+              <h3 data-i18n="home.quick_action_title">Choose a PDF Tool</h3>
+              <p data-i18n="home.quick_action_desc">Select an action for your document:</p>
+            </div>
+            <div class="quick-modal-grid" id="quickModalGrid">
+              ${buttonsHtml}
+            </div>
+            <div class="quick-modal-footer" id="quickModalFooter">
+              <button type="button" class="btn btn-ghost btn-md" id="closeQuickModalBtn" data-i18n="quick.close">Cancel</button>
+            </div>
+          </div>
+        `;
+      } else {
+        // In existing modal (e.g. index.html), normalize target paths
+        quickModal.querySelectorAll('.quick-action-btn').forEach(btn => {
+          let target = btn.getAttribute('data-target') || '';
+          if (target && !pagesUrl && target.startsWith('pages/')) {
+            btn.setAttribute('data-target', target.replace(/^pages\//, ''));
+          } else if (target && pagesUrl && !target.startsWith('pages/') && !target.startsWith('../')) {
+            btn.setAttribute('data-target', pagesUrl + target);
+          }
+        });
+      }
+    },
+
     bindEvents: function (headerEl) {
       const convertTrigger = headerEl.querySelector('#convertPdfTrigger');
       const convertMenu = headerEl.querySelector('#convertDropdownMenu');
@@ -536,6 +598,7 @@
         const wrapper = convertTrigger ? convertTrigger.closest('.dropdown-nav-wrapper') : headerEl.querySelector('#convertDropdownWrapper');
         if (open) {
           setMega(false);
+          setQuickModal(false);
           convertMenu.classList.add('show', 'active');
           if (wrapper) wrapper.classList.add('open');
           if (convertTrigger) {
@@ -560,6 +623,7 @@
         if (!megaOverlay) return;
         if (open) {
           setConvert(false);
+          setQuickModal(false);
           megaOverlay.classList.add('show', 'active');
           if (allToolsTrigger) {
             allToolsTrigger.classList.add('show', 'menu-open');
@@ -578,11 +642,27 @@
         }
       }
 
+      function setQuickModal(open) {
+        const qm = document.getElementById('quickModalBackdrop');
+        if (!qm) return;
+        if (open) {
+          setConvert(false);
+          setMega(false);
+          qm.classList.add('active');
+          if (document.body && document.body.style) document.body.style.overflow = 'hidden';
+          if (nineDotsBtn) nineDotsBtn.setAttribute('aria-expanded', 'true');
+        } else {
+          qm.classList.remove('active');
+          if (document.body && document.body.style) document.body.style.overflow = '';
+          if (nineDotsBtn) nineDotsBtn.setAttribute('aria-expanded', 'false');
+        }
+      }
+
       // Convert Dropdown Toggle
       if (convertTrigger && convertMenu) {
         convertTrigger.addEventListener('click', function (e) {
-          e.preventDefault();
-          e.stopPropagation();
+          if (e.preventDefault) e.preventDefault();
+          if (e.stopPropagation) e.stopPropagation();
           const isOpen = convertMenu.classList.contains('show') || convertMenu.classList.contains('active');
           setConvert(!isOpen);
         });
@@ -591,8 +671,8 @@
       // Mega Menu Toggle
       if (allToolsTrigger && megaOverlay) {
         allToolsTrigger.addEventListener('click', function (e) {
-          e.preventDefault();
-          e.stopPropagation();
+          if (e.preventDefault) e.preventDefault();
+          if (e.stopPropagation) e.stopPropagation();
           const isOpen = megaOverlay.classList.contains('show') || megaOverlay.classList.contains('active');
           setMega(!isOpen);
         });
@@ -604,7 +684,41 @@
         });
       }
 
-      // Close menus on outside click or Escape
+      // Nine Dots Button -> Toggle Quick Actions Modal
+      if (nineDotsBtn) {
+        nineDotsBtn.addEventListener('click', function (e) {
+          if (e.preventDefault) e.preventDefault();
+          if (e.stopPropagation) e.stopPropagation();
+          const qm = document.getElementById('quickModalBackdrop');
+          const isOpen = qm && qm.classList.contains('active');
+          setQuickModal(!isOpen);
+        });
+      }
+
+      // Direct listeners on quick modal elements
+      const qmElement = document.getElementById('quickModalBackdrop');
+      if (qmElement) {
+        const closeBtn = qmElement.querySelector('#closeQuickModalBtn') || document.getElementById('closeQuickModalBtn');
+        if (closeBtn) {
+          closeBtn.addEventListener('click', function (e) {
+            if (e.preventDefault) e.preventDefault();
+            setQuickModal(false);
+          });
+        }
+
+        qmElement.querySelectorAll('.quick-action-btn').forEach(function (btn) {
+          btn.addEventListener('click', function (e) {
+            if (e.preventDefault) e.preventDefault();
+            const target = btn.dataset ? btn.dataset.target : btn.getAttribute('data-target');
+            if (target) {
+              setQuickModal(false);
+              window.location.href = target;
+            }
+          });
+        });
+      }
+
+      // Close menus and modals on outside click (delegated)
       document.addEventListener('click', function (e) {
         if (!e.target.closest('#convertDropdownWrapper')) {
           setConvert(false);
@@ -612,49 +726,60 @@
         if (!e.target.closest('#allToolsTrigger') && !e.target.closest('#megaMenuOverlay')) {
           setMega(false);
         }
+
+        const qm = document.getElementById('quickModalBackdrop');
+        if (qm) {
+          // Click on backdrop outside modal content closes it
+          if (e.target === qm) {
+            setQuickModal(false);
+            return;
+          }
+
+          // Close button click
+          if (e.target.closest && e.target.closest('#closeQuickModalBtn')) {
+            if (e.preventDefault) e.preventDefault();
+            setQuickModal(false);
+            return;
+          }
+
+          // Quick action button navigation
+          if (e.target.closest) {
+            const btn = e.target.closest('.quick-action-btn');
+            if (btn && qm.contains && qm.contains(btn)) {
+              if (e.preventDefault) e.preventDefault();
+              const target = btn.dataset ? btn.dataset.target : btn.getAttribute('data-target');
+              if (target) {
+                setQuickModal(false);
+                window.location.href = target;
+              }
+            }
+          }
+        }
       });
 
+      // Escape key closes open menus and modal
       document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
           setConvert(false);
           setMega(false);
+          setQuickModal(false);
         }
       });
 
       // Mobile Menu Toggle
       if (mobileMenuBtn) {
         mobileMenuBtn.addEventListener('click', function (e) {
-          e.preventDefault();
+          if (e.preventDefault) e.preventDefault();
           const drawer = document.getElementById('mobileNavDrawer');
           if (drawer) {
             drawer.classList.toggle('open');
             const isOpen = drawer.classList.contains('open');
-            document.body.style.overflow = isOpen ? 'hidden' : '';
+            if (document.body && document.body.style) document.body.style.overflow = isOpen ? 'hidden' : '';
             mobileMenuBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
           } else if (navEl) {
             navEl.classList.toggle('mobile-open');
             const isOpen = navEl.classList.contains('mobile-open');
             mobileMenuBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-          }
-        });
-      }
-
-      // Nine Dots Button -> Open Command Palette
-      if (nineDotsBtn) {
-        nineDotsBtn.addEventListener('click', function (e) {
-          e.preventDefault();
-          if (window.PDFTools && window.PDFTools.CommandPalette && window.PDFTools.CommandPalette.open) {
-            window.PDFTools.CommandPalette.open();
-          } else {
-            // Dispatch Ctrl+K keyboard event
-            const evt = new KeyboardEvent('keydown', {
-              key: 'k',
-              code: 'KeyK',
-              ctrlKey: true,
-              bubbles: true,
-              cancelable: true
-            });
-            document.dispatchEvent(evt);
           }
         });
       }
