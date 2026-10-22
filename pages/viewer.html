@@ -4054,6 +4054,7 @@
   <script src="../js/studio/studio-modals-export.js"></script>
   <script src="../js/studio/studio-renderer.js"></script>
   <script src="../js/studio/studio-annotations.js"></script>
+  <script src="../js/studio/studio-text-editor.js"></script>
   <script src="../js/app.js"></script>
 
   <!-- PDF Studio Controller Script -->
@@ -4064,7 +4065,6 @@
       let currentScale = 1.0;
       let viewMode = 'continuous';
       let viewRenderId = 0;
-      let _formatPaneMouseDown = false; // Guards blur handler when user clicks format panel
 
       // Find in Document State (delegated to window.PDFTools.StudioSearchOCR)
 
@@ -4382,71 +4382,32 @@
       const drawSmoothPointsOnCanvas = (ctx, points, color, width, isHighlight) => window.PDFTools.StudioAnnotations?.drawSmoothPointsOnCanvas(ctx, points, color, width, isHighlight);
       const redrawAnnotationLayer = () => window.PDFTools.StudioAnnotations?.redrawAnnotationLayer();
 
-      let textEditEngine = null;
-
-      async function renderExistingTextLayer() {
-        if (!textEditEngine) {
-          textEditEngine = new window.PDFTools.TextEditEngine(widgetContainer, setActiveText);
-        }
-        textEditEngine.clear();
-        if (!currentDoc || activeMode !== 'edit') return;
-
-        try {
-          const page = await currentDoc.pdfJsDoc.getPage(currentDoc.currentPage);
-          const pageAnn = currentDoc.getPageAnnotation(currentDoc.currentPage);
-          const edits = pageAnn.edits || [];
-
-          // 1. Extract raw runs with page rotation support
-          const extraRot = (currentDoc.pageRotations && currentDoc.pageRotations[currentDoc.currentPage]) || 0;
-          const textRuns = await window.PDFTools.PDFTextExtractor.extractPageTextRuns(page, currentDoc.currentPage, extraRot, pdfCanvas);
-          
-          // 2. Group into blocks
-          let blocks = window.PDFTools.TextBlockDetector.groupRuns(textRuns);
-          
-          // 3. Acrobat-style Auto-OCR for Scanned Documents / Image Pages
-          if (!blocks || blocks.length === 0) {
-            if (pageAnn.ocrBlocks && pageAnn.ocrBlocks.length > 0) {
-              blocks = pageAnn.ocrBlocks;
-            } else if (window.PDFTools.OCR && window.PDFTools.OCRLayoutEngine) {
-              PDFTools.Toast.info('Scanned page detected. Running OCR to make text editable...', 3500);
-              try {
-                const ocrCanvas = document.createElement('canvas');
-                const ocrScale = 2.0;
-                await PDFTools.Studio.renderPage(currentDoc, currentDoc.currentPage, ocrCanvas, ocrScale);
-
-                const langSelect = document.getElementById('ocrLangSelect');
-                const lang = (langSelect && langSelect.value) ? langSelect.value : 'ind+eng';
-
-                const ocrData = await PDFTools.OCR.recognizeCanvas(ocrCanvas, lang);
-
-                if (ocrData && ((ocrData.lines && ocrData.lines.length > 0) || (ocrData.paragraphs && ocrData.paragraphs.length > 0))) {
-                  blocks = window.PDFTools.OCRLayoutEngine.constructLayoutBlocks(ocrData, ocrScale, currentDoc.currentPage);
-                  pageAnn.ocrBlocks = blocks;
-                  PDFTools.Toast.success('OCR Complete! Click any text to edit directly.');
-                } else {
-                  PDFTools.Toast.info('No text detected on this scanned page.');
-                  return;
-                }
-              } catch (ocrErr) {
-                console.warn('Auto-OCR in Edit PDF failed:', ocrErr);
-                PDFTools.Toast.info('No editable text found. You can add text using "Add Text".');
-                return;
-              }
-            } else {
-              PDFTools.Toast.info('No editable text found on this page.');
-              return;
-            }
-          }
-
-          // 4. Render blocks
-          textEditEngine.renderBlocks(blocks, currentScale, edits);
-        } catch (err) {
-          console.warn('Existing text extraction failed:', err);
-          if (window.PDFTools && window.PDFTools.Toast) {
-            window.PDFTools.Toast.error('Edit PDF Error: ' + err.message);
-          }
-        }
+      // --- Text Editing & Format Controller - Delegated to StudioTextEditor ---
+      if (window.PDFTools && window.PDFTools.StudioTextEditor) {
+        window.PDFTools.StudioTextEditor.init({
+          getDoc: () => currentDoc,
+          getScale: () => currentScale,
+          getActiveMode: () => activeMode,
+          getViewMode: () => viewMode,
+          setViewMode: async (m) => await setViewMode(m),
+          switchTool: (t) => switchTool(t),
+          redrawAnnotationLayer: () => redrawAnnotationLayer(),
+          renderActivePageWidgets: () => renderActivePageWidgets(),
+          scheduleRecovery: () => scheduleRecovery(),
+          getUndoStack: () => undoStack,
+          commitTextInPlace: (tw, el, item) => commitTextInPlace(tw, el, item),
+          getWidgetContainer: () => widgetContainer,
+          getPdfCanvas: () => pdfCanvas
+        });
       }
+      const renderExistingTextLayer = () => window.PDFTools.StudioTextEditor?.renderExistingTextLayer();
+      const setActiveText = (item, el) => window.PDFTools.StudioTextEditor?.setActiveText(item, el);
+      const showRightFormatPanel = (s) => window.PDFTools.StudioTextEditor?.showRightFormatPanel(s);
+      const activateExistingTextEditing = () => window.PDFTools.StudioTextEditor?.activateExistingTextEditing();
+      const activateTextAdding = () => window.PDFTools.StudioTextEditor?.activateTextAdding();
+      const getActiveTextItem = () => window.PDFTools.StudioTextEditor?.getActiveTextItem();
+      const getActiveTextContentEl = () => window.PDFTools.StudioTextEditor?.getActiveTextContentEl();
+      const isFormatPaneMouseDown = () => window.PDFTools.StudioTextEditor?.isFormatPaneMouseDown();
 
       // Listen for line text edits
       document.addEventListener('pdf-text-edited', async (e) => {
@@ -4953,7 +4914,7 @@
             e.stopPropagation();
             pageAnn.texts = pageAnn.texts.filter(t => t.id !== textItem.id);
             textWidget.remove();
-            if (activeTextItem === textItem) setActiveText(null, null);
+            if (getActiveTextItem() === textItem) setActiveText(null, null);
             scheduleRecovery();
           });
           toolbar.appendChild(delBtn);
@@ -5008,7 +4969,7 @@
               const focused = document.activeElement;
               const inFormatPane = formatPane && formatPane.contains(focused);
               const inWidget = textWidget.contains(focused);
-              if (!inFormatPane && !inWidget && !_formatPaneMouseDown) {
+              if (!inFormatPane && !inWidget && !isFormatPaneMouseDown()) {
                 commitTextInPlace(textWidget, content, textItem);
                 textWidget.classList.remove('selected');
               }
@@ -5059,7 +5020,7 @@
             pageAnn.texts = pageAnn.texts.filter(item => item.id !== textItem.id);
           }
           textWidget.remove();
-          if (activeTextItem === textItem) setActiveText(null, null);
+          if (getActiveTextItem() === textItem) setActiveText(null, null);
           return;
         }
         textItem.text = value;
@@ -5075,7 +5036,7 @@
         if (!value || value === 'Type text here...' || value === 'New text') {
           pageAnn.texts = pageAnn.texts.filter(item => item.id !== textItem.id);
           textWidget.remove();
-          if (activeTextItem === textItem) setActiveText(null, null);
+          if (getActiveTextItem() === textItem) setActiveText(null, null);
           return;
         }
         textItem.text = value;
@@ -5468,283 +5429,7 @@
       toolHand.addEventListener('click', () => switchTool('hand'));
       toolEditPdf.addEventListener('click', () => activateExistingTextEditing());
       toolText.addEventListener('click', () => activateTextAdding());
-      // Right Format Panel & Secondary Toolbar Elements
-      const editModeBar = document.getElementById('editModeBar');
-      const closeEditModeBtn = document.getElementById('closeEditModeBtn');
-      const subToolEdit = document.getElementById('subToolEdit');
-      const subToolAddText = document.getElementById('subToolAddText');
-      const subToolAddImage = document.getElementById('subToolAddImage');
-      const subToolWatermark = document.getElementById('subToolWatermark');
-      const studioImageInput = document.getElementById('studioImageInput');
-      
-      const formatPane = document.getElementById('formatPane');
-      const standardToolsPane = document.getElementById('standardToolsPane');
-      const rightFontFamily = document.getElementById('rightFontFamily');
-      const rightFontSize = document.getElementById('rightFontSize');
-      const rightFontColor = document.getElementById('rightFontColor');
-      const rightColorPreview = document.getElementById('rightColorPreview');
-      const rightBoldBtn = document.getElementById('rightBoldBtn');
-      const rightItalicBtn = document.getElementById('rightItalicBtn');
-      const rightAlignLeft = document.getElementById('rightAlignLeft');
-      const rightAlignCenter = document.getElementById('rightAlignCenter');
-      const rightAlignRight = document.getElementById('rightAlignRight');
-      const rightDoneEditBtn = document.getElementById('rightDoneEditBtn');
-      const objAddRect = document.getElementById('objAddRect');
-      const objAddCircle = document.getElementById('objAddCircle');
-      const objAddLine = document.getElementById('objAddLine');
-      const objAddSign = document.getElementById('objAddSign');
-
-      let activeTextItem = null;
-      let activeTextContentEl = null;
-      let editModeIsActive = false; // True while edit/text mode bar is visible
-
-      const formatControls  = document.getElementById('formatControls');
-      const formatEmptyHint = document.getElementById('formatEmptyHint');
-
-      // Prevent format pane clicks from blurring the active text content.
-      // We use mousedown on the pane and preventDefault only for non-input elements.
-      // For selects/inputs we can't prevent default (it blocks interaction),
-      // so we re-focus the text box AFTER the change event fires.
-      formatPane.addEventListener('mousedown', (e) => {
-        const tag = e.target.tagName;
-        _formatPaneMouseDown = true;
-        setTimeout(() => { _formatPaneMouseDown = false; }, 300);
-        // Only prevent default on buttons/divs (not <select> or <input type="color">)
-        if (tag === 'SELECT' || tag === 'INPUT') return;
-        if (activeTextContentEl) {
-          e.preventDefault(); // prevents text box from losing focus
-        }
-      });
-
-      function setActiveText(textItem, contentEl) {
-        activeTextItem = textItem;
-        activeTextContentEl = contentEl;
-
-        const formatStatusText = document.getElementById('formatStatusText');
-
-        if (textItem && contentEl) {
-          if (formatStatusText) {
-            const preview = (textItem.text || '').replace(/\s+/g, ' ').trim();
-            formatStatusText.textContent = 'Menyunting: "' + (preview.length > 22 ? preview.substring(0, 22) + '...' : preview) + '"';
-          }
-          // Sync Right Panel with active text
-          let fontVal = textItem.fontFamily || 'Helvetica';
-          if (rightFontFamily) {
-            let matched = Array.from(rightFontFamily.options).some(opt => opt.value.toLowerCase() === fontVal.toLowerCase());
-            if (!matched && fontVal) {
-              const newOpt = document.createElement('option');
-              newOpt.value = fontVal;
-              newOpt.textContent = fontVal;
-              rightFontFamily.appendChild(newOpt);
-            }
-            rightFontFamily.value = fontVal;
-          }
-          if (rightFontSize) rightFontSize.value = (textItem.fontSize || 14).toString();
-          if (rightFontColor) rightFontColor.value = textItem.color || '#000000';
-          if (rightColorPreview) rightColorPreview.style.background = textItem.color || '#000000';
-          if (rightBoldBtn) rightBoldBtn.classList.toggle('active', !!textItem.bold);
-          if (rightItalicBtn) rightItalicBtn.classList.toggle('active', !!textItem.italic);
-          // Sync Alignment buttons
-          const align = textItem.align || 'left';
-          if (rightAlignLeft) rightAlignLeft.classList.toggle('active', align === 'left');
-          if (rightAlignCenter) rightAlignCenter.classList.toggle('active', align === 'center');
-          if (rightAlignRight) rightAlignRight.classList.toggle('active', align === 'right');
-          showRightFormatPanel(true);
-        } else {
-          if (formatStatusText) {
-            formatStatusText.textContent = 'Klik teks pada dokumen untuk menyunting';
-          }
-        }
-      }
-
-      function showRightFormatPanel(show) {
-        if (show) {
-          formatPane.classList.add('active');
-          standardToolsPane.style.display = 'none';
-          editModeBar.classList.add('active');
-        } else {
-          formatPane.classList.remove('active');
-          standardToolsPane.style.display = 'block';
-          if (activeMode !== 'edit' && activeMode !== 'text') {
-            editModeBar.classList.remove('active');
-          }
-        }
-      }
-
-      // Helper to map fontFamily to CSS value
-      function fontFamilyCSS(f) {
-        if (!f) return 'Helvetica, Arial, sans-serif';
-        const lower = f.toLowerCase();
-        if (lower.includes('times'))   return '"Times New Roman", Times, serif';
-        if (lower.includes('courier')) return '"Courier New", Courier, monospace';
-        if (lower.includes('roboto'))  return 'Roboto, sans-serif';
-        if (lower.includes('inter'))   return 'Inter, sans-serif';
-        if (lower.includes('georgia')) return 'Georgia, serif';
-        if (lower.includes('verdana')) return 'Verdana, Geneva, sans-serif';
-        if (lower.includes('tahoma'))  return 'Tahoma, sans-serif';
-        if (lower.includes('trebuchet')) return '"Trebuchet MS", sans-serif';
-        if (lower.includes('poppins')) return 'Poppins, sans-serif';
-        if (lower.includes('montserrat')) return 'Montserrat, sans-serif';
-        return `${f}, Arial, sans-serif`;
-      }
-
-      // Helper to re-focus the active text box after a format control interaction
-      function refocusActiveText() {
-        if (activeTextContentEl) {
-          // Short delay to let the select/input finish its own event handling
-          setTimeout(() => activeTextContentEl.focus(), 0);
-        }
-      }
-
-      // Format panel event listeners
-      rightFontFamily.addEventListener('change', () => {
-        if (!activeTextItem || !activeTextContentEl) return;
-        activeTextItem.fontFamily = rightFontFamily.value;
-        activeTextContentEl.style.fontFamily = fontFamilyCSS(activeTextItem.fontFamily);
-        scheduleRecovery();
-        refocusActiveText();
-      });
-
-      rightFontSize.addEventListener('change', () => {
-        if (!activeTextItem || !activeTextContentEl) return;
-        activeTextItem.fontSize = parseInt(rightFontSize.value, 10);
-        activeTextContentEl.style.fontSize = `${activeTextItem.fontSize * currentScale}px`;
-        scheduleRecovery();
-        refocusActiveText();
-      });
-
-      rightFontColor.addEventListener('input', () => {
-        if (!activeTextItem || !activeTextContentEl) return;
-        activeTextItem.color = rightFontColor.value;
-        rightColorPreview.style.background = activeTextItem.color;
-        activeTextContentEl.style.color = activeTextItem.color;
-        activeTextContentEl.style.webkitTextFillColor = activeTextItem.color;
-        scheduleRecovery();
-      });
-
-      rightBoldBtn.addEventListener('click', () => {
-        if (!activeTextItem || !activeTextContentEl) return;
-        activeTextItem.bold = !activeTextItem.bold;
-        rightBoldBtn.classList.toggle('active', activeTextItem.bold);
-        activeTextContentEl.style.fontWeight = activeTextItem.bold ? 'bold' : 'normal';
-        scheduleRecovery();
-      });
-
-      rightItalicBtn.addEventListener('click', () => {
-        if (!activeTextItem || !activeTextContentEl) return;
-        activeTextItem.italic = !activeTextItem.italic;
-        rightItalicBtn.classList.toggle('active', activeTextItem.italic);
-        activeTextContentEl.style.fontStyle = activeTextItem.italic ? 'italic' : 'normal';
-        scheduleRecovery();
-      });
-
-      rightAlignLeft.addEventListener('click', () => {
-        if (!activeTextContentEl) return;
-        activeTextContentEl.style.textAlign = 'left';
-        if (activeTextItem) activeTextItem.align = 'left';
-        rightAlignLeft.classList.add('active');
-        rightAlignCenter.classList.remove('active');
-        rightAlignRight.classList.remove('active');
-        scheduleRecovery();
-      });
-
-      rightAlignCenter.addEventListener('click', () => {
-        if (!activeTextContentEl) return;
-        activeTextContentEl.style.textAlign = 'center';
-        if (activeTextItem) activeTextItem.align = 'center';
-        rightAlignLeft.classList.remove('active');
-        rightAlignCenter.classList.add('active');
-        rightAlignRight.classList.remove('active');
-        scheduleRecovery();
-      });
-
-      rightAlignRight.addEventListener('click', () => {
-        if (!activeTextContentEl) return;
-        activeTextContentEl.style.textAlign = 'right';
-        if (activeTextItem) activeTextItem.align = 'right';
-        rightAlignLeft.classList.remove('active');
-        rightAlignCenter.classList.remove('active');
-        rightAlignRight.classList.add('active');
-        scheduleRecovery();
-      });
-
-      rightDoneEditBtn.addEventListener('click', () => {
-        // Commit any active text first
-        if (activeTextContentEl) {
-          if (typeof activeTextContentEl.commitEdit === 'function') {
-            activeTextContentEl.commitEdit();
-          } else {
-            const blockEl = activeTextContentEl.closest('.studio-text-block-edit');
-            if (blockEl && typeof blockEl.commitEdit === 'function') {
-              blockEl.commitEdit();
-            }
-          }
-          if (activeTextItem) {
-            const tw = activeTextContentEl.closest('.studio-text-widget');
-            if (tw) commitTextInPlace(tw, activeTextContentEl, activeTextItem);
-          }
-        }
-        setActiveText(null, null);
-        redrawAnnotationLayer();
-        renderExistingTextLayer();
-      });
-
-      objAddRect.addEventListener('click', () => switchTool('rect'));
-      objAddCircle.addEventListener('click', () => switchTool('circle'));
-      objAddLine.addEventListener('click', () => switchTool('line'));
-      objAddSign.addEventListener('click', () => toolSign.click());
-
-      subToolEdit.addEventListener('click', () => activateExistingTextEditing());
-      subToolAddText.addEventListener('click', () => activateTextAdding());
-      subToolAddImage.addEventListener('click', () => studioImageInput.click());
-      subToolWatermark.addEventListener('click', () => paneWatermark.click());
-      closeEditModeBtn.addEventListener('click', () => {
-        // Commit any pending text first
-        if (activeTextContentEl) {
-          if (typeof activeTextContentEl.commitEdit === 'function') {
-            activeTextContentEl.commitEdit();
-          } else {
-            const blockEl = activeTextContentEl.closest('.studio-text-block-edit');
-            if (blockEl && typeof blockEl.commitEdit === 'function') {
-              blockEl.commitEdit();
-            }
-          }
-          if (activeTextItem) {
-            const tw = activeTextContentEl.closest('.studio-text-widget');
-            if (tw) commitTextInPlace(tw, activeTextContentEl, activeTextItem);
-          }
-        }
-        setActiveText(null, null);
-        editModeIsActive = false;
-        switchTool('select');
-        editModeBar.classList.remove('active');
-        formatPane.classList.remove('active');
-        standardToolsPane.style.display = 'block';
-        redrawAnnotationLayer();
-        renderExistingTextLayer();
-      });
-
-      studioImageInput.addEventListener('change', async (e) => {
-        const file = e.target.files[0];
-        if (!file || !currentDoc) return;
-        const dataUrl = await PDFTools.FileUtils.readAsDataURL(file);
-        const pageAnn = currentDoc.getPageAnnotation(currentDoc.currentPage);
-        const newStamp = {
-          id: 'stamp_' + Date.now(),
-          type: 'image',
-          dataUrl: dataUrl,
-          x: 50,
-          y: 50,
-          width: 150,
-          height: 100
-        };
-        pageAnn.stamps.push(newStamp);
-        undoStack.push({ pageNum: currentDoc.currentPage, type: 'stamp', item: newStamp });
-        scheduleRecovery();
-        renderActivePageWidgets();
-        PDFTools.Toast.info('Image added to page.');
-        studioImageInput.value = '';
-      });
+      // Format Panel & Edit Mode Controller - Delegated to StudioTextEditor
 
       // Annotation Tool Options & Redaction Controller - Delegated to StudioAnnotations
       const updateAnnotationBar = (mode) => window.PDFTools.StudioAnnotations?.updateAnnotationBar(mode);
@@ -5764,40 +5449,6 @@
       toolHand.addEventListener('click', () => switchTool('hand'));
 
 
-      const activateExistingTextEditing = async () => {
-        if (!currentDoc) {
-          PDFTools.Toast.info('Please open a PDF document first.');
-          return;
-        }
-        if (subToolEdit) subToolEdit.classList.add('active');
-        if (subToolAddText) subToolAddText.classList.remove('active');
-        showRightFormatPanel(true);
-        if (viewMode !== 'single') {
-          await setViewMode('single');
-        }
-        switchTool('edit');
-        PDFTools.Toast.info('Click any text block on the page to edit directly.');
-      };
-
-      const activateTextAdding = async () => {
-        if (!currentDoc) {
-          PDFTools.Toast.info('Please open a PDF document first.');
-          return;
-        }
-        if (subToolEdit) subToolEdit.classList.remove('active');
-        if (subToolAddText) subToolAddText.classList.add('active');
-        showRightFormatPanel(true);
-        if (viewMode !== 'single') {
-          await setViewMode('single');
-        }
-        switchTool('text');
-        PDFTools.Toast.info('Click anywhere on the page to add a new text box.');
-      };
-
-      paneEditPdf.addEventListener('click', activateExistingTextEditing);
-      menuEditPdf.addEventListener('click', activateExistingTextEditing);
-      paneAddText.addEventListener('click', activateTextAdding);
-      menuAddText.addEventListener('click', activateTextAdding);
       menuAddShape.addEventListener('click', () => switchTool('rect'));
 
       async function switchTool(mode) {
