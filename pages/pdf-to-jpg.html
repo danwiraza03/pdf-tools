@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PDF to JPG — PDF Tools</title>
+  <link rel="icon" type="image/svg+xml" href="../icon.svg">
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/tool.css">
   <style>
@@ -41,22 +42,46 @@
       object-fit: contain;
     }
     .image-preview-info {
-      padding: var(--space-sm);
+      padding: 10px 14px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      font-size: 0.8rem;
-      background: var(--bg-glass);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      background: var(--bg-card);
       border-top: 1px solid var(--border-color);
     }
     .image-preview-download {
-      color: var(--tool-color);
-      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      font-size: 0.8rem;
       font-weight: 600;
+      font-family: inherit;
+      color: #ffffff;
+      background: var(--tool-color, #06B6D4);
+      border: 1px solid transparent;
+      border-radius: var(--radius-sm, 6px);
       cursor: pointer;
+      text-decoration: none;
+      box-shadow: 0 2px 6px rgba(6, 182, 212, 0.3);
+      transition: all var(--transition-fast, 0.15s ease);
     }
     .image-preview-download:hover {
-      text-decoration: underline;
+      background: #0891b2;
+      color: #ffffff;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(6, 182, 212, 0.4);
+      text-decoration: none;
+    }
+    .image-preview-download:active {
+      transform: translateY(0);
+      box-shadow: 0 1px 3px rgba(6, 182, 212, 0.25);
+    }
+    .image-preview-download svg {
+      flex-shrink: 0;
     }
   </style>
 </head>
@@ -278,9 +303,18 @@
             info.className = 'image-preview-info';
             info.innerHTML = `<span>Page ${img.pageNum}</span>`;
 
-            const dl = document.createElement('span');
+            const dl = document.createElement('button');
+            dl.type = 'button';
             dl.className = 'image-preview-download';
-            dl.textContent = 'Save ↓';
+            dl.setAttribute('aria-label', `Save Page ${img.pageNum}`);
+            dl.innerHTML = `
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              <span>Save</span>
+            `;
             dl.addEventListener('click', () => {
               PDFTools.Download.save(img.blob, img.name);
             });
