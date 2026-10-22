@@ -277,11 +277,28 @@
     }
   ];
 
+  function getCatalog() {
+    if (window.PDFTools && window.PDFTools.TOOLS_DATA) {
+      return window.PDFTools.TOOLS_DATA.map(t => ({
+        id: t.id,
+        name: t.name,
+        category: t.category,
+        color: t.color,
+        icon: t.icon,
+        url: prefix + t.file,
+        badge: t.badge,
+        desc: t.desc,
+        keywords: t.keywords
+      }));
+    }
+    return TOOLS_CATALOG;
+  }
+
   class CommandPalette {
     constructor() {
       this.isOpen = false;
       this.selectedIndex = 0;
-      this.filteredItems = [...TOOLS_CATALOG];
+      this.filteredItems = [...getCatalog()];
       this.init();
     }
 
@@ -445,11 +462,12 @@
     }
 
     filter(query) {
+      const catalog = getCatalog();
       if (!query) {
-        this.filteredItems = [...TOOLS_CATALOG];
+        this.filteredItems = [...catalog];
       } else {
         const q = query.toLowerCase();
-        this.filteredItems = TOOLS_CATALOG.filter(tool => {
+        this.filteredItems = catalog.filter(tool => {
           const nameMatch = tool.name.toLowerCase().includes(q);
           const categoryMatch = tool.category.toLowerCase().includes(q);
           const descMatch = tool.desc.toLowerCase().includes(q);

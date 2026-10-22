@@ -4,6 +4,10 @@
 document.addEventListener('DOMContentLoaded', function () {
   // --- 0. Setup Unified Global Header (Ensures 100% Consistency Across All Pages) ---
   function setupUnifiedHeader() {
+    if (window.PDFTools && window.PDFTools.Header) {
+      window.PDFTools.Header.init();
+      return;
+    }
     const header = document.querySelector('.header');
     if (!header || document.body.classList.contains('tool-page-viewer')) return;
 
