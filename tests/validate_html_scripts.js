@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const ROOT = 'c:/laragon/www/pdf';
+const ROOT = path.resolve(__dirname, '..');
 let total = 0;
 let errors = 0;
 

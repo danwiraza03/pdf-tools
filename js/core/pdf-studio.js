@@ -780,9 +780,12 @@ PDFTools.Studio = (function () {
         }
       }
 
-      // 4d. Bake Redactions
-      if (pageAnn.redactions && window.PDFTools.RedactionEngine) {
-        window.PDFTools.RedactionEngine.applyRedactions(pdfDoc, pageAnn, page, scaleX, scaleY, pdfHeight, rgb);
+      // 4d. Bake Redactions (Rasterizes redacted pages to prevent underlying text leakage)
+      if (pageAnn.redactions && pageAnn.redactions.length > 0 && window.PDFTools.RedactionEngine) {
+        await window.PDFTools.RedactionEngine.applyRedactions(pdfDoc, pageAnn, pageIndex, scaleX, scaleY, pdfHeight, rgb, {
+          pdfjsDoc: doc.pdfJsDoc,
+          doc
+        });
       }
     }
 

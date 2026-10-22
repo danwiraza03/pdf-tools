@@ -21,7 +21,7 @@ const scripts = [
 ];
 
 for (const s of scripts) {
-  const full = path.join('c:/laragon/www/pdf', s);
+  const full = path.join(path.resolve(__dirname, '..'), s);
   if (!fs.existsSync(full)) {
     console.error('MISSING FILE:', s);
     continue;

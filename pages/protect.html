@@ -4,12 +4,48 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Protect & Unlock PDF — PDF Tools</title>
-  <meta name="description" content="Encrypt your PDF with secure password or remove password restrictions from PDF documents 100% offline.">
+  <meta name="description" content="Encrypt your PDF with military-grade AES-256 password or remove password restrictions 100% offline.">
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/tool.css">
   <style>
     :root {
       --tool-color: #EF4444;
+    }
+    .protect-permissions-box {
+      margin-top: 14px;
+      padding: 14px;
+      border: 1px solid var(--border-color, #e2e8f0);
+      border-radius: 12px;
+      background: var(--bg-surface-secondary, rgba(0, 0, 0, 0.02));
+    }
+    .protect-perm-header {
+      font-size: 0.82rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-main, #0f172a);
+    }
+    .protect-perm-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      font-size: 0.82rem;
+    }
+    .protect-perm-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      user-select: none;
+      color: var(--text-main, #0f172a);
+    }
+    .protect-perm-label input[type="checkbox"] {
+      width: 15px;
+      height: 15px;
+      accent-color: var(--tool-color, #EF4444);
+      cursor: pointer;
     }
   </style>
 </head>
@@ -18,7 +54,9 @@
   <header class="header">
     <div class="header-inner">
       <a href="../index.html" class="app-logo">
-        <div class="logo-badge">⚡</div>
+        <div class="logo-badge">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </div>
         <div class="logo-title">
           <span>PDF Tools</span>
           <span class="logo-status-dot" title="100% Offline & Private"></span>
@@ -38,9 +76,9 @@
         </a>
       </nav>
       <div class="header-controls">
-        <button class="theme-toggle" id="themeToggle" title="Toggle Light/Dark Theme">☀️ Light</button>
-        <button class="lang-toggle" id="langToggle">ID 🇮🇩</button>
-        <a href="viewer.html" class="btn-header-studio">✨ PDF Studio</a>
+        <button class="theme-toggle" id="themeToggle" title="Toggle Light/Dark Theme">Light</button>
+        <button class="lang-toggle" id="langToggle">ID</button>
+        <a href="viewer.html" class="btn-header-studio">PDF Studio</a>
         <button type="button" class="nine-dots-btn" id="nineDotsBtn" title="All Quick Actions">⠿</button>
       </div>
     </div>
@@ -80,7 +118,7 @@
       <!-- Upload State -->
       <div id="uploadState">
         <div class="dropzone" id="dropzone">
-          <div class="dropzone-icon">
+          <div class="dropzone-icon" id="dropzoneIcon">
             <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg>
           </div>
           <div class="dropzone-title" id="dropzoneTitle" data-i18n="protect.drop_title_protect">Drop PDF file to protect</div>
@@ -113,6 +151,33 @@
                 <input type="password" id="protectConfirmPassword" class="form-input" placeholder="Re-type password" data-i18n-placeholder="protect.confirm_placeholder" style="width: 100%;">
               </div>
             </div>
+
+            <!-- Permissions Box -->
+            <div class="protect-permissions-box">
+              <div class="protect-perm-header">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <span data-i18n="protect.permissions_title">Document Restrictions & Permissions</span>
+              </div>
+              <div class="protect-perm-grid">
+                <label class="protect-perm-label">
+                  <input type="checkbox" id="permPrinting" checked>
+                  <span data-i18n="protect.perm_printing">Allow Printing</span>
+                </label>
+                <label class="protect-perm-label">
+                  <input type="checkbox" id="permCopying">
+                  <span data-i18n="protect.perm_copying">Allow Copying Content</span>
+                </label>
+                <label class="protect-perm-label">
+                  <input type="checkbox" id="permModifying">
+                  <span data-i18n="protect.perm_modifying">Allow Modifying File</span>
+                </label>
+                <label class="protect-perm-label">
+                  <input type="checkbox" id="permAnnotating">
+                  <span data-i18n="protect.perm_annotating">Allow Comments & Forms</span>
+                </label>
+              </div>
+            </div>
+
             <button type="button" id="btnApplyProtect" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 16px; display:inline-flex; align-items:center; justify-content:center; gap:8px;">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
               <span data-i18n="protect.download_btn">Encrypt & Download PDF</span>
@@ -180,6 +245,11 @@
       const protectConfirmPassword = document.getElementById('protectConfirmPassword');
       const unlockPasswordInput = document.getElementById('unlockPasswordInput');
 
+      const permPrinting = document.getElementById('permPrinting');
+      const permCopying = document.getElementById('permCopying');
+      const permModifying = document.getElementById('permModifying');
+      const permAnnotating = document.getElementById('permAnnotating');
+
       const btnApplyProtect = document.getElementById('btnApplyProtect');
       const btnApplyUnlock = document.getElementById('btnApplyUnlock');
       const resetBtn = document.getElementById('resetBtn');
@@ -195,8 +265,7 @@
           tabUnlock.classList.add('btn-ghost');
           tabUnlock.classList.remove('btn-primary', 'active');
 
-          dropzoneIcon.textContent = '🔒';
-          dropzoneTitle.textContent = 'Drop PDF files to protect';
+          dropzoneTitle.textContent = PDFTools.i18n ? PDFTools.i18n.t('protect.drop_title_protect') : 'Drop PDF file to protect';
           protectControls.style.display = 'block';
           unlockControls.style.display = 'none';
         } else {
@@ -205,11 +274,20 @@
           tabProtect.classList.add('btn-ghost');
           tabProtect.classList.remove('btn-primary', 'active');
 
-          dropzoneIcon.textContent = '🔓';
-          dropzoneTitle.textContent = 'Drop protected PDF file to unlock';
+          dropzoneTitle.textContent = PDFTools.i18n ? PDFTools.i18n.t('protect.drop_title_unlock') : 'Drop protected PDF file to unlock';
           protectControls.style.display = 'none';
           unlockControls.style.display = 'block';
         }
+      }
+
+      function getPermissions() {
+        return {
+          printing: permPrinting.checked ? 'highResolution' : false,
+          copying: Boolean(permCopying.checked),
+          modifying: Boolean(permModifying.checked),
+          annotating: Boolean(permAnnotating.checked),
+          fillingForms: Boolean(permAnnotating.checked)
+        };
       }
 
       PDFTools.Dropzone('dropzone', {
@@ -222,13 +300,13 @@
             isBatchMode = (currentMode === 'protect' && files.length > 1);
 
             if (isBatchMode) {
-              fileNameLabel.textContent = `📦 Batch Queue: ${files.length} Files Selected`;
+              fileNameLabel.textContent = `Batch Queue: ${files.length} Files Selected`;
               fileSizeLabel.textContent = `Primary: ${currentFile.name}`;
-              btnApplyProtect.textContent = `🔒 Encrypt ${files.length} Documents & Download (.ZIP)`;
+              btnApplyProtect.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> <span>Encrypt ${files.length} Documents & Download (.ZIP)</span>`;
             } else {
               fileNameLabel.textContent = currentFile.name;
               fileSizeLabel.textContent = PDFTools.FileUtils.formatSize(currentFile.size);
-              btnApplyProtect.textContent = '🔒 Encrypt & Download PDF';
+              btnApplyProtect.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> <span>Encrypt & Download PDF</span>`;
             }
 
             uploadState.style.display = 'none';
@@ -237,7 +315,7 @@
         }
       });
 
-      // Check for pending handoff file from homepage (B1)
+      // Check for pending handoff file from homepage
       if (PDFTools.FileUtils && PDFTools.FileUtils.consumePendingFile) {
         PDFTools.FileUtils.consumePendingFile().then(file => {
           if (file) {
@@ -258,37 +336,39 @@
         const pass2 = protectConfirmPassword.value;
 
         if (!pass1) {
-          PDFTools.Toast.error('Please enter a password.');
+          PDFTools.Toast.error(PDFTools.i18n ? PDFTools.i18n.t('protect.error_empty') : 'Please enter a password.');
           return;
         }
         if (pass1 !== pass2) {
-          PDFTools.Toast.error('Passwords do not match.');
+          PDFTools.Toast.error(PDFTools.i18n ? PDFTools.i18n.t('protect.error_match') : 'Passwords do not match.');
           return;
         }
 
         btnApplyProtect.disabled = true;
-        btnApplyProtect.textContent = '⏳ Encrypting PDF...';
+        btnApplyProtect.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="spin"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> <span>${PDFTools.i18n ? PDFTools.i18n.t('protect.encrypting') : 'Encrypting PDF...'}</span>`;
 
         try {
+          const permissions = getPermissions();
           if (isBatchMode && queuedFiles.length > 1) {
             const zip = new JSZip();
             const total = queuedFiles.length;
 
             for (let i = 0; i < total; i++) {
               const f = queuedFiles[i];
-              btnApplyProtect.textContent = `⏳ [${i + 1}/${total}] Encrypting ${f.name}...`;
-              const resBytes = await PDFTools.Protect.protectPdf(f, pass1, pass1);
+              btnApplyProtect.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="spin"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> <span>[${i + 1}/${total}] Encrypting ${f.name}...</span>`;
+              const resBytes = await PDFTools.Protect.protectPdf(f, pass1, pass1, permissions);
               const outName = `${f.name.replace(/\.pdf$/i, '')}_protected.pdf`;
               zip.file(outName, resBytes);
             }
 
             const zipBlob = await zip.generateAsync({ type: 'blob' });
             saveAs(zipBlob, 'protected_documents.zip');
-            PDFTools.Toast.success(`All ${total} documents encrypted with password into ZIP! 🔒`);
+            PDFTools.Toast.success(`All ${total} documents encrypted with password into ZIP!`);
           } else {
-            const outputBytes = await PDFTools.Protect.protectPdf(currentFile, pass1, pass1, {}, (pct) => {
-              btnApplyProtect.textContent = `⏳ ${pct}%`;
+            const outputBytes = await PDFTools.Protect.protectPdf(currentFile, pass1, pass1, permissions, (pct) => {
+              btnApplyProtect.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="spin"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> <span>${pct}%</span>`;
             });
+            lastProcessedBytes = outputBytes;
             const baseName = currentFile.name.replace(/\.pdf$/i, '');
             PDFTools.Download.save(outputBytes, `${baseName}_protected.pdf`);
 
@@ -296,7 +376,7 @@
               PDFTools.RecentFiles.add(currentFile.name, currentFile.size, 'Protect PDF', 'protect');
             }
 
-            PDFTools.Toast.success('PDF encrypted successfully with password!');
+            PDFTools.Toast.success(PDFTools.i18n ? PDFTools.i18n.t('protect.success_protect') : 'PDF encrypted successfully with password!');
           }
         } catch (err) {
           console.error(err);
@@ -315,11 +395,11 @@
         const pass = unlockPasswordInput.value;
 
         btnApplyUnlock.disabled = true;
-        btnApplyUnlock.textContent = 'Unlocking PDF...';
+        btnApplyUnlock.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="spin"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> <span>${PDFTools.i18n ? PDFTools.i18n.t('protect.unlocking') : 'Unlocking PDF...'}</span>`;
 
         try {
           const outputBytes = await PDFTools.Protect.unlockPdf(currentFile, pass, (pct) => {
-            btnApplyUnlock.textContent = `Unlocking (${pct}%)...`;
+            btnApplyUnlock.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="spin"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> <span>Unlocking (${pct}%)...</span>`;
           });
           lastProcessedBytes = outputBytes;
           const baseName = currentFile.name.replace(/\.pdf$/i, '');
@@ -329,7 +409,7 @@
             PDFTools.RecentFiles.add(currentFile.name, currentFile.size, 'Unlock PDF', 'unlock');
           }
 
-          PDFTools.Toast.success('PDF unlocked successfully!');
+          PDFTools.Toast.success(PDFTools.i18n ? PDFTools.i18n.t('protect.success_unlock') : 'PDF unlocked successfully!');
         } catch (err) {
           console.error(err);
           PDFTools.Toast.error(err.message || 'Incorrect password.');

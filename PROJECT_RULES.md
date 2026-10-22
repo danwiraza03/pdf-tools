@@ -258,7 +258,7 @@ Struktur internal editor PDF Studio Pro dipecah ke dalam modul-modul modular ber
    - `annotation-engine.js`: Penyorot teks (highlight), garis bawah, coret, pensil bebas, dan bentuk geometris (panah, kotak, lingkaran).
    - `comments-engine.js`: Catatan tempel (*sticky notes*) dan thread komentar.
    - `form-engine.js`: Pembuat dan pengisi AcroForm fields (teks, checkbox, radio, dropdown).
-   - `redaction-engine.js`: True vector/image redaction (menghapus stream teks dan gambar di area redaksi secara permanen, bukan sekadar menggambar kotak hitam di atasnya).
+   - `redaction-engine.js`: Rasterization-based permanent redaction (merasterisasi halaman bertanda redaksi ke canvas resolusi tinggi minimal 200 DPI dengan persegi hitam pekat via `pdf-coordinate-engine.js`, mengganti halaman asli dengan halaman gambar baru serta memusnahkan stream teks `/Contents`, anotasi, dan form field lama dari memori untuk menjamin zero data leak; halaman tanpa tanda redaksi tetap dipertahankan 100% sebagai vektor murni; menampilkan modal konfirmasi kustom sebelum eksekusi).
    - `security-engine.js`: Analisis hak akses (*permissions*), enkripsi, dan sanitasi metadata.
    - `signature-inspector.js`: Inspeksi tanda tangan digital (`ByteRange`, `SigFlags`) untuk mencegah kerusakan berkas bertanda tangan.
 
@@ -375,7 +375,7 @@ c:\laragon\www\pdf\
 │   │   ├── annotation-engine.js # Highlights, shapes, ink pen
 │   │   ├── comments-engine.js   # Sticky notes & comment threads
 │   │   ├── form-engine.js       # AcroForm fields builder & filler
-│   │   ├── redaction-engine.js  # True vector redaction sanitizer
+│   │   ├── redaction-engine.js  # High-DPI rasterization redaction engine (anti-leak)
 │   │   ├── security-engine.js   # Permissions & security flags analyzer
 │   │   ├── image-edit-engine.js # Image move, replace, resize, delete
 │   │   ├── image-extractor.js   # Embedded raster image extractor

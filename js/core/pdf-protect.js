@@ -1,94 +1,218 @@
 /**
  * PDF Tools — Password Protection & Unlock Engine
- * Encrypts or Decrypts PDF documents client-side using PDF-Lib
+ * Encrypts (AES-256) or Decrypts PDF documents client-side using @cantoo/pdf-lib
  */
-window.PDFTools = window.PDFTools || {};
+(function () {
+  const globalObj = typeof window !== 'undefined' ? window : (typeof global !== 'undefined' ? global : globalThis);
+  globalObj.PDFTools = globalObj.PDFTools || {};
 
-PDFTools.Protect = (function () {
   /**
-   * Encrypt PDF with user and owner passwords
-   * @param {File|ArrayBuffer} fileInput 
+   * Helper to check if Uint8Array contains '/Encrypt' pattern
+   * @param {Uint8Array} bytes 
+   * @returns {boolean}
+   */
+  function hasEncryptDictionary(bytes) {
+    if (!bytes || bytes.length === 0) return false;
+    // '/Encrypt' in ASCII is [47, 69, 110, 99, 114, 121, 112, 116]
+    const pattern = [47, 69, 110, 99, 114, 121, 112, 116];
+    let matched = 0;
+    for (let i = 0; i < bytes.length; i++) {
+      if (bytes[i] === pattern[matched]) {
+        matched++;
+        if (matched === pattern.length) return true;
+      } else {
+        matched = bytes[i] === pattern[0] ? 1 : 0;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Encrypt PDF with user and owner passwords and granular permissions
+   * @param {File|Blob|ArrayBuffer|Uint8Array} fileInput 
    * @param {string} userPassword 
-   * @param {string} ownerPassword 
-   * @param {Object} permissions 
-   * @param {Function} onProgress 
+   * @param {string} [ownerPassword] 
+   * @param {Object} [permissions] 
+   * @param {Function} [onProgress] 
    * @returns {Promise<Uint8Array>}
    */
   async function protectPdf(fileInput, userPassword, ownerPassword, permissions = {}, onProgress) {
+    const PDFLib = globalObj.PDFLib || (typeof require === 'function' ? require('../lib/pdf-lib.min.js') : null);
+    if (!PDFLib || !PDFLib.PDFDocument) {
+      throw new Error('PDF library is not loaded.');
+    }
+
+    if (!userPassword && !ownerPassword) {
+      throw new Error('Please specify a password to protect the PDF document.');
+    }
+
     const { PDFDocument } = PDFLib;
 
-    const arrayBuffer = fileInput instanceof ArrayBuffer
-      ? fileInput
-      : await PDFTools.FileUtils.readAsArrayBuffer(fileInput);
+    let arrayBuffer;
+    if (fileInput instanceof ArrayBuffer) {
+      arrayBuffer = fileInput;
+    } else if (fileInput instanceof Uint8Array) {
+      arrayBuffer = fileInput.buffer.slice(fileInput.byteOffset, fileInput.byteOffset + fileInput.byteLength);
+    } else if (globalObj.PDFTools && globalObj.PDFTools.FileUtils && typeof globalObj.PDFTools.FileUtils.readAsArrayBuffer === 'function') {
+      arrayBuffer = await globalObj.PDFTools.FileUtils.readAsArrayBuffer(fileInput);
+    } else if (fileInput && typeof fileInput.arrayBuffer === 'function') {
+      arrayBuffer = await fileInput.arrayBuffer();
+    } else {
+      throw new Error('Unsupported file input format.');
+    }
 
     if (typeof onProgress === 'function') onProgress(20, 'Loading PDF document...');
 
     const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
 
-    if (typeof onProgress === 'function') onProgress(60, 'Applying password security...');
+    if (typeof onProgress === 'function') onProgress(50, 'Configuring security permissions...');
 
-    const saveOptions = {
-      useObjectStreams: true
-    };
+    // Build permissions map
+    const permConfig = {};
 
-    if (userPassword || ownerPassword) {
-      saveOptions.userPassword = userPassword || ownerPassword;
-      saveOptions.ownerPassword = ownerPassword || userPassword;
-      
-      if (permissions.printing !== undefined) saveOptions.permissions = saveOptions.permissions || {};
-      if (permissions.modifying !== undefined) saveOptions.permissions = saveOptions.permissions || {};
-      if (permissions.copying !== undefined) saveOptions.permissions = saveOptions.permissions || {};
-      if (permissions.annotating !== undefined) saveOptions.permissions = saveOptions.permissions || {};
+    if (permissions.printing !== undefined) {
+      if (permissions.printing === 'high' || permissions.printing === 'highResolution' || permissions.printing === true) {
+        permConfig.printing = 'highResolution';
+      } else if (permissions.printing === 'low' || permissions.printing === 'lowResolution') {
+        permConfig.printing = 'lowResolution';
+      } else {
+        permConfig.printing = false;
+      }
+    } else {
+      permConfig.printing = 'highResolution'; // default allow printing
     }
 
-    if (typeof onProgress === 'function') onProgress(90, 'Encrypting and saving...');
-    return await pdfDoc.save(saveOptions);
+    if (permissions.copying !== undefined) {
+      permConfig.copying = Boolean(permissions.copying);
+    }
+    if (permissions.modifying !== undefined) {
+      permConfig.modifying = Boolean(permissions.modifying);
+    }
+    if (permissions.annotating !== undefined) {
+      permConfig.annotating = Boolean(permissions.annotating);
+    }
+    if (permissions.fillingForms !== undefined) {
+      permConfig.fillingForms = Boolean(permissions.fillingForms);
+    }
+    if (permissions.contentAccessibility !== undefined) {
+      permConfig.contentAccessibility = Boolean(permissions.contentAccessibility);
+    }
+    if (permissions.documentAssembly !== undefined) {
+      permConfig.documentAssembly = Boolean(permissions.documentAssembly);
+    }
+
+    if (typeof onProgress === 'function') onProgress(70, 'Applying AES encryption...');
+
+    if (typeof pdfDoc.encrypt !== 'function') {
+      throw new Error('Loaded PDF-Lib engine does not support encryption. Please ensure @cantoo/pdf-lib is loaded.');
+    }
+
+    pdfDoc.encrypt({
+      userPassword: userPassword || '',
+      ownerPassword: ownerPassword || userPassword || '',
+      permissions: permConfig
+    });
+
+    if (typeof onProgress === 'function') onProgress(90, 'Serializing protected document...');
+
+    const encryptedBytes = await pdfDoc.save();
+
+    // Strict validation: Ensure /Encrypt dictionary is present in the output
+    if (!hasEncryptDictionary(encryptedBytes)) {
+      throw new Error('Encryption failed: The output PDF is missing the required /Encrypt dictionary.');
+    }
+
+    if (typeof onProgress === 'function') onProgress(100, 'Protection complete!');
+    return encryptedBytes;
   }
 
   /**
    * Unlock a password protected PDF
-   * @param {File|ArrayBuffer} fileInput 
+   * @param {File|Blob|ArrayBuffer|Uint8Array} fileInput 
    * @param {string} password 
-   * @param {Function} onProgress 
+   * @param {Function} [onProgress] 
    * @returns {Promise<Uint8Array>}
    */
   async function unlockPdf(fileInput, password, onProgress) {
+    const PDFLib = globalObj.PDFLib || (typeof require === 'function' ? require('../lib/pdf-lib.min.js') : null);
+    if (!PDFLib || !PDFLib.PDFDocument) {
+      throw new Error('PDF library is not loaded.');
+    }
+
     const { PDFDocument } = PDFLib;
 
-    const arrayBuffer = fileInput instanceof ArrayBuffer
-      ? fileInput
-      : await PDFTools.FileUtils.readAsArrayBuffer(fileInput);
+    let arrayBuffer;
+    if (fileInput instanceof ArrayBuffer) {
+      arrayBuffer = fileInput;
+    } else if (fileInput instanceof Uint8Array) {
+      arrayBuffer = fileInput.buffer.slice(fileInput.byteOffset, fileInput.byteOffset + fileInput.byteLength);
+    } else if (globalObj.PDFTools && globalObj.PDFTools.FileUtils && typeof globalObj.PDFTools.FileUtils.readAsArrayBuffer === 'function') {
+      arrayBuffer = await globalObj.PDFTools.FileUtils.readAsArrayBuffer(fileInput);
+    } else if (fileInput && typeof fileInput.arrayBuffer === 'function') {
+      arrayBuffer = await fileInput.arrayBuffer();
+    } else {
+      throw new Error('Unsupported file input format.');
+    }
 
-    if (typeof onProgress === 'function') onProgress(30, 'Decrypting PDF with provided password...');
+    if (typeof onProgress === 'function') onProgress(30, 'Verifying password and decrypting...');
 
-    // Attempt to load with password
-    let pdfDoc;
+    let encryptedDoc;
     try {
-      pdfDoc = await PDFDocument.load(arrayBuffer, {
+      encryptedDoc = await PDFDocument.load(arrayBuffer, {
         password: password || '',
         ignoreEncryption: false
       });
     } catch (err) {
-      throw new Error('Incorrect password or unable to decrypt this PDF.');
+      throw new Error('Incorrect password or unable to decrypt this PDF: ' + (err.message || 'Access denied'));
     }
 
-    if (typeof onProgress === 'function') onProgress(70, 'Removing encryption & signature restrictions...');
+    if (typeof onProgress === 'function') onProgress(60, 'Removing encryption restrictions...');
 
-    // Strip digital signature locks & permission restrictions
-    if (window.PDFTools && window.PDFTools.Compress && typeof window.PDFTools.Compress.removeDigitalSignatures === 'function') {
+    // Create a pristine document and copy all pages from the decrypted document
+    const cleanDoc = await PDFDocument.create();
+    const pageIndices = encryptedDoc.getPageIndices();
+    if (pageIndices.length > 0) {
+      const copiedPages = await cleanDoc.copyPages(encryptedDoc, pageIndices);
+      copiedPages.forEach(page => cleanDoc.addPage(page));
+    }
+
+    // Preserve metadata if present
+    try {
+      if (encryptedDoc.getTitle()) cleanDoc.setTitle(encryptedDoc.getTitle());
+      if (encryptedDoc.getAuthor()) cleanDoc.setAuthor(encryptedDoc.getAuthor());
+      if (encryptedDoc.getSubject()) cleanDoc.setSubject(encryptedDoc.getSubject());
+      if (encryptedDoc.getKeywords()) cleanDoc.setKeywords(encryptedDoc.getKeywords());
+      if (encryptedDoc.getProducer()) cleanDoc.setProducer(encryptedDoc.getProducer());
+      if (encryptedDoc.getCreator()) cleanDoc.setCreator(encryptedDoc.getCreator());
+    } catch (e) {
+      // Non-fatal metadata copy
+    }
+
+    // Strip digital signature locks if applicable
+    if (globalObj.PDFTools && globalObj.PDFTools.Compress && typeof globalObj.PDFTools.Compress.removeDigitalSignatures === 'function') {
       try {
-        await window.PDFTools.Compress.removeDigitalSignatures(pdfDoc);
+        await globalObj.PDFTools.Compress.removeDigitalSignatures(cleanDoc);
       } catch (e) {
         console.warn('Signature unlock notice:', e);
       }
     }
 
-    // Save clean unencrypted document
-    return await pdfDoc.save({ useObjectStreams: true });
+    if (typeof onProgress === 'function') onProgress(90, 'Saving unlocked PDF document...');
+
+    const unlockedBytes = await cleanDoc.save();
+
+    // Verify that /Encrypt dictionary is completely gone
+    if (hasEncryptDictionary(unlockedBytes)) {
+      throw new Error('Unlock failed: Document still contains an /Encrypt dictionary.');
+    }
+
+    if (typeof onProgress === 'function') onProgress(100, 'Unlock complete!');
+    return unlockedBytes;
   }
 
-  return {
+  globalObj.PDFTools.Protect = {
     protectPdf,
-    unlockPdf
+    unlockPdf,
+    hasEncryptDictionary
   };
 })();

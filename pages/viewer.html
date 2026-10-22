@@ -2897,7 +2897,10 @@
           <svg class="btn-svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Apply Permanent Blackout
         </button>
         <button type="button" id="annClearRedactionsBtn" class="btn btn-ghost btn-sm" style="font-size: 0.75rem; padding: 3px 8px;" data-i18n="subbar.ann.redact_clear">
-          ↺ Clear
+          <svg class="btn-svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+            <polyline points="3 3 3 8 8 8"/>
+          </svg> Clear
         </button>
       </div>
 
@@ -3358,6 +3361,51 @@
           </div>
         </div>
         <textarea id="ocrOutputBox" style="flex: 1; background: #1a1a1a; color: #ffffff; border: 1px solid #444; border-radius: 4px; padding: 8px; font-family: monospace; font-size: 0.8rem; resize: none; outline: none; box-sizing: border-box;" placeholder="Text from scan will appear here..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- In-Studio Redaction Confirmation Warning Modal -->
+  <div class="studio-modal-overlay" id="redactConfirmModal" style="display: none;">
+    <div class="studio-modal" style="max-width: 480px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #444; padding-bottom: 10px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          <h3 style="margin: 0; font-size: 1.05rem; color: #ffffff;" data-i18n="modal.redact_confirm.title">Permanent Redaction Warning</h3>
+        </div>
+        <button type="button" class="acrobat-btn" id="closeRedactConfirmModalBtn" style="padding:0; width:24px; height:24px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <div style="margin-top: 14px; font-size: 0.85rem; line-height: 1.5; color: #d1d5db;" data-i18n="modal.redact_confirm.desc">
+        Pages with redactions will be permanently rasterized into high-resolution images (200+ DPI). All underlying text and interactive elements on redacted pages will be completely deleted and cannot be selected, copied, or searched. Unredacted pages will remain untouched vector content.
+      </div>
+
+      <div style="margin-top: 14px; padding: 10px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 6px; font-size: 0.78rem; color: #fca5a5; display: flex; align-items: flex-start; gap: 8px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 2px;">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <span>This action will permanently convert redacted pages to images to guarantee zero text data leakage.</span>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px;">
+        <button type="button" id="cancelRedactConfirmBtn" class="btn btn-ghost btn-md" data-i18n="modal.redact_confirm.cancel">Cancel</button>
+        <button type="button" id="confirmApplyRedactBtn" class="btn btn-primary btn-md" style="background: #EF4444; border-color: #EF4444;" data-i18n="modal.redact_confirm.apply">
+          <svg class="btn-svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg> Apply Permanent Redaction
+        </button>
       </div>
     </div>
   </div>
@@ -6400,20 +6448,78 @@
         closeAnnOptionsBtn.addEventListener('click', () => switchTool('select'));
       }
 
+      // Redaction Confirmation Modal Controller
+      const redactConfirmModal = document.getElementById('redactConfirmModal');
+      const closeRedactConfirmModalBtn = document.getElementById('closeRedactConfirmModalBtn');
+      const cancelRedactConfirmBtn = document.getElementById('cancelRedactConfirmBtn');
+      const confirmApplyRedactBtn = document.getElementById('confirmApplyRedactBtn');
+
+      const closeRedactModal = () => {
+        if (redactConfirmModal) {
+          redactConfirmModal.style.display = 'none';
+          redactConfirmModal.classList.remove('active');
+        }
+      };
+      closeRedactConfirmModalBtn?.addEventListener('click', closeRedactModal);
+      cancelRedactConfirmBtn?.addEventListener('click', closeRedactModal);
+
       if (annApplyRedactionsBtn) {
         annApplyRedactionsBtn.addEventListener('click', () => {
-          if (!currentDoc) return;
-          const pageAnn = currentDoc.getPageAnnotation(currentDoc.currentPage);
-          const unapplied = (pageAnn.redactions || []).filter(r => !r.applied);
-          if (unapplied.length === 0) {
-            PDFTools.Toast.info('No marked areas to redact. Drag on the document first.');
+          if (!currentDoc) {
+            PDFTools.Toast.info('Please open a PDF document first.');
             return;
           }
-          unapplied.forEach(r => { r.applied = true; });
-          redrawAnnotationLayer();
-          updateRedactBadge();
-          scheduleRecovery();
-          PDFTools.Toast.success('Redactions applied permanently!');
+          const pageAnn = currentDoc.getPageAnnotation(currentDoc.currentPage);
+          const hasMarks = (pageAnn.redactions && pageAnn.redactions.length > 0);
+          if (!hasMarks) {
+            PDFTools.Toast.info('No marked areas to redact on this page. Drag on the document first.');
+            return;
+          }
+          if (redactConfirmModal) {
+            redactConfirmModal.style.display = 'flex';
+            redactConfirmModal.classList.add('active');
+          }
+        });
+      }
+
+      if (confirmApplyRedactBtn) {
+        confirmApplyRedactBtn.addEventListener('click', async () => {
+          closeRedactModal();
+          if (!currentDoc) return;
+
+          PDFTools.Toast.info(PDFTools.i18n.t('modal.redact_confirm.applying') || 'Rasterizing and permanently redacting page...');
+
+          try {
+            let buffer = currentDoc.arrayBuffer;
+            if (!buffer || currentDoc.dirty) {
+              const baked = await PDFTools.Studio.exportDocument(currentDoc);
+              buffer = baked.buffer || baked;
+            }
+
+            const { PDFDocument } = window.PDFLib;
+            const pdfDoc = await PDFDocument.load(buffer);
+
+            // Rasterize & permanently redact all pages with redaction marks
+            await window.PDFTools.RedactionEngine.applyPermanentRedactionsToDocument(
+              pdfDoc,
+              currentDoc.pdfJsDoc,
+              currentDoc.annotations,
+              {
+                dpi: window.PDFTools.RedactionEngine.DEFAULT_DPI,
+                CoordinateEngine: window.PDFTools.PDFCoordinateEngine
+              }
+            );
+
+            const newBytes = await pdfDoc.save();
+            const newFile = new File([newBytes], currentDoc.fileName || 'document.pdf', { type: 'application/pdf' });
+            await openDocument(newFile);
+            setDocumentDirty(true);
+
+            PDFTools.Toast.success(PDFTools.i18n.t('modal.redact_confirm.success') || 'Permanent redaction applied successfully! Page rasterized.');
+          } catch (err) {
+            console.error('Permanent redaction error:', err);
+            PDFTools.Toast.error(err.message || 'Failed to apply permanent redactions.');
+          }
         });
       }
 

@@ -330,6 +330,13 @@ PDFTools.i18n = (function () {
       'modal.insert_page.btn_insert': 'Insert Page(s)',
       'modal.insert_page.btn_cancel': 'Cancel',
 
+      'modal.redact_confirm.title': 'Permanent Redaction Warning',
+      'modal.redact_confirm.desc': 'Pages with redactions will be permanently rasterized into high-resolution images (200+ DPI). All underlying text and interactive elements on redacted pages will be completely deleted and cannot be selected, copied, or searched. Unredacted pages will remain untouched vector content.',
+      'modal.redact_confirm.cancel': 'Cancel',
+      'modal.redact_confirm.apply': 'Apply Permanent Redaction',
+      'modal.redact_confirm.applying': 'Rasterizing and permanently redacting page...',
+      'modal.redact_confirm.success': 'Permanent redaction applied successfully! Page rasterized.',
+
       'modal.doc_props.title': 'Document Properties',
       'modal.doc_props.file_name': 'File Name:',
       'modal.doc_props.file_size': 'File Size:',
@@ -624,7 +631,32 @@ PDFTools.i18n = (function () {
       'merge.page': 'Page',
       'merge.new_page': 'New Page',
       'merge.old_page': 'Old Page',
-      'merge.orig': 'Orig'
+      'merge.orig': 'Orig',
+
+      // Protect & Unlock PDF
+      'protect.tab_protect': 'Protect PDF (Add Password)',
+      'protect.tab_unlock': 'Unlock PDF (Remove Password)',
+      'protect.drop_title_protect': 'Drop PDF file to protect',
+      'protect.drop_title_unlock': 'Drop protected PDF file to unlock',
+      'protect.set_password': 'Set Open Password',
+      'protect.password_placeholder': 'Enter secure password',
+      'protect.confirm_password': 'Confirm Password',
+      'protect.confirm_placeholder': 'Re-type password',
+      'protect.download_btn': 'Encrypt & Download PDF',
+      'protect.enter_password': 'Enter Current PDF Password',
+      'protect.unlock_placeholder': 'Password to unlock',
+      'protect.unlock_btn': 'Unlock & Download PDF',
+      'protect.permissions_title': 'Document Restrictions & Permissions',
+      'protect.perm_printing': 'Allow Printing',
+      'protect.perm_copying': 'Allow Copying Content',
+      'protect.perm_modifying': 'Allow Modifying File',
+      'protect.perm_annotating': 'Allow Comments & Forms',
+      'protect.encrypting': 'Encrypting PDF...',
+      'protect.unlocking': 'Unlocking PDF...',
+      'protect.success_protect': 'PDF encrypted successfully with password!',
+      'protect.success_unlock': 'PDF unlocked successfully!',
+      'protect.error_match': 'Passwords do not match.',
+      'protect.error_empty': 'Please enter a password.'
     },
 
     id: {
@@ -951,6 +983,13 @@ PDFTools.i18n = (function () {
       'modal.insert_page.btn_insert': 'Sisipkan Halaman',
       'modal.insert_page.btn_cancel': 'Batal',
 
+      'modal.redact_confirm.title': 'Peringatan Redaksi Permanen',
+      'modal.redact_confirm.desc': 'Halaman yang memiliki tanda redaksi akan dirasterisasi menjadi gambar resolusi tinggi (200+ DPI). Seluruh teks dan elemen interaktif asli pada halaman tersebut akan dihapus secara permanen dan tidak dapat dipilih, disalin, atau dicari lagi. Halaman lain yang tidak diredaksi akan tetap berupa vektor.',
+      'modal.redact_confirm.cancel': 'Batal',
+      'modal.redact_confirm.apply': 'Terapkan Redaksi Permanen',
+      'modal.redact_confirm.applying': 'Merasterisasi dan menerapkan redaksi permanen...',
+      'modal.redact_confirm.success': 'Redaksi permanen berhasil diterapkan! Halaman telah dirasterisasi.',
+
       'modal.doc_props.title': 'Properti Dokumen',
       'modal.doc_props.file_name': 'Nama Berkas:',
       'modal.doc_props.file_size': 'Ukuran Berkas:',
@@ -1246,7 +1285,32 @@ PDFTools.i18n = (function () {
       'merge.page': 'Halaman',
       'merge.new_page': 'Hal. Baru',
       'merge.old_page': 'Hal. Asal',
-      'merge.orig': 'Asal'
+      'merge.orig': 'Asal',
+
+      // Protect & Unlock PDF
+      'protect.tab_protect': 'Proteksi PDF (Tambah Sandi)',
+      'protect.tab_unlock': 'Buka Sandi PDF (Hapus Sandi)',
+      'protect.drop_title_protect': 'Tarik berkas PDF untuk diproteksi',
+      'protect.drop_title_unlock': 'Tarik berkas PDF terkunci untuk dibuka',
+      'protect.set_password': 'Atur Sandi Buka Dokumen',
+      'protect.password_placeholder': 'Masukkan kata sandi yang kuat',
+      'protect.confirm_password': 'Ketik Ulang Sandi',
+      'protect.confirm_placeholder': 'Ketik ulang kata sandi',
+      'protect.download_btn': 'Enkripsi & Unduh PDF',
+      'protect.enter_password': 'Masukkan Kata Sandi Saat Ini',
+      'protect.unlock_placeholder': 'Kata sandi untuk membuka',
+      'protect.unlock_btn': 'Buka & Unduh PDF',
+      'protect.permissions_title': 'Hak Akses & Pembatasan Dokumen',
+      'protect.perm_printing': 'Izinkan Mencetak',
+      'protect.perm_copying': 'Izinkan Menyalin Teks & Konten',
+      'protect.perm_modifying': 'Izinkan Mengubah Isi Berkas',
+      'protect.perm_annotating': 'Izinkan Komentar & Formulir',
+      'protect.encrypting': 'Mengenkripsi PDF...',
+      'protect.unlocking': 'Membuka sandi PDF...',
+      'protect.success_protect': 'PDF berhasil dienkripsi dengan kata sandi!',
+      'protect.success_unlock': 'PDF berhasil dibuka tanpa sandi!',
+      'protect.error_match': 'Kata sandi tidak cocok.',
+      'protect.error_empty': 'Silakan masukkan kata sandi.'
     }
   };
 

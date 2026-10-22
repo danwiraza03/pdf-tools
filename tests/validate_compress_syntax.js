@@ -1,5 +1,6 @@
 const fs = require('fs');
-const html = fs.readFileSync('c:/laragon/www/pdf/pages/compress.html', 'utf8');
+const path = require('path');
+const html = fs.readFileSync(path.resolve(__dirname, '../pages/compress.html'), 'utf8');
 
 // Extract script tag contents
 const scriptMatches = html.matchAll(/<script(?![^>]*src)[^>]*>([\s\S]*?)<\/script>/gi);
