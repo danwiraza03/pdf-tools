@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Merge PDF — PDF Tools</title>
+  <link rel="icon" type="image/svg+xml" href="../icon.svg">
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/tool.css">
 </head>
@@ -1926,7 +1927,7 @@
 
           document.getElementById('resPages').textContent = ordered.length;
           document.getElementById('resFiles').textContent = fileGroups.length;
-          document.getElementById('resSize').textContent = PDFTools.FileUtils.formatBytes(mergedData.byteLength);
+          document.getElementById('resSize').textContent = PDFTools.FileUtils.formatSize(mergedData.byteLength);
 
           const sigNotice = document.getElementById('sigNotice');
           if (sigNotice) sigNotice.style.display = hasDigitalSignatures ? 'flex' : 'none';
