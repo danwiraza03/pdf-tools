@@ -116,20 +116,24 @@ window.PDFTools.StudioThumbnails = (function () {
       if (nameLower.endsWith('.pdf')) {
         const buffer = await file.arrayBuffer();
         const res = await window.PDFTools.Studio.insertPdfPages(currentDoc, insertPos, buffer);
-        if (res && res.insertedCount > 0) {
-          insertPos += res.insertedCount;
-          totalInserted += res.insertedCount;
+        const count = res ? (res.insertedCount || res.count || 0) : 0;
+        if (count > 0) {
+          insertPos += count;
+          totalInserted += count;
         }
       } else if (/\.(png|jpe?g|webp|bmp|gif)$/.test(nameLower)) {
         const buffer = await file.arrayBuffer();
         const res = await window.PDFTools.Studio.insertImagePages(currentDoc, insertPos, [{
           name: file.name,
           type: file.type || 'image/jpeg',
-          data: buffer
+          mimeType: file.type || 'image/jpeg',
+          data: buffer,
+          arrayBuffer: buffer
         }]);
-        if (res && res.insertedCount > 0) {
-          insertPos += res.insertedCount;
-          totalInserted += res.insertedCount;
+        const count = res ? (res.insertedCount || res.count || 0) : 0;
+        if (count > 0) {
+          insertPos += count;
+          totalInserted += count;
         }
       }
     }
@@ -157,8 +161,27 @@ window.PDFTools.StudioThumbnails = (function () {
     if (!currentDoc) return;
     recordDocumentState();
     const safeIdx = Math.max(0, Math.min(insertIdx, currentDoc.getActivePagesList().length));
-    const res = await window.PDFTools.Studio.insertBlankPages(currentDoc, safeIdx, count, { size, orientation });
-    if (res && res.insertedCount > 0) {
+
+    let width = 595.28;
+    let height = 841.89;
+    if (size === 'letter') {
+      width = 612;
+      height = 792;
+    } else if (size === 'current' && currentDoc.pdfJsDoc) {
+      try {
+        const refPage = await currentDoc.pdfJsDoc.getPage(Math.min(currentDoc.currentPage, currentDoc.totalPages));
+        const vp = refPage.getViewport({ scale: 1.0 });
+        width = vp.width;
+        height = vp.height;
+      } catch (e) {
+        width = 595.28;
+        height = 841.89;
+      }
+    }
+
+    const res = await window.PDFTools.Studio.insertBlankPages(currentDoc, safeIdx, count, { width, height, size, orientation });
+    const inserted = res ? (res.insertedCount || res.count || 0) : 0;
+    if (inserted > 0) {
       currentDoc.currentPage = safeIdx + 1;
       scheduleRecovery();
       await buildSidebarThumbnails();
@@ -178,49 +201,76 @@ window.PDFTools.StudioThumbnails = (function () {
     const currentDoc = getDoc();
     if (!currentDoc) return;
     const activeList = currentDoc.getActivePagesList();
-    const safeIdx = Math.max(0, Math.min(pageIndex, activeList.length - 1));
-    const pageNum = activeList[safeIdx];
-    recordDocumentState();
-    currentDoc.pageOrder.splice(safeIdx + 1, 0, pageNum);
-    currentDoc.currentPage = pageNum;
-    scheduleRecovery();
-    await buildSidebarThumbnails();
-    await renderCurrentPageView();
+    const safeIdx = typeof pageIndex === 'number'
+      ? Math.max(0, Math.min(pageIndex, activeList.length - 1))
+      : Math.max(0, activeList.indexOf(currentDoc.currentPage));
 
-    const successMsg = window.PDFTools?.i18n?.t ? window.PDFTools.i18n.t('toast.page_duplicated') : 'Page duplicated!';
-    if (window.PDFTools?.Toast) window.PDFTools.Toast.success(successMsg);
+    recordDocumentState();
+    try {
+      const res = await window.PDFTools.Studio.duplicatePage(currentDoc, safeIdx);
+      if (res && res.success) {
+        scheduleRecovery();
+        await buildSidebarThumbnails();
+        await renderCurrentPageView();
+
+        const pageNumberInput = ctx?.getPageNumberInput?.() || document.getElementById('pageNumberInput');
+        const totalPagesLabel = ctx?.getTotalPagesLabel?.() || document.getElementById('totalPagesLabel');
+        if (pageNumberInput) pageNumberInput.value = currentDoc.currentPage;
+        if (totalPagesLabel) totalPagesLabel.textContent = currentDoc.totalPages;
+
+        const successMsg = window.PDFTools?.i18n?.t ? window.PDFTools.i18n.t('toast.page_duplicated') : 'Page duplicated!';
+        if (window.PDFTools?.Toast) window.PDFTools.Toast.success(successMsg);
+      }
+    } catch (err) {
+      console.error('Duplicate page failed:', err);
+      if (window.PDFTools?.Toast) window.PDFTools.Toast.error(err.message || 'Failed to duplicate page.');
+    }
   }
 
-  async function deletePageHandler(pageNum) {
+  async function deletePageHandler(pageIndex) {
     const currentDoc = getDoc();
     if (!currentDoc) return;
     const activeList = currentDoc.getActivePagesList();
-    if (activeList.length <= 1) {
+    if (activeList.length <= 1 || currentDoc.totalPages <= 1) {
       const err = window.PDFTools?.i18n?.t ? window.PDFTools.i18n.t('toast.cannot_delete_last') : 'Cannot delete the only page in the document.';
       if (window.PDFTools?.Toast) window.PDFTools.Toast.error(err);
       return;
     }
 
+    const safeIdx = typeof pageIndex === 'number'
+      ? Math.max(0, Math.min(pageIndex, activeList.length - 1))
+      : Math.max(0, activeList.indexOf(currentDoc.currentPage));
+
+    const pageDisplayNum = safeIdx + 1;
+
     let ok = true;
     if (window.PDFTools?.Modal?.confirm) {
-      const confirmMsg = window.PDFTools?.i18n?.t ? window.PDFTools.i18n.t('toast.confirm_delete_page') : `Delete page ${pageNum}?`;
+      const confirmTpl = window.PDFTools?.i18n?.t ? window.PDFTools.i18n.t('toast.confirm_delete_page') : 'Delete page {page}?';
+      const confirmMsg = confirmTpl.replace('{page}', pageDisplayNum);
       ok = await window.PDFTools.Modal.confirm(confirmMsg, { isDanger: true });
     }
     if (!ok) return;
 
     recordDocumentState();
-    const idx = currentDoc.pageOrder.indexOf(pageNum);
-    if (idx !== -1) {
-      currentDoc.pageOrder.splice(idx, 1);
-    }
-    const remaining = currentDoc.getActivePagesList();
-    currentDoc.currentPage = remaining[Math.min(idx, remaining.length - 1)] || 1;
-    scheduleRecovery();
-    await buildSidebarThumbnails();
-    await renderCurrentPageView();
+    try {
+      const res = await window.PDFTools.Studio.deletePage(currentDoc, safeIdx);
+      if (res && res.success) {
+        scheduleRecovery();
+        await buildSidebarThumbnails();
+        await renderCurrentPageView();
 
-    const delMsg = window.PDFTools?.i18n?.t ? window.PDFTools.i18n.t('toast.page_deleted') : 'Page deleted.';
-    if (window.PDFTools?.Toast) window.PDFTools.Toast.info(delMsg);
+        const pageNumberInput = ctx?.getPageNumberInput?.() || document.getElementById('pageNumberInput');
+        const totalPagesLabel = ctx?.getTotalPagesLabel?.() || document.getElementById('totalPagesLabel');
+        if (pageNumberInput) pageNumberInput.value = currentDoc.currentPage;
+        if (totalPagesLabel) totalPagesLabel.textContent = currentDoc.totalPages;
+
+        const delMsg = window.PDFTools?.i18n?.t ? window.PDFTools.i18n.t('toast.page_deleted') : 'Page deleted.';
+        if (window.PDFTools?.Toast) window.PDFTools.Toast.info(delMsg);
+      }
+    } catch (err) {
+      console.error('Delete page failed:', err);
+      if (window.PDFTools?.Toast) window.PDFTools.Toast.error(err.message || 'Failed to delete page.');
+    }
   }
 
   // --- Top / Main Toolbar Actions ---
@@ -230,7 +280,7 @@ window.PDFTools.StudioThumbnails = (function () {
     if (!currentDoc) return;
     const p = currentDoc.currentPage;
     recordDocumentState();
-    currentDoc.pageRotations[p] = ((currentDoc.pageRotations[p] || 0) + deg + 360) % 360;
+    currentDoc.rotatePage(p, deg);
     scheduleRecovery();
     await renderCurrentPageView();
     await buildSidebarThumbnails();
@@ -239,32 +289,17 @@ window.PDFTools.StudioThumbnails = (function () {
   async function duplicateCurrent() {
     const currentDoc = getDoc();
     if (!currentDoc) return;
-    const cur = currentDoc.currentPage;
-    const idx = currentDoc.pageOrder.indexOf(cur);
-    if (idx !== -1) {
-      recordDocumentState();
-      currentDoc.pageOrder.splice(idx + 1, 0, cur);
-      scheduleRecovery();
-      await buildSidebarThumbnails();
-      if (window.PDFTools?.Toast) window.PDFTools.Toast.success(`Page ${cur} duplicated!`);
-    }
+    const activeList = currentDoc.getActivePagesList();
+    const idx = activeList.indexOf(currentDoc.currentPage);
+    await duplicatePageHandler(idx !== -1 ? idx : 0);
   }
 
   async function deleteCurrent() {
     const currentDoc = getDoc();
     if (!currentDoc) return;
-    if (currentDoc.getActivePagesList().length <= 1) {
-      if (window.PDFTools?.Toast) window.PDFTools.Toast.error('Cannot delete all pages.');
-      return;
-    }
-    recordDocumentState();
-    currentDoc.deletedPages.add(currentDoc.currentPage);
-    scheduleRecovery();
-    const remaining = currentDoc.getActivePagesList();
-    currentDoc.currentPage = remaining[0] || 1;
-    await renderCurrentPageView();
-    await buildSidebarThumbnails();
-    if (window.PDFTools?.Toast) window.PDFTools.Toast.info('Page deleted');
+    const activeList = currentDoc.getActivePagesList();
+    const idx = activeList.indexOf(currentDoc.currentPage);
+    await deletePageHandler(idx !== -1 ? idx : 0);
   }
 
   function triggerInsertPdf(targetIndex) {
@@ -408,7 +443,7 @@ window.PDFTools.StudioThumbnails = (function () {
       });
       hoverActions.querySelector('.btn-quick-del').addEventListener('click', (e) => {
         e.stopPropagation();
-        deletePageHandler(p);
+        deletePageHandler(idx);
       });
 
       card.appendChild(frame);
@@ -506,6 +541,14 @@ window.PDFTools.StudioThumbnails = (function () {
     const thumbnailSidebar = getThumbnailSidebar();
     const thumbScrollList = getThumbScrollList();
 
+    function closeInsertDropdown() {
+      if (insertDropdownMenu) {
+        insertDropdownMenu.style.display = 'none';
+        insertDropdownMenu.classList.remove('show');
+        insertPageDropdownBtn?.setAttribute('aria-expanded', 'false');
+      }
+    }
+
     // Toggle Insert Dropdown
     insertPageDropdownBtn?.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -515,14 +558,20 @@ window.PDFTools.StudioThumbnails = (function () {
         if (window.PDFTools?.Toast) window.PDFTools.Toast.error(msg);
         return;
       }
-      const isOpen = insertDropdownMenu.style.display === 'block';
-      insertDropdownMenu.style.display = isOpen ? 'none' : 'block';
+      const isOpen = insertDropdownMenu.classList.contains('show') || insertDropdownMenu.style.display === 'block';
+      if (isOpen) {
+        closeInsertDropdown();
+      } else {
+        insertDropdownMenu.style.display = 'block';
+        insertDropdownMenu.classList.add('show');
+        insertPageDropdownBtn.setAttribute('aria-expanded', 'true');
+      }
     });
 
     // Close floating menus on click outside
     document.addEventListener('click', (e) => {
       if (insertDropdownMenu && !e.target.closest('#insertPageDropdownBtn')) {
-        insertDropdownMenu.style.display = 'none';
+        closeInsertDropdown();
       }
       if (thumbContextMenu && !e.target.closest('#thumbContextMenu')) {
         thumbContextMenu.style.display = 'none';
@@ -578,7 +627,7 @@ window.PDFTools.StudioThumbnails = (function () {
 
     // Insert Dropdown Items
     document.getElementById('menuInsertBlankPage')?.addEventListener('click', () => {
-      if (insertDropdownMenu) insertDropdownMenu.style.display = 'none';
+      closeInsertDropdown();
       const currentDoc = getDoc();
       if (!currentDoc) return;
       const activeList = currentDoc.getActivePagesList();
@@ -587,7 +636,7 @@ window.PDFTools.StudioThumbnails = (function () {
     });
 
     document.getElementById('menuInsertPdfPage')?.addEventListener('click', () => {
-      if (insertDropdownMenu) insertDropdownMenu.style.display = 'none';
+      closeInsertDropdown();
       const currentDoc = getDoc();
       if (!currentDoc) return;
       const activeList = currentDoc.getActivePagesList();
@@ -596,7 +645,7 @@ window.PDFTools.StudioThumbnails = (function () {
     });
 
     document.getElementById('menuInsertImagePage')?.addEventListener('click', () => {
-      if (insertDropdownMenu) insertDropdownMenu.style.display = 'none';
+      closeInsertDropdown();
       const currentDoc = getDoc();
       if (!currentDoc) return;
       const activeList = currentDoc.getActivePagesList();
@@ -605,34 +654,16 @@ window.PDFTools.StudioThumbnails = (function () {
     });
 
     document.getElementById('menuDuplicatePage')?.addEventListener('click', () => {
-      if (insertDropdownMenu) insertDropdownMenu.style.display = 'none';
-      const currentDoc = getDoc();
-      if (!currentDoc) return;
-      const activeList = currentDoc.getActivePagesList();
-      const activeIdx = activeList.indexOf(currentDoc.currentPage);
-      duplicatePageHandler(activeIdx !== -1 ? activeIdx : 0);
+      closeInsertDropdown();
+      duplicateCurrent();
     });
 
     document.getElementById('addPageBtn')?.addEventListener('click', () => {
-      const currentDoc = getDoc();
-      if (!currentDoc) {
-        const msg = window.PDFTools?.i18n?.t ? window.PDFTools.i18n.t('toast.open_first') : 'Please open a document first.';
-        if (window.PDFTools?.Toast) window.PDFTools.Toast.error(msg);
-        return;
-      }
-      const activeList = currentDoc.getActivePagesList();
-      const activeIdx = activeList.indexOf(currentDoc.currentPage);
-      duplicatePageHandler(activeIdx !== -1 ? activeIdx : 0);
+      duplicateCurrent();
     });
 
     document.getElementById('deletePageThumbBtn')?.addEventListener('click', () => {
-      const currentDoc = getDoc();
-      if (!currentDoc) {
-        const msg = window.PDFTools?.i18n?.t ? window.PDFTools.i18n.t('toast.open_first') : 'Please open a document first.';
-        if (window.PDFTools?.Toast) window.PDFTools.Toast.error(msg);
-        return;
-      }
-      deletePageHandler(currentDoc.currentPage);
+      deleteCurrent();
     });
 
     // Hidden file input change listeners
@@ -757,7 +788,7 @@ window.PDFTools.StudioThumbnails = (function () {
 
     document.getElementById('ctxDelete')?.addEventListener('click', () => {
       if (thumbContextMenu) thumbContextMenu.style.display = 'none';
-      deletePageHandler(contextTargetPage);
+      deletePageHandler(contextTargetIndex);
     });
 
     // Top / Sidebar Page Action Buttons

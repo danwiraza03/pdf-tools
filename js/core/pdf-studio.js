@@ -62,6 +62,11 @@ PDFTools.Studio = (function () {
       }
       return active;
     }
+
+    rotatePage(pageNum, deg) {
+      this.pageRotations[pageNum] = ((this.pageRotations[pageNum] || 0) + deg + 360) % 360;
+      this.dirty = true;
+    }
   }
 
   /**
@@ -901,19 +906,99 @@ PDFTools.Studio = (function () {
     doc.pageRotations = newRotations;
   }
 
+  function getPdfJs() {
+    if (typeof pdfjsLib !== 'undefined') return pdfjsLib;
+    if (typeof pdfjs !== 'undefined') return pdfjs;
+    if (typeof window !== 'undefined' && window.pdfjsLib) return window.pdfjsLib;
+    return null;
+  }
+
+  function needsSync(doc) {
+    if (!doc) return false;
+    if (doc.deletedPages && doc.deletedPages.size > 0) return true;
+    if (doc.pageRotations && Object.values(doc.pageRotations).some(r => r % 360 !== 0)) return true;
+    if (!doc.pageOrder || doc.pageOrder.length !== doc.totalPages) return true;
+    return doc.pageOrder.some((p, i) => p !== i + 1);
+  }
+
+  async function syncDocumentBuffer(doc) {
+    if (!doc || !doc.arrayBuffer) return;
+    const activeList = doc.getActivePagesList ? doc.getActivePagesList() : [];
+    if (activeList.length === 0) return;
+    if (!needsSync(doc)) return;
+
+    const { PDFDocument, degrees } = PDFLib;
+    const loadedDoc = await PDFDocument.load(doc.arrayBuffer, { ignoreEncryption: true });
+    const finalDoc = await PDFDocument.create();
+
+    const origTotal = loadedDoc.getPageCount();
+    for (let i = 0; i < activeList.length; i++) {
+      const origPageNum = activeList[i];
+      const origIndex = origPageNum - 1;
+      if (origIndex >= 0 && origIndex < origTotal) {
+        const [copiedPage] = await finalDoc.copyPages(loadedDoc, [origIndex]);
+        const addRot = (doc.pageRotations && doc.pageRotations[origPageNum] ? doc.pageRotations[origPageNum] : 0) % 360;
+        if (addRot !== 0) {
+          const curRot = copiedPage.getRotation ? copiedPage.getRotation().angle : 0;
+          copiedPage.setRotation(degrees((curRot + addRot + 360) % 360));
+        }
+        finalDoc.addPage(copiedPage);
+      }
+    }
+
+    const newAnnotations = {};
+    for (let i = 0; i < activeList.length; i++) {
+      const origPageNum = activeList[i];
+      const newPageNum = i + 1;
+      if (doc.annotations && doc.annotations[origPageNum]) {
+        newAnnotations[newPageNum] = JSON.parse(JSON.stringify(doc.annotations[origPageNum]));
+      }
+    }
+
+    const newBytes = await finalDoc.save({ useObjectStreams: true });
+    const pLib = getPdfJs();
+    if (pLib) {
+      const loadingTask = pLib.getDocument({ data: new Uint8Array(newBytes.slice(0)) });
+      doc.pdfJsDoc = await loadingTask.promise;
+      doc.totalPages = doc.pdfJsDoc.numPages;
+    } else {
+      doc.totalPages = finalDoc.getPageCount();
+    }
+
+    doc.arrayBuffer = newBytes.buffer || newBytes;
+    doc.pageOrder = Array.from({ length: doc.totalPages }, (_, i) => i + 1);
+    doc.deletedPages = new Set();
+    doc.pageRotations = {};
+    doc.annotations = newAnnotations;
+    doc.dirty = true;
+  }
+
   /**
    * Insert blank pages into StudioDoc at given 0-based index
    * @param {StudioDoc} doc 
    * @param {number} insertIndex 0-based index where pages are inserted
    * @param {number} count Number of blank pages
-   * @param {Object} options { width, height, orientation }
+   * @param {Object} options { width, height, orientation, size }
    */
   async function insertBlankPages(doc, insertIndex, count = 1, options = {}) {
+    if (!doc || !doc.arrayBuffer) throw new Error('No active document loaded.');
+    if (needsSync(doc)) {
+      await syncDocumentBuffer(doc);
+    }
     const { PDFDocument } = PDFLib;
     const pdfDoc = await PDFDocument.load(doc.arrayBuffer, { ignoreEncryption: true });
 
-    let w = options.width || 595.28; // Standard A4 width
-    let h = options.height || 841.89; // Standard A4 height
+    let w = options.width;
+    let h = options.height;
+    if (!w || !h) {
+      if (options.size === 'letter') {
+        w = 612;
+        h = 792;
+      } else {
+        w = 595.28; // Standard A4 width
+        h = 841.89; // Standard A4 height
+      }
+    }
 
     if (options.orientation === 'landscape' && w < h) {
       const tmp = w; w = h; h = tmp;
@@ -929,17 +1014,23 @@ PDFTools.Studio = (function () {
     }
 
     const newBytes = await pdfDoc.save({ useObjectStreams: true });
-    const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(newBytes.slice(0)) });
-    doc.pdfJsDoc = await loadingTask.promise;
+    const pLib = getPdfJs();
+    if (pLib) {
+      const loadingTask = pLib.getDocument({ data: new Uint8Array(newBytes.slice(0)) });
+      doc.pdfJsDoc = await loadingTask.promise;
+      doc.totalPages = doc.pdfJsDoc.numPages;
+    } else {
+      doc.totalPages = pdfDoc.getPageCount();
+    }
     doc.arrayBuffer = newBytes.buffer || newBytes;
-    doc.totalPages = doc.pdfJsDoc.numPages;
     doc.pageOrder = Array.from({ length: doc.totalPages }, (_, i) => i + 1);
     doc.deletedPages = new Set();
+    doc.pageRotations = {};
     shiftAnnotationsOnInsert(doc, safeIdx, count);
     doc.currentPage = safeIdx + 1;
     doc.dirty = true;
 
-    return { count, newTotalPages: doc.totalPages, targetPage: doc.currentPage };
+    return { success: true, count, insertedCount: count, newTotalPages: doc.totalPages, targetPage: doc.currentPage };
   }
 
   /**
@@ -950,6 +1041,10 @@ PDFTools.Studio = (function () {
    * @param {number[]|null} sourcePageIndices 0-based indices of pages to copy
    */
   async function insertPdfPages(doc, insertIndex, sourcePdfBuffer, sourcePageIndices = null) {
+    if (!doc || !doc.arrayBuffer) throw new Error('No active document loaded.');
+    if (needsSync(doc)) {
+      await syncDocumentBuffer(doc);
+    }
     const { PDFDocument } = PDFLib;
     const targetPdfDoc = await PDFDocument.load(doc.arrayBuffer, { ignoreEncryption: true });
     const sourcePdfDoc = await PDFDocument.load(sourcePdfBuffer, { ignoreEncryption: true });
@@ -959,7 +1054,7 @@ PDFTools.Studio = (function () {
       ? sourcePageIndices.filter(i => i >= 0 && i < sourceTotal)
       : Array.from({ length: sourceTotal }, (_, i) => i);
 
-    if (indicesToCopy.length === 0) return { count: 0, newTotalPages: doc.totalPages };
+    if (indicesToCopy.length === 0) return { success: false, count: 0, insertedCount: 0, newTotalPages: doc.totalPages };
 
     const copiedPages = await targetPdfDoc.copyPages(sourcePdfDoc, indicesToCopy);
     const targetTotal = targetPdfDoc.getPageCount();
@@ -970,27 +1065,37 @@ PDFTools.Studio = (function () {
     });
 
     const newBytes = await targetPdfDoc.save({ useObjectStreams: true });
-    const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(newBytes.slice(0)) });
-    doc.pdfJsDoc = await loadingTask.promise;
+    const pLib = getPdfJs();
+    if (pLib) {
+      const loadingTask = pLib.getDocument({ data: new Uint8Array(newBytes.slice(0)) });
+      doc.pdfJsDoc = await loadingTask.promise;
+      doc.totalPages = doc.pdfJsDoc.numPages;
+    } else {
+      doc.totalPages = targetPdfDoc.getPageCount();
+    }
     doc.arrayBuffer = newBytes.buffer || newBytes;
-    doc.totalPages = doc.pdfJsDoc.numPages;
     doc.pageOrder = Array.from({ length: doc.totalPages }, (_, i) => i + 1);
     doc.deletedPages = new Set();
+    doc.pageRotations = {};
     shiftAnnotationsOnInsert(doc, safeIdx, copiedPages.length);
     doc.currentPage = safeIdx + 1;
     doc.dirty = true;
 
-    return { count: copiedPages.length, newTotalPages: doc.totalPages, targetPage: doc.currentPage };
+    return { success: true, count: copiedPages.length, insertedCount: copiedPages.length, newTotalPages: doc.totalPages, targetPage: doc.currentPage };
   }
 
   /**
    * Insert image(s) as PDF pages into StudioDoc
    * @param {StudioDoc} doc 
    * @param {number} insertIndex 
-   * @param {Array<{arrayBuffer: ArrayBuffer, mimeType: string, width?: number, height?: number}>} imageItems 
+   * @param {Array<{arrayBuffer: ArrayBuffer, data?: ArrayBuffer, bytes?: Uint8Array, mimeType: string, type?: string, name?: string}>} imageItems 
    */
   async function insertImagePages(doc, insertIndex, imageItems = []) {
-    if (!imageItems || imageItems.length === 0) return { count: 0, newTotalPages: doc.totalPages };
+    if (!doc || !doc.arrayBuffer) throw new Error('No active document loaded.');
+    if (!imageItems || imageItems.length === 0) return { success: false, count: 0, insertedCount: 0, newTotalPages: doc.totalPages };
+    if (needsSync(doc)) {
+      await syncDocumentBuffer(doc);
+    }
     const { PDFDocument } = PDFLib;
     const targetPdfDoc = await PDFDocument.load(doc.arrayBuffer, { ignoreEncryption: true });
 
@@ -1000,13 +1105,13 @@ PDFTools.Studio = (function () {
 
     for (let i = 0; i < imageItems.length; i++) {
       const item = imageItems[i];
-      let imgBytes = item.arrayBuffer;
-      if (!imgBytes && item.bytes) imgBytes = item.bytes;
-
+      let imgBytes = item.data || item.arrayBuffer || item.bytes;
       if (!imgBytes) continue;
 
       let embeddedImg;
-      const isPng = (item.mimeType && item.mimeType.includes('png')) || (item.name && item.name.toLowerCase().endsWith('.png'));
+      const mime = item.mimeType || item.type || '';
+      const name = item.name || '';
+      const isPng = mime.includes('png') || name.toLowerCase().endsWith('.png');
 
       try {
         if (isPng) {
@@ -1047,20 +1152,146 @@ PDFTools.Studio = (function () {
       insertedCount++;
     }
 
-    if (insertedCount === 0) return { count: 0, newTotalPages: doc.totalPages };
+    if (insertedCount === 0) return { success: false, count: 0, insertedCount: 0, newTotalPages: doc.totalPages };
 
     const newBytes = await targetPdfDoc.save({ useObjectStreams: true });
-    const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(newBytes.slice(0)) });
-    doc.pdfJsDoc = await loadingTask.promise;
+    const pLib = getPdfJs();
+    if (pLib) {
+      const loadingTask = pLib.getDocument({ data: new Uint8Array(newBytes.slice(0)) });
+      doc.pdfJsDoc = await loadingTask.promise;
+      doc.totalPages = doc.pdfJsDoc.numPages;
+    } else {
+      doc.totalPages = targetPdfDoc.getPageCount();
+    }
     doc.arrayBuffer = newBytes.buffer || newBytes;
-    doc.totalPages = doc.pdfJsDoc.numPages;
     doc.pageOrder = Array.from({ length: doc.totalPages }, (_, i) => i + 1);
     doc.deletedPages = new Set();
+    doc.pageRotations = {};
     shiftAnnotationsOnInsert(doc, safeIdx, insertedCount);
     doc.currentPage = safeIdx + 1;
     doc.dirty = true;
 
-    return { count: insertedCount, newTotalPages: doc.totalPages, targetPage: doc.currentPage };
+    return { success: true, count: insertedCount, insertedCount, newTotalPages: doc.totalPages, targetPage: doc.currentPage };
+  }
+
+  /**
+   * Duplicate page in StudioDoc at given 0-based index
+   * @param {StudioDoc} doc 
+   * @param {number} pageIndex 0-based page index to duplicate
+   * @returns {Promise<{success: boolean, count: number, insertedCount: number, newTotalPages: number, targetPage: number}>}
+   */
+  async function duplicatePage(doc, pageIndex) {
+    if (!doc || !doc.arrayBuffer) throw new Error('No active document loaded.');
+    if (needsSync(doc)) {
+      await syncDocumentBuffer(doc);
+    }
+    const { PDFDocument } = PDFLib;
+    const pdfDoc = await PDFDocument.load(doc.arrayBuffer, { ignoreEncryption: true });
+    const total = pdfDoc.getPageCount();
+    const safeIdx = Math.max(0, Math.min(pageIndex, total - 1));
+
+    const [copiedPage] = await pdfDoc.copyPages(pdfDoc, [safeIdx]);
+    pdfDoc.insertPage(safeIdx + 1, copiedPage);
+
+    const newBytes = await pdfDoc.save({ useObjectStreams: true });
+    const pLib = getPdfJs();
+    if (pLib) {
+      const loadingTask = pLib.getDocument({ data: new Uint8Array(newBytes.slice(0)) });
+      doc.pdfJsDoc = await loadingTask.promise;
+      doc.totalPages = doc.pdfJsDoc.numPages;
+    } else {
+      doc.totalPages = pdfDoc.getPageCount();
+    }
+
+    doc.arrayBuffer = newBytes.buffer || newBytes;
+    doc.pageOrder = Array.from({ length: doc.totalPages }, (_, i) => i + 1);
+    doc.deletedPages = new Set();
+    doc.pageRotations = {};
+
+    // Shift and clone annotations
+    const newAnnotations = {};
+    const srcPage = safeIdx + 1;
+    const destPage = safeIdx + 2;
+
+    for (let p = 1; p <= total; p++) {
+      if (p < destPage) {
+        if (doc.annotations && doc.annotations[p]) {
+          newAnnotations[p] = doc.annotations[p];
+        }
+      } else {
+        if (doc.annotations && doc.annotations[p]) {
+          newAnnotations[p + 1] = doc.annotations[p];
+        }
+      }
+    }
+
+    if (doc.annotations && doc.annotations[srcPage]) {
+      const cloned = JSON.parse(JSON.stringify(doc.annotations[srcPage]));
+      if (Array.isArray(cloned.texts)) cloned.texts.forEach(t => t.id = 'txt_' + Math.random().toString(36).substr(2, 9));
+      if (Array.isArray(cloned.edits)) cloned.edits.forEach(e => e.id = 'edt_' + Math.random().toString(36).substr(2, 9));
+      if (Array.isArray(cloned.shapes)) cloned.shapes.forEach(s => s.id = 'shp_' + Math.random().toString(36).substr(2, 9));
+      if (Array.isArray(cloned.stamps)) cloned.stamps.forEach(s => s.id = 'sig_' + Math.random().toString(36).substr(2, 9));
+      newAnnotations[destPage] = cloned;
+    }
+
+    doc.annotations = newAnnotations;
+    doc.currentPage = destPage;
+    doc.dirty = true;
+
+    return { success: true, count: 1, insertedCount: 1, newTotalPages: doc.totalPages, targetPage: doc.currentPage };
+  }
+
+  /**
+   * Delete page in StudioDoc at given 0-based index
+   * @param {StudioDoc} doc 
+   * @param {number} pageIndex 0-based page index to delete
+   * @returns {Promise<{success: boolean, count: number, newTotalPages: number, targetPage: number}>}
+   */
+  async function deletePage(doc, pageIndex) {
+    if (!doc || !doc.arrayBuffer) throw new Error('No active document loaded.');
+    if (needsSync(doc)) {
+      await syncDocumentBuffer(doc);
+    }
+    const { PDFDocument } = PDFLib;
+    const pdfDoc = await PDFDocument.load(doc.arrayBuffer, { ignoreEncryption: true });
+    const total = pdfDoc.getPageCount();
+    if (total <= 1) {
+      throw new Error('Cannot delete the only page in the document.');
+    }
+    const safeIdx = Math.max(0, Math.min(pageIndex, total - 1));
+
+    pdfDoc.removePage(safeIdx);
+
+    const newBytes = await pdfDoc.save({ useObjectStreams: true });
+    const pLib = getPdfJs();
+    if (pLib) {
+      const loadingTask = pLib.getDocument({ data: new Uint8Array(newBytes.slice(0)) });
+      doc.pdfJsDoc = await loadingTask.promise;
+      doc.totalPages = doc.pdfJsDoc.numPages;
+    } else {
+      doc.totalPages = pdfDoc.getPageCount();
+    }
+
+    doc.arrayBuffer = newBytes.buffer || newBytes;
+    doc.pageOrder = Array.from({ length: doc.totalPages }, (_, i) => i + 1);
+    doc.deletedPages = new Set();
+    doc.pageRotations = {};
+
+    // Shift annotations
+    const delPage = safeIdx + 1;
+    const newAnnotations = {};
+    for (let p = 1; p <= total; p++) {
+      if (p < delPage) {
+        if (doc.annotations && doc.annotations[p]) newAnnotations[p] = doc.annotations[p];
+      } else if (p > delPage) {
+        if (doc.annotations && doc.annotations[p]) newAnnotations[p - 1] = doc.annotations[p];
+      }
+    }
+    doc.annotations = newAnnotations;
+    doc.currentPage = Math.max(1, Math.min(delPage, doc.totalPages));
+    doc.dirty = true;
+
+    return { success: true, count: 1, newTotalPages: doc.totalPages, targetPage: doc.currentPage };
   }
 
   /**
@@ -1093,6 +1324,10 @@ PDFTools.Studio = (function () {
     insertBlankPages,
     insertPdfPages,
     insertImagePages,
+    duplicatePage,
+    deletePage,
+    syncDocumentBuffer,
+    bakePageOrder: syncDocumentBuffer,
     saveRecoverySnapshot,
     getRecoverySnapshot,
     clearRecoverySnapshot

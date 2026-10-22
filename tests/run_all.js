@@ -12,6 +12,7 @@ const tests = [
   { name: 'Command Palette Icon Parity Audit', file: 'check_palette_icons.js' },
   { name: 'OCR Bundle Integrity Check', file: 'check_ocr_bundle.js' },
   { name: 'Header Dropdown & Mega Menu Verification', file: 'test_header_dropdown.js' },
+  { name: 'PDF Studio In-Memory Page Operations (Insert, Duplicate, Delete)', file: 'test_studio_page_ops.js' },
   { name: 'End-to-End Functional Tools Audit', file: 'audit_all_tools.js' },
   { name: 'PDF Protect & Unlock Engine Verification', file: 'test_pdf_protect.js' },
   { name: 'Permanent Redaction & Anti-Leak Test', file: 'test_redaction_rasterize.js' },
