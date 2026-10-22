@@ -369,8 +369,11 @@ Setiap halaman tool berdiri sendiri (*standalone tool page*) di folder `pages/` 
    - Detektor kebocoran wajib dijalankan dulu pada input YANG BELUM dilindungi dan harus MENEMUKAN rahasia.
    - Setiap mekanisme perlindungan wajib diuji dengan mematikannya secara sengaja di dalam test; test harus mendeteksi kebocoran. Test yang tetap lulus saat perlindungan dimatikan dianggap tidak menguji apa pun.
    - Perbaikan bug wajib disertai test yang terbukti GAGAL pada kode sebelum perbaikan.
-5. **Penyelesaian Tugas**:
-   - Selesaikan tugas dengan menjalankan `node tests/run_all.js` dan menempel outputnya sebagai bukti bahwa seluruh test suite berhasil dilewati (baris `FINAL SUMMARY` tanpa kegagalan).
+5. **Kewajiban Pengujian Browser (Playwright Browser Tests)**:
+   - Perintah `npm run test:browser` **WAJIB** dijalankan untuk setiap perubahan di `pages/`, `js/studio/`, `js/editor/`, atau `js/core/`, selain menjalankan `node tests/run_all.js`.
+   - Pengujian browser menguji interaksi antarmuka pengguna nyata (seperti drag redaksi mouse, modal konfirmasi, penambahan anotasi), rendering canvas/rasterisasi piksel, konversi file berbasis browser/Web Worker/WASM (DOCX, XLSX, OCR Tesseract, Grayscale, Sign), dan efektivitas kompresi foto.
+6. **Penyelesaian Tugas**:
+   - Selesaikan tugas dengan menjalankan `node tests/run_all.js` dan menempel outputnya sebagai bukti bahwa seluruh test suite berhasil dilewati (baris `FINAL SUMMARY` tanpa kegagalan). Jika perubahan melibatkan `pages/`, `js/studio/`, `js/editor/`, atau `js/core/`, jalankan juga `npm run test:browser` dan sertakan outputnya.
 
 ---
 
