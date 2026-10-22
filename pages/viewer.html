@@ -630,27 +630,41 @@
       font-size: 0.82rem;
     }
 
-    .thumb-context-menu .acrobat-menu-link {
+    .thumb-context-menu .acrobat-menu-link,
+    #insertDropdownMenu .acrobat-menu-link {
       padding: 7px 14px;
       display: flex;
       align-items: center;
+      justify-content: flex-start !important;
       gap: 10px;
       cursor: pointer;
       color: var(--acrobat-text, #f8fafc);
       transition: background 0.12s, color 0.12s;
+      text-align: left !important;
     }
 
-    .thumb-context-menu .acrobat-menu-link svg {
+    .thumb-context-menu .acrobat-menu-link svg,
+    #insertDropdownMenu .acrobat-menu-link svg {
       flex-shrink: 0;
+      width: 14px;
+      height: 14px;
       opacity: 0.85;
     }
 
-    .thumb-context-menu .acrobat-menu-link:hover {
+    .thumb-context-menu .acrobat-menu-link span,
+    #insertDropdownMenu .acrobat-menu-link span {
+      text-align: left !important;
+      white-space: nowrap;
+    }
+
+    .thumb-context-menu .acrobat-menu-link:hover,
+    #insertDropdownMenu .acrobat-menu-link:hover {
       background: var(--acrobat-hover, rgba(59, 130, 246, 0.15));
       color: #3b82f6;
     }
 
-    .thumb-context-menu .acrobat-menu-link:hover svg {
+    .thumb-context-menu .acrobat-menu-link:hover svg,
+    #insertDropdownMenu .acrobat-menu-link:hover svg {
       opacity: 1;
     }
 
@@ -2535,11 +2549,15 @@
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 0, 0, 0.08) !important;
     }
 
-    html.light-theme body.tool-page-viewer .thumb-context-menu .acrobat-menu-link {
+    html.light-theme body.tool-page-viewer .thumb-context-menu .acrobat-menu-link,
+    html.light-theme body.tool-page-viewer #insertDropdownMenu .acrobat-menu-link {
       color: #1e293b !important;
+      justify-content: flex-start !important;
+      text-align: left !important;
     }
 
-    html.light-theme body.tool-page-viewer .thumb-context-menu .acrobat-menu-link:hover {
+    html.light-theme body.tool-page-viewer .thumb-context-menu .acrobat-menu-link:hover,
+    html.light-theme body.tool-page-viewer #insertDropdownMenu .acrobat-menu-link:hover {
       background: #f1f5f9 !important;
       color: #2563eb !important;
     }

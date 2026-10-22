@@ -90,8 +90,8 @@ window.PDFTools.StudioThumbnails = (function () {
     contextTargetIndex = pageIdx;
 
     thumbContextMenu.style.display = 'block';
-    const menuWidth = 200;
-    const menuHeight = 320;
+    const menuWidth = 230;
+    const menuHeight = 350;
     const posX = Math.min(x, window.innerWidth - menuWidth - 10);
     const posY = Math.min(y, window.innerHeight - menuHeight - 10);
 
