@@ -672,13 +672,21 @@ a {
   border-color: rgba(79, 70, 229, 0.2);
 }
 
-.nav-chevron {
+.nav-chevron,
+.nav-chevron-svg {
   display: inline-block;
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   font-size: 0.72rem;
 }
 
-.nav-chevron.rotated {
+.nav-chevron.rotated,
+.nav-chevron-svg.rotated,
+.dropdown-nav-wrapper.open .nav-chevron-svg,
+.dropdown-nav-wrapper.open .nav-chevron,
+.nav-link-item.menu-open .nav-chevron-svg,
+.nav-link-item.menu-open .nav-chevron,
+.nav-link-item.show .nav-chevron-svg,
+.nav-link-item.show .nav-chevron {
   transform: rotate(180deg);
 }
 
@@ -705,6 +713,17 @@ a {
   animation: dropdownFade 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* Invisible bridge to prevent mouse-leave hover drop between trigger and menu */
+.convert-dropdown-menu::before {
+  content: '';
+  position: absolute;
+  top: -14px;
+  left: 0;
+  right: 0;
+  height: 14px;
+  background: transparent;
+}
+
 :root.light-theme .convert-dropdown-menu,
 [data-theme="light"] .convert-dropdown-menu {
   background: rgba(255, 255, 255, 0.98);
@@ -719,8 +738,21 @@ a {
   box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
 }
 
-.convert-dropdown-menu.show {
+.convert-dropdown-menu.show,
+.convert-dropdown-menu.active,
+.dropdown-nav-wrapper.open .convert-dropdown-menu {
   display: block;
+}
+
+/* Desktop hover support for Convert PDF dropdown */
+@media (min-width: 992px) {
+  .dropdown-nav-wrapper:hover .convert-dropdown-menu {
+    display: block;
+  }
+  .dropdown-nav-wrapper:hover .nav-chevron-svg,
+  .dropdown-nav-wrapper:hover .nav-chevron {
+    transform: rotate(180deg);
+  }
 }
 
 @keyframes dropdownFade {
@@ -817,7 +849,8 @@ a {
   box-shadow: 0 24px 50px -10px rgba(0, 0, 0, 0.55);
 }
 
-.mega-menu-overlay.show {
+.mega-menu-overlay.show,
+.mega-menu-overlay.active {
   display: block;
 }
 

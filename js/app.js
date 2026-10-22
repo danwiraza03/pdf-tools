@@ -321,27 +321,50 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function toggleConvert(show) {
       if (!convertMenu) return;
-      const willShow = show !== undefined ? show : !convertMenu.classList.contains('show');
+      const willShow = show !== undefined ? show : !(convertMenu.classList.contains('show') || convertMenu.classList.contains('active'));
+      const wrapper = document.getElementById('convertDropdownWrapper');
       if (willShow) {
-        convertMenu.classList.add('show');
-        if (convertChevron) convertChevron.classList.add('rotated');
+        convertMenu.classList.add('show', 'active');
+        if (wrapper) wrapper.classList.add('open');
+        if (convertTrigger) {
+          convertTrigger.classList.add('show', 'menu-open');
+          convertTrigger.setAttribute('aria-expanded', 'true');
+        }
+        const ch = convertChevron || (convertTrigger && convertTrigger.querySelector('.nav-chevron-svg, .nav-chevron'));
+        if (ch) ch.classList.add('rotated');
         toggleMega(false);
       } else {
-        convertMenu.classList.remove('show');
-        if (convertChevron) convertChevron.classList.remove('rotated');
+        convertMenu.classList.remove('show', 'active');
+        if (wrapper) wrapper.classList.remove('open');
+        if (convertTrigger) {
+          convertTrigger.classList.remove('show', 'menu-open');
+          convertTrigger.setAttribute('aria-expanded', 'false');
+        }
+        const ch = convertChevron || (convertTrigger && convertTrigger.querySelector('.nav-chevron-svg, .nav-chevron'));
+        if (ch) ch.classList.remove('rotated');
       }
     }
 
     function toggleMega(show) {
       if (!megaOverlay) return;
-      const willShow = show !== undefined ? show : !megaOverlay.classList.contains('show');
+      const willShow = show !== undefined ? show : !(megaOverlay.classList.contains('show') || megaOverlay.classList.contains('active'));
       if (willShow) {
-        megaOverlay.classList.add('show');
-        if (allToolsChevron) allToolsChevron.classList.add('rotated');
+        megaOverlay.classList.add('show', 'active');
+        if (allToolsBtn) {
+          allToolsBtn.classList.add('show', 'menu-open');
+          allToolsBtn.setAttribute('aria-expanded', 'true');
+        }
+        const ch = allToolsChevron || (allToolsBtn && allToolsBtn.querySelector('.nav-chevron-svg, .nav-chevron'));
+        if (ch) ch.classList.add('rotated');
         toggleConvert(false);
       } else {
-        megaOverlay.classList.remove('show');
-        if (allToolsChevron) allToolsChevron.classList.remove('rotated');
+        megaOverlay.classList.remove('show', 'active');
+        if (allToolsBtn) {
+          allToolsBtn.classList.remove('show', 'menu-open');
+          allToolsBtn.setAttribute('aria-expanded', 'false');
+        }
+        const ch = allToolsChevron || (allToolsBtn && allToolsBtn.querySelector('.nav-chevron-svg, .nav-chevron'));
+        if (ch) ch.classList.remove('rotated');
       }
     }
 
@@ -671,9 +694,31 @@ document.addEventListener('DOMContentLoaded', function () {
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') {
         const mega = document.getElementById('megaMenuOverlay');
-        if (mega && mega.classList.contains('show')) {
-          mega.classList.remove('show');
+        if (mega && (mega.classList.contains('show') || mega.classList.contains('active'))) {
+          mega.classList.remove('show', 'active');
+          const allTools = document.getElementById('allToolsTrigger');
+          if (allTools) {
+            allTools.classList.remove('show', 'menu-open');
+            allTools.setAttribute('aria-expanded', 'false');
+            const ch = allTools.querySelector('.nav-chevron-svg, .nav-chevron');
+            if (ch) ch.classList.remove('rotated');
+          }
           const chevron = document.getElementById('allToolsChevron');
+          if (chevron) chevron.classList.remove('rotated');
+        }
+        const convertMenu = document.getElementById('convertDropdownMenu');
+        if (convertMenu && (convertMenu.classList.contains('show') || convertMenu.classList.contains('active'))) {
+          convertMenu.classList.remove('show', 'active');
+          const wrapper = document.getElementById('convertDropdownWrapper');
+          if (wrapper) wrapper.classList.remove('open');
+          const convertTrigger = document.getElementById('convertPdfTrigger');
+          if (convertTrigger) {
+            convertTrigger.classList.remove('show', 'menu-open');
+            convertTrigger.setAttribute('aria-expanded', 'false');
+            const ch = convertTrigger.querySelector('.nav-chevron-svg, .nav-chevron');
+            if (ch) ch.classList.remove('rotated');
+          }
+          const chevron = document.getElementById('convertChevron');
           if (chevron) chevron.classList.remove('rotated');
         }
         const quickModal = document.getElementById('quickModalBackdrop');

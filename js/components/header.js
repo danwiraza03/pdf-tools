@@ -372,7 +372,8 @@
   const HeaderComponent = {
     initialized: false,
 
-    init: function () {
+    init: function (force) {
+      if (this.initialized && !force) return;
       if (document.body && document.body.classList.contains('tool-page-viewer')) {
         return; // Viewer / Studio has its own full-screen custom acrobat layout
       }
@@ -434,17 +435,17 @@
             
             <!-- Convert PDF Dropdown Menu -->
             <div class="dropdown-nav-wrapper" id="convertDropdownWrapper">
-              <a href="javascript:void(0)" class="nav-link-item ${isConvertActive ? 'active' : ''}" id="convertPdfTrigger">
+              <a href="javascript:void(0)" class="nav-link-item ${isConvertActive ? 'active' : ''}" id="convertPdfTrigger" aria-haspopup="true" aria-expanded="false">
                 <span data-i18n="nav.convert">CONVERT PDF</span>
                 <svg class="nav-chevron-svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-left:4px;vertical-align:middle;"><polyline points="6 9 12 15 18 9"/></svg>
               </a>
-              <div class="convert-dropdown-menu" id="convertDropdownMenu">
+              <div class="convert-dropdown-menu" id="convertDropdownMenu" role="menu">
                 ${convertItemsHtml}
               </div>
             </div>
 
             <!-- ALL PDF TOOLS Mega Menu Trigger -->
-            <a href="javascript:void(0)" class="nav-link-item all-tools-toggle" id="allToolsTrigger">
+            <a href="javascript:void(0)" class="nav-link-item all-tools-toggle" id="allToolsTrigger" aria-haspopup="true" aria-expanded="false">
               <span data-i18n="nav.all_tools">ALL PDF TOOLS</span>
               <svg class="nav-chevron-svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-left:4px;vertical-align:middle;"><polyline points="6 9 12 15 18 9"/></svg>
             </a>
@@ -530,15 +531,60 @@
       const navEl = headerEl.querySelector('.header-nav');
       const nineDotsBtn = headerEl.querySelector('#nineDotsBtn');
 
+      function setConvert(open) {
+        if (!convertMenu) return;
+        const wrapper = convertTrigger ? convertTrigger.closest('.dropdown-nav-wrapper') : headerEl.querySelector('#convertDropdownWrapper');
+        if (open) {
+          setMega(false);
+          convertMenu.classList.add('show', 'active');
+          if (wrapper) wrapper.classList.add('open');
+          if (convertTrigger) {
+            convertTrigger.classList.add('show', 'menu-open');
+            convertTrigger.setAttribute('aria-expanded', 'true');
+            const chevron = convertTrigger.querySelector('.nav-chevron-svg, .nav-chevron');
+            if (chevron) chevron.classList.add('rotated');
+          }
+        } else {
+          convertMenu.classList.remove('show', 'active');
+          if (wrapper) wrapper.classList.remove('open');
+          if (convertTrigger) {
+            convertTrigger.classList.remove('show', 'menu-open');
+            convertTrigger.setAttribute('aria-expanded', 'false');
+            const chevron = convertTrigger.querySelector('.nav-chevron-svg, .nav-chevron');
+            if (chevron) chevron.classList.remove('rotated');
+          }
+        }
+      }
+
+      function setMega(open) {
+        if (!megaOverlay) return;
+        if (open) {
+          setConvert(false);
+          megaOverlay.classList.add('show', 'active');
+          if (allToolsTrigger) {
+            allToolsTrigger.classList.add('show', 'menu-open');
+            allToolsTrigger.setAttribute('aria-expanded', 'true');
+            const chevron = allToolsTrigger.querySelector('.nav-chevron-svg, .nav-chevron');
+            if (chevron) chevron.classList.add('rotated');
+          }
+        } else {
+          megaOverlay.classList.remove('show', 'active');
+          if (allToolsTrigger) {
+            allToolsTrigger.classList.remove('show', 'menu-open');
+            allToolsTrigger.setAttribute('aria-expanded', 'false');
+            const chevron = allToolsTrigger.querySelector('.nav-chevron-svg, .nav-chevron');
+            if (chevron) chevron.classList.remove('rotated');
+          }
+        }
+      }
+
       // Convert Dropdown Toggle
       if (convertTrigger && convertMenu) {
         convertTrigger.addEventListener('click', function (e) {
           e.preventDefault();
           e.stopPropagation();
-          if (megaOverlay) megaOverlay.classList.remove('active');
-          if (allToolsTrigger) allToolsTrigger.classList.remove('active');
-          convertMenu.classList.toggle('active');
-          convertTrigger.classList.toggle('active');
+          const isOpen = convertMenu.classList.contains('show') || convertMenu.classList.contains('active');
+          setConvert(!isOpen);
         });
       }
 
@@ -547,49 +593,49 @@
         allToolsTrigger.addEventListener('click', function (e) {
           e.preventDefault();
           e.stopPropagation();
-          if (convertMenu) convertMenu.classList.remove('active');
-          if (convertTrigger) convertTrigger.classList.remove('active');
-          const willOpen = !megaOverlay.classList.contains('active');
-          megaOverlay.classList.toggle('active', willOpen);
-          allToolsTrigger.classList.toggle('active', willOpen);
+          const isOpen = megaOverlay.classList.contains('show') || megaOverlay.classList.contains('active');
+          setMega(!isOpen);
         });
 
         megaOverlay.addEventListener('click', function (e) {
           if (e.target === megaOverlay) {
-            megaOverlay.classList.remove('active');
-            allToolsTrigger.classList.remove('active');
+            setMega(false);
           }
         });
       }
 
       // Close menus on outside click or Escape
       document.addEventListener('click', function (e) {
-        if (!e.target.closest('#convertDropdownWrapper') && convertMenu) {
-          convertMenu.classList.remove('active');
-          if (convertTrigger) convertTrigger.classList.remove('active');
+        if (!e.target.closest('#convertDropdownWrapper')) {
+          setConvert(false);
         }
-        if (!e.target.closest('#allToolsTrigger') && !e.target.closest('#megaMenuOverlay') && megaOverlay) {
-          megaOverlay.classList.remove('active');
-          if (allToolsTrigger) allToolsTrigger.classList.remove('active');
+        if (!e.target.closest('#allToolsTrigger') && !e.target.closest('#megaMenuOverlay')) {
+          setMega(false);
         }
       });
 
       document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
-          if (convertMenu) convertMenu.classList.remove('active');
-          if (convertTrigger) convertTrigger.classList.remove('active');
-          if (megaOverlay) megaOverlay.classList.remove('active');
-          if (allToolsTrigger) allToolsTrigger.classList.remove('active');
+          setConvert(false);
+          setMega(false);
         }
       });
 
       // Mobile Menu Toggle
-      if (mobileMenuBtn && navEl) {
+      if (mobileMenuBtn) {
         mobileMenuBtn.addEventListener('click', function (e) {
-          e.stopPropagation();
-          navEl.classList.toggle('mobile-open');
-          const isOpen = navEl.classList.contains('mobile-open');
-          mobileMenuBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+          e.preventDefault();
+          const drawer = document.getElementById('mobileNavDrawer');
+          if (drawer) {
+            drawer.classList.toggle('open');
+            const isOpen = drawer.classList.contains('open');
+            document.body.style.overflow = isOpen ? 'hidden' : '';
+            mobileMenuBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+          } else if (navEl) {
+            navEl.classList.toggle('mobile-open');
+            const isOpen = navEl.classList.contains('mobile-open');
+            mobileMenuBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+          }
         });
       }
 
