@@ -258,6 +258,9 @@
           modifying: Boolean(permModifying.checked),
           annotating: Boolean(permAnnotating.checked),
           fillingForms: Boolean(permAnnotating.checked)
+          // Note: Accessibility permission (contentAccessibility) is intentionally not toggleable
+          // and is permanently enforced true in pdf-protect.js to ensure screen-readers for visually
+          // impaired users can always read the protected document.
         };
       }
 

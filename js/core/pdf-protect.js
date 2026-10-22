@@ -94,9 +94,10 @@
     if (permissions.fillingForms !== undefined) {
       permConfig.fillingForms = Boolean(permissions.fillingForms);
     }
-    if (permissions.contentAccessibility !== undefined) {
-      permConfig.contentAccessibility = Boolean(permissions.contentAccessibility);
-    }
+    // Accessibility (contentAccessibility) must ALWAYS remain true regardless of user settings
+    // so assistive technology and screen readers for visually impaired users can always read the document.
+    permConfig.contentAccessibility = true;
+
     if (permissions.documentAssembly !== undefined) {
       permConfig.documentAssembly = Boolean(permissions.documentAssembly);
     }

@@ -145,6 +145,49 @@ async function runTests() {
   }
   assert(unlockedOpensFreely, 'Unlocked PDF opens without password in PDF.js and matches original page count', `(${unlockedPageCount}/${originalPages} pages)`);
 
+  // ------------------------------------------------------------------------
+  // Test 8: Accessibility permission remains permanently enabled even with strict restrictions
+  // ------------------------------------------------------------------------
+  const strictRestrictedBytes = await PDFTools.Protect.protectPdf(
+    originalBytes,
+    userPassword,
+    ownerPassword,
+    {
+      copying: false,
+      modifying: false,
+      annotating: false,
+      printing: false,
+      contentAccessibility: false // even if explicitly requested false
+    }
+  );
+
+  const strictRawStr = Buffer.from(strictRestrictedBytes).toString('latin1');
+  const strictPMatch = strictRawStr.match(/\/P\s+(-?\d+)/);
+  const strictPVal = strictPMatch ? parseInt(strictPMatch[1], 10) : 0;
+  // Bit 10 (value 512) represents content accessibility for screen readers in PDF ISO 32000-1
+  const hasAccessibilityFlagInP = (strictPVal & 512) !== 0;
+
+  let accessibilityInPdfJs = false;
+  try {
+    const strictLoadedDoc = await pdfjs.getDocument({
+      data: new Uint8Array(strictRestrictedBytes),
+      password: userPassword
+    }).promise;
+    if (strictLoadedDoc.getPermissions) {
+      const permsArray = await strictLoadedDoc.getPermissions();
+      // PDF.js defines PermissionFlag.ACCESSIBILITY = 512
+      accessibilityInPdfJs = Array.isArray(permsArray) && permsArray.includes(512);
+    }
+  } catch (err) {
+    console.error('Error verifying accessibility in PDF.js:', err.message);
+  }
+
+  assert(
+    hasAccessibilityFlagInP && accessibilityInPdfJs,
+    'Accessibility permission (contentAccessibility / bit 512) remains enabled on locked PDF with all other permissions disabled',
+    `(P: ${strictPVal}, Bit 512: ${hasAccessibilityFlagInP}, PDF.js perms: ${accessibilityInPdfJs})`
+  );
+
   console.log('\n========================================================================');
   console.log(`RESULTS: ${passed} passed, ${failed} failed across ${passed + failed} test assertions`);
   console.log('========================================================================');
