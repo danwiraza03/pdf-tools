@@ -14,7 +14,9 @@ const tests = [
   { name: 'End-to-End Functional Tools Audit', file: 'audit_all_tools.js' },
   { name: 'PDF Protect & Unlock Engine Verification', file: 'test_pdf_protect.js' },
   { name: 'Permanent Redaction & Anti-Leak Test', file: 'test_redaction_rasterize.js' },
-  { name: 'UI Consistency (Zero Emoji & Zero Native Dialogs)', file: 'check_ui_rules.js' }
+  { name: 'UI Consistency (Zero Emoji & Zero Native Dialogs)', file: 'check_ui_rules.js' },
+  { name: 'Local Server Security & Path Traversal Audit', file: 'test_server_security.js' },
+  { name: 'Zero External HTTP(S) URLs Offline Compliance', file: 'test_no_external_urls.js' }
 ];
 
 console.log('========================================================================');

@@ -294,23 +294,15 @@ PDFTools.OCR = (function () {
         const altOptions = Object.assign({}, primaryOptions, { gzip: false });
         worker = await Tesseract.createWorker(lang, 1, altOptions);
       } catch (secErr) {
-        console.warn('Local OCR fallback notice:', secErr);
-        const CDN_BASE = 'https://cdn.jsdelivr.net/npm/tesseract.js@5.0.4/dist/';
-        const fallbackOptions = {
-          workerPath: CDN_BASE + 'worker.min.js',
-          corePath: CDN_BASE + 'tesseract-core.wasm.js',
-          langPath: 'https://tessdata.projectnaptha.com/4.0.0_best/',
-          gzip: true,
-          logger: m => {
-            if (typeof onProgress === 'function' && m.status) {
-              const statusText = m.status === 'recognizing text'
-                ? `Recognizing text (${Math.round((m.progress || 0) * 100)}%)...`
-                : `${m.status}...`;
-              onProgress(Math.round((m.progress || 0) * 100), statusText);
-            }
-          }
-        };
-        worker = await Tesseract.createWorker(lang, 1, fallbackOptions);
+        console.error('Failed to load local offline OCR worker:', secErr);
+        const isIndonesian = typeof window !== 'undefined' && window.PDFTools?.i18n?.currentLang === 'id';
+        const errorMsg = isIndonesian
+          ? 'Gagal memuat modul OCR offline lokal. Pastikan file model bahasa dan runtime WASM di folder js/lib/tesseract/ tersedia.'
+          : 'Failed to load local offline OCR module. Please ensure language model and WASM runtime files in js/lib/tesseract/ are available.';
+        if (typeof window !== 'undefined' && window.PDFTools?.Toast?.error) {
+          window.PDFTools.Toast.error(errorMsg);
+        }
+        throw new Error(errorMsg);
       }
     }
 
