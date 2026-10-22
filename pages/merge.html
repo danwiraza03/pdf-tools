@@ -8,39 +8,8 @@
   <link rel="stylesheet" href="../css/tool.css">
 </head>
 <body class="tool-page-merge">
-  <!-- Header -->
-  <header class="header">
-    <div class="header-inner">
-      <a href="../index.html" class="app-logo">
-        <div class="logo-badge">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-        </div>
-        <div class="logo-title">
-          <span>PDF Tools</span>
-          <span class="logo-status-dot" title="100% Offline & Private"></span>
-        </div>
-      </a>
-      <nav class="header-nav">
-        <a href="merge.html" class="nav-link-item active">MERGE PDF</a>
-        <a href="split.html" class="nav-link-item">SPLIT PDF</a>
-        <a href="compress.html" class="nav-link-item">COMPRESS PDF</a>
-        <div class="dropdown-nav-wrapper" id="convertDropdownWrapper">
-          <a href="javascript:void(0)" class="nav-link-item" id="convertPdfTrigger">
-            CONVERT PDF <span class="nav-chevron" id="convertChevron">▾</span>
-          </a>
-        </div>
-        <a href="javascript:void(0)" class="nav-link-item all-tools-toggle" id="allToolsTrigger">
-          ALL PDF TOOLS <span class="nav-chevron" id="allToolsChevron">▾</span>
-        </a>
-      </nav>
-      <div class="header-controls">
-        <button class="theme-toggle" id="themeToggle" title="Toggle Light/Dark Theme">Light</button>
-        <button class="lang-toggle" id="langToggle">ID</button>
-        <a href="viewer.html" class="btn-header-studio">PDF Studio</a>
-        <button type="button" class="nine-dots-btn" id="nineDotsBtn" title="All Quick Actions">⠿</button>
-      </div>
-    </div>
-  </header>
+  <!-- Unified Header Placeholder -->
+  <header class="header" id="appHeader"></header>
 
   <main class="main-content">
     <div class="container">
@@ -260,6 +229,7 @@
   <script src="../js/components/dropzone.js"></script>
   <script src="../js/core/pdf-compress.js"></script>
   <script src="../js/core/pdf-merge.js"></script>
+  <script src="../js/components/header.js"></script>
   <script src="../js/app.js"></script>
 
   <!-- Tool Script -->

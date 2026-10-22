@@ -133,36 +133,7 @@
 </head>
 <body class="tool-page-docx">
   <!-- Header -->
-  <header class="header">
-    <div class="header-inner">
-      <a href="../index.html" class="app-logo">
-        <div class="logo-badge">⚡</div>
-        <div class="logo-title">
-          <span>PDF Tools</span>
-          <span class="logo-status-dot" title="100% Offline & Private"></span>
-        </div>
-      </a>
-      <nav class="header-nav">
-        <a href="merge.html" class="nav-link-item">MERGE PDF</a>
-        <a href="split.html" class="nav-link-item">SPLIT PDF</a>
-        <a href="compress.html" class="nav-link-item">COMPRESS PDF</a>
-        <div class="dropdown-nav-wrapper" id="convertDropdownWrapper">
-          <a href="javascript:void(0)" class="nav-link-item active" id="convertPdfTrigger">
-            CONVERT PDF <span class="nav-chevron" id="convertChevron">▾</span>
-          </a>
-        </div>
-        <a href="javascript:void(0)" class="nav-link-item all-tools-toggle" id="allToolsTrigger">
-          ALL PDF TOOLS <span class="nav-chevron" id="allToolsChevron">▾</span>
-        </a>
-      </nav>
-      <div class="header-controls">
-        <button class="theme-toggle" id="themeToggle" title="Toggle Light/Dark Theme">☀️ Light</button>
-        <button class="lang-toggle" id="langToggle">ID 🇮🇩</button>
-        <a href="viewer.html" class="btn-header-studio">✨ PDF Studio</a>
-        <button type="button" class="nine-dots-btn" id="nineDotsBtn" title="All Quick Actions">⠿</button>
-      </div>
-    </div>
-  </header>
+  <header class="header" id="appHeader"></header>
 
   <!-- Main Content -->
   <main class="main-content">
@@ -282,6 +253,7 @@
   <script src="../js/utils/file-utils.js"></script>
   <script src="../js/core/pdf-to-docx.js"></script>
   <script src="../js/components/toast.js"></script>
+  <script src="../js/components/header.js"></script>
   <script src="../js/app.js"></script>
 
   <script>

@@ -137,26 +137,7 @@
 </head>
 <body class="tool-page-crop">
   <!-- Header -->
-  <header class="header">
-    <div class="header-inner">
-      <a href="../index.html" class="header-logo">
-        <div class="logo-icon">⚡</div>
-        <span>PDF Tools</span>
-      </a>
-      <nav class="header-nav">
-        <a href="../index.html" data-i18n="nav.home">Home</a>
-        <a href="viewer.html" data-i18n="tool.studio">✨ PDF Studio</a>
-        <a href="merge.html" data-i18n="tool.merge">Merge PDF</a>
-        <a href="compress.html" data-i18n="tool.compress">Compress PDF</a>
-        <a href="split.html" data-i18n="tool.split">Split PDF</a>
-        <a href="ocr.html" data-i18n="tool.ocr">OCR PDF</a>
-      </nav>
-      <div class="header-controls">
-        <button class="theme-toggle" id="themeToggle" title="Toggle Theme (Ctrl+D)">☀️ Light</button>
-        <button class="lang-toggle" id="langToggle">ID 🇮🇩</button>
-      </div>
-    </div>
-  </header>
+  <header class="header" id="appHeader"></header>
 
   <!-- Main Content -->
   <main class="main-content">
@@ -299,6 +280,7 @@
   <script src="../js/core/pdf-crop.js"></script>
   <script src="../js/components/toast.js"></script>
   <script src="../js/components/dropzone.js"></script>
+  <script src="../js/components/header.js"></script>
   <script src="../js/app.js"></script>
 
   <script>
