@@ -8,6 +8,21 @@
 
   window.PDFTools = window.PDFTools || {};
 
+  // Auto-ensure favicon link in document.head across all pages
+  (function ensureFavicon() {
+    try {
+      if (typeof document !== 'undefined' && document.head && !document.querySelector('link[rel*="icon"]')) {
+        const link = document.createElement('link');
+        link.rel = 'icon';
+        link.type = 'image/svg+xml';
+        const rawPath = (window.location && window.location.pathname) ? window.location.pathname.replace(/\\/g, '/') : '';
+        const isPagesDir = rawPath.includes('/pages/') || (window.location && window.location.href && window.location.href.includes('/pages/'));
+        link.href = isPagesDir ? '../icon.svg' : 'icon.svg';
+        document.head.appendChild(link);
+      }
+    } catch (_) {}
+  })();
+
   // Determine current depth for relative URL links
   function getPaths() {
     const rawPath = (window.location && window.location.pathname) ? window.location.pathname.replace(/\\/g, '/') : '';
