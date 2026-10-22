@@ -13,7 +13,8 @@ const tests = [
   { name: 'OCR Bundle Integrity Check', file: 'check_ocr_bundle.js' },
   { name: 'End-to-End Functional Tools Audit', file: 'audit_all_tools.js' },
   { name: 'PDF Protect & Unlock Engine Verification', file: 'test_pdf_protect.js' },
-  { name: 'Permanent Redaction & Anti-Leak Test', file: 'test_redaction_rasterize.js' }
+  { name: 'Permanent Redaction & Anti-Leak Test', file: 'test_redaction_rasterize.js' },
+  { name: 'UI Consistency (Zero Emoji & Zero Native Dialogs)', file: 'check_ui_rules.js' }
 ];
 
 console.log('========================================================================');
