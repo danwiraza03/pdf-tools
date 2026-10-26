@@ -125,6 +125,185 @@
       opacity: 0.35;
       cursor: not-allowed;
     }
+
+    /* Segmented Control */
+    .segmented-control {
+      display: flex;
+      background: var(--bg-input, rgba(0, 0, 0, 0.05));
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg, 12px);
+      padding: 4px;
+      gap: 4px;
+      max-width: 320px;
+      width: 100%;
+    }
+    .segmented-btn {
+      flex: 1;
+      min-height: 44px;
+      padding: 8px 16px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-weight: 600;
+      font-size: 0.9rem;
+      border-radius: var(--radius-md, 8px);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .segmented-btn.active {
+      background: var(--tool-color, #EC4899);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(236, 72, 153, 0.25);
+    }
+
+    /* Position Grid */
+    .wm-position-container {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .wm-position-grid {
+      display: inline-grid;
+      grid-template-columns: repeat(3, 44px);
+      grid-template-rows: repeat(3, 44px);
+      gap: 6px;
+      background: var(--bg-card);
+      padding: 6px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg, 12px);
+    }
+    .wm-pos-btn {
+      width: 44px;
+      height: 44px;
+      min-width: 44px;
+      min-height: 44px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-input, transparent);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-secondary);
+      transition: all 0.15s ease;
+    }
+    .wm-pos-btn:hover {
+      border-color: var(--tool-color, #EC4899);
+      color: var(--tool-color, #EC4899);
+    }
+    .wm-pos-btn.active {
+      background: var(--tool-color, #EC4899);
+      border-color: var(--tool-color, #EC4899);
+      color: #ffffff;
+      box-shadow: 0 2px 6px rgba(236, 72, 153, 0.3);
+    }
+    .wm-pos-tile-btn {
+      min-height: 44px;
+      padding: 8px 16px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+      border-radius: var(--radius-lg, 12px);
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+    .wm-pos-tile-btn:hover {
+      border-color: var(--tool-color, #EC4899);
+      color: var(--tool-color, #EC4899);
+    }
+    .wm-pos-tile-btn.active {
+      background: var(--tool-color, #EC4899);
+      border-color: var(--tool-color, #EC4899);
+      color: #ffffff;
+      box-shadow: 0 2px 6px rgba(236, 72, 153, 0.3);
+    }
+
+    /* Image Dropzone & Thumb */
+    .wm-image-dropzone {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .wm-image-hint {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .wm-image-thumb-container {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 10px 14px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg, 12px);
+      background: var(--bg-card);
+      max-width: 420px;
+      width: 100%;
+    }
+    .wm-thumb-preview {
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      border: 1px solid var(--border-color);
+    }
+    .wm-thumb-preview img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+    .wm-thumb-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .wm-thumb-name {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .wm-thumb-meta {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+    @media (pointer: coarse) {
+      .segmented-btn,
+      .wm-pos-btn,
+      .wm-pos-tile-btn,
+      #wmImageUploadBtn,
+      #wmRemoveImageBtn {
+        min-height: 44px;
+        min-width: 44px;
+      }
+    }
+    @media (max-width: 440px) {
+      .segmented-control {
+        max-width: 100%;
+      }
+      .wm-image-thumb-container {
+        max-width: 100%;
+        box-sizing: border-box;
+      }
+    }
   </style>
 </head>
 <body class="tool-page-watermark">
@@ -157,15 +336,130 @@
         <!-- Options Panel -->
         <div id="optionsPanel" class="options-panel" style="display: none;">
           <div class="options-title" data-i18n="tool.watermark">Watermark Settings</div>
+
+          <!-- Mode Switcher (Segmented, no emoji) -->
+          <div class="form-field" style="margin-bottom: 1.25rem;">
+            <label data-i18n="watermark.mode">Watermark Type</label>
+            <div class="segmented-control" id="wmModeControl">
+              <button type="button" class="segmented-btn active" id="wmModeText" data-mode="text" data-i18n="watermark.mode_text">Text</button>
+              <button type="button" class="segmented-btn" id="wmModeImage" data-mode="image" data-i18n="watermark.mode_image">Image</button>
+            </div>
+          </div>
           
           <div class="watermark-form-grid">
-            <!-- Text input -->
-            <div class="form-field" style="grid-column: 1 / -1;">
-              <label data-i18n="watermark.text">Watermark Text</label>
-              <input type="text" id="wmText" value="CONFIDENTIAL" data-i18n-placeholder="watermark.text_placeholder" placeholder="e.g. CONFIDENTIAL, DRAFT, SAMPLE">
+            <!-- Text Section (shown when mode == text) -->
+            <div id="wmTextSection" style="grid-column: 1 / -1; display: contents;">
+              <!-- Text input -->
+              <div class="form-field" style="grid-column: 1 / -1;">
+                <label data-i18n="watermark.text">Watermark Text</label>
+                <input type="text" id="wmText" value="CONFIDENTIAL" data-i18n-placeholder="watermark.text_placeholder" placeholder="e.g. CONFIDENTIAL, DRAFT, SAMPLE">
+              </div>
+
+              <!-- Font Size -->
+              <div class="form-field">
+                <label data-i18n="watermark.size">Font Size</label>
+                <select id="wmFontSize">
+                  <option value="28">Small (28 pt)</option>
+                  <option value="42">Medium (42 pt)</option>
+                  <option value="56" selected>Large (56 pt)</option>
+                  <option value="72">Extra Large (72 pt)</option>
+                </select>
+              </div>
+
+              <!-- Color Palette -->
+              <div class="form-field">
+                <label data-i18n="watermark.color">Color</label>
+                <div class="color-swatches" id="colorSwatches">
+                  <div class="color-swatch active" data-color="#e74c3c" style="background: #e74c3c;" title="Red"></div>
+                  <div class="color-swatch" data-color="#7f8c8d" style="background: #7f8c8d;" title="Grey"></div>
+                  <div class="color-swatch" data-color="#2980b9" style="background: #2980b9;" title="Blue"></div>
+                  <div class="color-swatch" data-color="#27ae60" style="background: #27ae60;" title="Green"></div>
+                  <div class="color-swatch" data-color="#2c3e50" style="background: #2c3e50;" title="Dark"></div>
+                </div>
+              </div>
             </div>
 
-            <!-- Rotation Preset -->
+            <!-- Image Section (shown when mode == image) -->
+            <div id="wmImageSection" style="grid-column: 1 / -1; display: none;">
+              <div class="form-field" style="grid-column: 1 / -1;">
+                <label data-i18n="watermark.image_select">Select Image</label>
+                <input type="file" id="wmImageInput" accept="image/png,image/jpeg,image/webp" style="display: none;">
+                
+                <div id="wmImageUploadPrompt" class="wm-image-dropzone">
+                  <button type="button" class="btn btn-secondary" id="wmImageUploadBtn" style="min-height: 44px; display: inline-flex; align-items: center; gap: 8px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                    <span data-i18n="watermark.image_browse">Choose Image</span>
+                  </button>
+                  <span class="wm-image-hint" data-i18n="watermark.image_hint">Supports PNG, JPG, or WebP</span>
+                </div>
+
+                <div id="wmImageThumbContainer" class="wm-image-thumb-container" style="display: none;">
+                  <div class="wm-thumb-preview">
+                    <img id="wmImageThumb" src="" alt="Watermark preview">
+                  </div>
+                  <div class="wm-thumb-info">
+                    <span id="wmThumbName" class="wm-thumb-name">image.png</span>
+                    <span id="wmThumbMeta" class="wm-thumb-meta">100x100</span>
+                  </div>
+                  <button type="button" class="btn-icon" id="wmRemoveImageBtn" aria-label="Remove image" data-i18n-title="watermark.image_remove" title="Remove image" style="min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border-color); border-radius: 8px; background: transparent; cursor: pointer; color: var(--text-secondary);">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Image Scale Range Slider (5% to 100%, default 30%) -->
+              <div class="form-field" style="margin-top: 10px;">
+                <label for="wmScaleRange">
+                  <span data-i18n="watermark.image_scale">Image Size (% of page width)</span>:
+                  <span id="wmScaleVal" style="font-weight: 700; color: var(--tool-color, #EC4899);">30%</span>
+                </label>
+                <div style="display: flex; align-items: center; gap: 12px; margin-top: 6px;">
+                  <input type="range" id="wmScaleRange" min="5" max="100" value="30" style="flex: 1; min-height: 44px;">
+                </div>
+              </div>
+            </div>
+
+            <!-- Position Control (Shared for both Text and Image modes!) -->
+            <div class="form-field" style="grid-column: 1 / -1;">
+              <label data-i18n="watermark.position">Position</label>
+              <div class="wm-position-container">
+                <div class="wm-position-grid" id="wmPositionGrid">
+                  <button type="button" class="wm-pos-btn" data-pos="top-left" title="Top Left" aria-label="Top Left">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="7 17 7 7 17 7"/></svg>
+                  </button>
+                  <button type="button" class="wm-pos-btn" data-pos="top-center" title="Top Center" aria-label="Top Center">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+                  </button>
+                  <button type="button" class="wm-pos-btn" data-pos="top-right" title="Top Right" aria-label="Top Right">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="7 7 17 7 17 17"/></svg>
+                  </button>
+                  <button type="button" class="wm-pos-btn" data-pos="middle-left" title="Middle Left" aria-label="Middle Left">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                  </button>
+                  <button type="button" class="wm-pos-btn active" data-pos="center" title="Center" aria-label="Center">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="4"/></svg>
+                  </button>
+                  <button type="button" class="wm-pos-btn" data-pos="middle-right" title="Middle Right" aria-label="Middle Right">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                  </button>
+                  <button type="button" class="wm-pos-btn" data-pos="bottom-left" title="Bottom Left" aria-label="Bottom Left">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="17 17 7 17 7 7"/></svg>
+                  </button>
+                  <button type="button" class="wm-pos-btn" data-pos="bottom-center" title="Bottom Center" aria-label="Bottom Center">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+                  </button>
+                  <button type="button" class="wm-pos-btn" data-pos="bottom-right" title="Bottom Right" aria-label="Bottom Right">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="7 17 17 17 17 7"/></svg>
+                  </button>
+                </div>
+                <button type="button" class="wm-pos-tile-btn" id="wmPosTile" data-pos="tile">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                  <span data-i18n="watermark.pos_tile">Tile (Repeat)</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Rotation Preset (Shared) -->
             <div class="form-field">
               <label data-i18n="watermark.rotation">Rotation Angle</label>
               <select id="wmRotation">
@@ -176,18 +470,7 @@
               </select>
             </div>
 
-            <!-- Font Size -->
-            <div class="form-field">
-              <label data-i18n="watermark.size">Font Size</label>
-              <select id="wmFontSize">
-                <option value="28">Small (28 pt)</option>
-                <option value="42">Medium (42 pt)</option>
-                <option value="56" selected>Large (56 pt)</option>
-                <option value="72">Extra Large (72 pt)</option>
-              </select>
-            </div>
-
-            <!-- Transparency / Opacity -->
+            <!-- Transparency / Opacity (Shared) -->
             <div class="form-field">
               <label data-i18n="watermark.opacity">Transparency (Opacity)</label>
               <select id="wmOpacity">
@@ -196,18 +479,6 @@
                 <option value="0.50">Bold (50%)</option>
                 <option value="0.80">Opaque (80%)</option>
               </select>
-            </div>
-
-            <!-- Color Palette -->
-            <div class="form-field">
-              <label data-i18n="watermark.color">Color</label>
-              <div class="color-swatches" id="colorSwatches">
-                <div class="color-swatch active" data-color="#e74c3c" style="background: #e74c3c;" title="Red"></div>
-                <div class="color-swatch" data-color="#7f8c8d" style="background: #7f8c8d;" title="Grey"></div>
-                <div class="color-swatch" data-color="#2980b9" style="background: #2980b9;" title="Blue"></div>
-                <div class="color-swatch" data-color="#27ae60" style="background: #27ae60;" title="Green"></div>
-                <div class="color-swatch" data-color="#2c3e50" style="background: #2c3e50;" title="Dark"></div>
-              </div>
             </div>
           </div>
         </div>
@@ -365,6 +636,109 @@
         }
       });
 
+      // Watermark state
+      let currentMode = 'text'; // 'text' | 'image'
+      let selectedPosition = 'center';
+      let selectedImageFile = null;
+      let preparedImageData = null;
+
+      const wmModeText = document.getElementById('wmModeText');
+      const wmModeImage = document.getElementById('wmModeImage');
+      const wmTextSection = document.getElementById('wmTextSection');
+      const wmImageSection = document.getElementById('wmImageSection');
+      const wmImageInput = document.getElementById('wmImageInput');
+      const wmImageUploadBtn = document.getElementById('wmImageUploadBtn');
+      const wmImageUploadPrompt = document.getElementById('wmImageUploadPrompt');
+      const wmImageThumbContainer = document.getElementById('wmImageThumbContainer');
+      const wmImageThumb = document.getElementById('wmImageThumb');
+      const wmThumbName = document.getElementById('wmThumbName');
+      const wmThumbMeta = document.getElementById('wmThumbMeta');
+      const wmRemoveImageBtn = document.getElementById('wmRemoveImageBtn');
+      const wmScaleRange = document.getElementById('wmScaleRange');
+      const wmScaleVal = document.getElementById('wmScaleVal');
+      const wmPosTile = document.getElementById('wmPosTile');
+
+      // Mode toggling
+      wmModeText.addEventListener('click', function () {
+        currentMode = 'text';
+        wmModeText.classList.add('active');
+        wmModeImage.classList.remove('active');
+        wmTextSection.style.display = 'contents';
+        wmImageSection.style.display = 'none';
+      });
+
+      wmModeImage.addEventListener('click', function () {
+        currentMode = 'image';
+        wmModeImage.classList.add('active');
+        wmModeText.classList.remove('active');
+        wmTextSection.style.display = 'none';
+        wmImageSection.style.display = 'block';
+      });
+
+      // Position grid buttons
+      const posButtons = document.querySelectorAll('#wmPositionGrid .wm-pos-btn');
+      posButtons.forEach(btn => {
+        btn.addEventListener('click', function () {
+          posButtons.forEach(b => b.classList.remove('active'));
+          wmPosTile.classList.remove('active');
+          btn.classList.add('active');
+          selectedPosition = btn.getAttribute('data-pos');
+        });
+      });
+
+      // Tile button
+      wmPosTile.addEventListener('click', function () {
+        posButtons.forEach(b => b.classList.remove('active'));
+        wmPosTile.classList.add('active');
+        selectedPosition = 'tile';
+      });
+
+      // Range slider
+      wmScaleRange.addEventListener('input', function () {
+        wmScaleVal.textContent = `${this.value}%`;
+      });
+
+      // Image selection & removal
+      wmImageUploadBtn.addEventListener('click', function () {
+        wmImageInput.click();
+      });
+
+      wmImageInput.addEventListener('change', async function () {
+        const file = this.files && this.files[0];
+        if (!file) return;
+
+        try {
+          const prepared = await PDFTools.Watermark.prepareImage(file);
+          selectedImageFile = file;
+          preparedImageData = prepared;
+
+          if (wmImageThumb.src && wmImageThumb.src.startsWith('blob:')) {
+            URL.revokeObjectURL(wmImageThumb.src);
+          }
+          wmImageThumb.src = URL.createObjectURL(file);
+          wmThumbName.textContent = file.name;
+          wmThumbMeta.textContent = `${prepared.width} × ${prepared.height} px`;
+
+          wmImageUploadPrompt.style.display = 'none';
+          wmImageThumbContainer.style.display = 'flex';
+        } catch (err) {
+          console.error(err);
+          wmImageInput.value = '';
+          selectedImageFile = null;
+          preparedImageData = null;
+          PDFTools.Toast.error(err.message || PDFTools.i18n.t('watermark.error_invalid_image'));
+        }
+      });
+
+      wmRemoveImageBtn.addEventListener('click', function () {
+        selectedImageFile = null;
+        preparedImageData = null;
+        wmImageInput.value = '';
+        wmImageThumb.src = '';
+        wmImageThumbContainer.style.display = 'none';
+        wmImageUploadPrompt.style.display = 'flex';
+      });
+
       // Color Swatches
       document.querySelectorAll('#colorSwatches .color-swatch').forEach(swatch => {
         swatch.addEventListener('click', function () {
@@ -377,10 +751,18 @@
       applyBtn.addEventListener('click', async function () {
         if (!queuedFiles || queuedFiles.length === 0) return;
 
+        if (currentMode === 'image') {
+          if (!selectedImageFile || !preparedImageData) {
+            PDFTools.Toast.error(PDFTools.i18n.t('watermark.error_no_image'));
+            return;
+          }
+        }
+
         const text = document.getElementById('wmText').value.trim() || 'CONFIDENTIAL';
         const rotation = parseInt(document.getElementById('wmRotation').value, 10);
         const fontSize = parseInt(document.getElementById('wmFontSize').value, 10);
         const opacity = parseFloat(document.getElementById('wmOpacity').value);
+        const scale = parseInt(wmScaleRange.value, 10) / 100;
 
         applyBtn.disabled = true;
         progress.show(PDFTools.i18n.t('action.processing'));
@@ -393,14 +775,24 @@
             const basePct = Math.round((i / total) * 100);
             progress.update(basePct, `Processing (${i + 1}/${total}): ${file.name}...`);
 
-            const resBytes = await PDFTools.Watermark.applyWatermark(file, {
+            const watermarkOptions = currentMode === 'image' ? {
+              type: 'image',
+              image: preparedImageData,
+              position: selectedPosition,
+              scale: scale,
+              rotation: rotation,
+              opacity: opacity
+            } : {
+              type: 'text',
               text: text,
               rotation: rotation,
               fontSize: fontSize,
               opacity: opacity,
               color: selectedColor,
-              position: 'center'
-            }, function (pct, status) {
+              position: selectedPosition
+            };
+
+            const resBytes = await PDFTools.Watermark.applyWatermark(file, watermarkOptions, function (pct, status) {
               const fileStep = Math.round(basePct + (pct / total));
               progress.update(fileStep, `[${i + 1}/${total}] ${file.name} - ${status}`);
             });
@@ -559,6 +951,23 @@
         resultArea.classList.remove('active');
         document.getElementById('fileList').style.display = 'flex';
         dropzoneEl.style.display = 'block';
+
+        currentMode = 'text';
+        selectedPosition = 'center';
+        selectedImageFile = null;
+        preparedImageData = null;
+        wmImageInput.value = '';
+        wmImageThumb.src = '';
+        wmImageThumbContainer.style.display = 'none';
+        wmImageUploadPrompt.style.display = 'flex';
+        wmModeText.classList.add('active');
+        wmModeImage.classList.remove('active');
+        wmTextSection.style.display = 'contents';
+        wmImageSection.style.display = 'none';
+        wmScaleRange.value = '30';
+        wmScaleVal.textContent = '30%';
+        posButtons.forEach(b => b.classList.toggle('active', b.getAttribute('data-pos') === 'center'));
+        wmPosTile.classList.remove('active');
 
         wmResultPdfDoc = null;
         wmPageNav.style.display = 'none';
