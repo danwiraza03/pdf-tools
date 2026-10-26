@@ -16,8 +16,44 @@ if (!window._pdfToolsWindowDragGuarded) {
 }
 
 PDFTools.Dropzone = function (elementId, options) {
-  options = options || {};
-  var accept = options.accept || '.pdf';
+  function normalizeAccept(raw) {
+    if (!raw) return 'application/pdf,.pdf';
+    var parts = raw.split(',').map(function (s) { return s.trim(); });
+    var normalized = [];
+    parts.forEach(function (p) {
+      if (p === '.pdf' || p === 'application/pdf') {
+        if (!normalized.includes('application/pdf')) normalized.push('application/pdf');
+        if (!normalized.includes('.pdf')) normalized.push('.pdf');
+      } else if (p === '.jpg' || p === '.jpeg' || p === 'image/jpeg') {
+        if (!normalized.includes('image/jpeg')) normalized.push('image/jpeg');
+        if (!normalized.includes('.jpg')) normalized.push('.jpg');
+        if (!normalized.includes('.jpeg')) normalized.push('.jpeg');
+      } else if (p === '.png' || p === 'image/png') {
+        if (!normalized.includes('image/png')) normalized.push('image/png');
+        if (!normalized.includes('.png')) normalized.push('.png');
+      } else if (p === 'image/*') {
+        if (!normalized.includes('image/*')) normalized.push('image/*');
+        if (!normalized.includes('.jpg')) normalized.push('.jpg');
+        if (!normalized.includes('.jpeg')) normalized.push('.jpeg');
+        if (!normalized.includes('.png')) normalized.push('.png');
+      } else if (p === '.docx' || p === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+        if (!normalized.includes('application/vnd.openxmlformats-officedocument.wordprocessingml.document')) {
+          normalized.push('application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+        }
+        if (!normalized.includes('.docx')) normalized.push('.docx');
+      } else if (p === '.xlsx' || p === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+        if (!normalized.includes('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')) {
+          normalized.push('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        }
+        if (!normalized.includes('.xlsx')) normalized.push('.xlsx');
+      } else {
+        if (!normalized.includes(p)) normalized.push(p);
+      }
+    });
+    return normalized.join(',');
+  }
+
+  var accept = normalizeAccept(options.accept);
   var multiple = options.multiple !== false;
   var onFiles = options.onFiles || function () {};
   var dropzoneEl = document.getElementById(elementId);
@@ -29,6 +65,7 @@ PDFTools.Dropzone = function (elementId, options) {
   if (!dropzoneEl.getAttribute('aria-label')) dropzoneEl.setAttribute('aria-label', 'Click or drop files here to upload');
 
   var inputEl = dropzoneEl.querySelector('.dropzone-input') || createInput();
+  if (inputEl) inputEl.accept = accept;
 
   function createInput() {
     var input = document.createElement('input');
