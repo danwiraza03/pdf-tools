@@ -1394,12 +1394,34 @@ a {
   cursor: grab;
   color: var(--text-muted);
   padding: var(--space-xs);
-  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
+  transition: color var(--transition-fast);
+}
+
+.file-item-handle:hover {
+  color: var(--text-primary);
+}
+
+.file-item-handle svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
 }
 
 .file-item-handle:active {
   cursor: grabbing;
+}
+
+.page-card-handle {
+  display: none;
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 5;
+  cursor: grab;
 }
 
 .file-item-preview {
@@ -2719,3 +2741,191 @@ a {
   background: #dc2626;
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.45);
 }
+
+/* ============================================================
+   Touch Devices: 44x44px Minimum Touch Targets (pointer: coarse)
+   ============================================================ */
+@media (pointer: coarse) {
+  /* Header icons & controls: 44x44px touch targets without enlarging icons */
+  .theme-toggle,
+  .nine-dots-btn,
+  .mobile-menu-btn {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+  }
+
+  .lang-toggle {
+    min-width: 44px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    padding: 0 10px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Icons inside header buttons remain strictly 20x20px */
+  .theme-toggle svg,
+  .nine-dots-btn svg,
+  .mobile-menu-btn svg,
+  .lang-toggle svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  /* App logo & Header links */
+  .app-logo,
+  .header-logo {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    box-sizing: border-box;
+  }
+
+  .btn-header-studio {
+    min-height: 44px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Mobile drawer links & close button */
+  .mobile-nav-link {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    box-sizing: border-box;
+  }
+
+  .mobile-nav-close {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+  }
+
+  /* Buttons & category pills */
+  .btn,
+  .btn-sm,
+  .btn-md,
+  .btn-lg,
+  .btn-primary,
+  .btn-secondary,
+  .btn-ghost {
+    min-height: 44px;
+    box-sizing: border-box;
+  }
+
+  .cat-pill-btn {
+    min-height: 44px;
+    padding: 0 16px;
+    display: inline-flex;
+    align-items: center;
+    box-sizing: border-box;
+  }
+
+  /* Form inputs & interactive labels */
+  input[type="text"],
+  input[type="number"],
+  input[type="password"],
+  input[type="search"],
+  input[type="email"],
+  select {
+    min-height: 44px;
+    box-sizing: border-box;
+  }
+
+  /* File item handle & actions: 44x44px target with prominent 44x44px icon */
+  .file-item-handle {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: var(--bg-surface-elevated, rgba(255, 255, 255, 0.08));
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    box-sizing: border-box;
+    cursor: grab;
+  }
+
+  .file-item-handle svg {
+    width: 44px !important;
+    height: 44px !important;
+    display: block;
+  }
+
+  .file-item-remove {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    box-sizing: border-box;
+  }
+
+  /* Page card handle in reorder & previews: visible 44x44px grip on touch */
+  .page-card {
+    min-height: 44px;
+    touch-action: pan-y;
+  }
+
+  .page-card-handle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    background: rgba(15, 23, 42, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 8px;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    box-sizing: border-box;
+  }
+
+  .page-card-handle svg {
+    width: 44px;
+    height: 44px;
+    stroke: #ffffff;
+    display: block;
+  }
+
+  /* Modal close & footer buttons */
+  .pdftools-modal-close {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    box-sizing: border-box;
+  }
+
+  .pdftools-modal-footer button {
+    min-height: 44px;
+    box-sizing: border-box;
+  }
+}
+

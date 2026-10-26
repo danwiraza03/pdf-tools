@@ -869,10 +869,18 @@
         floatingPill.appendChild(deleteBtn);
         floatingPill.appendChild(zoomBtn);
 
+        // Drag handle for touch & visual dragging
+        const dragHandle = document.createElement('div');
+        dragHandle.className = 'stacked-doc-handle';
+        dragHandle.title = 'Drag to reorder file';
+        dragHandle.setAttribute('aria-label', 'Drag to reorder file');
+        dragHandle.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="19" r="1.5"/><circle cx="15" cy="19" r="1.5"/></svg>';
+
         card.appendChild(colorBar);
         card.appendChild(badge);
         card.appendChild(preview);
         card.appendChild(check);
+        card.appendChild(dragHandle);
         card.appendChild(footer);
         card.appendChild(floatingPill);
 
@@ -1162,9 +1170,17 @@
         titleText.title = `Source: ${item.fileName} (Original Page ${item.originalPage})`;
         footer.appendChild(titleText);
 
+        // Drag handle for touch & visual dragging
+        const dragHandle = document.createElement('div');
+        dragHandle.className = 'expanded-page-handle';
+        dragHandle.title = 'Drag to reorder page';
+        dragHandle.setAttribute('aria-label', 'Drag to reorder page');
+        dragHandle.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="19" r="1.5"/><circle cx="15" cy="19" r="1.5"/></svg>';
+
         card.appendChild(header);
         card.appendChild(preview);
         card.appendChild(check);
+        card.appendChild(dragHandle);
         card.appendChild(footer);
 
         // Click handler: Ctrl+Click toggles multi-select

@@ -1883,3 +1883,146 @@
     padding: 12px;
   }
 }
+
+.stacked-doc-handle,
+.expanded-page-handle {
+  display: none;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 8;
+  cursor: grab;
+}
+
+/* ============================================================
+   Touch Devices: 44x44px Minimum Touch Targets (pointer: coarse)
+   ============================================================ */
+@media (pointer: coarse) {
+  .add-more-btn {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+  }
+
+  .btn,
+  .btn-sm,
+  .btn-md,
+  .btn-lg {
+    min-height: 44px;
+    box-sizing: border-box;
+  }
+
+  .tool-tab,
+  .tab-btn,
+  .filter-btn,
+  .config-tab {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+  }
+
+  .config-option-label,
+  .radio-label,
+  .checkbox-label,
+  .form-check-label {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+  }
+
+  input[type="text"],
+  input[type="number"],
+  input[type="password"],
+  select {
+    min-height: 44px;
+    box-sizing: border-box;
+  }
+
+  /* Merge group header drag handle: 44x44px with 44x44px SVG */
+  .merge-group-drag-handle {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: var(--bg-surface-elevated, rgba(255, 255, 255, 0.08)) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: var(--radius-sm) !important;
+    color: var(--text-primary) !important;
+    box-sizing: border-box !important;
+  }
+
+  .merge-group-drag-handle svg {
+    width: 44px !important;
+    height: 44px !important;
+    display: block !important;
+  }
+
+  .merge-group-header-btn {
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+  }
+
+  .merge-card-mini-btn {
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+  }
+
+  .merge-pill-btn {
+    min-width: 44px !important;
+    min-height: 44px !important;
+    width: 44px !important;
+    height: 44px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Merge card drag handles: prominent 44x44px visual grip on touch */
+  .stacked-doc-handle,
+  .expanded-page-handle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    background: rgba(15, 23, 42, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 8px;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 10;
+    box-sizing: border-box;
+  }
+
+  .stacked-doc-handle svg,
+  .expanded-page-handle svg {
+    width: 44px;
+    height: 44px;
+    stroke: #ffffff;
+    display: block;
+  }
+}

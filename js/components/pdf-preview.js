@@ -127,9 +127,16 @@ PDFTools.Preview = (function () {
         check.className = 'page-card-check';
         check.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>';
 
+        const handle = document.createElement('div');
+        handle.className = 'page-card-handle';
+        handle.title = 'Drag to reorder';
+        handle.setAttribute('aria-label', 'Drag to reorder');
+        handle.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="19" r="1.5"/><circle cx="15" cy="19" r="1.5"/></svg>';
+
         card.appendChild(previewDiv);
         card.appendChild(label);
         card.appendChild(check);
+        card.appendChild(handle);
 
         if (selectable) {
           card.addEventListener('click', function () {
