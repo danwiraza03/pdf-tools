@@ -364,6 +364,57 @@ async function runMobileInteractionSuite() {
       await grayContext.close();
     }
 
+    // 5. Test Crop touch-action dynamic behavior and page scroll outside crop box
+    console.log('\n--- Menguji Touch-Action & Scroll pages/crop.html ---');
+    const cropContext = await browser.newContext({
+      ...devices['iPhone 13'],
+      hasTouch: true
+    });
+    const cropPage = await cropContext.newPage();
+    try {
+      await cropPage.goto(`${BASE_URL}/pages/crop.html`, { waitUntil: 'domcontentloaded', timeout: 25000 });
+      const docBytes = await generateSinglePagePdf('Crop Test');
+      await cropPage.setInputFiles('input[type="file"]', {
+        name: 'crop_test.pdf',
+        mimeType: 'application/pdf',
+        buffer: Buffer.from(docBytes)
+      });
+      await cropPage.waitForSelector('#workspaceState', { state: 'visible', timeout: 10000 });
+      await cropPage.waitForTimeout(600);
+
+      const idleTouchAction = await cropPage.evaluate(() => {
+        return window.getComputedStyle(document.getElementById('cropOverlay')).touchAction;
+      });
+
+      const cropCdp = await cropContext.newCDPSession(cropPage);
+      // Fast swipe outside crop box
+      await cropCdp.send('Input.dispatchTouchEvent', {
+        type: 'touchStart',
+        touchPoints: [{ x: 100, y: 750 }]
+      });
+      await cropPage.waitForTimeout(40);
+      await cropCdp.send('Input.dispatchTouchEvent', {
+        type: 'touchMove',
+        touchPoints: [{ x: 100, y: 500 }]
+      });
+      await cropPage.waitForTimeout(40);
+      await cropCdp.send('Input.dispatchTouchEvent', {
+        type: 'touchEnd',
+        touchPoints: []
+      });
+      await cropPage.waitForTimeout(300);
+
+      const cropScrollY = await cropPage.evaluate(() => window.scrollY);
+      console.log(`  Crop Idle touch-action: ${idleTouchAction}, Scrolled Y outside box: ${cropScrollY}px (Harus > 50px)`);
+
+      if (cropScrollY < 50) {
+        throw new Error('Test crop scroll outside box failed: page did not scroll!');
+      }
+    } finally {
+      await cropPage.close();
+      await cropContext.close();
+    }
+
     console.log('\n========================================================================================================================');
     console.log('                                 HASIL PENGUJIAN INTERAKSI SENTUH SELULER (CDP)                                         ');
     console.log('========================================================================================================================');

@@ -48,6 +48,7 @@
       max-height: 76vh;
       box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.08);
       box-sizing: border-box;
+      touch-action: pan-y;
     }
     .crop-sheet-wrapper {
       position: relative;
@@ -55,7 +56,10 @@
       background: #ffffff;
       line-height: 0;
       user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
       border-radius: 2px;
+      touch-action: pan-y;
     }
     .crop-sheet-wrapper canvas {
       display: block;
@@ -69,6 +73,10 @@
       width: 100%;
       height: 100%;
       pointer-events: auto;
+      touch-action: pan-y;
+    }
+    .crop-overlay.is-dragging {
+      touch-action: none;
     }
     .crop-box {
       position: absolute;
@@ -76,6 +84,10 @@
       box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.55);
       cursor: move;
       box-sizing: border-box;
+      touch-action: pan-y;
+    }
+    .crop-box.is-dragging {
+      touch-action: none;
     }
     .crop-handle {
       position: absolute;
@@ -87,6 +99,10 @@
       box-sizing: border-box;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
       z-index: 20;
+      touch-action: pan-y;
+    }
+    .crop-handle.is-dragging {
+      touch-action: none;
     }
     .crop-handle.tl { top: -7px; left: -7px; cursor: nwse-resize; }
     .crop-handle.tr { top: -7px; right: -7px; cursor: nesw-resize; }
@@ -415,26 +431,34 @@
         const handle = target.dataset.handle;
         if (handle) {
           activeHandle = handle;
+          target.classList.add('is-dragging');
         } else if (target === cropBox || cropBox.contains(target)) {
           isDragging = true;
+          cropBox.classList.add('is-dragging');
         } else {
-          return;
+          return false;
         }
+        cropOverlay.classList.add('is-dragging');
+        cropOverlay.style.touchAction = 'none';
+        document.body.style.touchAction = 'none';
         startX = clientX;
         startY = clientY;
         origRect = { ...cropRect };
+        return true;
       };
 
       cropOverlay.addEventListener('mousedown', (e) => {
-        onPointerDown(e.clientX, e.clientY, e.target);
-        e.preventDefault();
+        if (onPointerDown(e.clientX, e.clientY, e.target)) {
+          e.preventDefault();
+        }
       });
 
       cropOverlay.addEventListener('touchstart', (e) => {
         if (e.touches && e.touches.length > 0) {
-          onPointerDown(e.touches[0].clientX, e.touches[0].clientY, e.target);
+          const started = onPointerDown(e.touches[0].clientX, e.touches[0].clientY, e.target);
+          if (started && e.cancelable) e.preventDefault();
         }
-      }, { passive: true });
+      }, { passive: false });
 
       const onPointerMove = (clientX, clientY) => {
         if (!isDragging && !activeHandle) return;
@@ -467,10 +491,13 @@
 
       window.addEventListener('mousemove', (e) => onPointerMove(e.clientX, e.clientY));
       window.addEventListener('touchmove', (e) => {
-        if (e.touches && e.touches.length > 0) {
-          onPointerMove(e.touches[0].clientX, e.touches[0].clientY);
+        if (isDragging || activeHandle) {
+          if (e.cancelable) e.preventDefault();
+          if (e.touches && e.touches.length > 0) {
+            onPointerMove(e.touches[0].clientX, e.touches[0].clientY);
+          }
         }
-      }, { passive: true });
+      }, { passive: false });
 
       const onPointerUp = () => {
         if (isDragging || activeHandle) {
@@ -478,10 +505,16 @@
         }
         isDragging = false;
         activeHandle = null;
+        cropOverlay.classList.remove('is-dragging');
+        cropBox.classList.remove('is-dragging');
+        document.querySelectorAll('.crop-handle.is-dragging').forEach(h => h.classList.remove('is-dragging'));
+        cropOverlay.style.touchAction = '';
+        document.body.style.touchAction = '';
       };
 
       window.addEventListener('mouseup', onPointerUp);
       window.addEventListener('touchend', onPointerUp);
+      window.addEventListener('touchcancel', onPointerUp);
 
       // Fit Mode Toggles
       btnFitPage.addEventListener('click', async () => {
