@@ -24,3 +24,6 @@ scratch/
 
 # Test Artifacts & Screenshots
 tests/browser/screenshots/
+test-results/
+playwright-report/
+.tmp/
