@@ -4,6 +4,7 @@ const fs = require('fs');
 const { chromium, webkit, devices } = require('playwright');
 const PDFLib = require(path.resolve(__dirname, '../../js/lib/pdf-lib.min.js'));
 const { startTestServer } = require('./helpers');
+const { getTempDir } = require('./helpers/tmp');
 
 /**
  * Creates a pure white A4 PDF document
@@ -143,10 +144,8 @@ async function runRotationOpacitySuite(browser, baseUrl, engineName = 'Chromium'
   console.log(`>>> [TEST] Watermark Rotation & Opacity Suite (${engineName})`);
   console.log(`========================================================================`);
 
-  const tempDir = path.resolve(__dirname, '../../scratch/test_wm_rot_op');
-  if (!fs.existsSync(tempDir)) {
-    fs.mkdirSync(tempDir, { recursive: true });
-  }
+  const temp = getTempDir('test_wm_rot_op');
+  const tempDir = temp.dir;
 
   const whitePdfPath = path.join(tempDir, 'white_a4.pdf');
   const magentaPngPath = path.join(tempDir, 'magenta_200x100.png');
@@ -353,6 +352,7 @@ async function runRotationOpacitySuite(browser, baseUrl, engineName = 'Chromium'
   } finally {
     await page.close();
     await context.close();
+    temp.cleanup();
   }
 }
 
@@ -379,7 +379,8 @@ async function runRotationOpacityWebKitMobile(baseUrl) {
     await page.goto(`${baseUrl}/pages/watermark.html`, { waitUntil: 'domcontentloaded' });
     await page.waitForFunction(() => !!(window.PDFTools && window.PDFTools.Watermark));
 
-    const tempDir = path.resolve(__dirname, '../../scratch/test_wm_rot_op');
+    const temp = getTempDir('test_wm_rot_op_mobile');
+    const tempDir = temp.dir;
     const whitePdfPath = path.join(tempDir, 'mobile_white.pdf');
     fs.writeFileSync(whitePdfPath, await createWhiteA4Pdf());
 
@@ -407,6 +408,7 @@ async function runRotationOpacityWebKitMobile(baseUrl) {
     await page.close();
     await context.close();
     await browser.close();
+    temp.cleanup();
   }
 }
 

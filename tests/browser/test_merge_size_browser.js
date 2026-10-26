@@ -15,6 +15,7 @@ const pdfjs = require(path.join(ROOT_DIR, 'js/lib/pdf.min.js'));
 pdfjs.GlobalWorkerOptions.workerSrc = path.join(ROOT_DIR, 'js/lib/pdf.worker.min.js');
 
 const { startTestServer } = require('./helpers');
+const { getTempDir } = require('./helpers/tmp');
 
 /**
  * Creates ~300 KB noise PNG
@@ -57,9 +58,9 @@ function createNoisePngBuffer(width = 320, height = 320) {
   ]);
 }
 
-async function createFixtures(scratchDir) {
-  if (!fs.existsSync(scratchDir)) {
-    fs.mkdirSync(scratchDir, { recursive: true });
+async function createFixtures(tempDir) {
+  if (!fs.existsSync(tempDir)) {
+    fs.mkdirSync(tempDir, { recursive: true });
   }
 
   const pngBuf = createNoisePngBuffer(320, 320);
@@ -73,7 +74,7 @@ async function createFixtures(scratchDir) {
     p.drawText(`HAL-A-${String(i + 1).padStart(2, '0')}`, { x: 50, y: 750, size: 20 });
   }
   const bytesA = await docA.save({ useObjectStreams: true });
-  const pathA = path.join(scratchDir, 'DocA_Thesis.pdf');
+  const pathA = path.join(tempDir, 'DocA_Thesis.pdf');
   fs.writeFileSync(pathA, bytesA);
 
   // Doc B: 5 pages
@@ -83,7 +84,7 @@ async function createFixtures(scratchDir) {
     p.drawText(`HAL-B-${String(i + 1).padStart(2, '0')}`, { x: 50, y: 750, size: 20 });
   }
   const bytesB = await docB.save({ useObjectStreams: true });
-  const pathB = path.join(scratchDir, 'DocB_Appendix.pdf');
+  const pathB = path.join(tempDir, 'DocB_Appendix.pdf');
   fs.writeFileSync(pathB, bytesB);
 
   return {
@@ -193,30 +194,34 @@ async function runMergeBrowserTestForEngine(browser, baseUrl, fixtures, engineNa
 }
 
 async function runMergeSizeBrowserSuite(chromiumBrowser, baseUrl) {
-  const scratchDir = path.resolve(ROOT_DIR, 'scratch/test_merge_browser');
-  const fixtures = await createFixtures(scratchDir);
-
-  // 1. Chromium Desktop
-  await runMergeBrowserTestForEngine(chromiumBrowser, baseUrl, fixtures, 'Chromium Desktop');
-
-  // 2. WebKit iPhone 13
-  let webkitBrowser;
+  const temp = getTempDir('test_merge_browser');
   try {
-    webkitBrowser = await webkit.launch({ headless: true });
-    await runMergeBrowserTestForEngine(
-      webkitBrowser,
-      baseUrl,
-      fixtures,
-      'iPhone 13 (WebKit)',
-      {
-        ...devices['iPhone 13'],
-        hasTouch: true
+    const fixtures = await createFixtures(temp.dir);
+
+    // 1. Chromium Desktop
+    await runMergeBrowserTestForEngine(chromiumBrowser, baseUrl, fixtures, 'Chromium Desktop');
+
+    // 2. WebKit iPhone 13
+    let webkitBrowser;
+    try {
+      webkitBrowser = await webkit.launch({ headless: true });
+      await runMergeBrowserTestForEngine(
+        webkitBrowser,
+        baseUrl,
+        fixtures,
+        'iPhone 13 (WebKit)',
+        {
+          ...devices['iPhone 13'],
+          hasTouch: true
+        }
+      );
+    } finally {
+      if (webkitBrowser) {
+        await webkitBrowser.close();
       }
-    );
-  } finally {
-    if (webkitBrowser) {
-      await webkitBrowser.close();
     }
+  } finally {
+    temp.cleanup();
   }
 }
 

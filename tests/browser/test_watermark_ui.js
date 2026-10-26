@@ -4,6 +4,7 @@ const fs = require('fs');
 const { chromium, webkit, devices } = require('playwright');
 const PDFLib = require(path.resolve(__dirname, '../../js/lib/pdf-lib.min.js'));
 const { startTestServer } = require('./helpers');
+const { getTempDir } = require('./helpers/tmp');
 
 /**
  * Creates a signed test PDF containing an AcroForm signature field (/FT /Sig).
@@ -90,10 +91,8 @@ async function runWatermarkUiSuite(browser, baseUrl, engineName = 'Chromium') {
   console.log(`>>> [BROWSER TEST] Watermark Image UI Suite (${engineName})`);
   console.log(`========================================================================`);
 
-  const tempDir = path.resolve(__dirname, '../../scratch/test_wm_ui');
-  if (!fs.existsSync(tempDir)) {
-    fs.mkdirSync(tempDir, { recursive: true });
-  }
+  const temp = getTempDir('test_wm_ui');
+  const tempDir = temp.dir;
 
   const pdfPath1 = path.join(tempDir, 'sample1.pdf');
   const pdfPath2 = path.join(tempDir, 'sample2.pdf');
@@ -300,6 +299,7 @@ async function runWatermarkUiSuite(browser, baseUrl, engineName = 'Chromium') {
   } finally {
     await page.close();
     await context.close();
+    temp.cleanup();
   }
 }
 
@@ -331,7 +331,8 @@ async function runWatermarkUiWebKitMobile(baseUrl) {
     assert(!overflow1, 'Initial page on iPhone 13 must have zero horizontal overflow');
 
     // Upload PDF
-    const tempDir = path.resolve(__dirname, '../../scratch/test_wm_ui');
+    const temp = getTempDir('test_wm_ui_mobile');
+    const tempDir = temp.dir;
     const pdfPath = path.join(tempDir, 'mobile_sample.pdf');
     fs.writeFileSync(pdfPath, await createGrayTestPdf());
     const pngPath = path.join(tempDir, 'mobile_wm.png');
@@ -409,6 +410,7 @@ async function runWatermarkUiWebKitMobile(baseUrl) {
     await page.close();
     await context.close();
     await browser.close();
+    temp.cleanup();
   }
 }
 
