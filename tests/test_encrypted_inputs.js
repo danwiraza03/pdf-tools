@@ -484,10 +484,52 @@ async function runTestSuite() {
     });
     console.log('\n❌ [FAIL] Encrypted inputs test suite failed as expected prior to fix.');
     process.exit(1);
-  } else {
-    console.log('\n✅ [PASS] All encrypted inputs tests passed!');
-    process.exit(0);
   }
+
+  // --- MUTATION CHECK (Requirement 4) ---
+  console.log('\n========================================================================');
+  console.log('   MUTATION CHECK: TEMPORARILY STUBBING ignoreEncryption: true          ');
+  console.log('========================================================================\n');
+
+  const originalRotate = PDFTools.Rotate.rotate;
+  let mutationFailedAsExpected = false;
+  let mutationCaughtError = null;
+
+  try {
+    // Deliberately stub Rotate to use legacy ignoreEncryption: true without decrypting
+    PDFTools.Rotate.rotate = async function (file, rotationsMap) {
+      const { PDFDocument, degrees } = PDFLib;
+      const arrayBuffer = await PDFTools.FileUtils.readAsArrayBuffer(file);
+      // Stubbed with forbidden pattern:
+      const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true }); // allow-ignore-encryption: mutation stub check
+      const pages = pdfDoc.getPages();
+      for (let i = 0; i < pages.length; i++) {
+        pages[i].setRotation(degrees(90));
+      }
+      return await pdfDoc.save();
+    };
+
+    console.log('[Mutation Check] Testing Rotate with stubbed ignoreEncryption: true on variant (b)...');
+    const mutatedBytes = await PDFTools.Rotate.rotate(variantB, { 0: 90, 1: 90 });
+    const extracted = await extractTextFromPdf(mutatedBytes);
+    if (!extracted.allText.includes(PAGE1_TEXT) || PDFTools.Protect.hasEncryptDictionary(mutatedBytes)) {
+      mutationFailedAsExpected = true;
+      mutationCaughtError = new Error('Corrupted text / remaining /Encrypt detected from ignoreEncryption: true');
+    }
+  } catch (err) {
+    mutationFailedAsExpected = true;
+    mutationCaughtError = err;
+  } finally {
+    // Restore original implementation immediately
+    PDFTools.Rotate.rotate = originalRotate;
+  }
+
+  assert(mutationFailedAsExpected, 'Mutation check failed: stubbed ignoreEncryption: true did not trigger failure!');
+  console.log(`  ✓ Mutation detected and rejected as expected: ${mutationCaughtError ? mutationCaughtError.message : 'Unknown'}`);
+  console.log('  ✓ Original implementation restored and verified safe.\n');
+
+  console.log('✅ [PASS] All encrypted inputs tests and mutation check passed!');
+  process.exit(0);
 }
 
 runTestSuite().catch(err => {

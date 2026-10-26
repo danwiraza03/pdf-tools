@@ -25,7 +25,9 @@ const tests = [
   { name: 'Merge Size & Resource Retention Verification', file: 'test_merge_size.js' },
   { name: 'Copy Fidelity (Ghost Pages, Link Remapping, Bookmarks)', file: 'test_copy_fidelity.js' },
   { name: 'Repository Hygiene Guard (File Size & Untracked Paths)', file: 'check_repo_hygiene.js' },
-  { name: 'Browser Launch Helper & Fallback Audit', file: 'test_launch_helper.js' }
+  { name: 'Browser Launch Helper & Fallback Audit', file: 'test_launch_helper.js' },
+  { name: 'Encrypted Inputs Test Suite (All 15 Tools x 4 Variants)', file: 'test_encrypted_inputs.js' },
+  { name: 'Zero Unsanitized ignoreEncryption: true Guard', file: 'check_no_ignore_encryption.js' }
 ];
 
 console.log('========================================================================');
