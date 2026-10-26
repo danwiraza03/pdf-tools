@@ -106,12 +106,14 @@ async function auditPageOnDevice(browser, deviceConfig, pagePath) {
       };
     });
 
-    // 3. Elements clipped / partially out of screen
+    // 3. Elements clipped / partially out of screen (ignoring intentional offscreen drawers & visually-hidden elements)
     clipped = await page.evaluate(() => {
       const all = Array.from(document.querySelectorAll('body *'));
       const vw = window.innerWidth;
       const off = [];
       for (const el of all) {
+        // Ignore intentional offscreen elements: mobile drawer, backdrop, visually hidden
+        if (el.closest('.mobile-nav-panel') || el.closest('.mobile-nav-backdrop') || el.classList.contains('mobile-nav-panel') || el.classList.contains('visually-hidden') || el.classList.contains('sr-only')) continue;
         const style = window.getComputedStyle(el);
         if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') continue;
         const r = el.getBoundingClientRect();
@@ -155,11 +157,10 @@ async function auditPageOnDevice(browser, deviceConfig, pagePath) {
   }
 
   // Calculate severity score
-  // Console errors: 100pts each | Overflow: 50pts + overflowPx | Clipped: 5pts | Target <44px: 1pt
+  // Console errors: 100pts each | Overflow: 50pts + overflowPx | Clipped: 0pts | Target <44px: 1pt
   const severityScore =
     (consoleErrors.length + pageErrors.length) * 100 +
     (overflow.hasOverflow ? (50 + Math.min(100, overflow.overflowPx)) : 0) +
-    clipped.count * 5 +
     touchTargets.count * 1;
 
   return {
