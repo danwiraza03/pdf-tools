@@ -1394,7 +1394,32 @@ PDFTools.i18n = (function () {
     }
   };
 
-  let currentLang = localStorage.getItem('pdftools-lang') || 'id';
+  function resolveInitialLang() {
+    try {
+      if (typeof localStorage !== 'undefined') {
+        const saved = localStorage.getItem('pdftools-lang');
+        if (saved === 'id' || saved === 'en') {
+          return saved;
+        }
+      }
+    } catch (e) {}
+
+    try {
+      const navLang = (typeof navigator !== 'undefined' && (navigator.language || (navigator.languages && navigator.languages[0]))) || '';
+      if (typeof navLang === 'string' && navLang.toLowerCase().startsWith('id')) {
+        return 'id';
+      }
+    } catch (e) {}
+
+    return 'en';
+  }
+
+  let currentLang = resolveInitialLang();
+
+  // Synchronously sync <html lang="..."> attribute immediately before first render
+  if (typeof document !== 'undefined' && document.documentElement) {
+    document.documentElement.lang = currentLang;
+  }
 
   function t(key, defaultVal) {
     if (!key) return defaultVal || '';
@@ -1406,10 +1431,18 @@ PDFTools.i18n = (function () {
 
   function setLang(lang) {
     currentLang = lang === 'en' ? 'en' : 'id';
-    localStorage.setItem('pdftools-lang', currentLang);
-    document.documentElement.lang = currentLang;
+    try {
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('pdftools-lang', currentLang);
+      }
+    } catch (e) {}
+    if (typeof document !== 'undefined' && document.documentElement) {
+      document.documentElement.lang = currentLang;
+    }
     updatePage();
-    window.dispatchEvent(new CustomEvent('pdftools:langchange', { detail: { lang: currentLang } }));
+    if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
+      window.dispatchEvent(new CustomEvent('pdftools:langchange', { detail: { lang: currentLang } }));
+    }
     return currentLang;
   }
 
