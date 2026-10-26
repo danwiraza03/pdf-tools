@@ -14,24 +14,27 @@ const FILE_PROTOCOL_ROOT = 'file:///' + REPO_ROOT.replace(/\\/g, '/');
  *   b. Direct file protocol (file:///)
  * across three languages: 'ind', 'eng', and 'ind+eng'.
  */
-async function runOcrEnvironmentTests() {
+async function runOcrEnvironmentTests(passedBrowser = null, passedBaseUrl = null) {
   console.log('========================================================================');
   console.log('    OCR ENVIRONMENTS TEST SUITE (HTTP & FILE PROTOCOL, MULTI-LANG)     ');
   console.log('========================================================================\n');
 
-  let server;
-  let browser;
+  let server = null;
+  let browser = passedBrowser;
+  const baseUrl = passedBaseUrl || BASE_HTTP;
 
   const results = [];
 
   try {
-    server = await startTestServer(TEST_PORT);
-    console.log(`[Test Server] Running at ${BASE_HTTP}`);
+    if (!browser) {
+      server = await startTestServer(TEST_PORT);
+      console.log(`[Test Server] Running at ${baseUrl}`);
 
-    console.log('[Browser] Launching Chromium...');
-    browser = await chromium.launch({
-      headless: true
-    });
+      console.log('[Browser] Launching Chromium...');
+      browser = await chromium.launch({
+        headless: true
+      });
+    }
 
     const pagesToTest = [
       { name: 'pages/ocr.html', path: 'pages/ocr.html' },
@@ -39,7 +42,7 @@ async function runOcrEnvironmentTests() {
     ];
 
     const conditions = [
-      { name: 'http://127.0.0.1 (Server Lokal)', base: BASE_HTTP },
+      { name: 'http://127.0.0.1 (Server Lokal)', base: baseUrl },
       { name: 'file:/// (Tanpa Server)', base: FILE_PROTOCOL_ROOT }
     ];
 
@@ -239,7 +242,7 @@ async function runOcrEnvironmentTests() {
       }
     }
   } finally {
-    if (browser) {
+    if (!passedBrowser && browser) {
       await browser.close();
     }
     if (server) {

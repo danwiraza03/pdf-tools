@@ -3,6 +3,8 @@ const { startTestServer } = require('./helpers');
 const { runStudioRedactionTests } = require('./test_studio_redaction');
 const { runSkippedToolsTests } = require('./test_skipped_tools');
 const { runCompressEffectivenessTest } = require('./test_compress_effectiveness');
+const { testAllPagesForErrors } = require('./test_page_errors');
+const { runOcrEnvironmentTests } = require('./test_ocr_environments');
 
 const TEST_PORT = 8765;
 const BASE_URL = `http://127.0.0.1:${TEST_PORT}`;
@@ -34,6 +36,19 @@ async function main() {
 
     // 3. Measure Compress Effectiveness on Photo PDF (Extreme, Recommended, Less)
     await runCompressEffectivenessTest(browser, BASE_URL);
+
+    // 4. Page Console & Runtime Error Audit across all HTML pages
+    const auditPassed = await testAllPagesForErrors(browser, BASE_URL);
+    if (!auditPassed) {
+      throw new Error('Audit kegagalan konsol / pageerror pada halaman HTML gagal!');
+    }
+
+    // 5. OCR Environments Test (Local HTTP & Direct file:///, with optional live site)
+    const ocrResults = await runOcrEnvironmentTests(browser, BASE_URL);
+    const ocrFailed = ocrResults && ocrResults.some(r => r.status !== 'BERHASIL');
+    if (ocrFailed) {
+      throw new Error('Satu atau lebih skenario pengujian lingkungan OCR gagal!');
+    }
 
     console.log('========================================================================');
     console.log('                 BROWSER TESTS COMPLETE: ALL PASSED!                   ');

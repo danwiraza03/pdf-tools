@@ -7,7 +7,7 @@ const TEST_PORT = 8765;
 const BASE_URL = `http://127.0.0.1:${TEST_PORT}`;
 const REPO_ROOT = path.resolve(__dirname, '../..');
 
-async function testAllPagesForErrors() {
+async function testAllPagesForErrors(passedBrowser = null, passedBaseUrl = null) {
   console.log('========================================================================');
   console.log('      PAGE CONSOLE & RUNTIME ERROR AUDIT (ALL HTML PAGES)              ');
   console.log('========================================================================\n');
@@ -18,16 +18,19 @@ async function testAllPagesForErrors() {
 
   console.log(`Found ${allPages.length} pages to audit.`);
 
-  let server;
-  let browser;
+  let server = null;
+  let browser = passedBrowser;
+  const baseUrl = passedBaseUrl || BASE_URL;
   const failureReports = [];
 
   try {
-    server = await startTestServer(TEST_PORT);
-    browser = await chromium.launch({ headless: true });
+    if (!browser) {
+      server = await startTestServer(TEST_PORT);
+      browser = await chromium.launch({ headless: true });
+    }
 
     for (const pagePath of allPages) {
-      const pageUrl = `${BASE_URL}/${pagePath}`;
+      const pageUrl = `${baseUrl}/${pagePath}`;
       const context = await browser.newContext();
       const page = await context.newPage();
 
@@ -74,7 +77,7 @@ async function testAllPagesForErrors() {
       await context.close();
     }
   } finally {
-    if (browser) await browser.close();
+    if (!passedBrowser && browser) await browser.close();
     if (server) server.close();
   }
 
