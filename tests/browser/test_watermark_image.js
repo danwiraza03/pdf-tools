@@ -41,15 +41,9 @@ async function runNodeWatermarkImageTests() {
   }
   const originalBytes = await doc.save();
 
-  // 2. Create a test PNG image buffer (~15 KB or valid PNG bytes)
-  // 100x50 transparent PNG with magenta pixels
-  const docImg = await PDFLib.PDFDocument.create();
-  const pageImg = docImg.addPage([100, 50]);
-  pageImg.drawRectangle({ x: 0, y: 0, width: 100, height: 50, color: PDFLib.rgb(1, 0, 1) });
-  const samplePdfBytes = await docImg.save();
-  // Valid sample PNG buffer
+  // Valid 10x10 transparent/colored PNG
   const samplePngBase64 = 
-    'iVBORw0KGgoAAAANSUhEUgAAAMgAAABkCAYAAADDhn8LAAAAPklEQVR42u3BAQ0AAADCoPdPbQ43oAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8GYYMAABoO757AAAAABJRU5ErkJggg==';
+    'iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVR42mP8z8BQz0AEYBxVSF+FABJAD/6pnMbCAAAAAElFTkSuQmCC';
   const imgBytes = Buffer.from(samplePngBase64, 'base64');
 
   // 3. Apply image watermark

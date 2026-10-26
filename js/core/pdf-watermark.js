@@ -137,22 +137,37 @@ PDFTools.Watermark = {
   },
 
   /**
-   * Add text watermark to a PDF
-   * @param {File} file - PDF file
+   * Add text or image watermark to a PDF
+   * @param {File|Object} file - PDF file or wrapper
    * @param {Object} options - Watermark settings
+   *   options.type: 'text' (default) | 'image'
+   *   options.image: { bytes, mime } or raw buffer
+   *   options.scale: 0.05-1.0 (fraction of visible page width, default 0.3)
+   *   options.margin: margin in points (default 20)
+   *   options.position: 'center' | 'top-left' | 'top-center' | 'top-right' | 'middle-left' | 'middle-right' | 'bottom-left' | 'bottom-center' | 'bottom-right' | 'tile' | 'diagonal'
+   *   options.tileGap: gap between tiles in points (default 50)
+   *   options.opacity: 0.0-1.0 (default 0.3)
+   *   options.rotation: angle in degrees (default 0 or 45 for diagonal)
    * @param {Function} onProgress - Progress callback
    * @returns {Promise<Uint8Array>}
    */
   applyWatermark: async function (file, options, onProgress) {
     options = options || {};
+    const type = options.type === 'image' ? 'image' : 'text';
     const text = options.text || 'CONFIDENTIAL';
     const fontSize = parseInt(options.fontSize, 10) || 48;
     const opacity = typeof options.opacity === 'number' ? options.opacity : (parseFloat(options.opacity) || 0.30);
-    const rotationAngle = typeof options.rotation === 'number' ? options.rotation : (options.position === 'diagonal' ? 45 : (parseInt(options.rotation, 10) || 0));
+    const rotationAngle = typeof options.rotation === 'number'
+      ? options.rotation
+      : (options.position === 'diagonal' ? 45 : (parseInt(options.rotation, 10) || 0));
     const position = options.position || 'center';
     const colorHex = options.color || '#e74c3c';
     const margin = typeof options.margin === 'number' ? options.margin : 20;
     const tileGap = typeof options.tileGap === 'number' ? options.tileGap : 50;
+
+    let scale = typeof options.scale === 'number' ? options.scale : 0.30;
+    if (scale < 0.05) scale = 0.05;
+    if (scale > 1.0) scale = 1.0;
 
     // Parse hex color to 0..1 RGB for pdf-lib
     function hexToRgb(hex) {
@@ -184,8 +199,33 @@ PDFTools.Watermark = {
       } catch (e) {}
     }
 
-    // Embed bold font for crisp readable watermark
-    const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    let font = null;
+    let embeddedImage = null;
+    let imgAspectRatio = 1.0;
+
+    // Single embedding per document: embed font or image once before page loop
+    if (type === 'image') {
+      if (!options.image) {
+        throw new Error('Watermark image is required when type is "image"');
+      }
+      let rawBytes = options.image.bytes || options.image;
+      if (rawBytes instanceof ArrayBuffer) {
+        rawBytes = new Uint8Array(rawBytes);
+      } else if (rawBytes && rawBytes.buffer && !(rawBytes instanceof Uint8Array)) {
+        rawBytes = new Uint8Array(rawBytes.buffer, rawBytes.byteOffset, rawBytes.byteLength);
+      }
+
+      const mime = (options.image && options.image.mime) || '';
+      const isJpg = mime === 'image/jpeg' || mime === 'image/jpg' ||
+        (rawBytes && rawBytes.length >= 3 && rawBytes[0] === 0xFF && rawBytes[1] === 0xD8 && rawBytes[2] === 0xFF);
+
+      embeddedImage = isJpg ? await pdfDoc.embedJpg(rawBytes) : await pdfDoc.embedPng(rawBytes);
+      const imgSize = embeddedImage.size();
+      imgAspectRatio = imgSize.height / imgSize.width;
+    } else {
+      font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    }
+
     const pages = pdfDoc.getPages();
     const totalPages = pages.length;
 
@@ -196,26 +236,59 @@ PDFTools.Watermark = {
       }
 
       const page = pages[i];
-      const textWidth = font.widthOfTextAtSize(text, fontSize);
-      const textHeight = font.heightAtSize(fontSize);
 
-      const placement = PDFTools.Watermark.computePlacement(page, textWidth, textHeight, {
-        position,
-        rotation: rotationAngle,
-        margin,
-        tileGap
-      });
+      if (type === 'image') {
+        // Resolve visible dimensions to scale image proportionally
+        const cropBox = (page && typeof page.getCropBox === 'function')
+          ? page.getCropBox()
+          : { x: 0, y: 0, width: page.getSize().width, height: page.getSize().height };
+        const cropW = cropBox.width || (page.getSize ? page.getSize().width : 600);
+        const cropH = cropBox.height || (page.getSize ? page.getSize().height : 800);
+        const pageRotation = page && page.getRotation ? ((page.getRotation().angle % 360) + 360) % 360 : 0;
+        const visibleWidth = (pageRotation === 90 || pageRotation === 270) ? cropH : cropW;
 
-      for (const pl of placement.placements) {
-        page.drawText(text, {
-          x: pl.x,
-          y: pl.y,
-          size: fontSize,
-          font: font,
-          color: rgb(r, g, b),
-          opacity: opacity,
-          rotate: degrees(pl.rotate)
+        const targetWidth = visibleWidth * scale;
+        const targetHeight = targetWidth * imgAspectRatio;
+
+        const placement = PDFTools.Watermark.computePlacement(page, targetWidth, targetHeight, {
+          position,
+          rotation: rotationAngle,
+          margin,
+          tileGap
         });
+
+        for (const pl of placement.placements) {
+          page.drawImage(embeddedImage, {
+            x: pl.x,
+            y: pl.y,
+            width: targetWidth,
+            height: targetHeight,
+            opacity: opacity,
+            rotate: degrees(pl.rotate)
+          });
+        }
+      } else {
+        const textWidth = font.widthOfTextAtSize(text, fontSize);
+        const textHeight = font.heightAtSize(fontSize);
+
+        const placement = PDFTools.Watermark.computePlacement(page, textWidth, textHeight, {
+          position,
+          rotation: rotationAngle,
+          margin,
+          tileGap
+        });
+
+        for (const pl of placement.placements) {
+          page.drawText(text, {
+            x: pl.x,
+            y: pl.y,
+            size: fontSize,
+            font: font,
+            color: rgb(r, g, b),
+            opacity: opacity,
+            rotate: degrees(pl.rotate)
+          });
+        }
       }
     }
 
