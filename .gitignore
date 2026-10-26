@@ -21,3 +21,6 @@ Thumbs.db
 # Trash & Scratch files
 trash/
 scratch/
+
+# Test Artifacts & Screenshots
+tests/browser/screenshots/
