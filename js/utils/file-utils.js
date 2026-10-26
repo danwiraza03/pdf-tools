@@ -1,9 +1,125 @@
-/**
- * PDF Tools — File Utilities
- */
-window.PDFTools = window.PDFTools || {};
+const globalObj = typeof window !== 'undefined' ? window : (typeof global !== 'undefined' ? global : globalThis);
+globalObj.PDFTools = globalObj.PDFTools || {};
 
-PDFTools.FileUtils = {
+const FileUtils = {
+  /**
+   * Safely loads and decrypts a PDF document client-side.
+   * If protected, decrypts in-memory using unlockPdf and returns a pristine, unencrypted PDFDocument.
+   *
+   * @param {File|Blob|ArrayBuffer|Uint8Array|Object} file
+   * @param {Object} [options={}]
+   * @param {Function} [options.getPassword] - async (fileName, attempt) => password|null
+   * @param {string} [options.fileName]
+   * @param {boolean} [options.updateMetadata=true]
+   * @returns {Promise<PDFDocument>}
+   */
+  loadPdfDecrypted: async function (file, options = {}) {
+    const PDFLib = globalObj.PDFLib || (typeof require === 'function' ? require('../lib/pdf-lib.min.js') : null);
+    if (!PDFLib || !PDFLib.PDFDocument) {
+      throw new Error('PDF library is not loaded.');
+    }
+    const { PDFDocument } = PDFLib;
+
+    const Protect = (globalObj.PDFTools && globalObj.PDFTools.Protect)
+      || (typeof require === 'function' ? (function () {
+        try { return require('../core/pdf-protect.js'); } catch (e) {
+          try { return require('./js/core/pdf-protect.js'); } catch (e2) { return null; }
+        }
+      })() : null);
+
+    const arrayBuffer = await this.readAsArrayBuffer(file);
+    const bytes = new Uint8Array(arrayBuffer);
+    const fileName = (file && file.name) ? file.name : (options.fileName || 'Dokumen.pdf');
+    const loadOptions = {
+      updateMetadata: options.updateMetadata !== false
+    };
+
+    // Check if document has /Encrypt dictionary
+    const isEncrypted = Protect && typeof Protect.hasEncryptDictionary === 'function'
+      ? Protect.hasEncryptDictionary(bytes)
+      : (function () {
+          const p = [47, 69, 110, 99, 114, 121, 112, 116];
+          let m = 0;
+          for (let i = 0; i < bytes.length; i++) {
+            if (bytes[i] === p[m]) {
+              m++;
+              if (m === p.length) return true;
+            } else {
+              m = bytes[i] === p[0] ? 1 : 0;
+            }
+          }
+          return false;
+        })();
+
+    if (!isEncrypted) {
+      return await PDFDocument.load(arrayBuffer, loadOptions);
+    }
+
+    if (!Protect || typeof Protect.unlockPdf !== 'function') {
+      throw new Error('PDFTools.Protect.unlockPdf is required to decrypt protected PDF documents.');
+    }
+
+    // Attempt 0: Try empty password (handles permissions-only encryption / empty user password)
+    try {
+      const unlockedBytes = await Protect.unlockPdf(arrayBuffer, '');
+      return await PDFDocument.load(unlockedBytes, loadOptions);
+    } catch (emptyErr) {
+      // Document has a non-empty user password
+    }
+
+    // Resolve getPassword function (fallback to options.password or custom modal if in browser)
+    let getPassword = options.getPassword;
+    if (typeof getPassword !== 'function' && typeof options.password === 'string') {
+      getPassword = () => options.password;
+    }
+    if (typeof getPassword !== 'function' && globalObj.PDFTools && globalObj.PDFTools.Modal && typeof globalObj.PDFTools.Modal.requestPassword === 'function') {
+      getPassword = (fn, att) => globalObj.PDFTools.Modal.requestPassword(fn, att);
+    }
+
+    if (typeof getPassword !== 'function') {
+      const err = new Error(`Password diperlukan untuk membuka PDF: ${fileName}`);
+      err.code = 'PASSWORD_REQUIRED';
+      err.fileName = fileName;
+      throw err;
+    }
+
+    let unlockedBytes = null;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      let pass = await getPassword(fileName, attempt);
+      if (pass === null || pass === undefined) {
+        const err = new Error(`Pembukaan PDF dibatalkan oleh pengguna: ${fileName}`);
+        err.code = 'PASSWORD_CANCELLED';
+        err.fileName = fileName;
+        throw err;
+      }
+      if (typeof pass !== 'string') {
+        pass = String(pass);
+      }
+      try {
+        unlockedBytes = await Protect.unlockPdf(arrayBuffer, pass);
+        pass = null; // Transient in-memory only: clear immediately
+        break;
+      } catch (decryptErr) {
+        pass = null; // Transient in-memory only: clear immediately
+        if (attempt === 3) {
+          const err = new Error(`Password salah (3 kali percobaan terlampaui): ${fileName}`);
+          err.code = 'PASSWORD_INCORRECT';
+          err.fileName = fileName;
+          err.originalError = decryptErr;
+          throw err;
+        }
+      }
+    }
+
+    if (!unlockedBytes) {
+      const err = new Error(`Password salah untuk membuka PDF: ${fileName}`);
+      err.code = 'PASSWORD_INCORRECT';
+      err.fileName = fileName;
+      throw err;
+    }
+
+    return await PDFDocument.load(unlockedBytes, loadOptions);
+  },
   /**
    * Format bytes to human-readable string
    */
@@ -201,6 +317,11 @@ PDFTools.FileUtils = {
     });
   }
 };
+
+globalObj.PDFTools.FileUtils = FileUtils;
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = FileUtils;
+}
 
 /**
  * Recent Files & Activity Store (B3 Feature)

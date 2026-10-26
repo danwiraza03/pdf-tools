@@ -680,7 +680,13 @@ PDFTools.i18n = (function () {
       'protect.success_protect': 'PDF encrypted successfully with password!',
       'protect.success_unlock': 'PDF unlocked successfully!',
       'protect.error_match': 'Passwords do not match.',
-      'protect.error_empty': 'Please enter a password.'
+      'protect.error_empty': 'Please enter a password.',
+      'modal.password_title': 'Protected PDF Document',
+      'modal.password_message': 'Please enter the password to open "{filename}":',
+      'modal.password_incorrect': 'Incorrect password, please try again (Attempt {attempt} of {max}).',
+      'modal.password_unlock': 'Open',
+      'modal.password_skip': 'Skip',
+      'modal.password_placeholder': 'Enter document password'
     },
 
     id: {
@@ -1358,7 +1364,13 @@ PDFTools.i18n = (function () {
       'protect.success_protect': 'PDF berhasil dienkripsi dengan kata sandi!',
       'protect.success_unlock': 'PDF berhasil dibuka tanpa sandi!',
       'protect.error_match': 'Kata sandi tidak cocok.',
-      'protect.error_empty': 'Silakan masukkan kata sandi.'
+      'protect.error_empty': 'Silakan masukkan kata sandi.',
+      'modal.password_title': 'Dokumen PDF Dilindungi',
+      'modal.password_message': 'Masukkan kata sandi untuk membuka "{filename}":',
+      'modal.password_incorrect': 'Password salah, silakan coba lagi (Percobaan {attempt} dari {max}).',
+      'modal.password_unlock': 'Buka',
+      'modal.password_skip': 'Lewati',
+      'modal.password_placeholder': 'Masukkan kata sandi dokumen'
     }
   };
 
