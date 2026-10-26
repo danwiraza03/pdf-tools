@@ -389,6 +389,15 @@ async function checkGhostAndLeak(bytes, removedPageNums, label) {
 }
 
 // ============================================================================
+// Assert output PDF contains no __TARGET_PAGE_ placeholder strings (iv)
+// ============================================================================
+function assertNoTargetPagePlaceholders(bytes, label) {
+  const buf = Buffer.from(bytes);
+  const idx = buf.indexOf('__TARGET_PAGE_');
+  ok(idx === -1, `${label}: output PDF contains no '__TARGET_PAGE_' placeholder strings (found at index ${idx})`);
+}
+
+// ============================================================================
 // Internal link check (c,d): links to surviving pages resolve correctly;
 //   links to removed pages are absent.
 // URL link check (e): URL link survives.
@@ -562,6 +571,7 @@ async function run() {
     equals(pdfjsDoc.numPages, 29, 'S1: page count is 29');
 
     await checkGhostAndLeak(outBytes, [8], 'S1: Merge');
+    assertNoTargetPagePlaceholders(outBytes, 'S1: Merge');
     // Kept targets: all in LINK_TARGETS except 8 → [5,6,7,9,10,11,12,13,14]
     const keptT = LINK_TARGETS.filter(t => t !== 8);
     const removedT = [8];
@@ -583,6 +593,7 @@ async function run() {
     equals(pdfjsDoc.numPages, 29, 'S2: page count is 29');
 
     await checkGhostAndLeak(outBytes, [8], 'S2: Remove');
+    assertNoTargetPagePlaceholders(outBytes, 'S2: Remove');
     const keptT = LINK_TARGETS.filter(t => t !== 8);
     await checkLinks(outBytes, keptT, [8], 'S2: Remove');
     await checkMetadata(outBytes, 'S2: Remove');
@@ -603,6 +614,7 @@ async function run() {
     // Discarded: pages 7-30
     const removed = Array.from({ length: 24 }, (_, i) => i + 7); // 7..30
     await checkGhostAndLeak(outBytes, removed, 'S3: Split');
+    assertNoTargetPagePlaceholders(outBytes, 'S3: Split');
 
     // Link page 2 (index 1) was kept; targets 5,6 survived; 7-14 discarded
     const keptT = LINK_TARGETS.filter(t => t <= 6); // [5, 6]
@@ -627,6 +639,7 @@ async function run() {
 
     // No pages removed → no ghost pages, no content leaked
     await checkGhostAndLeak(outBytes, [], 'S4: Reorder');
+    assertNoTargetPagePlaceholders(outBytes, 'S4: Reorder');
     // All links still valid (targets still exist, just reordered)
     await checkLinks(outBytes, LINK_TARGETS, [], 'S4: Reorder',
       // In reversed order, page 2 is now at index (30 - 2) = 28
@@ -647,9 +660,154 @@ async function run() {
     equals(pdfjsDoc.numPages, 30, 'S5: page count is 30');
 
     await checkGhostAndLeak(outBytes, [], 'S5: Unlock');
+    assertNoTargetPagePlaceholders(outBytes, 'S5: Unlock');
     await checkLinks(outBytes, LINK_TARGETS, [], 'S5: Unlock');
     await checkMetadata(outBytes, 'S5: Unlock');
     await checkBookmarks(outBytes, true, true, 'S5: Unlock');
+  }
+
+  // =========================================================================
+  // S6: Duplicate page with internal links (Item 1.i)
+  // Page 2 (with internal links) is included TWICE in the merge assemble items
+  // =========================================================================
+  console.log('\n[S6] Duplicate page with internal links');
+  {
+    const srcDoc = await PDFDocument.load(fixtureBytes, { ignoreEncryption: true });
+    // Assemble: Page 1, Page 2 (link page), Page 5 (target), Page 2 (duplicate link page)
+    const items = [
+      { doc: srcDoc, pageIndex: 0, rotation: 0 },
+      { doc: srcDoc, pageIndex: 1, rotation: 0 }, // slot 1 (Page 2)
+      { doc: srcDoc, pageIndex: 4, rotation: 0 }, // slot 2 (Page 5, target of link 0)
+      { doc: srcDoc, pageIndex: 1, rotation: 0 }  // slot 3 (Duplicate Page 2)
+    ];
+    const result = await PDFTools.Merge.assemble(items);
+    const outBytes = result.bytes;
+
+    const pdfjsDoc = await loadPdfjs(outBytes);
+    equals(pdfjsDoc.numPages, 4, 'S6: page count is 4 (includes duplicated page)');
+
+    await checkGhostAndLeak(outBytes, [], 'S6: Dupe');
+    assertNoTargetPagePlaceholders(outBytes, 'S6: Dupe');
+
+    const outDoc = await PDFDocument.load(outBytes, { ignoreEncryption: true });
+    const targetRef = outDoc.getPage(2).ref;
+
+    // Check slot 1 links
+    const linksSlot1 = await getLinksForPage(outBytes, 1);
+    ok(linksSlot1.length > 0, 'S6: first copy of page 2 has link annotations');
+    const firstLinkSlot1 = linksSlot1.find(l => l.dest);
+    ok(firstLinkSlot1, 'S6: first copy has /Dest link');
+    if (firstLinkSlot1 && firstLinkSlot1.dest) {
+      const dArr = firstLinkSlot1.dest instanceof PDFArray ? firstLinkSlot1.dest : outDoc.context.lookup(firstLinkSlot1.dest);
+      equals(dArr.get(0).tag, targetRef.tag, 'S6: first copy link points to target Page 5 (slot 2)');
+    }
+
+    // Check slot 3 links (duplicate)
+    const linksSlot3 = await getLinksForPage(outBytes, 3);
+    ok(linksSlot3.length > 0, 'S6: second copy (duplicate) of page 2 has link annotations');
+    const firstLinkSlot3 = linksSlot3.find(l => l.dest);
+    ok(firstLinkSlot3, 'S6: second copy has /Dest link');
+    if (firstLinkSlot3 && firstLinkSlot3.dest) {
+      const dArr = firstLinkSlot3.dest instanceof PDFArray ? firstLinkSlot3.dest : outDoc.context.lookup(firstLinkSlot3.dest);
+      equals(dArr.get(0).tag, targetRef.tag, 'S6: second copy link points to target Page 5 (slot 2)');
+    }
+  }
+
+  // =========================================================================
+  // S7: Merge two files each with internal links — verify target page text matching (Item 1.ii)
+  // =========================================================================
+  console.log('\n[S7] Merge two files each with internal links (text matching)');
+  {
+    // Build File A (3 pages, link on page 2 points to page 3 "DOCA-PAGE-3-TARGET")
+    const docA = await PDFDocument.create();
+    const fontA = await docA.embedFont(StandardFonts.Helvetica);
+    const pA1 = docA.addPage([300, 300]); pA1.drawText('DOCA-PAGE-1', { x: 50, y: 250, size: 14, font: fontA });
+    const pA2 = docA.addPage([300, 300]); pA2.drawText('DOCA-PAGE-2-SOURCE', { x: 50, y: 250, size: 14, font: fontA });
+    const pA3 = docA.addPage([300, 300]); pA3.drawText('DOCA-PAGE-3-TARGET', { x: 50, y: 250, size: 14, font: fontA });
+    const annotA = docA.context.obj({
+      Type: 'Annot', Subtype: 'Link',
+      Rect: [50, 100, 150, 120],
+      Dest: docA.context.obj([pA3.ref, PDFName.of('Fit')])
+    });
+    pA2.node.set(PDFName.of('Annots'), docA.context.obj([docA.context.register(annotA)]));
+    const bytesA = await docA.save({ useObjectStreams: false });
+
+    // Build File B (3 pages, link on page 2 points to page 1 "DOCB-PAGE-1-TARGET")
+    const docB = await PDFDocument.create();
+    const fontB = await docB.embedFont(StandardFonts.Helvetica);
+    const pB1 = docB.addPage([300, 300]); pB1.drawText('DOCB-PAGE-1-TARGET', { x: 50, y: 250, size: 14, font: fontB });
+    const pB2 = docB.addPage([300, 300]); pB2.drawText('DOCB-PAGE-2-SOURCE', { x: 50, y: 250, size: 14, font: fontB });
+    const pB3 = docB.addPage([300, 300]); pB3.drawText('DOCB-PAGE-3', { x: 50, y: 250, size: 14, font: fontB });
+    const annotB = docB.context.obj({
+      Type: 'Annot', Subtype: 'Link',
+      Rect: [50, 100, 150, 120],
+      Dest: docB.context.obj([pB1.ref, PDFName.of('Fit')])
+    });
+    pB2.node.set(PDFName.of('Annots'), docB.context.obj([docB.context.register(annotB)]));
+    const bytesB = await docB.save({ useObjectStreams: false });
+
+    // Merge via Whole-File List Mode (merge function)
+    const fileA = bytesToFile(bytesA, 'docA.pdf');
+    const fileB = bytesToFile(bytesB, 'docB.pdf');
+    const mergeResult = await PDFTools.Merge.merge([fileA, fileB]);
+    const outBytes = mergeResult.bytes;
+
+    const pdfjsDoc = await loadPdfjs(outBytes);
+    equals(pdfjsDoc.numPages, 6, 'S7: merged page count is 6');
+
+    await checkGhostAndLeak(outBytes, [], 'S7: Merge Two Files');
+    assertNoTargetPagePlaceholders(outBytes, 'S7: Merge Two Files');
+
+    // Inspect links in destination document
+    const outDoc = await PDFDocument.load(outBytes, { ignoreEncryption: true });
+
+    // Link in Doc A (Page 2, index 1)
+    const linksA = await getLinksForPage(outBytes, 1);
+    ok(linksA.length === 1, 'S7: Doc A page 2 has 1 link');
+    const destRefA = outDoc.context.lookup(linksA[0].dest).get(0);
+
+    // Link in Doc B (Page 5, index 4)
+    const linksB = await getLinksForPage(outBytes, 4);
+    ok(linksB.length === 1, 'S7: Doc B page 2 has 1 link');
+    const destRefB = outDoc.context.lookup(linksB[0].dest).get(0);
+
+    // Find destination page indices
+    let targetIdxA = -1;
+    let targetIdxB = -1;
+    for (let i = 0; i < outDoc.getPageCount(); i++) {
+      if (outDoc.getPage(i).ref.tag === destRefA.tag) targetIdxA = i;
+      if (outDoc.getPage(i).ref.tag === destRefB.tag) targetIdxB = i;
+    }
+
+    // Verify target text via PDF.js matches target page text
+    const textTargetA = await pageText(pdfjsDoc, targetIdxA + 1);
+    const textTargetB = await pageText(pdfjsDoc, targetIdxB + 1);
+    ok(textTargetA.includes('DOCA-PAGE-3-TARGET'), `S7: Doc A link target matches text 'DOCA-PAGE-3-TARGET' (got: "${textTargetA}")`);
+    ok(textTargetB.includes('DOCB-PAGE-1-TARGET'), `S7: Doc B link target matches text 'DOCB-PAGE-1-TARGET' (got: "${textTargetB}")`);
+  }
+
+  // =========================================================================
+  // S8: Consecutive copy of the same source instance (Item 1.iii)
+  // =========================================================================
+  console.log('\n[S8] Consecutive copy of the same source instance');
+  {
+    const loadedSrc = await PDFDocument.load(fixtureBytes, { ignoreEncryption: true });
+    const items = [
+      { doc: loadedSrc, pageIndex: 0, rotation: 0 },
+      { doc: loadedSrc, pageIndex: 1, rotation: 0 },
+      { doc: loadedSrc, pageIndex: 4, rotation: 0 }
+    ];
+
+    const res1 = await PDFTools.Merge.assemble(items);
+    const res2 = await PDFTools.Merge.assemble(items);
+
+    equals(res1.pageCount, res2.pageCount, 'S8: consecutive copy page counts match');
+    equals(res1.bytes.length, res2.bytes.length, 'S8: consecutive copy byte lengths match');
+    const bufferDiff = Buffer.compare(Buffer.from(res1.bytes), Buffer.from(res2.bytes));
+    ok(bufferDiff === 0, 'S8: consecutive copy byte contents are 100% identical');
+
+    assertNoTargetPagePlaceholders(res1.bytes, 'S8: Consecutive copy 1');
+    assertNoTargetPagePlaceholders(res2.bytes, 'S8: Consecutive copy 2');
   }
 
   // =========================================================================

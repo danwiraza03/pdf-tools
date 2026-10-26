@@ -22,7 +22,8 @@ const tests = [
   { name: 'Zero External HTTP(S) URLs Offline Compliance', file: 'test_no_external_urls.js' },
   { name: 'SortableJS Mobile Touch Options Audit (delayOnTouchOnly)', file: 'check_sortable_touch.js' },
   { name: 'Guard Audit: Batched copyPages Loops', file: 'check_copypages_loops.js' },
-  { name: 'Merge Size & Resource Retention Verification', file: 'test_merge_size.js' }
+  { name: 'Merge Size & Resource Retention Verification', file: 'test_merge_size.js' },
+  { name: 'Copy Fidelity (Ghost Pages, Link Remapping, Bookmarks)', file: 'test_copy_fidelity.js' }
 ];
 
 console.log('========================================================================');
