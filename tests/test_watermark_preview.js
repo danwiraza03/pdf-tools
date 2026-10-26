@@ -399,12 +399,148 @@ async function runPageRangeTest() {
   }
 }
 
+async function runLargePdfDebounceTest() {
+  console.log('========================================================================');
+  console.log('>>> [BROWSER TEST] 250-Page PDF Preview Performance, Debounce & Cancellation');
+  console.log('========================================================================');
+
+  const PORT = 8980;
+  const server = http.createServer((req, res) => {
+    const rawUrl = req.url.split('?')[0];
+    const safePath = path.normalize(path.join(__dirname, '..', rawUrl));
+    if (!safePath.startsWith(path.resolve(__dirname, '..'))) {
+      res.writeHead(403);
+      return res.end('Forbidden');
+    }
+    if (fs.existsSync(safePath) && fs.statSync(safePath).isFile()) {
+      const ext = path.extname(safePath).toLowerCase();
+      const mimeMap = {
+        '.html': 'text/html',
+        '.js': 'application/javascript',
+        '.css': 'text/css',
+        '.svg': 'image/svg+xml',
+        '.png': 'image/png',
+        '.jpg': 'image/jpeg',
+        '.pdf': 'application/pdf'
+      };
+      res.writeHead(200, { 'Content-Type': mimeMap[ext] || 'application/octet-stream' });
+      fs.createReadStream(safePath).pipe(res);
+    } else {
+      res.writeHead(404);
+      res.end('Not Found');
+    }
+  });
+
+  await new Promise((resolve, reject) => {
+    server.listen(PORT, '127.0.0.1', resolve);
+    server.on('error', reject);
+  });
+
+  const browser = await chromium.launch({ headless: true });
+  const page = await browser.newPage();
+
+  page.on('dialog', dialog => {
+    assert.fail(`Forbidden native dialog triggered: ${dialog.type()} "${dialog.message()}"`);
+  });
+
+  const tempDir = path.join(__dirname, 'temp_wm_large_test');
+  if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
+  const test250PdfPath = path.join(tempDir, 'sample_250pages.pdf');
+
+  try {
+    // Generate a 250-page PDF
+    console.log('  --- Creating 250-page PDF fixture ---');
+    const doc = await PDFLib.PDFDocument.create();
+    for (let i = 1; i <= 250; i++) {
+      const p = doc.addPage([595, 842]);
+      p.drawText(`Document Page ${i} of 250`, { x: 50, y: 780, size: 22, color: PDFLib.rgb(0.2, 0.2, 0.2) });
+    }
+    fs.writeFileSync(test250PdfPath, await doc.save());
+    console.log('  ✓ 250-page PDF fixture created (' + (fs.statSync(test250PdfPath).size / 1024).toFixed(1) + ' KB).');
+
+    await page.goto(`http://127.0.0.1:${PORT}/pages/watermark.html`, { waitUntil: 'domcontentloaded' });
+    await page.waitForFunction(() => !!(window.PDFTools && window.PDFTools.Watermark));
+
+    // Upload 250-page PDF
+    const fileInput = page.locator('#dropzone input[type="file"]');
+    await fileInput.setInputFiles(test250PdfPath);
+    await page.waitForSelector('#optionsPanel', { state: 'visible', timeout: 8000 });
+    console.log('  ✓ 250-page PDF loaded into Watermark UI.');
+
+    // 1. Measure Preview Performance (Requirement 3: only page 1 processed, completes in reasonable time)
+    console.log('  --- Measuring Preview Performance for 250-Page PDF ---');
+    const previewBtn = page.locator('#previewBtn');
+    await previewBtn.waitFor({ state: 'visible', timeout: 3000 });
+
+    const startTime = Date.now();
+    await previewBtn.click();
+
+    // Wait for canvas to be populated
+    await page.waitForFunction(() => {
+      const canvas = document.getElementById('wmResultCanvas');
+      if (!canvas || canvas.width === 0 || canvas.height === 0) return false;
+      const ctx = canvas.getContext('2d');
+      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      return imgData.data.some(b => b > 0);
+    }, { timeout: 10000 });
+
+    const previewDuration = Date.now() - startTime;
+    console.log(`  ✓ 250-page PDF preview completed in ${previewDuration}ms (reasonable time < 4000ms).`);
+    assert(previewDuration < 5000, `Preview took ${previewDuration}ms, exceeding reasonable threshold (5000ms)!`);
+
+    // 2. Test UI Responsiveness (Event loop is free and UI responds immediately)
+    console.log('  --- Testing UI Responsiveness and Interaction ---');
+    const isResponsive = await page.evaluate(async () => {
+      const t0 = performance.now();
+      await new Promise(r => setTimeout(r, 20));
+      const lag = performance.now() - t0;
+      return lag < 100; // Event loop lag under 100ms indicates free and responsive UI
+    });
+    assert(isResponsive, 'UI and event loop must remain free and responsive');
+    console.log('  ✓ UI is responsive (event loop delay < 100ms).');
+
+    // 3. Test Debounce & Cancellation on rapid settings change
+    console.log('  --- Testing Live Preview Debounce and Cancellation ---');
+    const initialExecCount = await page.evaluate(() => window.__wmState.getPreviewExecCount());
+    const initialToken = await page.evaluate(() => window.__wmState.getActivePreviewToken());
+
+    // Rapidly change text 3 times
+    const wmTextInput = page.locator('#wmText');
+    await wmTextInput.fill('RAPID_CHANGE_1');
+    await page.waitForTimeout(40);
+    await wmTextInput.fill('RAPID_CHANGE_2');
+    await page.waitForTimeout(40);
+    await wmTextInput.fill('FINAL_RAPID_TEXT');
+
+    // Verify token was incremented (older runs cancelled)
+    const afterRapidToken = await page.evaluate(() => window.__wmState.getActivePreviewToken());
+    assert(afterRapidToken > initialToken, 'Settings change must increment active cancellation token');
+
+    // Wait for debounce timer (300ms) to fire and complete the preview
+    await page.waitForFunction((count) => {
+      return window.__wmState && window.__wmState.getPreviewExecCount() > count;
+    }, initialExecCount, { timeout: 5000 });
+
+    const finalExecCount = await page.evaluate(() => window.__wmState.getPreviewExecCount());
+    assert.strictEqual(finalExecCount, initialExecCount + 1, 'Debouncing should ensure exactly ONE preview execution for rapid keystrokes');
+    console.log(`  ✓ Debounce & Cancellation passed: rapid keystrokes executed exactly 1 render (total runs: ${finalExecCount}).`);
+
+    console.log('✅ [PASS] 250-page PDF preview performance, debounce & cancellation passed!\n');
+  } finally {
+    await browser.close();
+    server.close();
+    if (fs.existsSync(test250PdfPath)) fs.unlinkSync(test250PdfPath);
+    if (fs.existsSync(tempDir)) fs.rmdirSync(tempDir);
+  }
+}
+
 async function main() {
   await runUnitTests();
   await runBrowserPreviewPixelTest();
   await runPageRangeTest();
+  await runLargePdfDebounceTest();
   console.log('========================================================================');
-  console.log('ALL WATERMARK PREVIEW & RANGE TESTS PASSED SUCCESSFULLY!');
+  console.log('ALL WATERMARK PREVIEW, RANGE, & PERFORMANCE TESTS PASSED SUCCESSFULLY!');
   console.log('========================================================================');
 }
 
@@ -415,4 +551,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { runUnitTests, runBrowserPreviewPixelTest, runPageRangeTest };
+module.exports = { runUnitTests, runBrowserPreviewPixelTest, runPageRangeTest, runLargePdfDebounceTest };

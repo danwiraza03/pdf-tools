@@ -793,6 +793,43 @@
       const wmResetRotationBtn = document.getElementById('wmResetRotationBtn');
       const wmPosTile = document.getElementById('wmPosTile');
 
+      // Debounce & cancellation for live preview (Requirement 3)
+      let previewDebounceTimer = null;
+      let activePreviewToken = 0;
+      let isPreviewActive = false;
+      let previewExecCount = 0;
+
+      window.__wmState = {
+        getActivePreviewToken: () => activePreviewToken,
+        getIsPreviewActive: () => isPreviewActive,
+        getPreviewExecCount: () => previewExecCount
+      };
+
+      function cancelPendingPreview() {
+        if (previewDebounceTimer) {
+          clearTimeout(previewDebounceTimer);
+          previewDebounceTimer = null;
+        }
+        activePreviewToken++;
+      }
+
+      function scheduleDebouncedPreview(delay = 300) {
+        if (!queuedFiles || queuedFiles.length === 0) return;
+        if (resultArea && resultArea.classList.contains('active')) return;
+
+        // Immediately cancel any pending timer and invalidate in-flight generation
+        cancelPendingPreview();
+
+        // Only schedule if user has activated preview
+        if (!isPreviewActive) {
+          return;
+        }
+
+        previewDebounceTimer = setTimeout(() => {
+          generatePreview({ isAutoDebounced: true });
+        }, delay);
+      }
+
       // Mode toggling
       wmModeText.addEventListener('click', function () {
         currentMode = 'text';
@@ -801,6 +838,7 @@
         wmTextSection.style.display = 'contents';
         wmImageSection.style.display = 'none';
         setOpacityValue(30);
+        scheduleDebouncedPreview(100);
       });
 
       wmModeImage.addEventListener('click', function () {
@@ -810,6 +848,7 @@
         wmTextSection.style.display = 'none';
         wmImageSection.style.display = 'block';
         setOpacityValue(50);
+        scheduleDebouncedPreview(100);
       });
 
       // Position grid buttons
@@ -820,6 +859,7 @@
           wmPosTile.classList.remove('active');
           btn.classList.add('active');
           selectedPosition = btn.getAttribute('data-pos');
+          scheduleDebouncedPreview(100);
         });
       });
 
@@ -828,6 +868,7 @@
         posButtons.forEach(b => b.classList.remove('active'));
         wmPosTile.classList.add('active');
         selectedPosition = 'tile';
+        scheduleDebouncedPreview(100);
       });
 
       // Apply-to page selection ('all' | 'first' | 'custom')
@@ -854,13 +895,16 @@
       wmApplyCustom.addEventListener('click', () => setApplyTo('custom'));
 
       // Unified Opacity synchronization
-      function setOpacityValue(val) {
+      function setOpacityValue(val, triggerPreview = true) {
         val = parseInt(val, 10);
         if (!Number.isFinite(val) || val < 1) val = 1;
         if (val > 100) val = 100;
         wmOpacityRange.value = val;
         wmOpacityNum.value = val;
         wmOpacityVal.textContent = `${val}%`;
+        if (triggerPreview) {
+          scheduleDebouncedPreview(250);
+        }
       }
       wmOpacityRange.addEventListener('input', function () {
         setOpacityValue(this.value);
@@ -873,6 +917,7 @@
           if (clamped > 100) clamped = 100;
           wmOpacityRange.value = clamped;
           wmOpacityVal.textContent = `${clamped}%`;
+          scheduleDebouncedPreview(250);
         }
       });
       wmOpacityNum.addEventListener('change', function () {
@@ -880,7 +925,7 @@
       });
 
       // Unified Rotation synchronization
-      function setRotationValue(val) {
+      function setRotationValue(val, triggerPreview = true) {
         val = parseInt(val, 10);
         if (!Number.isFinite(val)) val = 0;
         if (val < -180) val = -180;
@@ -888,6 +933,9 @@
         wmRotationRange.value = val;
         wmRotationNum.value = val;
         wmRotationVal.textContent = `${val}°`;
+        if (triggerPreview) {
+          scheduleDebouncedPreview(250);
+        }
       }
       wmRotationRange.addEventListener('input', function () {
         setRotationValue(this.value);
@@ -900,6 +948,7 @@
           if (clamped > 180) clamped = 180;
           wmRotationRange.value = clamped;
           wmRotationVal.textContent = `${clamped}°`;
+          scheduleDebouncedPreview(250);
         }
       });
       wmRotationNum.addEventListener('change', function () {
@@ -910,13 +959,16 @@
       });
 
       // Scale synchronization
-      function setScaleValue(val) {
+      function setScaleValue(val, triggerPreview = true) {
         val = parseInt(val, 10);
         if (!Number.isFinite(val) || val < 5) val = 5;
         if (val > 100) val = 100;
         wmScaleRange.value = val;
         if (wmScaleNum) wmScaleNum.value = val;
         wmScaleVal.textContent = `${val}%`;
+        if (triggerPreview) {
+          scheduleDebouncedPreview(250);
+        }
       }
       wmScaleRange.addEventListener('input', function () {
         setScaleValue(this.value);
@@ -930,6 +982,7 @@
             if (clamped > 100) clamped = 100;
             wmScaleRange.value = clamped;
             wmScaleVal.textContent = `${clamped}%`;
+            scheduleDebouncedPreview(250);
           }
         });
         wmScaleNum.addEventListener('change', function () {
@@ -968,6 +1021,7 @@
 
           wmImageUploadPrompt.style.display = 'none';
           wmImageThumbContainer.style.display = 'flex';
+          scheduleDebouncedPreview(150);
         } catch (err) {
           console.error(err);
           wmImageInput.value = '';
@@ -984,6 +1038,7 @@
         wmImageThumb.src = '';
         wmImageThumbContainer.style.display = 'none';
         wmImageUploadPrompt.style.display = 'flex';
+        scheduleDebouncedPreview(100);
       });
 
       // Color Swatches
@@ -992,20 +1047,34 @@
           document.querySelectorAll('#colorSwatches .color-swatch').forEach(s => s.classList.remove('active'));
           swatch.classList.add('active');
           selectedColor = swatch.getAttribute('data-color');
+          scheduleDebouncedPreview(100);
         });
       });
 
-      // Preview handler (Requirement 1: page 1 of first file only with options.pages = [0])
-      async function generatePreview() {
+      // Live Text & Font Size listeners
+      document.getElementById('wmText').addEventListener('input', () => scheduleDebouncedPreview(300));
+      document.getElementById('wmFontSize').addEventListener('change', () => scheduleDebouncedPreview(100));
+
+      // Preview handler (Requirement 1 & 3: page 1 of first file only with options.pages = [0], cancellable & debounced)
+      async function generatePreview(opts = {}) {
         if (!queuedFiles || queuedFiles.length === 0) return;
         const file = queuedFiles[0];
 
         if (currentMode === 'image') {
           if (!selectedImageFile || !preparedImageData) {
-            PDFTools.Toast.error(PDFTools.i18n.t('watermark.error_no_image'));
+            if (!opts.isAutoDebounced) {
+              PDFTools.Toast.error(PDFTools.i18n.t('watermark.error_no_image'));
+            }
             return;
           }
         }
+
+        if (previewDebounceTimer) {
+          clearTimeout(previewDebounceTimer);
+          previewDebounceTimer = null;
+        }
+
+        const thisToken = ++activePreviewToken;
 
         const text = document.getElementById('wmText').value.trim() || 'CONFIDENTIAL';
         const rotation = parseInt(wmRotationNum.value, 10) || 0;
@@ -1037,20 +1106,35 @@
 
           const previewBytes = await PDFTools.Watermark.applyWatermark(file, watermarkOptions);
 
+          // If settings changed while this preview was computing, discard this stale render
+          if (thisToken !== activePreviewToken) {
+            return;
+          }
+
+          previewExecCount++;
           previewSlot.appendChild(wmResultPreviewCard);
           wmResultPreviewCard.style.display = 'flex';
           wmBatchFileSelectorContainer.style.display = 'none';
 
           await renderWatermarkPreview(previewBytes, true);
         } catch (err) {
-          console.error('Preview error:', err);
-          PDFTools.Toast.error(err.message || PDFTools.i18n.t('toast.error'));
+          if (thisToken === activePreviewToken) {
+            console.error('Preview error:', err);
+            if (!opts.isAutoDebounced) {
+              PDFTools.Toast.error(err.message || PDFTools.i18n.t('toast.error'));
+            }
+          }
         } finally {
-          previewBtn.disabled = false;
+          if (thisToken === activePreviewToken) {
+            previewBtn.disabled = false;
+          }
         }
       }
 
-      previewBtn.addEventListener('click', generatePreview);
+      previewBtn.addEventListener('click', () => {
+        isPreviewActive = true;
+        generatePreview({ isAutoDebounced: false });
+      });
 
       applyBtn.addEventListener('click', async function () {
         if (!queuedFiles || queuedFiles.length === 0) return;
