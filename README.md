@@ -196,6 +196,42 @@ Rangkaian tes ini mencakup 13 suite pengujian otomatis: validasi sintaks JavaScr
 
 ---
 
+## Merapikan dan Mengemas (Repository Hygiene & Packaging)
+
+Untuk menjaga ukuran repositori tetap ramping dan membersihkan berkas hasil uji sementara, gunakan perintah berikut:
+
+### 1. Membersihkan Berkas Sementara (Clean)
+
+Menghapus folder tangkapan layar pengujian (`tests/browser/screenshots`), berkas scratch, trash, hasil laporan Playwright (`test-results`, `playwright-report`), serta berkas log pengujian tanpa menyentuh berkas yang terlacak git:
+
+```bash
+npm run clean
+```
+
+Jika ingin membersihkan `node_modules` sekaligus:
+
+```bash
+npm run clean -- --deep
+```
+
+### 2. Pengambilan Tangkapan Layar Opsional
+
+Pengujian responsivitas seluler (`npm run test:mobile`) secara default tidak menyimpan tangkapan layar kecuali terjadi kegagalan pada halaman. Untuk menyimpan seluruh tangkapan layar pengujian, jalankan dengan variabel lingkungan:
+
+```bash
+SAVE_SCREENSHOTS=1 npm run test:mobile
+```
+
+### 3. Mengemas Arsip Ramping (Lightweight Zip)
+
+Untuk membuat arsip zip yang hanya memuat berkas yang sudah ter-commit di Git tanpa menyertakan model bahasa OCR Tesseract lokal:
+
+```bash
+git archive --format=zip -o ..\pdf-ringan.zip HEAD -- . ':(exclude)js/lib/tesseract'
+```
+
+---
+
 ## ⚠️ Masalah yang Diketahui (Known Issues)
 
 - **Unlock PDF**: Unlock pada PDF terenkripsi buatan alat lain tidak membawa Title dan Author.
