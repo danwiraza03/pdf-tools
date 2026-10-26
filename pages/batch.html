@@ -348,7 +348,7 @@
         <!-- Right Column: Operations Configuration Panel -->
         <div class="batch-config-card">
           <div class="config-group">
-            <label class="config-label">1. Choose Batch Action</label>
+            <div class="config-label">1. Choose Batch Action</div>
             <div class="operation-selector-grid" id="opSelectorGrid">
               
               <!-- Action 1: Compress -->
@@ -416,12 +416,12 @@
 
           <!-- Dynamic Action Settings -->
           <div class="config-group">
-            <label class="config-label">2. Action Settings</label>
+            <div class="config-label">2. Action Settings</div>
             <div class="op-settings-box" id="opSettingsContainer">
               
               <!-- Compress Settings -->
               <div class="op-sub-panel" id="settingsCompress">
-                <label style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 600; display: block; margin-bottom: 4px;">Compression Level:</label>
+                <label for="compressLevelSelect" style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 600; display: block; margin-bottom: 4px;">Compression Level:</label>
                 <select class="form-input" id="compressLevelSelect" style="width: 100%;">
                   <option value="recommended" selected>Recommended (Balanced Quality & Size)</option>
                   <option value="extreme">Extreme Compression (Smallest Size)</option>

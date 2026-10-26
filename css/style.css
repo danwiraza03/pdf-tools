@@ -2781,9 +2781,10 @@ a {
     height: 20px !important;
   }
 
-  /* App logo & Header links */
+  /* App logo & Header links & Breadcrumb */
   .app-logo,
-  .header-logo {
+  .header-logo,
+  .breadcrumb a {
     min-height: 44px;
     display: inline-flex;
     align-items: center;
