@@ -134,14 +134,19 @@ PDFTools.Watermark = {
     const margin = typeof options.margin === 'number' ? options.margin : 20;
     const tileGap = typeof options.tileGap === 'number' ? options.tileGap : 50;
     let position = options.position || 'center';
-    let itemRotation = typeof options.rotation === 'number' ? options.rotation : 0;
+    let itemRotation = 0;
+    if (options.rotation !== undefined && options.rotation !== null) {
+      const parsedRot = typeof options.rotation === 'number' ? options.rotation : parseInt(options.rotation, 10);
+      if (Number.isFinite(parsedRot)) {
+        itemRotation = parsedRot;
+      }
+    } else if (position === 'diagonal') {
+      itemRotation = 45;
+    }
 
-    // Handle legacy 'diagonal' preset as center with 45 degree rotation
+    // Handle legacy 'diagonal' preset as center
     if (position === 'diagonal') {
       position = 'center';
-      if (typeof options.rotation !== 'number') {
-        itemRotation = 45;
-      }
     }
 
     // 1. Resolve CropBox & MediaBox boundaries
@@ -269,10 +274,23 @@ PDFTools.Watermark = {
     const type = options.type === 'image' ? 'image' : 'text';
     const text = options.text || 'CONFIDENTIAL';
     const fontSize = parseInt(options.fontSize, 10) || 48;
-    const opacity = typeof options.opacity === 'number' ? options.opacity : (parseFloat(options.opacity) || 0.30);
-    const rotationAngle = typeof options.rotation === 'number'
-      ? options.rotation
-      : (options.position === 'diagonal' ? 45 : (parseInt(options.rotation, 10) || 0));
+    let opacity = 0.30;
+    if (options.opacity !== undefined && options.opacity !== null) {
+      const parsedOp = typeof options.opacity === 'number' ? options.opacity : parseFloat(options.opacity);
+      if (Number.isFinite(parsedOp)) {
+        opacity = parsedOp;
+      }
+    }
+
+    let rotationAngle = 0;
+    if (options.rotation !== undefined && options.rotation !== null) {
+      const parsedRot = typeof options.rotation === 'number' ? options.rotation : parseInt(options.rotation, 10);
+      if (Number.isFinite(parsedRot)) {
+        rotationAngle = parsedRot;
+      }
+    } else if (options.position === 'diagonal') {
+      rotationAngle = 45;
+    }
     const position = options.position || 'center';
     const colorHex = options.color || '#e74c3c';
     const margin = typeof options.margin === 'number' ? options.margin : 20;
