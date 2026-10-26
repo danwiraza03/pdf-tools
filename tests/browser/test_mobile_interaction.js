@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { chromium, devices } = require('playwright');
+const { chromium, webkit, devices } = require('playwright');
 const PDFLib = require(path.resolve(__dirname, '../../js/lib/pdf-lib.min.js'));
 const { startTestServer } = require('./helpers');
 
@@ -413,6 +413,33 @@ async function runMobileInteractionSuite() {
     } finally {
       await cropPage.close();
       await cropContext.close();
+    }
+
+    // 6. Test Batch PDF overflow on iPhone 13 WebKit
+    console.log('\n--- Menguji Horizontal Overflow pages/batch.html pada iPhone 13 (WebKit) ---');
+    if (webkit) {
+      const webkitBrowser = await webkit.launch({ headless: true });
+      try {
+        const batchContext = await webkitBrowser.newContext({
+          ...devices['iPhone 13']
+        });
+        const batchPage = await batchContext.newPage();
+        await batchPage.goto(`${BASE_URL}/pages/batch.html`, { waitUntil: 'domcontentloaded', timeout: 25000 });
+        await batchPage.waitForTimeout(600);
+
+        const docWidth = await batchPage.evaluate(() => document.documentElement.scrollWidth);
+        const winWidth = await batchPage.evaluate(() => window.innerWidth);
+        const diff = docWidth - winWidth;
+        console.log(`  batch.html on iPhone 13 WebKit: docWidth=${docWidth}px, winWidth=${winWidth}px, diff=${diff}px (${diff === 0 ? '✓ LULUS (NO OVERFLOW)' : '✗ GAGAL'});`);
+
+        if (diff > 0) {
+          throw new Error(`Test overflow batch.html gagal: masih ada overflow horizontal +${diff}px pada WebKit!`);
+        }
+        await batchPage.close();
+        await batchContext.close();
+      } finally {
+        await webkitBrowser.close();
+      }
     }
 
     console.log('\n========================================================================================================================');

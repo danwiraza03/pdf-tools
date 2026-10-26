@@ -13,14 +13,29 @@
 
     .batch-layout {
       display: grid;
-      grid-template-columns: 1fr 360px;
+      grid-template-columns: minmax(0, 1fr) 360px;
       gap: 24px;
       align-items: start;
     }
 
+    .batch-layout > * {
+      min-width: 0;
+    }
+
     @media (max-width: 960px) {
       .batch-layout {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .batch-queue-card,
+      .batch-config-card {
+        padding: 16px;
+      }
+      .queue-header {
+        flex-wrap: wrap;
+        gap: 12px;
       }
     }
 
