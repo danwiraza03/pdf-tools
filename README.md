@@ -166,6 +166,8 @@ pdf/
 ├── tests/                      # Automated Quality Gates & Security Tests (13 test suites)
 │   └── run_all.js              # Runner utama pengujian otomatis (`node tests/run_all.js`)
 ├── server.js                   # Local static server (127.0.0.1, proteksi path traversal)
+├── LICENSE                     # Lisensi Perangkat Lunak MIT
+├── THIRD_PARTY_NOTICES.md      # Pemberitahuan Lisensi Pihak Ketiga & Font
 ├── PROJECT_RULES.md            # Standar Arsitektur & Kepatuhan Proyek
 ├── AGENTS.md                   # Instruksi Wajib AI Coding Assistant
 └── README.md                   # Dokumentasi Resmi Proyek
@@ -189,3 +191,12 @@ Rangkaian tes ini mencakup 13 suite pengujian otomatis: validasi sintaks JavaScr
 - **100% Berjalan Lokal di Sisi Klien**: Tidak ada data yang dikirim ke server cloud pihak ketiga manapun.
 - **Bebas Ketergantungan Eksternal**: Seluruh file CSS, font kaligrafi, JavaScript, WASM binary, dan model bahasa Tesseract tersimpan lokal di dalam repositori.
 - **Dukungan Protokol `file:///` Penuh**: Dapat dijalankan langsung dari USB Flashdisk, hard drive lokal, atau jaringan lokal tanpa instalasi server.
+
+---
+
+## 📜 Lisensi
+
+Aplikasi **PDF Tools** ini dirilis sebagai perangkat lunak sumber terbuka di bawah lisensi [MIT License](LICENSE).
+
+Seluruh dependensi pustaka pihak ketiga (*vendor libraries*) dan font kaligrafi lokal didistribusikan di bawah lisensi resmi masing-masing (MIT, Apache-2.0, dan SIL Open Font License 1.1). Informasi pemegang hak cipta dan teks lisensi lengkap dapat dibaca pada [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
