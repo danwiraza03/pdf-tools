@@ -406,6 +406,10 @@ async function runMobileInteractionSuite(existingBrowser, existingBaseUrl) {
       await cropPage.locator('#cropStageContainer').scrollIntoViewIfNeeded();
       await cropPage.waitForTimeout(400);
 
+      await cropPage.evaluate(() => {
+        document.querySelectorAll('.toast').forEach(t => t.remove());
+      });
+
       const initialBox = await cropPage.evaluate(() => {
         const b = document.getElementById('cropBox');
         const rect = b.getBoundingClientRect();
@@ -423,8 +427,15 @@ async function runMobileInteractionSuite(existingBrowser, existingBaseUrl) {
       });
 
       const cropCdp = await cropContext.newCDPSession(cropPage);
-      // CDP touch coordinate translation offset under iPhone 13 emulation
-      const cdpOffsetY = 63;
+      // Dynamically resolve CDP touch offset if header or viewport coordinates differ
+      const cdpOffsetY = await cropPage.evaluate((info) => {
+        const el = document.elementFromPoint(info.cx, info.cy);
+        if (el && (el.classList.contains('crop-handle') || el.closest('.crop-handle'))) return 0;
+        const el63 = document.elementFromPoint(info.cx, info.cy - 63);
+        if (el63 && (el63.classList.contains('crop-handle') || el63.closest('.crop-handle'))) return 63;
+        return 0;
+      }, handleInfo);
+
       const startHandleTouchY = handleInfo.cy - cdpOffsetY;
 
       // a. Seret gagang crop vertikal 80 px ke bawah: tinggi kotak berkurang ~80 px, scrollY tetap 0
