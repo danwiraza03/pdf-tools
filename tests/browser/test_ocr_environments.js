@@ -159,7 +159,8 @@ async function runOcrEnvironmentTests(passedBrowser = null, passedBaseUrl = null
                 try {
                   const res = await window.PDFTools.OCR.recognizeCanvas(canvas, targetLang);
                   const txt = (res && res.text) ? res.text.trim() : '';
-                  return { success: true, text: txt };
+                  const workerType = (res && res.workerType) || (window.PDFTools.OCR.getActiveWorkerType ? window.PDFTools.OCR.getActiveWorkerType() : null);
+                  return { success: true, text: txt, workerType: workerType };
                 } catch (e) {
                   return { success: false, error: e.message || String(e), stack: e.stack };
                 } finally {
@@ -194,9 +195,15 @@ async function runOcrEnvironmentTests(passedBrowser = null, passedBaseUrl = null
             firstPathDetail = ocrExecution.firstPathHook || firstPathError;
 
             if (ocrExecution.success) {
-              status = 'BERHASIL';
-              ocrTextResult = ocrExecution.text;
-              console.log(`  ✓ OCR Berhasil. Hasil: "${ocrTextResult.replace(/\n/g, ' ')}"`);
+              if (ocrExecution.workerType !== 'offline-bundle') {
+                status = 'GAGAL';
+                finalError = `Bukan jalur offline-bundle (menggunakan: ${ocrExecution.workerType})`;
+                console.log(`  ✗ OCR Gagal: Bukan offline-bundle (${ocrExecution.workerType})`);
+              } else {
+                status = 'BERHASIL';
+                ocrTextResult = ocrExecution.text;
+                console.log(`  ✓ OCR Berhasil [${ocrExecution.workerType}]. Hasil: "${ocrTextResult.replace(/\n/g, ' ')}"`);
+              }
             } else {
               status = 'GAGAL';
               finalError = ocrExecution.error;
@@ -207,7 +214,9 @@ async function runOcrEnvironmentTests(passedBrowser = null, passedBaseUrl = null
             finalError = navOrWaitErr.message || String(navOrWaitErr);
             console.log(`  ✗ Error navigasi / inisialisasi halaman: ${finalError}`);
           } finally {
-            if (!firstPathDetail) {
+            if (status === 'BERHASIL') {
+              firstPathDetail = '-';
+            } else if (!firstPathDetail) {
               const noticeLog = capturedConsole.find(c => c.text.includes('Offline worker bundle initialization notice:'));
               if (noticeLog) {
                 firstPathDetail = noticeLog.text;

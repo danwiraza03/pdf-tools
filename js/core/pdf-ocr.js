@@ -64,6 +64,104 @@ PDFTools.OCR = (function () {
     return bytes;
   }
 
+  const loadedScripts = new Set();
+  const scriptLoadPromises = new Map();
+
+  function loadScript(src) {
+    if (typeof document === 'undefined') return Promise.resolve();
+    if (loadedScripts.has(src)) return Promise.resolve();
+    if (scriptLoadPromises.has(src)) return scriptLoadPromises.get(src);
+
+    const promise = new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.type = 'text/javascript';
+      script.async = false;
+      script.src = src;
+      script.onload = () => {
+        loadedScripts.add(src);
+        scriptLoadPromises.delete(src);
+        resolve();
+      };
+      script.onerror = () => {
+        scriptLoadPromises.delete(src);
+        const fileName = src.split('/').pop() || src;
+        reject(new Error(`Gagal mengunduh berkas OCR: ${fileName}`));
+      };
+      document.head.appendChild(script);
+    });
+
+    scriptLoadPromises.set(src, promise);
+    return promise;
+  }
+
+  const LANG_LABELS = {
+    ind: { id: 'Indonesia', en: 'Indonesian' },
+    eng: { id: 'Inggris', en: 'English' }
+  };
+
+  /**
+   * Lazily loads Tesseract offline bundle and only the requested language model scripts on-demand
+   * @param {string} lang 
+   * @param {Function} onProgress 
+   */
+  async function ensureOcrAssetsLoaded(lang, onProgress) {
+    if (typeof window === 'undefined' || typeof document === 'undefined') return;
+
+    const isIndonesian = window.PDFTools?.i18n?.currentLang === 'id';
+    const basePath = getTesseractBasePath();
+
+    // 1. Load offline bundle if not yet loaded in window
+    if (!window.__TESSERACT_WORKER_CODE__) {
+      const bundleUrl = new URL('tesseract-worker.bundle.js', basePath).href;
+      if (typeof onProgress === 'function') {
+        const msg = isIndonesian ? 'Mengunduh modul OCR offline...' : 'Downloading offline OCR module...';
+        onProgress(3, msg);
+      }
+      try {
+        await loadScript(bundleUrl);
+      } catch (bundleErr) {
+        console.warn('[OCR Engine] Dynamic load of tesseract-worker.bundle.js notice:', bundleErr);
+      }
+    }
+
+    // 2. Load language models only for requested language(s)
+    const langList = (lang || 'ind').includes('+') ? (lang || 'ind').split('+') : [lang || 'ind'];
+    for (let i = 0; i < langList.length; i++) {
+      const l = langList[i];
+      const isAlreadyLoaded = (l === 'ind' && window.__TESSDATA_IND__) || (l === 'eng' && window.__TESSDATA_ENG__);
+      if (!isAlreadyLoaded) {
+        const labels = LANG_LABELS[l] || { id: l.toUpperCase(), en: l.toUpperCase() };
+        const langName = isIndonesian ? labels.id : labels.en;
+        if (typeof onProgress === 'function') {
+          const msg = isIndonesian
+            ? `Mengunduh model bahasa ${langName}...`
+            : `Downloading ${langName} language model...`;
+          onProgress(5 + i * 5, msg);
+        }
+
+        const langScriptUrl = new URL(`lang-data/${l}.js`, basePath).href;
+        try {
+          await loadScript(langScriptUrl);
+        } catch (langErr) {
+          const errMsg = isIndonesian
+            ? `Gagal mengunduh model bahasa ${langName} (${l}.js).`
+            : `Failed to download ${langName} language model (${l}.js).`;
+          throw new Error(errMsg);
+        }
+      }
+    }
+
+    // 3. Fallback: load tesseract.min.js only if offline bundle could not be loaded
+    if (!window.__TESSERACT_WORKER_CODE__ && typeof window.Tesseract === 'undefined') {
+      const tessApiUrl = new URL('tesseract.min.js', basePath).href;
+      try {
+        await loadScript(tessApiUrl);
+      } catch (tessErr) {
+        console.warn('[OCR Engine] Dynamic load of tesseract.min.js fallback failed:', tessErr);
+      }
+    }
+  }
+
   /**
    * Create an offline inline Web Worker using embedded bundle & language data
    * @param {string} lang - 'ind' | 'eng' | 'ind+eng'
@@ -237,9 +335,12 @@ PDFTools.OCR = (function () {
           output: output
         });
 
-        const resultObj = Object.assign({ data: rawData }, rawData);
+        rawData.workerType = 'offline-bundle';
+        const resultObj = Object.assign({ data: rawData, workerType: 'offline-bundle' }, rawData);
+        resultObj.workerType = 'offline-bundle';
         return resultObj;
       },
+      workerType: 'offline-bundle',
       async terminate() {
         try {
           await sendJob('terminate', {});
@@ -275,6 +376,9 @@ PDFTools.OCR = (function () {
       }
       activeWorker = null;
     }
+
+    // Ensure assets (bundle & requested language models) are loaded dynamically on demand
+    await ensureOcrAssetsLoaded(lang, onProgress);
 
     let worker = null;
 
@@ -1151,8 +1255,13 @@ PDFTools.OCR = (function () {
     return 'ind';
   }
 
+  function getActiveWorkerType() {
+    return activeWorker ? (activeWorker.workerType || 'standard-tesseract') : null;
+  }
+
   return {
     getWorker,
+    getActiveWorkerType,
     terminate,
     recognizeCanvas,
     processFile,
