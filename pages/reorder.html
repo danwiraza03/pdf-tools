@@ -138,7 +138,10 @@
             sortable = new Sortable(pageGrid, {
               animation: 200,
               ghostClass: 'sortable-ghost',
-              dragClass: 'sortable-drag'
+              dragClass: 'sortable-drag',
+              delay: 200,
+              delayOnTouchOnly: true,
+              touchStartThreshold: 8
             });
           }
         }
@@ -192,7 +195,10 @@
               sortable = new Sortable(pageGrid, {
                 animation: 200,
                 ghostClass: 'sortable-ghost',
-                dragClass: 'sortable-drag'
+                dragClass: 'sortable-drag',
+                delay: 200,
+                delayOnTouchOnly: true,
+                touchStartThreshold: 8
               });
             }
           }

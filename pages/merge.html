@@ -1538,6 +1538,9 @@
           ghostClass: 'sortable-ghost',
           filter: '.merge-file-group-body, .merge-floating-pill, .merge-group-header-btn, .merge-pill-btn',
           preventOnFilter: false,
+          delay: 200,
+          delayOnTouchOnly: true,
+          touchStartThreshold: 8,
 
           onAdd: function (evt) {
             const droppedEl = evt.item;
@@ -1657,6 +1660,9 @@
             dragClass: 'sortable-drag',
             filter: '.merge-card-header-actions, .merge-card-mini-btn',
             preventOnFilter: true,
+            delay: 200,
+            delayOnTouchOnly: true,
+            touchStartThreshold: 8,
 
             onAdd: function (evt) {
               // When an entire bundled file (stacked card) is dropped into this page grid!

@@ -93,6 +93,9 @@ PDFTools.FileList = function (containerId, options) {
         animation: 150,
         ghostClass: 'sortable-ghost',
         dragClass: 'sortable-drag',
+        delay: 200,
+        delayOnTouchOnly: true,
+        touchStartThreshold: 8,
         onEnd: function () {
           const newOrder = Array.from(container.children).map(el => el.getAttribute('data-id'));
           files = newOrder.map(id => files.find(f => f.id === id)).filter(Boolean);
