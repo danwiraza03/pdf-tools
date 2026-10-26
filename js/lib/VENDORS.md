@@ -8,7 +8,7 @@ Dokumen ini mencatat seluruh pustaka pihak ketiga (vendor libraries) yang disimp
 
 | Berkas / Direktori | Nama Library | Versi | Sumber Unduhan / Repositori | Lisensi |
 |---|---|---|---|---|
-| `js/lib/pdf-lib.min.js` | **@cantoo/pdf-lib** *(Fork dari pdf-lib)* | `2.11.1` (atau 2.x) | [cantoo-scribe/pdf-lib](https://github.com/cantoo-scribe/pdf-lib) / [npm: @cantoo/pdf-lib](https://www.npmjs.com/package/@cantoo/pdf-lib) | MIT |
+| `js/lib/pdf-lib.min.js` | **@cantoo/pdf-lib** *(Fork dari pdf-lib)* | `2.11.1` | [cantoo-scribe/pdf-lib](https://github.com/cantoo-scribe/pdf-lib) / [npm: @cantoo/pdf-lib](https://www.npmjs.com/package/@cantoo/pdf-lib) | MIT |
 | `js/lib/pdf.min.js` | **PDF.js** (Display / Viewer engine) | `3.11.174` | [mozilla/pdf.js](https://github.com/mozilla/pdf.js) / [npm: pdfjs-dist](https://www.npmjs.com/package/pdfjs-dist) | Apache-2.0 |
 | `js/lib/pdf.worker.min.js` | **PDF.js Worker** | `3.11.174` | [mozilla/pdf.js](https://github.com/mozilla/pdf.js) / [npm: pdfjs-dist](https://www.npmjs.com/package/pdfjs-dist) | Apache-2.0 |
 | `js/lib/FileSaver.min.js` | **FileSaver.js** | `2.0.5` | [eligrey/FileSaver.js](https://github.com/eligrey/FileSaver.js) / [npm: file-saver](https://www.npmjs.com/package/file-saver) | MIT |
@@ -29,6 +29,11 @@ Dokumen ini mencatat seluruh pustaka pihak ketiga (vendor libraries) yang disimp
 
 * **Pustaka Asal:** `Hopding/pdf-lib` (v1.17.1).
 * **Fork yang Digunakan:** **`@cantoo/pdf-lib`** (dikembangkan oleh tim [Cantoo Scribe](https://github.com/cantoo-scribe/pdf-lib), dipublikasikan di NPM sebagai [`@cantoo/pdf-lib`](https://www.npmjs.com/package/@cantoo/pdf-lib)).
+* **Versi:** `2.11.1`
+* **Catatan Verifikasi Berkas:**
+  - Ukuran: 616.746 byte
+  - SHA-256: `2294a0bb8742d8948ae2d49a60cb6a3600c0b5deae6de198e57fb368d1b79ba9`
+  - Terverifikasi identik bit-per-bit dengan paket npm @cantoo/pdf-lib@2.11.1.
 * **Alasan Penggunaan Fork:**
   1. Versi upstream resmi (`Hopding/pdf-lib`) tidak memiliki dukungan enkripsi atau proteksi kata sandi dan berhenti menerima pembaruan aktif.
   2. Fork `@cantoo/pdf-lib` menambahkan metode native `pdfDoc.encrypt(...)` dengan algoritma enkripsi modern **AES-256**, dukungan `userPassword`, `ownerPassword`, dan konfigurasi granular izin hak akses (`permissions`: printing, modifying, copying, annotating, dll).
