@@ -38,7 +38,13 @@ PDFTools.Merge = {
     return false;
   },
 
-  merge: async function (items, onProgress) {
+  merge: async function (items, onProgress, options) {
+    if (typeof onProgress === 'object' && onProgress !== null && !options) {
+      options = onProgress;
+      onProgress = null;
+    }
+    options = options || {};
+
     if (!items || items.length === 0) {
       throw new Error('At least one item or page is required for merging');
     }
@@ -61,13 +67,15 @@ PDFTools.Merge = {
         return docCache.get(cacheKey);
       }
 
-      const arrayBuffer = await PDFTools.FileUtils.readAsArrayBuffer(file);
       let pdf;
       try {
-        pdf = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true, updateMetadata: false });
+        pdf = await PDFTools.FileUtils.loadPdfDecrypted(file, { ...options, updateMetadata: false });
       } catch (loadErr) {
+        if (loadErr && (loadErr.code === 'PASSWORD_REQUIRED' || loadErr.code === 'PASSWORD_INCORRECT' || loadErr.code === 'PASSWORD_CANCELLED')) {
+          throw loadErr;
+        }
         console.warn(`Merge: Initial load failed for "${file.name}", retrying with fallback:`, loadErr);
-        pdf = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+        pdf = await PDFTools.FileUtils.loadPdfDecrypted(file, options);
       }
 
       // Remove digital signatures and bake e-materai stamps

@@ -10,10 +10,13 @@ PDFTools.Reorder = {
    * @param {number[]} newPageOrder - Array of 0-based page indices in the desired new order
    * @param {Function} onProgress
    */
-  reorder: async function (file, newPageOrder, onProgress) {
+  reorder: async function (file, newPageOrder, onProgress, options) {
+    if (typeof onProgress === 'object' && onProgress !== null && !options) {
+      options = onProgress;
+      onProgress = null;
+    }
     const { PDFDocument } = PDFLib;
-    const arrayBuffer = await PDFTools.FileUtils.readAsArrayBuffer(file);
-    const srcDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+    const srcDoc = await PDFTools.FileUtils.loadPdfDecrypted(file, options);
 
     if (PDFTools.Compress && PDFTools.Compress.removeDigitalSignatures) {
       try {

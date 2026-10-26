@@ -13,20 +13,20 @@ PDFTools.PageNumber = (function () {
    * @returns {Promise<Uint8Array>}
    */
   async function applyPageNumbers(fileInput, options = {}, onProgress) {
-    const { PDFDocument, StandardFonts, rgb } = PDFLib;
-
-    const arrayBuffer = fileInput instanceof ArrayBuffer
-      ? fileInput
-      : await PDFTools.FileUtils.readAsArrayBuffer(fileInput);
+    if (typeof onProgress === 'object' && onProgress !== null) {
+      options = Object.assign({}, onProgress, options);
+      onProgress = options.onProgress;
+    }
+    const { StandardFonts, rgb } = PDFLib;
 
     if (typeof onProgress === 'function') onProgress(15, 'Loading PDF document...');
 
-    const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+    const pdfDoc = await PDFTools.FileUtils.loadPdfDecrypted(fileInput, options);
     
     // Unlock any digital signatures if present
     try {
       if (PDFTools.Compress && PDFTools.Compress.removeDigitalSignatures) {
-        await PDFTools.Compress.removeDigitalSignatures(pdfDoc, arrayBuffer);
+        await PDFTools.Compress.removeDigitalSignatures(pdfDoc);
       }
     } catch (e) {
       console.warn('Signature unlock notice:', e);

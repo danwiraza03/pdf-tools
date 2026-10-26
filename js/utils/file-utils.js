@@ -27,7 +27,12 @@ const FileUtils = {
         }
       })() : null);
 
-    const arrayBuffer = await this.readAsArrayBuffer(file);
+    const readFn = (this && typeof this.readAsArrayBuffer === 'function')
+      ? this.readAsArrayBuffer.bind(this)
+      : (FileUtils.readAsArrayBuffer
+        ? FileUtils.readAsArrayBuffer.bind(FileUtils)
+        : (globalObj.PDFTools && globalObj.PDFTools.FileUtils && globalObj.PDFTools.FileUtils.readAsArrayBuffer));
+    const arrayBuffer = await readFn(file);
     const bytes = new Uint8Array(arrayBuffer);
     const fileName = (file && file.name) ? file.name : (options.fileName || 'Dokumen.pdf');
     const loadOptions = {

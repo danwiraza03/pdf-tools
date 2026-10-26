@@ -325,7 +325,17 @@ PDFTools.Watermark = {
     }
 
     const { StandardFonts, rgb, degrees } = PDFLib;
-    const pdfDoc = await PDFTools.FileUtils.loadPdfDecrypted(file, options);
+    const loadDoc = (PDFTools.FileUtils && typeof PDFTools.FileUtils.loadPdfDecrypted === 'function')
+      ? PDFTools.FileUtils.loadPdfDecrypted.bind(PDFTools.FileUtils)
+      : (function () {
+          if (typeof require !== 'function') return null;
+          try { return require('../utils/file-utils.js').loadPdfDecrypted; } catch (e) {
+            try { return require('../../js/utils/file-utils.js').loadPdfDecrypted; } catch (e2) {
+              try { return require('./js/utils/file-utils.js').loadPdfDecrypted; } catch (e3) { return null; }
+            }
+          }
+        })();
+    const pdfDoc = await loadDoc(file, options);
 
     if (PDFTools.Compress && PDFTools.Compress.removeDigitalSignatures) {
       try {

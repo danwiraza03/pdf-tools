@@ -1117,7 +1117,7 @@ PDFTools.OCR = (function () {
     const safeBytes = (arrayBuffer instanceof ArrayBuffer)
       ? new Uint8Array(arrayBuffer.slice(0))
       : (arrayBuffer instanceof Uint8Array ? arrayBuffer.slice(0) : new Uint8Array(arrayBuffer));
-    const pdfDoc = await PDFDocument.load(safeBytes, { ignoreEncryption: true });
+    const pdfDoc = await PDFTools.FileUtils.loadPdfDecrypted(safeBytes);
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const pages = pdfDoc.getPages();
 

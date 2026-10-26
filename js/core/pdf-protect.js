@@ -36,7 +36,11 @@
    * @param {Function} [onProgress] 
    * @returns {Promise<Uint8Array>}
    */
-  async function protectPdf(fileInput, userPassword, ownerPassword, permissions = {}, onProgress) {
+  async function protectPdf(fileInput, userPassword, ownerPassword, permissions = {}, onProgress, options = {}) {
+    if (typeof onProgress === 'object' && onProgress !== null && !options) {
+      options = onProgress;
+      onProgress = null;
+    }
     const PDFLib = globalObj.PDFLib || (typeof require === 'function' ? require('../lib/pdf-lib.min.js') : null);
     if (!PDFLib || !PDFLib.PDFDocument) {
       throw new Error('PDF library is not loaded.');
@@ -63,7 +67,10 @@
 
     if (typeof onProgress === 'function') onProgress(20, 'Loading PDF document...');
 
-    const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+    const FileUtils = (globalObj.PDFTools && globalObj.PDFTools.FileUtils) || (typeof require === 'function' ? require('../utils/file-utils.js') : null);
+    const pdfDoc = (FileUtils && typeof FileUtils.loadPdfDecrypted === 'function')
+      ? await FileUtils.loadPdfDecrypted(arrayBuffer, options)
+      : await PDFDocument.load(arrayBuffer);
 
     if (typeof onProgress === 'function') onProgress(50, 'Configuring security permissions...');
 

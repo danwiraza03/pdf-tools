@@ -303,13 +303,18 @@ PDFTools.Compress = {
    * @param {Function} onProgress - Progress callback (percent, text)
    * @returns {Promise<{bytes: Uint8Array, originalSize: number, newSize: number, savedPercent: number, method: string, docType: string, hadSignatures: boolean, signaturesRemoved: number}>}
    */
-  compress: async function (file, level, onProgress) {
+  compress: async function (file, level, onProgress, options) {
+    if (typeof level === 'object' && level !== null && !options) {
+      options = level;
+      level = options.level || options.mode || 'medium';
+      onProgress = options.onProgress || onProgress;
+    }
+    if (typeof onProgress === 'object' && onProgress !== null && !options) {
+      options = onProgress;
+      onProgress = null;
+    }
     level = level || 'medium';
-    
-    const arrayBuffer = await PDFTools.FileUtils.readAsArrayBuffer(file);
-    const originalSize = (file && typeof file.size === 'number' && file.size > 0)
-      ? file.size
-      : (arrayBuffer ? arrayBuffer.byteLength : 0);
+    options = options || {};
 
     const reportProgress = (pct, msg) => {
       if (typeof onProgress === 'function') {
@@ -317,10 +322,18 @@ PDFTools.Compress = {
       }
     };
 
+    reportProgress(5, 'Reading PDF document...');
+
+    const initialDecryptedDoc = await PDFTools.FileUtils.loadPdfDecrypted(file, options);
+    const decryptedBytes = await initialDecryptedDoc.save();
+    const arrayBuffer = decryptedBytes.buffer.slice(decryptedBytes.byteOffset, decryptedBytes.byteOffset + decryptedBytes.byteLength);
+
+    const originalSize = (file && typeof file.size === 'number' && file.size > 0)
+      ? file.size
+      : (arrayBuffer ? arrayBuffer.byteLength : 0);
+
     const fileName = (file && file.name) ? file.name : 'document.pdf';
     console.log(`[Compress] Starting: ${fileName} (${(originalSize / 1024 / 1024).toFixed(1)} MB), level=${level}`);
-
-    reportProgress(5, 'Reading PDF document...');
 
     const { PDFDocument } = PDFLib;
 
@@ -332,7 +345,7 @@ PDFTools.Compress = {
     let vectorOptimizedBytes = null;
 
     try {
-      const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+      const pdfDoc = await PDFTools.FileUtils.loadPdfDecrypted(arrayBuffer, options);
 
       // Run Hybrid Signature Flattener
       const sigResult = await this.removeDigitalSignatures(pdfDoc, arrayBuffer);
@@ -501,7 +514,7 @@ PDFTools.Compress = {
       reportProgress(40, 'Using fallback image compressor...');
 
       try {
-        const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+        const pdfDoc = await PDFTools.FileUtils.loadPdfDecrypted(arrayBuffer, options);
         const pages = pdfDoc.getPages();
         let imagesRecompressed = 0;
 

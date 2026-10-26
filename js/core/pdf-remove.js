@@ -10,10 +10,13 @@ PDFTools.Remove = {
    * @param {number[]} pagesToRemove - Array of 0-based page indices to remove
    * @param {Function} onProgress
    */
-  removePages: async function (file, pagesToRemove, onProgress) {
+  removePages: async function (file, pagesToRemove, onProgress, options) {
+    if (typeof onProgress === 'object' && onProgress !== null && !options) {
+      options = onProgress;
+      onProgress = null;
+    }
     const { PDFDocument } = PDFLib;
-    const arrayBuffer = await PDFTools.FileUtils.readAsArrayBuffer(file);
-    const srcDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+    const srcDoc = await PDFTools.FileUtils.loadPdfDecrypted(file, options);
 
     if (PDFTools.Compress && PDFTools.Compress.removeDigitalSignatures) {
       try {
