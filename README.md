@@ -187,6 +187,10 @@ node tests/run_all.js
 
 Rangkaian tes ini mencakup 13 suite pengujian otomatis: validasi sintaks JavaScript, konsistensi SVG, integritas model OCR offline, verifikasi fungsionalitas end-to-end, keamanan enkripsi PDF, pemusnahan kebocoran data pada redaksi permanen, keamanan host server `127.0.0.1`, pencegahan path traversal, dan kepatuhan zero external HTTP(S) URLs.
 
+### Lingkungan Pengujian
+- **Versi Node.js Lokal**: `v24.20.0` (Node 24 LTS)
+- **Browser Automation**: Playwright dengan engine Chromium dan WebKit (`npx playwright install --with-deps chromium webkit`)
+
 ---
 
 ## 🔒 Privasi, Keamanan, & Kepatuhan Standalone

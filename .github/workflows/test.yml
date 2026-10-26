@@ -6,19 +6,25 @@ on:
   pull_request:
     branches: [ master ]
 
+permissions:
+  contents: read
+
 jobs:
   test:
     name: Run Unit & Browser Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js 24.20.0 (LTS)
+      - name: Set up Node.js 24 (LTS)
         uses: actions/setup-node@v4
         with:
-          node-version: '24.20.0'
+          node-version: '24'
           cache: 'npm'
 
       - name: Install dependencies
@@ -27,10 +33,12 @@ jobs:
       - name: Run unit & security tests
         run: node tests/run_all.js
 
-      - name: Install Playwright Chromium
-        run: npx playwright install --with-deps chromium
+      - name: Install Playwright Browsers (Chromium & WebKit)
+        run: npx playwright install --with-deps chromium webkit
 
       - name: Run browser tests
+        env:
+          CI: true
         run: npm run test:browser 2>&1 | tee browser-test.log
         shell: bash
 
