@@ -432,6 +432,169 @@ async function runWatermarkImageBrowserTests(browser, baseUrl) {
 
     console.log('  ✓ [PASS] Seluruh posisi x rotasi x orientasi halaman terverifikasi presisi.');
     console.log('  ✓ [PASS] Transparansi lubang dan opacity blending terverifikasi akurat.');
+
+    // =========================================================================
+    // Item 5: MUTATION CHECK
+    // =========================================================================
+    console.log('\n--- [MUTATION CHECK] Deliberately stubbing opacity & /Rotate to prove test sensitivity ---');
+    const mutationResults = await page.evaluate(async () => {
+      const { PDFDocument, rgb, degrees } = window.PDFLib;
+      const pdfjs = window.pdfjsLib;
+
+      // 1. Create a simple test PDF with a /Rotate 90 page and gray background
+      const testDoc = await PDFDocument.create();
+      const p1 = testDoc.addPage([595, 842]);
+      p1.setRotation(degrees(90));
+      p1.drawRectangle({ x: 0, y: 0, width: 595, height: 842, color: rgb(0.8, 0.8, 0.8) });
+      const testPdfBytes = await testDoc.save();
+
+      // Test image: 100x50 pure magenta
+      const imgCanvas = document.createElement('canvas');
+      imgCanvas.width = 100;
+      imgCanvas.height = 50;
+      const ictx = imgCanvas.getContext('2d');
+      ictx.fillStyle = '#FF00FF';
+      ictx.fillRect(0, 0, 100, 50);
+      const imgBlob = await new Promise(r => imgCanvas.toBlob(r, 'image/png'));
+      const imgBytes = new Uint8Array(await imgBlob.arrayBuffer());
+
+      // Helper to check green component with opacity 0.3
+      async function testOpacityCheck() {
+        const bytes = await window.PDFTools.Watermark.applyWatermark(
+          { file: testPdfBytes },
+          {
+            type: 'image',
+            image: { bytes: imgBytes, mime: 'image/png' },
+            position: 'center',
+            opacity: 0.3
+          }
+        );
+        const doc = await pdfjs.getDocument({ data: bytes, verbosity: 0 }).promise;
+        const page = await doc.getPage(1);
+        const vp = page.getViewport({ scale: 1.0 });
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(vp.width);
+        canvas.height = Math.round(vp.height);
+        const ctx = canvas.getContext('2d');
+        await page.render({ canvasContext: ctx, viewport: vp }).promise;
+        const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+        await doc.destroy();
+
+        // Sample center pixel: with opacity 0.3 on gray, green must be > 60
+        const sampleIdx = (Math.round(canvas.height / 2) * canvas.width + Math.round(canvas.width / 2)) * 4;
+        const g = data[sampleIdx + 1];
+        return { green: g, passed: g > 60 };
+      }
+
+      // Helper to check center-of-mass on /Rotate 90 page
+      async function testRotateCheck() {
+        const bytes = await window.PDFTools.Watermark.applyWatermark(
+          { file: testPdfBytes },
+          {
+            type: 'image',
+            image: { bytes: imgBytes, mime: 'image/png' },
+            position: 'top-left',
+            scale: 0.3,
+            margin: 20
+          }
+        );
+        const doc = await pdfjs.getDocument({ data: bytes, verbosity: 0 }).promise;
+        const page = await doc.getPage(1);
+        const vp = page.getViewport({ scale: 1.0 });
+        const visibleW = Math.round(vp.width);
+        const visibleH = Math.round(vp.height);
+        const canvas = document.createElement('canvas');
+        canvas.width = visibleW;
+        canvas.height = visibleH;
+        const ctx = canvas.getContext('2d');
+        await page.render({ canvasContext: ctx, viewport: vp }).promise;
+        const data = ctx.getImageData(0, 0, visibleW, visibleH).data;
+        await doc.destroy();
+
+        let sumX = 0, sumY = 0, count = 0;
+        for (let y = 0; y < visibleH; y++) {
+          for (let x = 0; x < visibleW; x++) {
+            const idx = (y * visibleW + x) * 4;
+            if (data[idx] - data[idx + 1] > 20 && data[idx + 2] - data[idx + 1] > 20) {
+              sumX += x;
+              sumY += y;
+              count++;
+            }
+          }
+        }
+        if (count === 0) return { passed: false, reason: 'no magenta' };
+        const comX = sumX / count;
+        const comY = sumY / count;
+        // Expected visible top-left center:
+        const imgW = visibleW * 0.3;
+        const imgH = imgW * 0.5;
+        const expX = 20 + imgW / 2;
+        const expY = 20 + imgH / 2;
+        const diffX = Math.abs(comX - expX);
+        const diffY = Math.abs(comY - expY);
+        const passed = diffX <= 0.06 * visibleW && diffY <= 0.06 * visibleH;
+        return { comX, comY, expX, expY, diffX, diffY, passed };
+      }
+
+      // --- MUTATION 1: Matikan penanganan opacity sengaja via stub ---
+      const origApply = window.PDFTools.Watermark.applyWatermark;
+      let mutation1Failed = false;
+      try {
+        // Stub: ignore opacity, force opacity: 1.0
+        window.PDFTools.Watermark.applyWatermark = function (f, o, p) {
+          const mutatedOpts = Object.assign({}, o, { opacity: 1.0 });
+          return origApply.call(this, f, mutatedOpts, p);
+        };
+        const resMut1 = await testOpacityCheck();
+        // Since opacity is forced to 1.0, green component is ~0 (<60), so resMut1.passed should be FALSE
+        mutation1Failed = !resMut1.passed;
+      } finally {
+        // Restore
+        window.PDFTools.Watermark.applyWatermark = origApply;
+      }
+
+      // Verify unmutated opacity test passes
+      const unmutatedOpacityRes = await testOpacityCheck();
+
+      // --- MUTATION 2: Matikan penanganan /Rotate sengaja via stub ---
+      const origCompute = window.PDFTools.Watermark.computePlacement;
+      let mutation2Failed = false;
+      try {
+        // Stub: force pageRotation = 0 regardless of page.getRotation()
+        window.PDFTools.Watermark.computePlacement = function (page, w, h, opts) {
+          const fakePage = Object.create(page);
+          fakePage.getRotation = () => ({ angle: 0 });
+          return origCompute.call(this, fakePage, w, h, opts);
+        };
+        const resMut2 = await testRotateCheck();
+        // Since rotation is ignored, placement is at wrong coordinate on /Rotate 90 page, so resMut2.passed should be FALSE
+        mutation2Failed = !resMut2.passed;
+      } finally {
+        // Restore
+        window.PDFTools.Watermark.computePlacement = origCompute;
+      }
+
+      // Verify unmutated rotate test passes
+      const unmutatedRotateRes = await testRotateCheck();
+
+      return {
+        mutation1Failed, // true when mutant failed the test
+        mutation2Failed, // true when mutant failed the test
+        unmutatedOpacityPassed: unmutatedOpacityRes.passed,
+        unmutatedRotatePassed: unmutatedRotateRes.passed
+      };
+    });
+
+    assert(mutationResults.mutation1Failed, 'Mutation 1: Disabling opacity handling MUST cause test to fail!');
+    console.log('  ✓ [MUTATION CHECK 1] Disabled opacity handling -> Test FAILED as expected (caught by opacity check)');
+
+    assert(mutationResults.mutation2Failed, 'Mutation 2: Disabling /Rotate handling MUST cause test to fail!');
+    console.log('  ✓ [MUTATION CHECK 2] Disabled /Rotate handling -> Test FAILED as expected (caught by rotation check)');
+
+    assert(mutationResults.unmutatedOpacityPassed, 'Restored opacity handling must pass test');
+    assert(mutationResults.unmutatedRotatePassed, 'Restored /Rotate handling must pass test');
+    console.log('  ✓ [MUTATION RESTORED] Original implementations restored and verified passing.');
+
     return { success: true };
   } finally {
     await page.close();
