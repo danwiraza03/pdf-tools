@@ -93,7 +93,10 @@ Dokumen ini mencatat seluruh pustaka pihak ketiga (vendor libraries) yang disimp
 * **Berkas:**
   - `tesseract.min.js`: Client API penghubung antarmuka OCR.
   - `worker.min.js`: Web worker pengelola thread OCR offline.
-  - `tesseract-worker.bundle.js`: Bundle worker terkompilasi (disertai fallback global `self.TesseractCore`).
+  - `tesseract-worker.bundle.js`: Bundle worker terkompilasi offline. Merupakan **hasil build lokal** yang menggabungkan `tesseract-core-lstm.wasm.js` dan `worker.min.js` dengan serialisasi `JSON.stringify` untuk keamanan escaping kutip dan karakter biner.
+    - **Perintah Build:** `node scripts/build_ocr_bundle.js`
+    - **Ukuran:** `4.011.355 bytes`
+    - **Integritas SHA-256:** `a48ab3c9c8a1a7342f75e363f9ee7eba69cc3c87bf2dc428ead101a9334cd3b7`
   - `tesseract-core.wasm.js`, `tesseract-core-lstm.wasm.js`, `tesseract-core-simd-lstm.wasm.js`: Biner WebAssembly mesin OCR Tesseract.
   - `lang-data/eng.*` & `lang-data/ind.*`: Model bobot bahasa terlatih (English dan Bahasa Indonesia) berbasis neural network LSTM.
 * **Fungsi:** Pengenalan karakter optik (OCR) 100% offline di browser klien tanpa pengiriman data ke server mana pun.
