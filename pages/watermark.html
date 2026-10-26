@@ -129,12 +129,13 @@
     /* Segmented Control */
     .segmented-control {
       display: flex;
+      flex-wrap: wrap;
       background: var(--bg-input, rgba(0, 0, 0, 0.05));
       border: 1px solid var(--border-color);
       border-radius: var(--radius-lg, 12px);
       padding: 4px;
       gap: 4px;
-      max-width: 320px;
+      max-width: 440px;
       width: 100%;
     }
     .segmented-btn {
@@ -423,6 +424,20 @@
             <div class="segmented-control" id="wmModeControl">
               <button type="button" class="segmented-btn active" id="wmModeText" data-mode="text" data-i18n="watermark.mode_text">Text</button>
               <button type="button" class="segmented-btn" id="wmModeImage" data-mode="image" data-i18n="watermark.mode_image">Image</button>
+            </div>
+          </div>
+
+          <!-- Apply to Page Target Switcher (Semua Halaman | Halaman Pertama | Rentang) -->
+          <div class="form-field" style="margin-bottom: 1.25rem;">
+            <label data-i18n="watermark.apply_to">Apply to</label>
+            <div class="segmented-control" id="wmApplyToControl" style="max-width: 440px;">
+              <button type="button" class="segmented-btn active" id="wmApplyAll" data-apply="all" data-i18n="watermark.pages_all">All Pages</button>
+              <button type="button" class="segmented-btn" id="wmApplyFirst" data-apply="first" data-i18n="watermark.pages_first">First Page Only</button>
+              <button type="button" class="segmented-btn" id="wmApplyCustom" data-apply="custom" data-i18n="watermark.pages_custom">Page Range</button>
+            </div>
+            <div id="wmCustomRangeWrap" style="display: none; margin-top: 8px;">
+              <input type="text" id="wmCustomRangeInput" placeholder="misal: 1, 3-5" data-i18n-placeholder="watermark.range_placeholder" style="min-height: 44px; padding: 10px 14px; font-size: 0.92rem; border-radius: var(--radius-md); background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-primary); width: 100%; box-sizing: border-box;">
+              <span style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px; display: block;" data-i18n="watermark.range_hint">Pisahkan dengan koma atau tanda hubung (cth: 1, 3-5)</span>
             </div>
           </div>
           
@@ -815,6 +830,29 @@
         selectedPosition = 'tile';
       });
 
+      // Apply-to page selection ('all' | 'first' | 'custom')
+      let selectedApplyTo = 'all';
+      const wmApplyAll = document.getElementById('wmApplyAll');
+      const wmApplyFirst = document.getElementById('wmApplyFirst');
+      const wmApplyCustom = document.getElementById('wmApplyCustom');
+      const wmCustomRangeWrap = document.getElementById('wmCustomRangeWrap');
+      const wmCustomRangeInput = document.getElementById('wmCustomRangeInput');
+
+      function setApplyTo(mode) {
+        selectedApplyTo = mode;
+        wmApplyAll.classList.toggle('active', mode === 'all');
+        wmApplyFirst.classList.toggle('active', mode === 'first');
+        wmApplyCustom.classList.toggle('active', mode === 'custom');
+        wmCustomRangeWrap.style.display = (mode === 'custom') ? 'block' : 'none';
+        if (mode === 'custom') {
+          wmCustomRangeInput.focus();
+        }
+      }
+
+      wmApplyAll.addEventListener('click', () => setApplyTo('all'));
+      wmApplyFirst.addEventListener('click', () => setApplyTo('first'));
+      wmApplyCustom.addEventListener('click', () => setApplyTo('custom'));
+
       // Unified Opacity synchronization
       function setOpacityValue(val) {
         val = parseInt(val, 10);
@@ -1030,6 +1068,24 @@
         const opacity = (parseInt(wmOpacityNum.value, 10) || 30) / 100;
         const scale = (parseInt(wmScaleNum ? wmScaleNum.value : wmScaleRange.value, 10) || 30) / 100;
 
+        let targetPagesOption = 'all';
+        if (selectedApplyTo === 'first') {
+          targetPagesOption = 'first';
+        } else if (selectedApplyTo === 'custom') {
+          const rangeVal = wmCustomRangeInput.value.trim();
+          if (!rangeVal) {
+            PDFTools.Toast.error(PDFTools.i18n.t('watermark.range_error_empty') || 'Rentang halaman tidak boleh kosong.');
+            wmCustomRangeInput.focus();
+            return;
+          }
+          if (!/^[0-9,\-\s]+$/.test(rangeVal)) {
+            PDFTools.Toast.error(PDFTools.i18n.t('watermark.range_error_invalid') || 'Format rentang halaman tidak valid.');
+            wmCustomRangeInput.focus();
+            return;
+          }
+          targetPagesOption = rangeVal;
+        }
+
         applyBtn.disabled = true;
         previewBtn.disabled = true;
         progress.show(PDFTools.i18n.t('action.processing'));
@@ -1051,7 +1107,8 @@
               position: selectedPosition,
               scale: scale,
               rotation: rotation,
-              opacity: opacity
+              opacity: opacity,
+              pages: targetPagesOption
             } : {
               type: 'text',
               text: text,
@@ -1059,7 +1116,8 @@
               fontSize: fontSize,
               opacity: opacity,
               color: selectedColor,
-              position: selectedPosition
+              position: selectedPosition,
+              pages: targetPagesOption
             };
 
             try {
@@ -1114,6 +1172,7 @@
           }
 
           if (watermarkedData) {
+            window.watermarkedData = watermarkedData;
             await renderWatermarkPreview(watermarkedData, false);
           }
 
@@ -1139,6 +1198,7 @@
           }
           const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(bytes.slice(0)) });
           wmResultPdfDoc = await loadingTask.promise;
+          window.wmResultPdfDoc = wmResultPdfDoc;
           totalWmPages = wmResultPdfDoc.numPages;
           currentWmPage = 1;
 
@@ -1262,6 +1322,8 @@
         setScaleValue(30);
         setOpacityValue(30);
         setRotationValue(0);
+        setApplyTo('all');
+        wmCustomRangeInput.value = '';
         posButtons.forEach(b => b.classList.toggle('active', b.getAttribute('data-pos') === 'center'));
         wmPosTile.classList.remove('active');
 

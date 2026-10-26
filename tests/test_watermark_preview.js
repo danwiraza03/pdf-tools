@@ -217,11 +217,194 @@ async function runBrowserPreviewPixelTest() {
   }
 }
 
+async function runPageRangeTest() {
+  console.log('========================================================================');
+  console.log('>>> [BROWSER TEST] Page Range Application & Pixel Verification');
+  console.log('========================================================================');
+
+  const PORT = 8978;
+  const server = http.createServer((req, res) => {
+    const rawUrl = req.url.split('?')[0];
+    const safePath = path.normalize(path.join(__dirname, '..', rawUrl));
+    if (!safePath.startsWith(path.resolve(__dirname, '..'))) {
+      res.writeHead(403);
+      return res.end('Forbidden');
+    }
+    if (fs.existsSync(safePath) && fs.statSync(safePath).isFile()) {
+      const ext = path.extname(safePath).toLowerCase();
+      const mimeMap = {
+        '.html': 'text/html',
+        '.js': 'application/javascript',
+        '.css': 'text/css',
+        '.svg': 'image/svg+xml',
+        '.png': 'image/png',
+        '.jpg': 'image/jpeg',
+        '.pdf': 'application/pdf'
+      };
+      res.writeHead(200, { 'Content-Type': mimeMap[ext] || 'application/octet-stream' });
+      fs.createReadStream(safePath).pipe(res);
+    } else {
+      res.writeHead(404);
+      res.end('Not Found');
+    }
+  });
+
+  await new Promise((resolve, reject) => {
+    server.listen(PORT, '127.0.0.1', resolve);
+    server.on('error', reject);
+  });
+
+  const browser = await chromium.launch({ headless: true });
+  const page = await browser.newPage();
+
+  page.on('dialog', dialog => {
+    assert.fail(`Forbidden native dialog triggered: ${dialog.type()} "${dialog.message()}"`);
+  });
+
+  const tempDir = path.join(__dirname, 'temp_wm_range_test');
+  if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
+  const test5PdfPath = path.join(tempDir, 'sample_5pages.pdf');
+
+  try {
+    // Create 5-page PDF with distinct text and background
+    const doc = await PDFLib.PDFDocument.create();
+    for (let i = 1; i <= 5; i++) {
+      const p = doc.addPage([595, 842]);
+      p.drawRectangle({ x: 0, y: 0, width: 595, height: 842, color: PDFLib.rgb(1, 1, 1) });
+      p.drawText(`Original Page Content ${i}`, { x: 60, y: 700, size: 28, color: PDFLib.rgb(0.1, 0.1, 0.1) });
+    }
+    const origBytes = await doc.save();
+    fs.writeFileSync(test5PdfPath, origBytes);
+
+    await page.goto(`http://127.0.0.1:${PORT}/pages/watermark.html`, { waitUntil: 'domcontentloaded' });
+    await page.waitForFunction(() => !!(window.PDFTools && window.PDFTools.Watermark));
+
+    // Upload 5-page PDF
+    const fileInput = page.locator('#dropzone input[type="file"]');
+    await fileInput.setInputFiles(test5PdfPath);
+    await page.waitForSelector('#optionsPanel', { state: 'visible', timeout: 5000 });
+
+    // 1. Test validation on empty custom range
+    await page.locator('#wmApplyCustom').click();
+    await page.waitForSelector('#wmCustomRangeWrap', { state: 'visible' });
+    await page.locator('#wmCustomRangeInput').fill('');
+    await page.locator('#applyBtn').click();
+
+    // Verify toast error appeared
+    const toastEmpty = await page.waitForSelector('.toast.toast-error', { state: 'visible', timeout: 4000 });
+    const emptyMsg = await toastEmpty.textContent();
+    assert(/kosong|empty/i.test(emptyMsg), `Empty range toast expected, got: "${emptyMsg}"`);
+    console.log('  ✓ Toast error correctly displayed for empty page range:', emptyMsg);
+
+    // 2. Test validation on invalid format (e.g. "abc")
+    await page.locator('#wmCustomRangeInput').fill('abc');
+    await page.locator('#applyBtn').click();
+    await page.waitForFunction(() => {
+      const toasts = document.querySelectorAll('.toast.toast-error');
+      return Array.from(toasts).some(t => /tidak valid|invalid/i.test(t.textContent));
+    }, { timeout: 4000 });
+    console.log('  ✓ Toast error correctly displayed for invalid characters range ("abc").');
+
+    // 3. Test validation on out of bounds (e.g. "1, 99")
+    await page.locator('#wmCustomRangeInput').fill('1, 99');
+    await page.locator('#applyBtn').click();
+    await page.waitForFunction(() => {
+      const toasts = document.querySelectorAll('.toast.toast-error');
+      return Array.from(toasts).some(t => /melebihi|out of bounds/i.test(t.textContent));
+    }, { timeout: 4000 });
+    console.log('  ✓ Toast error correctly displayed for out-of-bounds page ("1, 99").');
+
+    // 4. Test valid range: "1, 3-5"
+    // Pages 1, 3, 4, 5 will have watermark. Page 2 (index 1) must be 100% UNTOUCHED!
+    await page.locator('#wmCustomRangeInput').fill('1, 3-5');
+    await page.locator('#wmText').fill('WATERMARK_RANGE_TEST');
+    await page.locator('#applyBtn').click();
+    await page.waitForSelector('#resultArea.active', { state: 'visible', timeout: 15000 });
+    console.log('  ✓ Watermark applied with range "1, 3-5".');
+
+    // Extract rendered pixels of original PDF vs watermarked PDF
+    const comparison = await page.evaluate(async (origBase64) => {
+      const rawOrig = Uint8Array.from(atob(origBase64), c => c.charCodeAt(0));
+      const origDoc = await pdfjsLib.getDocument({ data: rawOrig }).promise;
+      
+      // Page 2 of original
+      const origP2 = await origDoc.getPage(2);
+      const vp2 = origP2.getViewport({ scale: 1.0 });
+      const cOrig2 = document.createElement('canvas');
+      cOrig2.width = vp2.width;
+      cOrig2.height = vp2.height;
+      await origP2.render({ canvasContext: cOrig2.getContext('2d'), viewport: vp2 }).promise;
+      const origP2Data = Array.from(cOrig2.getContext('2d').getImageData(0, 0, vp2.width, vp2.height).data);
+
+      // Page 2 of watermarked result (wmResultPdfDoc or watermarkedData)
+      const wmDoc = window.wmResultPdfDoc || (await pdfjsLib.getDocument({ data: window.watermarkedData }).promise);
+      const wmP2 = await wmDoc.getPage(2);
+      const cWm2 = document.createElement('canvas');
+      cWm2.width = vp2.width;
+      cWm2.height = vp2.height;
+      await wmP2.render({ canvasContext: cWm2.getContext('2d'), viewport: vp2 }).promise;
+      const wmP2Data = Array.from(cWm2.getContext('2d').getImageData(0, 0, vp2.width, vp2.height).data);
+
+      // Page 1 of original vs watermarked
+      const origP1 = await origDoc.getPage(1);
+      const vp1 = origP1.getViewport({ scale: 1.0 });
+      const cOrig1 = document.createElement('canvas');
+      cOrig1.width = vp1.width;
+      cOrig1.height = vp1.height;
+      await origP1.render({ canvasContext: cOrig1.getContext('2d'), viewport: vp1 }).promise;
+      const origP1Data = Array.from(cOrig1.getContext('2d').getImageData(0, 0, vp1.width, vp1.height).data);
+
+      const wmP1 = await wmDoc.getPage(1);
+      const cWm1 = document.createElement('canvas');
+      cWm1.width = vp1.width;
+      cWm1.height = vp1.height;
+      await wmP1.render({ canvasContext: cWm1.getContext('2d'), viewport: vp1 }).promise;
+      const wmP1Data = Array.from(cWm1.getContext('2d').getImageData(0, 0, vp1.width, vp1.height).data);
+
+      return {
+        origP2Data,
+        wmP2Data,
+        origP1Data,
+        wmP1Data
+      };
+    }, Buffer.from(origBytes).toString('base64'));
+
+    // Verify Page 2 (outside range) has ZERO pixel differences
+    assert.strictEqual(comparison.origP2Data.length, comparison.wmP2Data.length);
+    let p2Diffs = 0;
+    for (let i = 0; i < comparison.origP2Data.length; i++) {
+      if (comparison.origP2Data[i] !== comparison.wmP2Data[i]) {
+        p2Diffs++;
+      }
+    }
+    assert.strictEqual(p2Diffs, 0, `Page 2 (outside range) MUST be 100% untouched! Found ${p2Diffs} differences.`);
+    console.log('  ✓ [PIXEL VERIFIED] Page 2 (outside range "1, 3-5") has 0 pixel differences from original!');
+
+    // Verify Page 1 (inside range) has watermark differences
+    let p1Diffs = 0;
+    for (let i = 0; i < comparison.origP1Data.length; i++) {
+      if (comparison.origP1Data[i] !== comparison.wmP1Data[i]) {
+        p1Diffs++;
+      }
+    }
+    assert(p1Diffs > 0, 'Page 1 (inside range "1, 3-5") MUST have watermark applied');
+    console.log(`  ✓ [PIXEL VERIFIED] Page 1 (inside range) has ${p1Diffs} watermark pixel differences from original.`);
+
+    console.log('✅ [PASS] Page range application and pixel verification passed!\n');
+  } finally {
+    await browser.close();
+    server.close();
+    if (fs.existsSync(test5PdfPath)) fs.unlinkSync(test5PdfPath);
+    if (fs.existsSync(tempDir)) fs.rmdirSync(tempDir);
+  }
+}
+
 async function main() {
   await runUnitTests();
   await runBrowserPreviewPixelTest();
+  await runPageRangeTest();
   console.log('========================================================================');
-  console.log('ALL WATERMARK PREVIEW TESTS PASSED SUCCESSFULLY!');
+  console.log('ALL WATERMARK PREVIEW & RANGE TESTS PASSED SUCCESSFULLY!');
   console.log('========================================================================');
 }
 
@@ -232,4 +415,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { runUnitTests, runBrowserPreviewPixelTest };
+module.exports = { runUnitTests, runBrowserPreviewPixelTest, runPageRangeTest };
