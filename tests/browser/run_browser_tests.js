@@ -13,6 +13,7 @@ const { runMobileInteractionSuite } = require('./test_mobile_interaction');
 const { runWatermarkImageBrowserTests, runNodeWatermarkImageTests } = require('./test_watermark_image');
 const { runWatermarkUiSuite, runWatermarkUiWebKitMobile } = require('./test_watermark_ui');
 const { runRotationOpacitySuite, runRotationOpacityWebKitMobile } = require('./test_watermark_rotation_opacity');
+const { runMergeSizeBrowserSuite } = require('./test_merge_size_browser');
 
 const TEST_PORT = 8765;
 const BASE_URL = `http://127.0.0.1:${TEST_PORT}`;
@@ -167,6 +168,9 @@ async function main() {
     // 12. Watermark Rotation & Opacity Unified Controls Suite (Chromium & iPhone 13 WebKit)
     await runRotationOpacitySuite(browser, BASE_URL);
     await runRotationOpacityWebKitMobile(BASE_URL);
+
+    // 13. Merge Size Optimization & UI Reordering Suite (Chromium & iPhone 13 WebKit)
+    await runMergeSizeBrowserSuite(browser, BASE_URL);
 
     console.log('========================================================================');
     console.log('                 BROWSER TESTS COMPLETE: ALL PASSED!                   ');
