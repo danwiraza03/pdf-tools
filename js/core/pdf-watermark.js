@@ -6,6 +6,137 @@ window.PDFTools = window.PDFTools || {};
 
 PDFTools.Watermark = {
   /**
+   * Unified placement calculation for both text and image watermarks.
+   * Takes into account page /Rotate, CropBox, item center-based rotation,
+   * margins, and 9 standard positions plus tiling.
+   *
+   * @param {PDFPage} page - PDF-Lib page instance
+   * @param {number} itemWidth - Width of the item in points
+   * @param {number} itemHeight - Height of the item in points
+   * @param {Object} options - Placement options
+   * @returns {{ placements: Array<{x: number, y: number, rotate: number}>, x: number, y: number, rotate: number, visibleWidth: number, visibleHeight: number }}
+   */
+  computePlacement: function (page, itemWidth, itemHeight, options) {
+    options = options || {};
+    const margin = typeof options.margin === 'number' ? options.margin : 20;
+    const tileGap = typeof options.tileGap === 'number' ? options.tileGap : 50;
+    let position = options.position || 'center';
+    let itemRotation = typeof options.rotation === 'number' ? options.rotation : 0;
+
+    // Handle legacy 'diagonal' preset as center with 45 degree rotation
+    if (position === 'diagonal') {
+      position = 'center';
+      if (typeof options.rotation !== 'number') {
+        itemRotation = 45;
+      }
+    }
+
+    // 1. Resolve CropBox & MediaBox boundaries
+    const cropBox = (page && typeof page.getCropBox === 'function')
+      ? page.getCropBox()
+      : { x: 0, y: 0, width: page.getSize().width, height: page.getSize().height };
+    const cropX = cropBox.x || 0;
+    const cropY = cropBox.y || 0;
+    const cropW = cropBox.width || (page.getSize ? page.getSize().width : 600);
+    const cropH = cropBox.height || (page.getSize ? page.getSize().height : 800);
+
+    // 2. Resolve page rotation (0, 90, 180, 270)
+    const pageRotation = page && page.getRotation ? ((page.getRotation().angle % 360) + 360) % 360 : 0;
+
+    // Visible dimensions as seen in viewer
+    let visibleWidth, visibleHeight;
+    if (pageRotation === 90 || pageRotation === 270) {
+      visibleWidth = cropH;
+      visibleHeight = cropW;
+    } else {
+      visibleWidth = cropW;
+      visibleHeight = cropH;
+    }
+
+    // Map visible Cartesian coordinate (vx: 0..visibleWidth from left, vy: 0..visibleHeight from bottom)
+    // to raw PDF coordinates (pdfX, pdfY)
+    function mapVisibleToPdf(vx, vy) {
+      if (pageRotation === 0) return { x: cropX + vx, y: cropY + vy };
+      if (pageRotation === 90) return { x: cropX + cropW - vy, y: cropY + vx };
+      if (pageRotation === 180) return { x: cropX + cropW - vx, y: cropY + cropH - vy };
+      if (pageRotation === 270) return { x: cropX + vy, y: cropY + cropH - vx };
+      return { x: cropX + vx, y: cropY + vy };
+    }
+
+    // Effective rotation in raw PDF space: counter-act page rotation to orient to visible page
+    const effectiveAngle = ((itemRotation + pageRotation) % 360 + 360) % 360;
+    const rad = (effectiveAngle * Math.PI) / 180;
+
+    // Center offset vector: when rotating around center (cx, cy),
+    // origin (x, y) = center - (w/2 * cos - h/2 * sin, w/2 * sin + h/2 * cos)
+    const dx = (itemWidth / 2) * Math.cos(rad) - (itemHeight / 2) * Math.sin(rad);
+    const dy = (itemWidth / 2) * Math.sin(rad) + (itemHeight / 2) * Math.cos(rad);
+
+    function calcOriginFromVisibleCenter(centerVx, centerVy) {
+      const pdfCenter = mapVisibleToPdf(centerVx, centerVy);
+      return {
+        x: pdfCenter.x - dx,
+        y: pdfCenter.y - dy,
+        rotate: effectiveAngle
+      };
+    }
+
+    // Tile mode: repeat item in grid across visible page
+    if (position === 'tile') {
+      const stepX = itemWidth + tileGap;
+      const stepY = itemHeight + tileGap;
+      const cols = Math.max(1, Math.floor((visibleWidth - 2 * margin) / stepX));
+      const rows = Math.max(1, Math.floor((visibleHeight - 2 * margin) / stepY));
+      const startX = (visibleWidth - (cols - 1) * stepX) / 2;
+      const startY = (visibleHeight - (rows - 1) * stepY) / 2;
+
+      const placements = [];
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const cvx = startX + c * stepX;
+          const cvy = startY + r * stepY;
+          placements.push(calcOriginFromVisibleCenter(cvx, cvy));
+        }
+      }
+      return {
+        placements,
+        x: placements[0].x,
+        y: placements[0].y,
+        rotate: effectiveAngle,
+        visibleWidth,
+        visibleHeight
+      };
+    }
+
+    // 9 standard positions:
+    // Horizontal alignment
+    let centerVx = visibleWidth / 2;
+    if (position.includes('left')) {
+      centerVx = margin + itemWidth / 2;
+    } else if (position.includes('right')) {
+      centerVx = visibleWidth - margin - itemWidth / 2;
+    }
+
+    // Vertical alignment (vy=0 is bottom, vy=visibleHeight is top)
+    let centerVy = visibleHeight / 2;
+    if (position.startsWith('top')) {
+      centerVy = visibleHeight - margin - itemHeight / 2;
+    } else if (position.startsWith('bottom')) {
+      centerVy = margin + itemHeight / 2;
+    }
+
+    const singlePlacement = calcOriginFromVisibleCenter(centerVx, centerVy);
+    return {
+      placements: [singlePlacement],
+      x: singlePlacement.x,
+      y: singlePlacement.y,
+      rotate: singlePlacement.rotate,
+      visibleWidth,
+      visibleHeight
+    };
+  },
+
+  /**
    * Add text watermark to a PDF
    * @param {File} file - PDF file
    * @param {Object} options - Watermark settings
@@ -16,10 +147,12 @@ PDFTools.Watermark = {
     options = options || {};
     const text = options.text || 'CONFIDENTIAL';
     const fontSize = parseInt(options.fontSize, 10) || 48;
-    const opacity = parseFloat(options.opacity) || 0.30;
-    const rotationAngle = parseInt(options.rotation, 10) || 45;
-    const position = options.position || 'center'; // 'center' | 'top-right' | 'bottom-right' | 'diagonal'
+    const opacity = typeof options.opacity === 'number' ? options.opacity : (parseFloat(options.opacity) || 0.30);
+    const rotationAngle = typeof options.rotation === 'number' ? options.rotation : (options.position === 'diagonal' ? 45 : (parseInt(options.rotation, 10) || 0));
+    const position = options.position || 'center';
     const colorHex = options.color || '#e74c3c';
+    const margin = typeof options.margin === 'number' ? options.margin : 20;
+    const tileGap = typeof options.tileGap === 'number' ? options.tileGap : 50;
 
     // Parse hex color to 0..1 RGB for pdf-lib
     function hexToRgb(hex) {
@@ -63,45 +196,27 @@ PDFTools.Watermark = {
       }
 
       const page = pages[i];
-      const { width, height } = page.getSize();
       const textWidth = font.widthOfTextAtSize(text, fontSize);
       const textHeight = font.heightAtSize(fontSize);
 
-      let x = 0;
-      let y = 0;
-      let angle = rotationAngle;
-
-      if (position === 'center' || position === 'diagonal') {
-        // Calculate center with rotation compensation
-        const rad = (angle * Math.PI) / 180;
-        const rotatedTextWidth = textWidth * Math.cos(rad) - textHeight * Math.sin(rad);
-        const rotatedTextHeight = textWidth * Math.sin(rad) + textHeight * Math.cos(rad);
-
-        x = (width - rotatedTextWidth) / 2;
-        y = (height - rotatedTextHeight) / 2;
-      } else if (position === 'top-right') {
-        x = width - textWidth - 30;
-        y = height - textHeight - 30;
-        angle = 0;
-      } else if (position === 'bottom-right') {
-        x = width - textWidth - 30;
-        y = 30;
-        angle = 0;
-      } else if (position === 'top-left') {
-        x = 30;
-        y = height - textHeight - 30;
-        angle = 0;
-      }
-
-      page.drawText(text, {
-        x: Math.max(10, x),
-        y: Math.max(10, y),
-        size: fontSize,
-        font: font,
-        color: rgb(r, g, b),
-        opacity: opacity,
-        rotate: degrees(angle)
+      const placement = PDFTools.Watermark.computePlacement(page, textWidth, textHeight, {
+        position,
+        rotation: rotationAngle,
+        margin,
+        tileGap
       });
+
+      for (const pl of placement.placements) {
+        page.drawText(text, {
+          x: pl.x,
+          y: pl.y,
+          size: fontSize,
+          font: font,
+          color: rgb(r, g, b),
+          opacity: opacity,
+          rotate: degrees(pl.rotate)
+        });
+      }
     }
 
     if (typeof onProgress === 'function') {
