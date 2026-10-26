@@ -77,6 +77,7 @@ PDFTools.Split = {
         onProgress(Math.round(((i + 1) / totalPages) * 100), `Extracting page ${i + 1} of ${totalPages}...`);
       }
       const singleDoc = await PDFDocument.create();
+      // allow-single-page-copy: membuat satu dokumen PDF mandiri per halaman
       const [copied] = await singleDoc.copyPages(srcDoc, [i]);
       singleDoc.addPage(copied);
       const bytes = await singleDoc.save();
