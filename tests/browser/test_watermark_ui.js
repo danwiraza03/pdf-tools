@@ -239,20 +239,41 @@ async function runWatermarkUiSuite(browser, baseUrl, engineName = 'Chromium') {
     await imageInput.setInputFiles(pngPath);
     await page.waitForTimeout(300);
 
-    // 7. Apply Watermark and verify result canvas
-    console.log('  --- Applying Watermark & Verifying Output Canvas ---');
+    // 7. Preview before Apply & Verify Output Canvas
+    console.log('  --- Testing Preview Button Before Apply ---');
+    const previewBtn = page.locator('#previewBtn');
+    await previewBtn.waitFor({ state: 'visible', timeout: 5000 });
+    const previewBtnBox = await previewBtn.boundingBox();
+    assert(previewBtnBox && previewBtnBox.height >= 44, 'Preview button must have touch height >= 44px');
+    await previewBtn.click();
+
+    const previewCanvas = page.locator('#wmResultCanvas');
+    await previewCanvas.waitFor({ state: 'visible', timeout: 8000 });
+    const previewPixels = await previewCanvas.evaluate(canvas => {
+      const ctx = canvas.getContext('2d');
+      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      return Array.from(imgData.data);
+    });
+    assert(previewPixels.some(val => val > 0), 'Preview canvas must have rendered output pixels');
+    console.log('  ✓ Preview button before apply rendered watermark on canvas.');
+
+    console.log('  --- Applying Watermark & Verifying Pixel Identity ---');
     await applyBtn.click();
     await page.waitForSelector('#resultArea.active', { state: 'visible', timeout: 15000 });
 
-    const previewCanvas = page.locator('#wmResultCanvas');
-    await previewCanvas.waitFor({ state: 'visible', timeout: 5000 });
-    const hasPixels = await previewCanvas.evaluate(canvas => {
+    await page.waitForTimeout(500);
+    const finalPixels = await previewCanvas.evaluate(canvas => {
       const ctx = canvas.getContext('2d');
       const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      return imgData.data.some(val => val > 0);
+      return Array.from(imgData.data);
     });
-    assert(hasPixels, 'Preview canvas must have rendered output pixels');
-    console.log('  ✓ Result area displayed and preview canvas has rendered pixels.');
+    assert.strictEqual(previewPixels.length, finalPixels.length, 'Preview and final canvas buffers must match in size');
+    let pixelMismatches = 0;
+    for (let i = 0; i < previewPixels.length; i++) {
+      if (previewPixels[i] !== finalPixels[i]) pixelMismatches++;
+    }
+    assert.strictEqual(pixelMismatches, 0, `Preview and final page 1 must be pixel-per-pixel identical (mismatches: ${pixelMismatches})`);
+    console.log('  ✓ Result area displayed and preview is pixel-per-pixel identical to page 1 of final result (0 mismatches).');
 
     // 8. Test Signed PDF Case (Item 5: watermark applied without error/popup)
     console.log('  --- Testing Digitally Signed PDF Watermarking ---');

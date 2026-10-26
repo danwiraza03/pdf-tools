@@ -255,6 +255,117 @@ PDFTools.Watermark = {
   },
 
   /**
+   * Parse pages option into a sorted array of 0-based page indices.
+   * Supports 'all', 'first', number arrays (0-based), and range strings (1-based, e.g. "1, 3-5").
+   *
+   * @param {string|number[]|'all'|'first'|null|undefined} pagesOption
+   * @param {number} totalPages
+   * @returns {number[]} 0-based page indices to process
+   */
+  parsePageRange: function (pagesOption, totalPages) {
+    if (!totalPages || totalPages < 1) {
+      throw new Error('Total halaman dokumen tidak valid.');
+    }
+
+    if (pagesOption === undefined || pagesOption === null || pagesOption === 'all') {
+      const all = [];
+      for (let i = 0; i < totalPages; i++) all.push(i);
+      return all;
+    }
+
+    if (pagesOption === 'first') {
+      return [0];
+    }
+
+    if (Array.isArray(pagesOption)) {
+      if (pagesOption.length === 0) {
+        throw new Error('Daftar halaman tidak boleh kosong.');
+      }
+      const indices = [];
+      for (const item of pagesOption) {
+        const idx = typeof item === 'number' ? item : parseInt(item, 10);
+        if (!Number.isInteger(idx) || idx < 0 || idx >= totalPages) {
+          throw new Error(`Indeks halaman ${item} tidak valid (total ${totalPages} halaman).`);
+        }
+        indices.push(idx);
+      }
+      return Array.from(new Set(indices)).sort((a, b) => a - b);
+    }
+
+    if (typeof pagesOption === 'string') {
+      const str = pagesOption.trim();
+      if (!str) {
+        throw new Error('Rentang halaman tidak boleh kosong.');
+      }
+      if (str.toLowerCase() === 'all') {
+        const all = [];
+        for (let i = 0; i < totalPages; i++) all.push(i);
+        return all;
+      }
+      if (str.toLowerCase() === 'first') {
+        return [0];
+      }
+
+      // Check for valid characters: only digits, commas, hyphens, and whitespace
+      if (!/^[0-9,\-\s]+$/.test(str)) {
+        throw new Error(`Rentang halaman mengandung karakter tidak valid: "${str}". Format yang benar: "1, 3-5".`);
+      }
+
+      const parts = str.split(',').map(p => p.trim()).filter(Boolean);
+      if (parts.length === 0) {
+        throw new Error('Rentang halaman tidak boleh kosong.');
+      }
+
+      const indices = [];
+      for (const part of parts) {
+        if (part.includes('-')) {
+          const rangeParts = part.split('-').map(s => s.trim());
+          if (rangeParts.length !== 2 || !rangeParts[0] || !rangeParts[1]) {
+            throw new Error(`Format rentang halaman tidak valid: "${part}". Contoh: "1-5".`);
+          }
+          const start = parseInt(rangeParts[0], 10);
+          const end = parseInt(rangeParts[1], 10);
+          if (!Number.isInteger(start) || !Number.isInteger(end)) {
+            throw new Error(`Nomor halaman pada rentang "${part}" harus berupa angka bulat.`);
+          }
+          if (start < 1) {
+            throw new Error(`Nomor halaman awal rentang (${start}) harus minimal 1.`);
+          }
+          if (start > end) {
+            throw new Error(`Rentang halaman tidak valid: awal rentang (${start}) lebih besar dari akhir rentang (${end}).`);
+          }
+          if (end > totalPages) {
+            throw new Error(`Halaman ${end} melebihi jumlah halaman dokumen (${totalPages}).`);
+          }
+          for (let p = start; p <= end; p++) {
+            indices.push(p - 1);
+          }
+        } else {
+          const pageNum = parseInt(part, 10);
+          if (!Number.isInteger(pageNum)) {
+            throw new Error(`Nomor halaman "${part}" tidak valid.`);
+          }
+          if (pageNum < 1) {
+            throw new Error(`Nomor halaman (${pageNum}) harus minimal 1.`);
+          }
+          if (pageNum > totalPages) {
+            throw new Error(`Halaman ${pageNum} melebihi jumlah halaman dokumen (${totalPages}).`);
+          }
+          indices.push(pageNum - 1);
+        }
+      }
+
+      const uniqueSorted = Array.from(new Set(indices)).sort((a, b) => a - b);
+      if (uniqueSorted.length === 0) {
+        throw new Error('Rentang halaman tidak valid.');
+      }
+      return uniqueSorted;
+    }
+
+    throw new Error('Format opsi halaman tidak didukung.');
+  },
+
+  /**
    * Add text or image watermark to a PDF
    * @param {File|Object} file - PDF file or wrapper
    * @param {Object} options - Watermark settings
@@ -266,6 +377,7 @@ PDFTools.Watermark = {
    *   options.tileGap: gap between tiles in points (default 50)
    *   options.opacity: 0.0-1.0 (default 0.3)
    *   options.rotation: angle in degrees (default 0 or 45 for diagonal)
+   *   options.pages: 'all' (default) | 'first' | [0, 1] | '1,3-5'
    * @param {Function} onProgress - Progress callback
    * @returns {Promise<Uint8Array>}
    */
@@ -372,10 +484,12 @@ PDFTools.Watermark = {
 
     const pages = pdfDoc.getPages();
     const totalPages = pages.length;
+    const targetIndices = PDFTools.Watermark.parsePageRange(options.pages, totalPages);
 
-    for (let i = 0; i < totalPages; i++) {
+    for (let idx = 0; idx < targetIndices.length; idx++) {
+      const i = targetIndices[idx];
       if (typeof onProgress === 'function') {
-        const percent = Math.round(15 + ((i / totalPages) * 75));
+        const percent = Math.round(15 + (((idx + 1) / targetIndices.length) * 75));
         onProgress(percent, `Applying watermark to page ${i + 1} of ${totalPages}...`);
       }
 
