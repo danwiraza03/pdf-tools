@@ -22,6 +22,7 @@ const pdfjs = require(path.join(ROOT_DIR, 'js/lib/pdf.min.js'));
 pdfjs.GlobalWorkerOptions.workerSrc = path.join(ROOT_DIR, 'js/lib/pdf.worker.min.js');
 const CoordinateEngine = require(path.join(ROOT_DIR, 'js/editor/pdf-coordinate-engine.js'));
 const RedactionEngine = require(path.join(ROOT_DIR, 'js/editor/redaction-engine.js'));
+const { findLeaks } = require(path.join(__dirname, 'helpers/leak-detector.js'));
 
 const {
   PDFDocument, StandardFonts, degrees, PDFName, PDFString, PDFArray, PDFDict,
@@ -36,34 +37,8 @@ function ok(cond, msg) {
 }
 
 // ---------------------------------------------------------------------------
-// Leak detector
+// Leak detector is imported from tests/helpers/leak-detector.js
 // ---------------------------------------------------------------------------
-function decodeStream(stream) {
-  try {
-    if (stream instanceof PDFRawStream) return Buffer.from(decodePDFRawStream(stream).decode());
-    if (typeof stream.getUnencodedContents === 'function') return Buffer.from(stream.getUnencodedContents());
-  } catch (e) {
-    // Image streams (DCT) may not decode; their raw bytes are still searched below
-  }
-  return Buffer.from(stream.getContents ? stream.getContents() : []);
-}
-
-async function findLeaks(bytes, secret) {
-  const doc = await PDFDocument.load(bytes, { ignoreEncryption: true });
-  const needles = [
-    secret,
-    Buffer.from(secret, 'latin1').toString('hex').toUpperCase(),
-    Buffer.from(secret, 'latin1').toString('hex').toLowerCase()
-  ];
-  const hits = [];
-  for (const [ref, obj] of doc.context.enumerateIndirectObjects()) {
-    const text = (obj instanceof PDFStream)
-      ? decodeStream(obj).toString('latin1') + ' ' + obj.dict.toString()
-      : obj.toString();
-    if (needles.some(n => text.includes(n))) hits.push(ref.toString());
-  }
-  return hits;
-}
 
 async function countImagesWithSize(bytes, w, h) {
   const doc = await PDFDocument.load(bytes);
