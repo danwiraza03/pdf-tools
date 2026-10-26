@@ -8,11 +8,6 @@ const TEST_PORT = 8765;
 const BASE_URL = `http://127.0.0.1:${TEST_PORT}`;
 const SCREENSHOT_DIR = path.resolve(__dirname, 'screenshots');
 
-// Ensure screenshots directory exists
-if (!fs.existsSync(SCREENSHOT_DIR)) {
-  fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });
-}
-
 // Generate sample multi-page PDF for reorder
 async function generate6PagePdf() {
   const doc = await PDFLib.PDFDocument.create();
@@ -142,13 +137,20 @@ async function auditPageOnDevice(browser, deviceConfig, pagePath) {
       };
     });
 
-    // 4. Capture Screenshot
-    const pageSlug = pagePath.replace(/\.html$/i, '').replace(/[\/\\]/g, '_');
-    const deviceSlug = deviceConfig.name.toLowerCase().replace(/[^a-z0-9]/g, '_');
-    const screenshotName = `${pageSlug}_${deviceSlug}.png`;
-    const screenshotPath = path.join(SCREENSHOT_DIR, screenshotName);
-    await page.screenshot({ path: screenshotPath, fullPage: false });
+    // 4. Capture Screenshot if SAVE_SCREENSHOTS=1 or if page failed
+    const isFailed = !loadSuccess || consoleErrors.length > 0 || pageErrors.length > 0 || overflow.hasOverflow;
+    const shouldSaveScreenshots = process.env.SAVE_SCREENSHOTS === '1';
 
+    if (shouldSaveScreenshots || isFailed) {
+      if (!fs.existsSync(SCREENSHOT_DIR)) {
+        fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });
+      }
+      const pageSlug = pagePath.replace(/\.html$/i, '').replace(/[\/\\]/g, '_');
+      const deviceSlug = deviceConfig.name.toLowerCase().replace(/[^a-z0-9]/g, '_');
+      const screenshotName = `${pageSlug}_${deviceSlug}.png`;
+      const screenshotPath = path.join(SCREENSHOT_DIR, screenshotName);
+      await page.screenshot({ path: screenshotPath, fullPage: false });
+    }
   } catch (err) {
     pageErrors.push(`Failed to audit page: ${err.message || String(err)}`);
   } finally {
@@ -341,6 +343,19 @@ async function runMobileAuditSuite() {
   console.log('               MOBILE READINESS & TOUCH INTERACTION AUDIT               ');
   console.log('========================================================================\n');
 
+  // If SAVE_SCREENSHOTS=1, empty screenshots directory at start to prevent piling up
+  const shouldSaveScreenshots = process.env.SAVE_SCREENSHOTS === '1';
+  if (shouldSaveScreenshots && fs.existsSync(SCREENSHOT_DIR)) {
+    try {
+      const files = fs.readdirSync(SCREENSHOT_DIR);
+      for (const file of files) {
+        fs.rmSync(path.join(SCREENSHOT_DIR, file), { recursive: true, force: true });
+      }
+    } catch (e) {
+      // Ignore transient cleanup errors
+    }
+  }
+
   let server = null;
   let chromiumBrowser = null;
   let webkitBrowser = null;
@@ -494,7 +509,9 @@ async function runMobileAuditSuite() {
     }
     console.log('========================================================================================================================\n');
 
-    console.log(`Screenshots saved to: ${SCREENSHOT_DIR}`);
+    if (shouldSaveScreenshots || (fs.existsSync(SCREENSHOT_DIR) && fs.readdirSync(SCREENSHOT_DIR).length > 0)) {
+      console.log(`Screenshots saved to: ${SCREENSHOT_DIR}`);
+    }
     return { success: true, auditResults, sortableResults };
   } catch (fatalErr) {
     console.error('Fatal crash during mobile audit:', fatalErr);
