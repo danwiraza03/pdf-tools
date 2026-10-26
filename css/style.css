@@ -1361,6 +1361,8 @@ a {
   border-radius: var(--radius-md);
   transition: all var(--transition-fast);
   animation: fileSlideIn 0.3s ease-out;
+  -webkit-touch-callout: none;
+  user-select: none;
 }
 
 @keyframes fileSlideIn {
@@ -1697,6 +1699,8 @@ a {
   transition: all var(--transition-fast);
   position: relative;
   background: var(--bg-card);
+  -webkit-touch-callout: none;
+  user-select: none;
 }
 
 .page-card:hover {
