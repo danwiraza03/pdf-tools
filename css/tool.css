@@ -1938,7 +1938,13 @@
   input[type="text"],
   input[type="number"],
   input[type="password"],
-  select {
+  input[type="range"].wm-range-input,
+  select,
+  .wm-range-input,
+  .wm-number-input,
+  .wm-reset-btn,
+  .wm-pos-btn,
+  .wm-pos-tile-btn {
     min-height: 44px;
     box-sizing: border-box;
   }
