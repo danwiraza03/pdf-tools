@@ -707,6 +707,14 @@
         const file = this.files && this.files[0];
         if (!file) return;
 
+        // Validation: maximum 15 MB image file size
+        const MAX_SIZE_BYTES = 15 * 1024 * 1024;
+        if (file.size > MAX_SIZE_BYTES) {
+          PDFTools.Toast.error(PDFTools.i18n.t('watermark.error_oversized'));
+          wmImageInput.value = '';
+          return;
+        }
+
         try {
           const prepared = await PDFTools.Watermark.prepareImage(file);
           selectedImageFile = file;
