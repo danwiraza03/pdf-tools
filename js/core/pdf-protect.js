@@ -172,21 +172,36 @@
     // Create a pristine document and copy all pages from the decrypted document
     const cleanDoc = await PDFDocument.create();
     const pageIndices = encryptedDoc.getPageIndices();
+    let copiedPages = [];
     if (pageIndices.length > 0) {
-      const copiedPages = await cleanDoc.copyPages(encryptedDoc, pageIndices);
+      copiedPages = await cleanDoc.copyPages(encryptedDoc, pageIndices);
       copiedPages.forEach(page => cleanDoc.addPage(page));
     }
 
-    // Preserve metadata if present
-    try {
-      if (encryptedDoc.getTitle()) cleanDoc.setTitle(encryptedDoc.getTitle());
-      if (encryptedDoc.getAuthor()) cleanDoc.setAuthor(encryptedDoc.getAuthor());
-      if (encryptedDoc.getSubject()) cleanDoc.setSubject(encryptedDoc.getSubject());
-      if (encryptedDoc.getKeywords()) cleanDoc.setKeywords(encryptedDoc.getKeywords());
-      if (encryptedDoc.getProducer()) cleanDoc.setProducer(encryptedDoc.getProducer());
-      if (encryptedDoc.getCreator()) cleanDoc.setCreator(encryptedDoc.getCreator());
-    } catch (e) {
-      // Non-fatal metadata copy
+    const PdfCopy = (globalObj.PDFTools && globalObj.PDFTools.PdfCopy)
+      || (typeof require === 'function' ? (function () {
+        try { return require('./pdf-copy.js'); } catch (e) {
+          try { return require('./js/core/pdf-copy.js'); } catch (e2) { return null; }
+        }
+      })() : null);
+
+    if (PdfCopy && typeof PdfCopy.finalize === 'function' && pageIndices.length > 0) {
+      const innerMap = new Map();
+      copiedPages.forEach((p, idx) => innerMap.set(pageIndices[idx], p.ref));
+      const pageMap = new Map([[encryptedDoc, innerMap]]);
+      await PdfCopy.finalize(cleanDoc, pageMap, { primarySource: encryptedDoc });
+    } else {
+      // Fallback metadata copy if PdfCopy is not present
+      try {
+        if (encryptedDoc.getTitle()) cleanDoc.setTitle(encryptedDoc.getTitle());
+        if (encryptedDoc.getAuthor()) cleanDoc.setAuthor(encryptedDoc.getAuthor());
+        if (encryptedDoc.getSubject()) cleanDoc.setSubject(encryptedDoc.getSubject());
+        if (encryptedDoc.getKeywords()) cleanDoc.setKeywords(encryptedDoc.getKeywords());
+        if (encryptedDoc.getProducer()) cleanDoc.setProducer(encryptedDoc.getProducer());
+        if (encryptedDoc.getCreator()) cleanDoc.setCreator(encryptedDoc.getCreator());
+      } catch (e) {
+        // Non-fatal metadata copy
+      }
     }
 
     // Strip digital signature locks if applicable

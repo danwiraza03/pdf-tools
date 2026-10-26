@@ -101,6 +101,10 @@ PDFTools.Merge = {
       } else {
         // --- MODE 1: Whole-File List Mode ---
         const totalFiles = items.length;
+        const pageMapMode1 = new Map(); // srcDoc -> Map<srcIdx, destRef>
+        const sourceNamesMode1 = new Map();
+        let firstSourceMode1 = null;
+
         for (let i = 0; i < totalFiles; i++) {
           const file = items[i];
           if (typeof onProgress === 'function') {
@@ -109,11 +113,29 @@ PDFTools.Merge = {
           }
 
           const sourcePdf = await getOrLoadDoc(file);
+          if (!firstSourceMode1) firstSourceMode1 = sourcePdf;
           const pageIndices = sourcePdf.getPageIndices();
           const copiedPages = await mergedPdf.copyPages(sourcePdf, pageIndices);
-          copiedPages.forEach(page => {
+          const innerMap = new Map();
+          copiedPages.forEach((page, idx) => {
             mergedPdf.addPage(page);
+            innerMap.set(pageIndices[idx], page.ref);
             totalPagesMerged++;
+          });
+          pageMapMode1.set(sourcePdf, innerMap);
+          sourceNamesMode1.set(sourcePdf, file.name || `Document ${i + 1}`);
+        }
+
+        if (typeof onProgress === 'function') {
+          onProgress(88, 'Remapping links and bookmarks...');
+        }
+
+        // Apply copy-fidelity post-processing
+        if (PDFTools.PdfCopy && typeof PDFTools.PdfCopy.finalize === 'function') {
+          await PDFTools.PdfCopy.finalize(mergedPdf, pageMapMode1, {
+            primarySource: firstSourceMode1,
+            mergeMode: totalFiles > 1,
+            sourceNames: sourceNamesMode1
           });
         }
 
@@ -235,6 +257,42 @@ PDFTools.Merge = {
         const pct = Math.round(75 + ((slot + 1) / totalPages) * 15);
         onProgress(pct, `Assembled page ${slot + 1} of ${totalPages}...`);
       }
+    }
+
+    if (typeof onProgress === 'function') {
+      onProgress(88, 'Remapping links, bookmarks, and metadata...');
+    }
+
+    // Step 4: Build pageMap for PdfCopy.finalize
+    // Map each source doc -> (srcPageIndex -> destPageRef)
+    const pageMap = new Map();
+    const sourceNames = new Map();
+    for (const [doc, entries] of docGroups.entries()) {
+      const innerMap = new Map();
+      for (const entry of entries) {
+        const slotData = resultSlots[entry.resultSlot];
+        if (slotData && slotData.page) {
+          innerMap.set(entry.pageIndex, slotData.page.ref);
+        }
+      }
+      pageMap.set(doc, innerMap);
+      // Find source name from items
+      const matchItem = items.find(it => (it.doc === doc || it.sourceDoc === doc));
+      if (matchItem && matchItem.file && matchItem.file.name) {
+        sourceNames.set(doc, matchItem.file.name);
+      }
+    }
+
+    const primarySource = items[0] && (items[0].doc || items[0].sourceDoc);
+    const isMultiSource = docGroups.size > 1;
+
+    // Call finalize: remap links, rebuild bookmarks, copy metadata, purge ghosts
+    if (PDFTools.PdfCopy && typeof PDFTools.PdfCopy.finalize === 'function') {
+      await PDFTools.PdfCopy.finalize(targetDoc, pageMap, {
+        primarySource,
+        mergeMode: isMultiSource,
+        sourceNames
+      });
     }
 
     if (typeof onProgress === 'function') {

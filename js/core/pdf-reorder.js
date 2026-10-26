@@ -29,11 +29,27 @@ PDFTools.Reorder = {
     const copiedPages = await newDoc.copyPages(srcDoc, newPageOrder);
     copiedPages.forEach(p => newDoc.addPage(p));
 
+    const PdfCopy = (typeof PDFTools !== 'undefined' && PDFTools.PdfCopy)
+      || (typeof window !== 'undefined' && window.PDFTools && window.PDFTools.PdfCopy)
+      || (typeof global !== 'undefined' && global.PDFTools && global.PDFTools.PdfCopy)
+      || (function () {
+        try { return require('./pdf-copy.js'); } catch (e) {
+          try { return require('./js/core/pdf-copy.js'); } catch (e2) { return null; }
+        }
+      })();
+
+    if (PdfCopy && typeof PdfCopy.finalize === 'function') {
+      const innerMap = new Map();
+      copiedPages.forEach((p, idx) => innerMap.set(newPageOrder[idx], p.ref));
+      const pageMap = new Map([[srcDoc, innerMap]]);
+      await PdfCopy.finalize(newDoc, pageMap, { primarySource: srcDoc });
+    }
+
     if (typeof onProgress === 'function') {
       onProgress(90, 'Saving reordered document...');
     }
 
-    const pdfBytes = await newDoc.save();
+    const pdfBytes = await newDoc.save({ useObjectStreams: true });
 
     if (typeof onProgress === 'function') {
       onProgress(100, 'Complete!');

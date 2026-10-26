@@ -116,6 +116,7 @@ async function extractAllPagesText(pdfBytes) {
 
 // Load Core Utilities and Engines
 eval(fs.readFileSync(path.join(ROOT_DIR, 'js/utils/file-utils.js'), 'utf8'));
+eval(fs.readFileSync(path.join(ROOT_DIR, 'js/core/pdf-copy.js'), 'utf8'));
 eval(fs.readFileSync(path.join(ROOT_DIR, 'js/core/pdf-merge.js'), 'utf8'));
 eval(fs.readFileSync(path.join(ROOT_DIR, 'js/core/pdf-split.js'), 'utf8'));
 eval(fs.readFileSync(path.join(ROOT_DIR, 'js/core/pdf-rotate.js'), 'utf8'));

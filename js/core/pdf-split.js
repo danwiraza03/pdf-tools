@@ -58,7 +58,23 @@ PDFTools.Split = {
     const copiedPages = await newDoc.copyPages(srcDoc, pageIndices);
     copiedPages.forEach(p => newDoc.addPage(p));
 
-    return await newDoc.save();
+    const PdfCopy = (typeof PDFTools !== 'undefined' && PDFTools.PdfCopy)
+      || (typeof window !== 'undefined' && window.PDFTools && window.PDFTools.PdfCopy)
+      || (typeof global !== 'undefined' && global.PDFTools && global.PDFTools.PdfCopy)
+      || (function () {
+        try { return require('./pdf-copy.js'); } catch (e) {
+          try { return require('./js/core/pdf-copy.js'); } catch (e2) { return null; }
+        }
+      })();
+
+    if (PdfCopy && typeof PdfCopy.finalize === 'function') {
+      const innerMap = new Map();
+      copiedPages.forEach((p, idx) => innerMap.set(pageIndices[idx], p.ref));
+      const pageMap = new Map([[srcDoc, innerMap]]);
+      await PdfCopy.finalize(newDoc, pageMap, { primarySource: srcDoc });
+    }
+
+    return await newDoc.save({ useObjectStreams: true });
   },
 
   /**
@@ -72,6 +88,15 @@ PDFTools.Split = {
     const results = [];
     const baseName = file.name.replace(/\.pdf$/i, '');
 
+    const PdfCopy = (typeof PDFTools !== 'undefined' && PDFTools.PdfCopy)
+      || (typeof window !== 'undefined' && window.PDFTools && window.PDFTools.PdfCopy)
+      || (typeof global !== 'undefined' && global.PDFTools && global.PDFTools.PdfCopy)
+      || (function () {
+        try { return require('./pdf-copy.js'); } catch (e) {
+          try { return require('./js/core/pdf-copy.js'); } catch (e2) { return null; }
+        }
+      })();
+
     for (let i = 0; i < totalPages; i++) {
       if (typeof onProgress === 'function') {
         onProgress(Math.round(((i + 1) / totalPages) * 100), `Extracting page ${i + 1} of ${totalPages}...`);
@@ -80,7 +105,14 @@ PDFTools.Split = {
       // allow-single-page-copy: membuat satu dokumen PDF mandiri per halaman
       const [copied] = await singleDoc.copyPages(srcDoc, [i]);
       singleDoc.addPage(copied);
-      const bytes = await singleDoc.save();
+
+      if (PdfCopy && typeof PdfCopy.finalize === 'function') {
+        const innerMap = new Map([[i, copied.ref]]);
+        const pageMap = new Map([[srcDoc, innerMap]]);
+        await PdfCopy.finalize(singleDoc, pageMap, { primarySource: srcDoc });
+      }
+
+      const bytes = await singleDoc.save({ useObjectStreams: true });
       results.push({
         name: `${baseName}_page_${i + 1}.pdf`,
         data: bytes
@@ -97,6 +129,15 @@ PDFTools.Split = {
     const { PDFDocument } = PDFLib;
     const srcDoc = await this._loadDoc(file);
     const totalPages = srcDoc.getPageCount();
+
+    const PdfCopy = (typeof PDFTools !== 'undefined' && PDFTools.PdfCopy)
+      || (typeof window !== 'undefined' && window.PDFTools && window.PDFTools.PdfCopy)
+      || (typeof global !== 'undefined' && global.PDFTools && global.PDFTools.PdfCopy)
+      || (function () {
+        try { return require('./pdf-copy.js'); } catch (e) {
+          try { return require('./js/core/pdf-copy.js'); } catch (e2) { return null; }
+        }
+      })();
 
     const results = [];
     const baseName = file.name.replace(/\.pdf$/i, '');
@@ -115,7 +156,15 @@ PDFTools.Split = {
       const partDoc = await PDFDocument.create();
       const copiedPages = await partDoc.copyPages(srcDoc, pageIndices);
       copiedPages.forEach(p => partDoc.addPage(p));
-      const bytes = await partDoc.save();
+
+      if (PdfCopy && typeof PdfCopy.finalize === 'function') {
+        const innerMap = new Map();
+        copiedPages.forEach((p, idx) => innerMap.set(pageIndices[idx], p.ref));
+        const pageMap = new Map([[srcDoc, innerMap]]);
+        await PdfCopy.finalize(partDoc, pageMap, { primarySource: srcDoc });
+      }
+
+      const bytes = await partDoc.save({ useObjectStreams: true });
 
       const pageStart = i + 1;
       const pageEnd = Math.min(i + n, totalPages);

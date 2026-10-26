@@ -196,9 +196,20 @@ class RedactionEngine {
    * reachable or not, so without this step the original content streams, Form
    * XObjects (which often hold the real text) and images of a redacted page would
    * still be inside the output file.
+   *
+   * Delegates to PDFTools.PdfCopy.purgeUnreachableObjects (js/core/pdf-copy.js)
+   * when available, to avoid code duplication. Falls back to a local implementation
+   * so that redaction tests can run without loading pdf-copy.js.
+   *
    * @returns {number} number of objects removed
    */
   static purgeUnreachableObjects(pdfDoc) {
+    // Prefer the shared implementation from pdf-copy.js
+    const globalObj = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : globalThis;
+    if (globalObj.PDFTools && globalObj.PDFTools.PdfCopy && typeof globalObj.PDFTools.PdfCopy.purgeUnreachableObjects === 'function') {
+      return globalObj.PDFTools.PdfCopy.purgeUnreachableObjects(pdfDoc);
+    }
+    // --- Local fallback (keeps redaction tests self-contained) ---
     const L = RedactionEngine.getPdfLib();
     const { PDFRef, PDFDict, PDFArray, PDFStream } = L;
     const ctx = pdfDoc.context;
