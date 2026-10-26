@@ -10,6 +10,7 @@ const { runOcrEnvironmentTests } = require('./test_ocr_environments');
 const { runPageWeightSuite } = require('./test_page_weight');
 const { runMobileHeaderSuite } = require('./test_mobile_header');
 const { runMobileInteractionSuite } = require('./test_mobile_interaction');
+const { runWatermarkImageBrowserTests, runNodeWatermarkImageTests } = require('./test_watermark_image');
 
 const TEST_PORT = 8765;
 const BASE_URL = `http://127.0.0.1:${TEST_PORT}`;
@@ -152,6 +153,10 @@ async function main() {
     if (!mobileAuditResult || !mobileAuditResult.success) {
       throw new Error('Audit mobile iPhone 13 (horizontal overflow / console error) gagal!');
     }
+
+    // 10. Watermark Image & Multi-orientation Tests (Single embed, 90 combinations & Mutation Check)
+    await runNodeWatermarkImageTests();
+    await runWatermarkImageBrowserTests(browser, BASE_URL);
 
     console.log('========================================================================');
     console.log('                 BROWSER TESTS COMPLETE: ALL PASSED!                   ');
