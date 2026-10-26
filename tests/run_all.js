@@ -19,7 +19,8 @@ const tests = [
   { name: 'PDF Studio Export Redaction Ordering Test', file: 'test_studio_export_redaction.js' },
   { name: 'UI Consistency (Zero Emoji & Zero Native Dialogs)', file: 'check_ui_rules.js' },
   { name: 'Local Server Security & Path Traversal Audit', file: 'test_server_security.js' },
-  { name: 'Zero External HTTP(S) URLs Offline Compliance', file: 'test_no_external_urls.js' }
+  { name: 'Zero External HTTP(S) URLs Offline Compliance', file: 'test_no_external_urls.js' },
+  { name: 'SortableJS Mobile Touch Options Audit (delayOnTouchOnly)', file: 'check_sortable_touch.js' }
 ];
 
 console.log('========================================================================');
