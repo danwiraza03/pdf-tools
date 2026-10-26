@@ -374,6 +374,9 @@ Setiap halaman tool berdiri sendiri (*standalone tool page*) di folder `pages/` 
    - Pengujian browser menguji interaksi antarmuka pengguna nyata (seperti drag redaksi mouse, modal konfirmasi, penambahan anotasi), rendering canvas/rasterisasi piksel, konversi file berbasis browser/Web Worker/WASM (DOCX, XLSX, OCR Tesseract, Grayscale, Sign), dan efektivitas kompresi foto.
 6. **Penyelesaian Tugas**:
    - Selesaikan tugas dengan menjalankan `node tests/run_all.js` dan menempel outputnya sebagai bukti bahwa seluruh test suite berhasil dilewati (baris `FINAL SUMMARY` tanpa kegagalan). Jika perubahan melibatkan `pages/`, `js/studio/`, `js/editor/`, atau `js/core/`, jalankan juga `npm run test:browser` dan sertakan outputnya.
+7. **Status Hijau CI/CD GitHub Actions Wajib**:
+   - Setiap commit di branch `master` **WAJIB berstatus hijau** pada pipeline GitHub Actions (`.github/workflows/test.yml`).
+   - Jika status CI berubah menjadi merah (gagal), perbaikan **WAJIB didahulukan** sebelum pekerjaan atau penambahan fitur lain.
 
 ---
 

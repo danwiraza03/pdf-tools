@@ -1,5 +1,7 @@
 # ⚡ PDF Tools — 100% Offline Client-Side PDF Suite
 
+[![Tests](https://github.com/danwiraza03/pdf/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/danwiraza03/pdf/actions/workflows/test.yml)
+
 Aplikasi pengolah dokumen PDF serbaguna yang berjalan **100% di browser lokal Anda tanpa memerlukan koneksi internet ataupun server web**. Semua proses penggabungan, pemotongan, kompresi, OCR, penandatanganan, dan pengeditan PDF dieksekusi secara instan di komputer Anda.
 
 ---

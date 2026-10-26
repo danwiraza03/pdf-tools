@@ -1,0 +1,48 @@
+name: Tests
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    name: Run Unit & Browser Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 24.20.0 (LTS)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit & security tests
+        run: node tests/run_all.js
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run browser tests
+        run: npm run test:browser 2>&1 | tee browser-test.log
+        shell: bash
+
+      - name: Upload browser test failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-test-failure-artifacts
+          path: |
+            browser-test.log
+            *.log
+            **/*.log
+            **/*.png
+            **/*.jpg
+          if-no-files-found: ignore
