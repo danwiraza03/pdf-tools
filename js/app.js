@@ -563,40 +563,43 @@ document.addEventListener('DOMContentLoaded', function () {
             </button>
           </div>
           <nav class="mobile-nav-links" role="navigation">
-            <a href="${pagesUrl}merge.html" class="mobile-nav-link" data-i18n="nav.merge">Merge PDF</a>
-            <a href="${pagesUrl}split.html" class="mobile-nav-link" data-i18n="nav.split">Split PDF</a>
-            <a href="${pagesUrl}compress.html" class="mobile-nav-link" data-i18n="nav.compress">Compress PDF</a>
+            <a href="${pagesUrl}merge.html" class="mobile-nav-link" data-i18n="mobile_nav.merge">Merge PDF</a>
+            <a href="${pagesUrl}split.html" class="mobile-nav-link" data-i18n="mobile_nav.split">Split PDF</a>
+            <a href="${pagesUrl}compress.html" class="mobile-nav-link" data-i18n="mobile_nav.compress">Compress PDF</a>
             <div class="mobile-nav-divider"></div>
-            <span class="mobile-nav-section">Convert</span>
-            <a href="${pagesUrl}pdf-to-docx.html" class="mobile-nav-link">PDF to Word</a>
-            <a href="${pagesUrl}pdf-to-xlsx.html" class="mobile-nav-link">PDF to Excel</a>
-            <a href="${pagesUrl}pdf-to-jpg.html" class="mobile-nav-link">PDF to JPG</a>
-            <a href="${pagesUrl}jpg-to-pdf.html" class="mobile-nav-link">JPG to PDF</a>
-            <a href="${pagesUrl}docx-to-pdf.html" class="mobile-nav-link">Word to PDF</a>
-            <a href="${pagesUrl}xlsx-to-pdf.html" class="mobile-nav-link">Excel to PDF</a>
+            <span class="mobile-nav-section" data-i18n="mobile_nav.section_convert">Convert</span>
+            <a href="${pagesUrl}pdf-to-docx.html" class="mobile-nav-link" data-i18n="mobile_nav.pdf_docx">PDF to Word</a>
+            <a href="${pagesUrl}pdf-to-xlsx.html" class="mobile-nav-link" data-i18n="mobile_nav.pdf_xlsx">PDF to Excel</a>
+            <a href="${pagesUrl}pdf-to-jpg.html" class="mobile-nav-link" data-i18n="mobile_nav.pdf_jpg">PDF to JPG</a>
+            <a href="${pagesUrl}jpg-to-pdf.html" class="mobile-nav-link" data-i18n="mobile_nav.jpg_pdf">JPG to PDF</a>
+            <a href="${pagesUrl}docx-to-pdf.html" class="mobile-nav-link" data-i18n="mobile_nav.docx_pdf">Word to PDF</a>
+            <a href="${pagesUrl}xlsx-to-pdf.html" class="mobile-nav-link" data-i18n="mobile_nav.xlsx_pdf">Excel to PDF</a>
             <div class="mobile-nav-divider"></div>
-            <span class="mobile-nav-section">Edit & Organize</span>
-            <a href="${pagesUrl}rotate.html" class="mobile-nav-link">Rotate PDF</a>
-            <a href="${pagesUrl}crop.html" class="mobile-nav-link">Crop PDF</a>
-            <a href="${pagesUrl}reorder.html" class="mobile-nav-link">Reorder Pages</a>
-            <a href="${pagesUrl}remove-pages.html" class="mobile-nav-link">Remove Pages</a>
-            <a href="${pagesUrl}watermark.html" class="mobile-nav-link">Watermark</a>
-            <a href="${pagesUrl}page-number.html" class="mobile-nav-link">Page Numbers</a>
+            <span class="mobile-nav-section" data-i18n="mobile_nav.section_edit">Edit & Organize</span>
+            <a href="${pagesUrl}rotate.html" class="mobile-nav-link" data-i18n="mobile_nav.rotate">Rotate PDF</a>
+            <a href="${pagesUrl}crop.html" class="mobile-nav-link" data-i18n="mobile_nav.crop">Crop PDF</a>
+            <a href="${pagesUrl}reorder.html" class="mobile-nav-link" data-i18n="mobile_nav.reorder">Reorder Pages</a>
+            <a href="${pagesUrl}remove-pages.html" class="mobile-nav-link" data-i18n="mobile_nav.remove">Remove Pages</a>
+            <a href="${pagesUrl}watermark.html" class="mobile-nav-link" data-i18n="mobile_nav.watermark">Watermark</a>
+            <a href="${pagesUrl}page-number.html" class="mobile-nav-link" data-i18n="mobile_nav.page_number">Page Numbers</a>
             <div class="mobile-nav-divider"></div>
-            <span class="mobile-nav-section">Security & Tools</span>
-            <a href="${pagesUrl}protect.html" class="mobile-nav-link">Protect / Unlock</a>
-            <a href="${pagesUrl}sign.html" class="mobile-nav-link">Sign PDF</a>
-            <a href="${pagesUrl}flatten.html" class="mobile-nav-link">Flatten PDF</a>
-            <a href="${pagesUrl}grayscale.html" class="mobile-nav-link">Grayscale</a>
-            <a href="${pagesUrl}ocr.html" class="mobile-nav-link">OCR PDF</a>
-            <a href="${pagesUrl}form-fill.html" class="mobile-nav-link">Fill Forms</a>
-            <a href="${pagesUrl}batch.html" class="mobile-nav-link">Batch Processing</a>
+            <span class="mobile-nav-section" data-i18n="mobile_nav.section_security">Security & Tools</span>
+            <a href="${pagesUrl}protect.html" class="mobile-nav-link" data-i18n="mobile_nav.protect">Protect / Unlock</a>
+            <a href="${pagesUrl}sign.html" class="mobile-nav-link" data-i18n="mobile_nav.sign">Sign PDF</a>
+            <a href="${pagesUrl}flatten.html" class="mobile-nav-link" data-i18n="mobile_nav.flatten">Flatten PDF</a>
+            <a href="${pagesUrl}grayscale.html" class="mobile-nav-link" data-i18n="mobile_nav.grayscale">Grayscale</a>
+            <a href="${pagesUrl}ocr.html" class="mobile-nav-link" data-i18n="mobile_nav.ocr">OCR PDF</a>
+            <a href="${pagesUrl}form-fill.html" class="mobile-nav-link" data-i18n="mobile_nav.form_fill">Fill Forms</a>
+            <a href="${pagesUrl}batch.html" class="mobile-nav-link" data-i18n="mobile_nav.batch">Batch Processing</a>
             <div class="mobile-nav-divider"></div>
-            <a href="${pagesUrl}viewer.html" class="mobile-nav-link mobile-nav-studio">PDF Studio</a>
+            <a href="${pagesUrl}viewer.html" class="mobile-nav-link mobile-nav-studio" data-i18n="mobile_nav.studio">PDF Studio</a>
           </nav>
         </div>
       `;
       document.body.appendChild(drawer);
+      if (window.PDFTools && PDFTools.i18n) {
+        PDFTools.i18n.updatePage();
+      }
     }
 
     const menuBtn = document.getElementById('mobileMenuBtn');
@@ -607,6 +610,9 @@ document.addEventListener('DOMContentLoaded', function () {
       drawer.classList.add('open');
       document.body.style.overflow = 'hidden';
       if (menuBtn) menuBtn.setAttribute('aria-expanded', 'true');
+      if (window.PDFTools && PDFTools.i18n) {
+        PDFTools.i18n.updatePage();
+      }
     }
     function closeDrawer() {
       drawer.classList.remove('open');
