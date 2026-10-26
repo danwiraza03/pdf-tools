@@ -2322,25 +2322,25 @@ a {
 
 @media (max-width: 380px) {
   .header-inner {
-    padding: 0 10px;
-    gap: 6px;
+    padding: 0 4px;
+    gap: 4px;
   }
 
   .app-logo,
   .header-logo {
-    gap: 8px;
-    font-size: 1.12rem;
+    gap: 4px;
+    font-size: 0.95rem;
   }
 
   .app-logo .logo-badge,
   .header-logo .logo-icon {
-    width: 32px;
-    height: 32px;
-    font-size: 1rem;
+    width: 30px;
+    height: 30px;
+    font-size: 0.95rem;
   }
 
   .header-controls {
-    gap: 4px;
+    gap: 2px;
   }
 
   .theme-toggle,

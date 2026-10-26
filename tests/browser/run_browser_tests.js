@@ -1,4 +1,6 @@
-const { chromium } = require('playwright');
+const fs = require('fs');
+const path = require('path');
+const { chromium, devices } = require('playwright');
 const { startTestServer } = require('./helpers');
 const { runStudioRedactionTests } = require('./test_studio_redaction');
 const { runSkippedToolsTests } = require('./test_skipped_tools');
@@ -11,6 +13,80 @@ const { runMobileInteractionSuite } = require('./test_mobile_interaction');
 
 const TEST_PORT = 8765;
 const BASE_URL = `http://127.0.0.1:${TEST_PORT}`;
+
+async function runMobileOverflowAndConsoleAudit(browser, baseUrl) {
+  console.log('========================================================================');
+  console.log('      MOBILE IPHONE 13 AUDIT: ZERO HORIZONTAL OVERFLOW & CONSOLE ERRORS ');
+  console.log('========================================================================\n');
+
+  const pagesDir = path.resolve(__dirname, '../../pages');
+  const pageFiles = fs.readdirSync(pagesDir).filter(f => f.endsWith('.html') && f !== 'viewer.html').map(f => `pages/${f}`);
+  pageFiles.unshift('index.html');
+
+  const context = await browser.newContext({
+    ...devices['iPhone 13'],
+    hasTouch: true
+  });
+
+  const failures = [];
+
+  for (const pagePath of pageFiles) {
+    const page = await context.newPage();
+    const consoleErrors = [];
+    const pageErrors = [];
+
+    page.on('console', msg => {
+      if (msg.type() === 'error') {
+        consoleErrors.push(msg.text());
+      }
+    });
+
+    page.on('pageerror', err => {
+      pageErrors.push(err.message || String(err));
+    });
+
+    try {
+      await page.goto(`${baseUrl}/${pagePath}`, { waitUntil: 'domcontentloaded', timeout: 20000 });
+      await page.waitForTimeout(200);
+
+      const overflow = await page.evaluate(() => {
+        const scrollW = document.documentElement.scrollWidth;
+        const innerW = window.innerWidth;
+        return {
+          scrollWidth: scrollW,
+          innerWidth: innerW,
+          hasOverflow: scrollW > innerW,
+          diff: Math.max(0, scrollW - innerW)
+        };
+      });
+
+      if (overflow.hasOverflow) {
+        failures.push(`${pagePath}: Horizontal overflow terdeteksi (${overflow.scrollWidth}px > ${overflow.innerWidth}px, selisih ${overflow.diff}px)`);
+        console.log(`  ✗ [FAIL OVERFLOW] ${pagePath} (${overflow.scrollWidth}px > ${overflow.innerWidth}px)`);
+      } else if (consoleErrors.length > 0 || pageErrors.length > 0) {
+        failures.push(`${pagePath}: Error konsol / runtime terdeteksi (${consoleErrors.length + pageErrors.length} errors)`);
+        console.log(`  ✗ [FAIL CONSOLE] ${pagePath}: ${consoleErrors.concat(pageErrors).join(' | ')}`);
+      } else {
+        console.log(`  ✓ [PASS] ${pagePath} (docWidth: ${overflow.scrollWidth}px, innerWidth: ${overflow.innerWidth}px, 0 errors)`);
+      }
+    } catch (err) {
+      failures.push(`${pagePath}: Gagal memuat (${err.message})`);
+      console.log(`  ✗ [LOAD ERROR] ${pagePath}: ${err.message}`);
+    } finally {
+      await page.close();
+    }
+  }
+
+  await context.close();
+
+  if (failures.length > 0) {
+    console.error(`\n❌ Total kegagalan audit mobile iPhone 13: ${failures.length}`);
+    return { success: false, failures };
+  }
+
+  console.log(`\n✔ Seluruh ${pageFiles.length} halaman non-Studio lolos: Bebas overflow horizontal dan bebas error konsol di iPhone 13!\n`);
+  return { success: true, failures: [] };
+}
 
 async function main() {
   console.log('========================================================================');
@@ -69,6 +145,12 @@ async function main() {
     const interactionResult = await runMobileInteractionSuite(browser, BASE_URL);
     if (!interactionResult || !interactionResult.success) {
       throw new Error('Audit interaksi sentuh seluler (scroll vs drag reorder) gagal!');
+    }
+
+    // 9. Mobile iPhone 13 Audit: Zero Horizontal Overflow & Zero Console Errors
+    const mobileAuditResult = await runMobileOverflowAndConsoleAudit(browser, BASE_URL);
+    if (!mobileAuditResult || !mobileAuditResult.success) {
+      throw new Error('Audit mobile iPhone 13 (horizontal overflow / console error) gagal!');
     }
 
     console.log('========================================================================');
