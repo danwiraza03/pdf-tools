@@ -69,30 +69,35 @@ PDFTools.Merge = {
     };
 
     let totalPagesMerged = 0;
+    let mergedBytes;
 
     try {
       if (isPageLevel) {
         // --- MODE 2: Page Organizer Mode ---
         const totalPages = items.length;
+        const assembledItems = [];
         for (let i = 0; i < totalPages; i++) {
           const item = items[i];
-          if (typeof onProgress === 'function') {
-            const percent = Math.round(((i + 1) / totalPages) * 85);
-            onProgress(percent, `Merging page ${i + 1} of ${totalPages} (${item.file.name} - p.${item.pageIndex + 1})...`);
-          }
-
-          const sourcePdf = await getOrLoadDoc(item.file);
-          const [copiedPage] = await mergedPdf.copyPages(sourcePdf, [item.pageIndex]);
-
-          // Apply rotation if specified
-          if (item.rotation) {
-            const currentRot = copiedPage.getRotation().angle || 0;
-            copiedPage.setRotation(degrees((currentRot + item.rotation) % 360));
-          }
-
-          mergedPdf.addPage(copiedPage);
-          totalPagesMerged++;
+          const sourcePdf = item.doc || await getOrLoadDoc(item.file);
+          assembledItems.push({
+            doc: sourcePdf,
+            pageIndex: item.pageIndex,
+            rotation: item.rotation || 0,
+            file: item.file
+          });
         }
+
+        const assembledResult = await PDFTools.Merge.assemble(assembledItems, {
+          targetDoc: mergedPdf,
+          onProgress: function (pct, status) {
+            if (typeof onProgress === 'function') {
+              onProgress(Math.round(pct * 0.90), status);
+            }
+          }
+        });
+
+        totalPagesMerged = assembledResult.pageCount;
+        mergedBytes = assembledResult.bytes;
       } else {
         // --- MODE 1: Whole-File List Mode ---
         const totalFiles = items.length;
@@ -111,13 +116,13 @@ PDFTools.Merge = {
             totalPagesMerged++;
           });
         }
-      }
 
-      if (typeof onProgress === 'function') {
-        onProgress(90, 'Saving merged PDF document...');
-      }
+        if (typeof onProgress === 'function') {
+          onProgress(90, 'Saving merged PDF document...');
+        }
 
-      const mergedBytes = await mergedPdf.save({ useObjectStreams: true });
+        mergedBytes = await mergedPdf.save({ useObjectStreams: true });
+      }
 
       if (typeof onProgress === 'function') {
         onProgress(100, 'Complete!');
@@ -136,6 +141,123 @@ PDFTools.Merge = {
       docCache.clear();
       throw mergeError;
     }
+  },
+
+  /**
+   * Assemble a list of individual pages from loaded PDFDocuments into a single document.
+   * Efficiently batches copyPages calls by grouping per source document and duplicate rounds,
+   * preserving shared resources (fonts, images, streams) and preventing file size explosion.
+   *
+   * @param {Array<{doc?: PDFDocument, file?: File, pageIndex: number, rotation?: number}>} items - Page items
+   * @param {Object|Function} [options={}] - Options object or onProgress callback
+   * @returns {Promise<{doc: PDFDocument, bytes: Uint8Array, pageCount: number}>}
+   */
+  assemble: async function (items, options = {}) {
+    if (!items || items.length === 0) {
+      throw new Error('At least one page item is required for assemble');
+    }
+
+    const lib = typeof PDFLib !== 'undefined' ? PDFLib : (typeof window !== 'undefined' ? window.PDFLib : null);
+    if (!lib) {
+      throw new Error('PDFLib library is required for assemble');
+    }
+    const { PDFDocument, degrees } = lib;
+
+    const onProgress = typeof options === 'function' ? options : (options && options.onProgress);
+    const targetDoc = (options && options.targetDoc) || await PDFDocument.create();
+
+    const totalPages = items.length;
+    if (typeof onProgress === 'function') {
+      onProgress(5, `Preparing ${totalPages} page(s) for assembly...`);
+    }
+
+    // Step 1: Group requested entries by source document
+    const docGroups = new Map(); // doc -> array of { resultSlot, pageIndex, rotation }
+
+    for (let slot = 0; slot < totalPages; slot++) {
+      const item = items[slot];
+      const doc = item.doc || item.sourceDoc || (item.file && item.file.doc);
+      if (!doc) {
+        throw new Error(`Item at position ${slot} is missing a source PDFDocument ('doc')`);
+      }
+      const pageIndex = item.pageIndex;
+      const rotation = item.rotation || 0;
+
+      if (!docGroups.has(doc)) {
+        docGroups.set(doc, []);
+      }
+      docGroups.get(doc).push({ resultSlot: slot, pageIndex: pageIndex, rotation: rotation });
+    }
+
+    // Array to hold the copied page and rotation for each result slot (0 .. totalPages - 1)
+    const resultSlots = new Array(totalPages);
+
+    const totalDocs = docGroups.size;
+    let completedDocs = 0;
+
+    // Step 2: One copyPages call per source document with all requested indices
+    for (const [doc, entries] of docGroups.entries()) {
+      const pageIndices = entries.map(e => e.pageIndex);
+      const copiedPages = await targetDoc.copyPages(doc, pageIndices);
+
+      for (let i = 0; i < entries.length; i++) {
+        const entry = entries[i];
+        resultSlots[entry.resultSlot] = {
+          page: copiedPages[i],
+          rotation: entry.rotation
+        };
+      }
+
+      completedDocs++;
+      if (typeof onProgress === 'function') {
+        const pct = Math.round(10 + (completedDocs / totalDocs) * 65);
+        onProgress(pct, `Copied pages from document ${completedDocs} of ${totalDocs}...`);
+      }
+    }
+
+    // Step 3: Add pages to the result document in the requested order and apply rotation
+    for (let slot = 0; slot < totalPages; slot++) {
+      const slotData = resultSlots[slot];
+      if (!slotData || !slotData.page) {
+        continue;
+      }
+      const copiedPage = slotData.page;
+      const rotation = slotData.rotation || 0;
+
+      if (rotation !== 0) {
+        const currentRot = copiedPage.getRotation().angle || 0;
+        copiedPage.setRotation(degrees((currentRot + rotation) % 360));
+      }
+
+      targetDoc.addPage(copiedPage);
+
+      if (typeof onProgress === 'function' && (slot % 10 === 0 || slot === totalPages - 1)) {
+        const pct = Math.round(75 + ((slot + 1) / totalPages) * 15);
+        onProgress(pct, `Assembled page ${slot + 1} of ${totalPages}...`);
+      }
+    }
+
+    if (typeof onProgress === 'function') {
+      onProgress(92, 'Optimizing and saving document streams...');
+    }
+
+    // Save with useObjectStreams: true for optimal compression
+    const bytes = await targetDoc.save({ useObjectStreams: true });
+
+    if (typeof onProgress === 'function') {
+      onProgress(100, 'Complete!');
+    }
+
+    return {
+      doc: targetDoc,
+      bytes: bytes,
+      pageCount: totalPages
+    };
   }
 };
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = PDFTools.Merge;
+}
+
 

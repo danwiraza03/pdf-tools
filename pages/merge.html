@@ -1906,8 +1906,6 @@
         mergeBtn.disabled = true;
 
         try {
-          const mergedPdf = await PDFLib.PDFDocument.create();
-
           // Cache source documents
           const fileDocCache = new Map();
           for (let i = 0; i < allUploadedFiles.length; i++) {
@@ -1923,24 +1921,25 @@
 
           let hasDigitalSignatures = false;
 
+          const itemsToAssemble = [];
           for (let i = 0; i < ordered.length; i++) {
             const { item } = ordered[i];
             const sourceDoc = fileDocCache.get(item.file);
             if (!sourceDoc) continue;
-
-            const [copiedPage] = await mergedPdf.copyPages(sourceDoc, [item.pageIndex]);
-
-            // Apply orientation / rotation
-            if (item.rotation !== 0) {
-              const currentRot = copiedPage.getRotation().angle;
-              copiedPage.setRotation(PDFLib.degrees((currentRot + item.rotation) % 360));
-            }
-
-            mergedPdf.addPage(copiedPage);
-            progress.update(Math.round(((i + 1) / ordered.length) * 100), `Merging page ${i + 1} of ${ordered.length}...`);
+            itemsToAssemble.push({
+              doc: sourceDoc,
+              pageIndex: item.pageIndex,
+              rotation: item.rotation || 0
+            });
           }
 
-          mergedData = await mergedPdf.save();
+          const assembleResult = await PDFTools.Merge.assemble(itemsToAssemble, {
+            onProgress: function (pct, text) {
+              progress.update(pct, text);
+            }
+          });
+
+          mergedData = assembleResult.bytes;
           progress.hide();
 
           organizerArea.style.display = 'none';
