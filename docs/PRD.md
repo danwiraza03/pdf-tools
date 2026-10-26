@@ -110,3 +110,10 @@ Semua fungsionalitas diuji melalui suite pengujian otomatis (`node tests/run_all
 - **Verifikasi Hasil Aktual**: Pengujian wajib memeriksa hasil keluaran dokumen/buffer/stream aktual, bukan hanya memeriksa ada atau tidaknya deklarasi fungsi.
 - **Larangan Klaim Tanpa Pembuktian Uji**: Dilarang mencantumkan klaim fitur di README, test, toast, atau komentar yang belum dibuktikan secara otomatis oleh test harness.
 - **Validasi Keamanan Data**: Untuk fitur sensitif (enkripsi sandi, redaksi permanen, sanitasi tanda tangan), wajib ada test yang membuktikan data rahasia benar-benar terenkripsi atau terhapus total tanpa kebocoran stream.
+
+---
+
+## 6. Masalah yang Diketahui (Known Issues)
+
+- **Unlock PDF**: Unlock pada PDF terenkripsi buatan alat lain tidak membawa Title dan Author.
+

@@ -196,6 +196,12 @@ Rangkaian tes ini mencakup 13 suite pengujian otomatis: validasi sintaks JavaScr
 
 ---
 
+## ⚠️ Masalah yang Diketahui (Known Issues)
+
+- **Unlock PDF**: Unlock pada PDF terenkripsi buatan alat lain tidak membawa Title dan Author.
+
+---
+
 ## 📜 Lisensi
 
 Aplikasi **PDF Tools** ini dirilis sebagai perangkat lunak sumber terbuka di bawah lisensi [MIT License](LICENSE).
