@@ -1,7 +1,8 @@
 const fs = require('fs');
 const path = require('path');
-const { chromium, devices } = require('playwright');
+const { devices } = require('playwright');
 const { startTestServer } = require('./helpers');
+const { launchChromium } = require('./helpers/launch');
 const { runStudioRedactionTests } = require('./test_studio_redaction');
 const { runSkippedToolsTests } = require('./test_skipped_tools');
 const { runCompressEffectivenessTest } = require('./test_compress_effectiveness');
@@ -106,10 +107,12 @@ async function main() {
     console.log(`Test server is active on ${BASE_URL}`);
 
     console.log('Launching Playwright Chromium browser...');
-    browser = await chromium.launch({
+    browser = await launchChromium({
       headless: true
     });
     console.log('Browser launched successfully.');
+
+    let totalSkippedWebKit = 0;
 
     // 1. PDF Studio Redaction Tests (Normal & /Rotate 90)
     await runStudioRedactionTests(browser, BASE_URL);
@@ -144,12 +147,14 @@ async function main() {
     if (!headerResult || !headerResult.success) {
       throw new Error(`Audit header dan navigasi seluler gagal dengan ${headerResult ? headerResult.failures.length : 0} kegagalan!`);
     }
+    totalSkippedWebKit += (headerResult.skippedWebKit || 0);
 
     // 8. Mobile Touch Drag vs Vertical Scroll Interaction Audit
     const interactionResult = await runMobileInteractionSuite(browser, BASE_URL);
     if (!interactionResult || !interactionResult.success) {
       throw new Error('Audit interaksi sentuh seluler (scroll vs drag reorder) gagal!');
     }
+    totalSkippedWebKit += (interactionResult.skippedWebKit || 0);
 
     // 9. Mobile iPhone 13 Audit: Zero Horizontal Overflow & Zero Console Errors
     const mobileAuditResult = await runMobileOverflowAndConsoleAudit(browser, BASE_URL);
@@ -163,17 +168,23 @@ async function main() {
 
     // 11. Watermark Image UI Suite & iPhone 13 WebKit Mobile Verification
     await runWatermarkUiSuite(browser, BASE_URL);
-    await runWatermarkUiWebKitMobile(BASE_URL);
+    const wmUiRes = await runWatermarkUiWebKitMobile(BASE_URL);
+    totalSkippedWebKit += (wmUiRes?.skippedWebKit || 0);
 
     // 12. Watermark Rotation & Opacity Unified Controls Suite (Chromium & iPhone 13 WebKit)
     await runRotationOpacitySuite(browser, BASE_URL);
-    await runRotationOpacityWebKitMobile(BASE_URL);
+    const wmRotRes = await runRotationOpacityWebKitMobile(BASE_URL);
+    totalSkippedWebKit += (wmRotRes?.skippedWebKit || 0);
 
     // 13. Merge Size Optimization & UI Reordering Suite (Chromium & iPhone 13 WebKit)
-    await runMergeSizeBrowserSuite(browser, BASE_URL);
+    const mergeRes = await runMergeSizeBrowserSuite(browser, BASE_URL);
+    totalSkippedWebKit += (mergeRes?.skippedWebKit || 0);
 
     console.log('========================================================================');
     console.log('                 BROWSER TESTS COMPLETE: ALL PASSED!                   ');
+    if (totalSkippedWebKit > 0) {
+      console.log(`  [DILEWATI] Total suite WebKit dilewati (lokal): ${totalSkippedWebKit}`);
+    }
     console.log('========================================================================\n');
     process.exitCode = 0;
   } catch (err) {

@@ -2,8 +2,7 @@ const assert = require('assert');
 const path = require('path');
 const fs = require('fs');
 const PDFLib = require(path.resolve(__dirname, '../../js/lib/pdf-lib.min.js'));
-const { startTestServer } = require('./helpers');
-const { chromium } = require('playwright');
+const { startTestServer, launchChromium } = require('./helpers');
 
 // Setup Node environment to run PDFTools.Watermark in Node
 global.PDFLib = PDFLib;
@@ -612,7 +611,7 @@ if (require.main === module) {
 
       // 2. Run Browser tests
       server = await startTestServer(8765);
-      browser = await chromium.launch({ headless: true });
+      browser = await launchChromium({ headless: true });
       await runWatermarkImageBrowserTests(browser, 'http://127.0.0.1:8765');
       console.log('\n✅ ALL WATERMARK IMAGE TESTS PASSED!\n');
       process.exitCode = 0;

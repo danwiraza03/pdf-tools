@@ -1,8 +1,8 @@
 const fs = require('fs');
 const path = require('path');
-const { chromium, webkit, devices } = require('playwright');
+const { devices } = require('playwright');
 const PDFLib = require(path.resolve(__dirname, '../../js/lib/pdf-lib.min.js'));
-const { startTestServer } = require('./helpers');
+const { startTestServer, launchChromium, launchWebKit } = require('./helpers');
 
 const TEST_PORT = 8765;
 const BASE_URL = `http://127.0.0.1:${TEST_PORT}`;
@@ -364,17 +364,19 @@ async function runMobileAuditSuite() {
     server = await startTestServer(TEST_PORT);
     console.log(`[Test Server] Standalone server active on ${BASE_URL}`);
 
-    chromiumBrowser = await chromium.launch({ headless: true });
+    chromiumBrowser = await launchChromium({ headless: true });
     console.log('[Browser] Chromium engine launched successfully.');
 
     // Check WebKit availability
     let hasWebKit = false;
-    try {
-      webkitBrowser = await webkit.launch({ headless: true });
+    let skippedWebKitCount = 0;
+    webkitBrowser = await launchWebKit({ headless: true });
+    if (webkitBrowser) {
       hasWebKit = true;
       console.log('[Browser] WebKit engine launched successfully.');
-    } catch (e) {
-      console.warn('[Browser] WebKit tidak tersedia / gagal dibuka:', e.message);
+    } else {
+      skippedWebKitCount++;
+      console.log('[Browser] ⚠️  [DILEWATI] Pengujian WebKit pada audit seluler dilewati karena WebKit tidak tersedia.');
     }
 
     // Define Device Matrix
@@ -512,7 +514,7 @@ async function runMobileAuditSuite() {
     if (shouldSaveScreenshots || (fs.existsSync(SCREENSHOT_DIR) && fs.readdirSync(SCREENSHOT_DIR).length > 0)) {
       console.log(`Screenshots saved to: ${SCREENSHOT_DIR}`);
     }
-    return { success: true, auditResults, sortableResults };
+    return { success: true, auditResults, sortableResults, skippedWebKit: skippedWebKitCount };
   } catch (fatalErr) {
     console.error('Fatal crash during mobile audit:', fatalErr);
     return { success: false, error: fatalErr };

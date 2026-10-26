@@ -1,9 +1,9 @@
 const assert = require('assert');
 const path = require('path');
 const fs = require('fs');
-const { chromium, webkit, devices } = require('playwright');
+const { devices } = require('playwright');
 const PDFLib = require(path.resolve(__dirname, '../../js/lib/pdf-lib.min.js'));
-const { startTestServer } = require('./helpers');
+const { startTestServer, launchChromium, launchWebKit } = require('./helpers');
 const { getTempDir } = require('./helpers/tmp');
 
 /**
@@ -364,7 +364,12 @@ async function runRotationOpacityWebKitMobile(baseUrl) {
   console.log(`>>> [TEST] Watermark Rotation & Opacity on iPhone 13 (WebKit)`);
   console.log(`========================================================================`);
 
-  const browser = await webkit.launch({ headless: true });
+  const browser = await launchWebKit({ headless: true });
+  if (!browser) {
+    console.log('  ⚠️  [DILEWATI] Watermark Rotation & Opacity iPhone 13 (WebKit) dilewati karena WebKit tidak tersedia.');
+    return { success: true, skipped: true, skippedWebKit: 1 };
+  }
+
   const context = await browser.newContext({
     ...devices['iPhone 13'],
     hasTouch: true
@@ -420,7 +425,7 @@ if (require.main === module) {
     let browser;
     try {
       server = await startTestServer(8765);
-      browser = await chromium.launch({ headless: true });
+      browser = await launchChromium({ headless: true });
       await runRotationOpacitySuite(browser, 'http://127.0.0.1:8765');
       await runRotationOpacityWebKitMobile('http://127.0.0.1:8765');
       console.log('\n🎉 ALL ROTATION & OPACITY TESTS PASSED!\n');

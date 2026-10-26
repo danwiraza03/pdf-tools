@@ -1,7 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { chromium } = require('playwright');
-const { startTestServer } = require('./helpers');
+const { startTestServer, launchChromium } = require('./helpers');
 
 const TEST_PORT = 8765;
 const BASE_URL = `http://127.0.0.1:${TEST_PORT}`;
@@ -26,7 +25,7 @@ async function testAllPagesForErrors(passedBrowser = null, passedBaseUrl = null)
   try {
     if (!browser) {
       server = await startTestServer(TEST_PORT);
-      browser = await chromium.launch({ headless: true });
+      browser = await launchChromium({ headless: true });
     }
 
     for (const pagePath of allPages) {

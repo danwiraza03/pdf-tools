@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
-const { chromium, webkit, devices } = require('playwright');
-const { startTestServer } = require('./helpers');
+const { devices } = require('playwright');
+const { startTestServer, launchChromium, launchWebKit } = require('./helpers');
 
 const TEST_PORT = 8765;
 const BASE_URL = `http://127.0.0.1:${TEST_PORT}`;
@@ -129,7 +129,7 @@ async function runMobileHeaderSuite(browserInstance = null, serverInstance = nul
       ownServer = true;
     }
     if (!browser) {
-      browser = await chromium.launch({ headless: true });
+      browser = await launchChromium({ headless: true });
       ownBrowser = true;
     }
 
@@ -195,9 +195,13 @@ async function runMobileHeaderSuite(browserInstance = null, serverInstance = nul
     }
 
     // Also run on iPhone 13 WebKit
-    if (webkit) {
-      console.log('\n--- Auditing iPhone 13 on WebKit Engine ---');
-      const webkitBrowser = await webkit.launch({ headless: true });
+    console.log('\n--- Auditing iPhone 13 on WebKit Engine ---');
+    let skippedWebKitCount = 0;
+    const webkitBrowser = await launchWebKit({ headless: true });
+    if (!webkitBrowser) {
+      console.log('  ⚠️  [DILEWATI] Audit iPhone 13 pada WebKit Engine dilewati karena WebKit tidak tersedia.');
+      skippedWebKitCount++;
+    } else {
       try {
         for (const pagePath of allPages) {
           checksRun++;
@@ -253,7 +257,8 @@ async function runMobileHeaderSuite(browserInstance = null, serverInstance = nul
     return {
       success: failures.length === 0,
       failures,
-      checksRun
+      checksRun,
+      skippedWebKit: skippedWebKitCount
     };
 
   } finally {

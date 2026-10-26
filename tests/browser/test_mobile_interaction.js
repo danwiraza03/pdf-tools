@@ -1,8 +1,8 @@
 const fs = require('fs');
 const path = require('path');
-const { chromium, webkit, devices } = require('playwright');
+const { devices } = require('playwright');
 const PDFLib = require(path.resolve(__dirname, '../../js/lib/pdf-lib.min.js'));
-const { startTestServer } = require('./helpers');
+const { startTestServer, launchChromium, launchWebKit } = require('./helpers');
 
 const TEST_PORT = 8765;
 const BASE_URL = `http://127.0.0.1:${TEST_PORT}`;
@@ -309,7 +309,7 @@ async function runMobileInteractionSuite(existingBrowser, existingBaseUrl) {
   try {
     if (!existingBrowser) {
       server = await startTestServer(TEST_PORT);
-      browser = await chromium.launch({ headless: true });
+      browser = await launchChromium({ headless: true });
     }
 
     for (const pagePath of targetPages) {
@@ -540,8 +540,12 @@ async function runMobileInteractionSuite(existingBrowser, existingBaseUrl) {
 
     // 6. Test Batch PDF overflow on iPhone 13 WebKit
     console.log('\n--- Menguji Horizontal Overflow pages/batch.html pada iPhone 13 (WebKit) ---');
-    if (webkit) {
-      const webkitBrowser = await webkit.launch({ headless: true });
+    let skippedWebKitCount = 0;
+    const webkitBrowser = await launchWebKit({ headless: true });
+    if (!webkitBrowser) {
+      console.log('  ⚠️  [DILEWATI] Uji Horizontal Overflow pages/batch.html pada WebKit dilewati karena WebKit tidak tersedia.');
+      skippedWebKitCount++;
+    } else {
       try {
         const batchContext = await webkitBrowser.newContext({
           ...devices['iPhone 13']
@@ -606,7 +610,7 @@ async function runMobileInteractionSuite(existingBrowser, existingBaseUrl) {
     console.log('Catatan: CDP hanya didukung di engine Chromium. Perilaku WebKit/Safari memerlukan verifikasi manual pada perangkat iOS.');
 
     const allPassed = results.every(r => r.swipePassed);
-    return { success: allPassed, results };
+    return { success: allPassed, results, skippedWebKit: skippedWebKitCount };
 
   } finally {
     if (browser && !existingBrowser) await browser.close();

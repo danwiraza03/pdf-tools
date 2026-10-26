@@ -7,14 +7,14 @@ const fs = require('fs');
 const path = require('path');
 const assert = require('assert');
 const zlib = require('zlib');
-const { chromium, webkit, devices } = require('playwright');
+const { devices } = require('playwright');
 
 const ROOT_DIR = path.resolve(__dirname, '../..');
 const PDFLib = require(path.join(ROOT_DIR, 'js/lib/pdf-lib.min.js'));
 const pdfjs = require(path.join(ROOT_DIR, 'js/lib/pdf.min.js'));
 pdfjs.GlobalWorkerOptions.workerSrc = path.join(ROOT_DIR, 'js/lib/pdf.worker.min.js');
 
-const { startTestServer } = require('./helpers');
+const { startTestServer, launchChromium, launchWebKit } = require('./helpers');
 const { getTempDir } = require('./helpers/tmp');
 
 /**
@@ -203,23 +203,30 @@ async function runMergeSizeBrowserSuite(chromiumBrowser, baseUrl) {
 
     // 2. WebKit iPhone 13
     let webkitBrowser;
+    let skippedWebKit = 0;
     try {
-      webkitBrowser = await webkit.launch({ headless: true });
-      await runMergeBrowserTestForEngine(
-        webkitBrowser,
-        baseUrl,
-        fixtures,
-        'iPhone 13 (WebKit)',
-        {
-          ...devices['iPhone 13'],
-          hasTouch: true
-        }
-      );
+      webkitBrowser = await launchWebKit({ headless: true });
+      if (!webkitBrowser) {
+        console.log('  ⚠️  [DILEWATI] Pengujian WebKit pada iPhone 13 dilewati karena WebKit tidak tersedia.');
+        skippedWebKit++;
+      } else {
+        await runMergeBrowserTestForEngine(
+          webkitBrowser,
+          baseUrl,
+          fixtures,
+          'iPhone 13 (WebKit)',
+          {
+            ...devices['iPhone 13'],
+            hasTouch: true
+          }
+        );
+      }
     } finally {
       if (webkitBrowser) {
         await webkitBrowser.close();
       }
     }
+    return { success: true, skippedWebKit };
   } finally {
     temp.cleanup();
   }
@@ -231,7 +238,7 @@ if (require.main === module) {
     let browser;
     try {
       server = await startTestServer(8765);
-      browser = await chromium.launch({ headless: true });
+      browser = await launchChromium({ headless: true });
       await runMergeSizeBrowserSuite(browser, 'http://127.0.0.1:8765');
       process.exitCode = 0;
     } catch (err) {

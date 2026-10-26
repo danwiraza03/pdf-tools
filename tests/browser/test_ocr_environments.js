@@ -1,6 +1,5 @@
 const path = require('path');
-const { chromium } = require('playwright');
-const { startTestServer, createTestPdf } = require('./helpers');
+const { startTestServer, createTestPdf, launchChromium } = require('./helpers');
 
 const TEST_PORT = 8765;
 const BASE_HTTP = `http://127.0.0.1:${TEST_PORT}`;
@@ -31,7 +30,7 @@ async function runOcrEnvironmentTests(passedBrowser = null, passedBaseUrl = null
       console.log(`[Test Server] Running at ${baseUrl}`);
 
       console.log('[Browser] Launching Chromium...');
-      browser = await chromium.launch({
+      browser = await launchChromium({
         headless: true
       });
     }

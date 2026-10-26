@@ -123,10 +123,15 @@ function startTestServer(port = 8765) {
   });
 }
 
+const { launchChromium, launchWebKit } = require('./helpers/launch');
+
 module.exports = {
   createTestPdf,
   createColorPdf,
   createSampleDocx,
   createSampleXlsx,
-  startTestServer
+  startTestServer,
+  launchChromium,
+  launchWebKit
 };
+
