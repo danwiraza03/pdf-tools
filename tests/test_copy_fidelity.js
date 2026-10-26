@@ -926,6 +926,61 @@ async function run() {
   }
 
   // =========================================================================
+  // S10: Merge: extract metadata from first file that HAS metadata (Item 3)
+  // =========================================================================
+  console.log('\n[S10] Merge: extract metadata from first file that HAS metadata');
+  {
+    // File 1: Has NO metadata (empty/default)
+    const doc1 = await PDFDocument.create();
+    const font1 = await doc1.embedFont(StandardFonts.Helvetica);
+    const p1 = doc1.addPage([300, 300]);
+    p1.drawText('Doc 1 without metadata', { x: 50, y: 250, size: 12, font: font1 });
+    const bytes1 = await doc1.save({ useObjectStreams: false });
+
+    // File 2: HAS metadata
+    const doc2 = await PDFDocument.create();
+    const font2 = await doc2.embedFont(StandardFonts.Helvetica);
+    const p2 = doc2.addPage([300, 300]);
+    p2.drawText('Doc 2 with metadata', { x: 50, y: 250, size: 12, font: font2 });
+    doc2.setTitle('Judul Berkas Kedua');
+    doc2.setAuthor('Penulis Berkas Kedua');
+    doc2.setSubject('Subjek Berkas Kedua');
+    doc2.setKeywords(['kunci1', 'kunci2']);
+    const bytes2 = await doc2.save({ useObjectStreams: false });
+
+    // File 3: Also has metadata (should NOT override file 2)
+    const doc3 = await PDFDocument.create();
+    const font3 = await doc3.embedFont(StandardFonts.Helvetica);
+    const p3 = doc3.addPage([300, 300]);
+    p3.drawText('Doc 3 with other metadata', { x: 50, y: 250, size: 12, font: font3 });
+    doc3.setTitle('Judul Berkas Ketiga');
+    const bytes3 = await doc3.save({ useObjectStreams: false });
+
+    // Mode 1: Merge files [file1, file2, file3]
+    const file1 = bytesToFile(bytes1, 'doc1_nometa.pdf');
+    const file2 = bytesToFile(bytes2, 'doc2_hasmeta.pdf');
+    const file3 = bytesToFile(bytes3, 'doc3_hasmeta.pdf');
+
+    const mergeRes = await PDFTools.Merge.merge([file1, file2, file3]);
+    const outBytes = mergeRes.bytes;
+
+    const outDoc = await PDFDocument.load(outBytes, { ignoreEncryption: true });
+    equals(outDoc.getTitle(), 'Judul Berkas Kedua', 'S10 (Mode 1): title is taken from file 2 (first file that has metadata)');
+    equals(outDoc.getAuthor(), 'Penulis Berkas Kedua', 'S10 (Mode 1): author is taken from file 2');
+    equals(outDoc.getSubject(), 'Subjek Berkas Kedua', 'S10 (Mode 1): subject is taken from file 2');
+
+    // Mode 2: Assemble [page from doc1, page from doc2, page from doc3]
+    const assembleRes = await PDFTools.Merge.assemble([
+      { doc: doc1, pageIndex: 0, rotation: 0 },
+      { doc: doc2, pageIndex: 0, rotation: 0 },
+      { doc: doc3, pageIndex: 0, rotation: 0 }
+    ]);
+    const outAssembleDoc = await PDFDocument.load(assembleRes.bytes, { ignoreEncryption: true });
+    equals(outAssembleDoc.getTitle(), 'Judul Berkas Kedua', 'S10 (Mode 2): title is taken from file 2 in page assemble');
+    equals(outAssembleDoc.getAuthor(), 'Penulis Berkas Kedua', 'S10 (Mode 2): author is taken from file 2 in page assemble');
+  }
+
+  // =========================================================================
   // Final summary
   // =========================================================================
   console.log('\n========================================================================');

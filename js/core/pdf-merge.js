@@ -18,6 +18,26 @@ PDFTools.Merge = {
    * @param {Function} onProgress - Progress callback (percent, text)
    * @returns {Promise<{bytes: Uint8Array, hadSignatures: boolean, sigFileCount: number, pageCount: number}>}
    */
+  /**
+   * Check if a PDF document has non-empty metadata
+   */
+  _hasMetadata: function (doc) {
+    if (!doc) return false;
+    try {
+      const title = doc.getTitle();
+      if (title && title.trim()) return true;
+      const author = doc.getAuthor();
+      if (author && author.trim()) return true;
+      const subject = doc.getSubject();
+      if (subject && subject.trim()) return true;
+      const keywords = doc.getKeywords();
+      if (Array.isArray(keywords) ? keywords.length > 0 : (keywords && keywords.trim())) return true;
+    } catch (e) {
+      return false;
+    }
+    return false;
+  },
+
   merge: async function (items, onProgress) {
     if (!items || items.length === 0) {
       throw new Error('At least one item or page is required for merging');
@@ -103,7 +123,7 @@ PDFTools.Merge = {
         const totalFiles = items.length;
         const pageMapMode1 = new Map(); // srcDoc -> Map<srcIdx, destRef>
         const sourceNamesMode1 = new Map();
-        let firstSourceMode1 = null;
+        const allSourcesMode1 = [];
 
         for (let i = 0; i < totalFiles; i++) {
           const file = items[i];
@@ -113,7 +133,7 @@ PDFTools.Merge = {
           }
 
           const sourcePdf = await getOrLoadDoc(file);
-          if (!firstSourceMode1) firstSourceMode1 = sourcePdf;
+          allSourcesMode1.push(sourcePdf);
           const pageIndices = sourcePdf.getPageIndices();
           const copiedPages = await mergedPdf.copyPages(sourcePdf, pageIndices);
           const innerMap = new Map();
@@ -130,10 +150,22 @@ PDFTools.Merge = {
           onProgress(88, 'Remapping links and bookmarks...');
         }
 
+        // Pick metadata from the first source that HAS metadata
+        let primarySourceMode1 = null;
+        for (const src of allSourcesMode1) {
+          if (this._hasMetadata(src)) {
+            primarySourceMode1 = src;
+            break;
+          }
+        }
+        if (!primarySourceMode1 && allSourcesMode1.length > 0) {
+          primarySourceMode1 = allSourcesMode1[0];
+        }
+
         // Apply copy-fidelity post-processing
         if (PDFTools.PdfCopy && typeof PDFTools.PdfCopy.finalize === 'function') {
           await PDFTools.PdfCopy.finalize(mergedPdf, pageMapMode1, {
-            primarySource: firstSourceMode1,
+            primarySource: primarySourceMode1,
             mergeMode: totalFiles > 1,
             sourceNames: sourceNamesMode1
           });
@@ -283,7 +315,18 @@ PDFTools.Merge = {
       }
     }
 
-    const primarySource = items[0] && (items[0].doc || items[0].sourceDoc);
+    // Pick metadata from the first source that HAS metadata
+    let primarySource = null;
+    for (const item of items) {
+      const doc = item.doc || item.sourceDoc || (item.file && item.file.doc);
+      if (doc && PDFTools.Merge._hasMetadata(doc)) {
+        primarySource = doc;
+        break;
+      }
+    }
+    if (!primarySource && items[0]) {
+      primarySource = items[0].doc || items[0].sourceDoc || (items[0].file && items[0].file.doc);
+    }
     const isMultiSource = docGroups.size > 1;
 
     // Call finalize: remap links, rebuild bookmarks, copy metadata, purge ghosts
