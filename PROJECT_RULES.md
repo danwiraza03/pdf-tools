@@ -182,10 +182,9 @@ Struktur internal editor PDF Studio Pro dipecah ke dalam modul-modul modular ber
 
 2. **Font Intelligence & Embedding Subsystem**:
    - `font-normalizer.js`: Parser PostScript Font Name dan pemetaan nama font standar.
-   - `font-intelligence.js`: Inferensi bobot (*weight*), gaya (*style*), dan fallback font point-based.
+   - `font-intelligence.js`: Inferensi bobot (*weight*), gaya (*style*), dan fallback font point-based (`FontIntelligenceEngine`).
    - `font-resolver.js`: Pemetaan font PDF-Lib (Standard 14 Fonts: Helvetica, Times, Courier, dll.).
    - `font-registry.js`: Registri font lokal dan font sistem yang tersedia.
-   - `font-engine.js`: Mesin embedding dan subsetting font TrueType / OpenType ke dalam PDF.
 
 3. **Koordinat, Kanvas & Background Sampling**:
    - `pdf-coordinate-engine.js`: Transformasi dua arah antara sistem koordinat PDF (origin kiri-bawah) dan koordinat Canvas/DOM (origin kiri-atas), zoom, dan rotasi.

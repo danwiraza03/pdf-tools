@@ -56,6 +56,13 @@ class FontIntelligenceEngine {
     return FontIntelligenceEngine.getDefaultStyle();
   }
 
+  /**
+   * Infer style at (x, y) point (alias for backward compatibility)
+   */
+  static inferAtPoint(textRuns, x, y) {
+    return this.inferStyleAtPoint(textRuns, x, y);
+  }
+
   static getDefaultStyle() {
     return {
       family: 'Arial',
