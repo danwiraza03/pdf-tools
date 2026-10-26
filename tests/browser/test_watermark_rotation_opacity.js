@@ -375,12 +375,13 @@ async function runRotationOpacityWebKitMobile(baseUrl) {
     assert.fail(`Forbidden native dialog triggered: ${dialog.type()} "${dialog.message()}"`);
   });
 
+  const temp = getTempDir('test_wm_rot_op_mobile');
+  const tempDir = temp.dir;
+
   try {
     await page.goto(`${baseUrl}/pages/watermark.html`, { waitUntil: 'domcontentloaded' });
     await page.waitForFunction(() => !!(window.PDFTools && window.PDFTools.Watermark));
 
-    const temp = getTempDir('test_wm_rot_op_mobile');
-    const tempDir = temp.dir;
     const whitePdfPath = path.join(tempDir, 'mobile_white.pdf');
     fs.writeFileSync(whitePdfPath, await createWhiteA4Pdf());
 

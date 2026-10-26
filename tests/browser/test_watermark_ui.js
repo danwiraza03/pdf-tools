@@ -322,6 +322,9 @@ async function runWatermarkUiWebKitMobile(baseUrl) {
     assert.fail(`Forbidden native dialog triggered: ${dialog.type()} with message: "${dialog.message()}"`);
   });
 
+  const temp = getTempDir('test_wm_ui_mobile');
+  const tempDir = temp.dir;
+
   try {
     await page.goto(`${baseUrl}/pages/watermark.html`, { waitUntil: 'domcontentloaded' });
     await page.waitForFunction(() => !!(window.PDFTools && window.PDFTools.Watermark));
@@ -331,8 +334,6 @@ async function runWatermarkUiWebKitMobile(baseUrl) {
     assert(!overflow1, 'Initial page on iPhone 13 must have zero horizontal overflow');
 
     // Upload PDF
-    const temp = getTempDir('test_wm_ui_mobile');
-    const tempDir = temp.dir;
     const pdfPath = path.join(tempDir, 'mobile_sample.pdf');
     fs.writeFileSync(pdfPath, await createGrayTestPdf());
     const pngPath = path.join(tempDir, 'mobile_wm.png');
