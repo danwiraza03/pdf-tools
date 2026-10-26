@@ -322,6 +322,55 @@ async function runMergeSignedBrowserSuite(browser, baseUrl) {
   }
 }
 
+/**
+ * 4. MUTATION CHECK: Deliberately stub removeDigitalSignatures and prove test FAILS
+ */
+async function runMutationCheck() {
+  console.log('\n========================================================================');
+  console.log('>>> [MUTATION CHECK] Deliberately Stubbing removeDigitalSignatures (NO-OP)');
+  console.log('========================================================================\n');
+
+  const signedBytes = await createSignedPdfFixture(PDFLib);
+  const normalBytes = await createNormalPdfFixture(PDFLib);
+
+  const file1 = {
+    name: 'kontrak_signed.pdf',
+    size: signedBytes.length,
+    lastModified: 1000,
+    buffer: signedBytes.buffer.slice(signedBytes.byteOffset, signedBytes.byteOffset + signedBytes.byteLength)
+  };
+  const file2 = {
+    name: 'lampiran_normal.pdf',
+    size: normalBytes.length,
+    lastModified: 2000,
+    buffer: normalBytes.buffer.slice(normalBytes.byteOffset, normalBytes.byteOffset + normalBytes.byteLength)
+  };
+
+  const origRemove = PDFTools.Compress.removeDigitalSignatures;
+  let mutationFailedAsExpected = false;
+  let caughtError = null;
+
+  try {
+    // Stub removeDigitalSignatures to do nothing
+    PDFTools.Compress.removeDigitalSignatures = async function () {
+      return { removed: false, count: 0 };
+    };
+
+    console.log('  [Mutation Check] Running PDFTools.Merge.merge with disabled removeDigitalSignatures...');
+    const result = await PDFTools.Merge.merge([file1, file2]);
+    await assertMergedPdfSignedClean(result.bytes);
+  } catch (err) {
+    mutationFailedAsExpected = true;
+    caughtError = err;
+  } finally {
+    PDFTools.Compress.removeDigitalSignatures = origRemove;
+  }
+
+  assert.ok(mutationFailedAsExpected, 'Mutation check failed: test should fail when removeDigitalSignatures is disabled!');
+  console.log(`  ✓ Mutation detected and rejected as expected: ${caughtError ? caughtError.message : 'Unknown'}`);
+  console.log('  ✓ Original removeDigitalSignatures restored and verified safe.\n');
+}
+
 // Standalone execution entry point
 if (require.main === module) {
   (async () => {
@@ -331,7 +380,10 @@ if (require.main === module) {
       // 1. Run Node Test
       await runNodeMergeSignedTest();
 
-      // 2. Start server and run Browser Tests
+      // 2. Run Mutation Check
+      await runMutationCheck();
+
+      // 3. Start server and run Browser Tests
       server = await startTestServer(8770);
       browser = await launchChromium();
       const baseUrl = 'http://127.0.0.1:8770';
@@ -353,6 +405,8 @@ if (require.main === module) {
 
 module.exports = {
   runNodeMergeSignedTest,
+  runMutationCheck,
   runMergeSignedBrowserSuite,
   assertMergedPdfSignedClean
 };
+
