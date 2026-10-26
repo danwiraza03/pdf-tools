@@ -984,8 +984,8 @@ a {
   padding: 8px 18px !important;
   font-size: 0.84rem !important;
   text-decoration: none !important;
-  display: inline-flex !important;
-  align-items: center !important;
+  display: inline-flex;
+  align-items: center;
   gap: 6px !important;
   box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35) !important;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
@@ -1830,10 +1830,6 @@ a {
   h2 { font-size: 1.5rem; }
   h3 { font-size: 1.25rem; }
 
-  .header-nav {
-    display: none;
-  }
-
   .dropzone {
     padding: var(--space-2xl) var(--space-lg);
   }
@@ -2241,9 +2237,102 @@ a {
   background: color-mix(in srgb, var(--tool-color, #6366f1), transparent 88%);
 }
 
-@media (max-width: 768px) {
+/* Consolidated Responsive Header Controls (Single Breakpoint <= 991px, Desktop >= 992px) */
+@media (max-width: 991px) {
+  .header-nav {
+    display: none !important;
+  }
+
   .mobile-menu-btn {
-    display: flex;
+    display: flex !important;
+  }
+
+  .theme-toggle span {
+    display: none;
+  }
+
+  .theme-toggle svg {
+    margin-right: 0 !important;
+  }
+
+  .theme-toggle {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+  }
+
+  .lang-toggle {
+    min-width: 36px;
+    height: 36px;
+    padding: 0 6px;
+    font-size: 0.78rem;
+  }
+
+  .nine-dots-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .mobile-menu-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .header-controls {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 640px) {
+  .header-inner {
+    padding: 0 14px;
+    gap: 8px;
+  }
+
+  .btn-header-studio {
+    display: none !important;
+  }
+
+  .header-controls {
+    gap: 6px;
+  }
+}
+
+@media (max-width: 380px) {
+  .header-inner {
+    padding: 0 10px;
+    gap: 6px;
+  }
+
+  .app-logo,
+  .header-logo {
+    gap: 8px;
+    font-size: 1.12rem;
+  }
+
+  .app-logo .logo-badge,
+  .header-logo .logo-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
+  }
+
+  .header-controls {
+    gap: 4px;
+  }
+
+  .theme-toggle,
+  .nine-dots-btn,
+  .mobile-menu-btn {
+    width: 34px;
+    height: 34px;
+  }
+
+  .lang-toggle {
+    min-width: 32px;
+    height: 34px;
+    padding: 0 4px;
+    font-size: 0.75rem;
   }
 }
 

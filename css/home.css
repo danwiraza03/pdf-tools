@@ -60,12 +60,7 @@
   50% { opacity: 0.5; transform: scale(1.2); }
 }
 
-/* --- Header Nav Items --- */
-.header-nav {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
+/* --- Header Nav Items (display and responsive controlled in style.css) --- */
 
 .header-nav .nav-link-item {
   text-transform: uppercase;
