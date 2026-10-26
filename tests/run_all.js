@@ -23,7 +23,8 @@ const tests = [
   { name: 'SortableJS Mobile Touch Options Audit (delayOnTouchOnly)', file: 'check_sortable_touch.js' },
   { name: 'Guard Audit: Batched copyPages Loops', file: 'check_copypages_loops.js' },
   { name: 'Merge Size & Resource Retention Verification', file: 'test_merge_size.js' },
-  { name: 'Copy Fidelity (Ghost Pages, Link Remapping, Bookmarks)', file: 'test_copy_fidelity.js' }
+  { name: 'Copy Fidelity (Ghost Pages, Link Remapping, Bookmarks)', file: 'test_copy_fidelity.js' },
+  { name: 'Repository Hygiene Guard (File Size & Untracked Paths)', file: 'check_repo_hygiene.js' }
 ];
 
 console.log('========================================================================');
