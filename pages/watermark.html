@@ -285,12 +285,92 @@
       font-size: 0.78rem;
       color: var(--text-muted);
     }
+
+    /* Uniform Slider Row Components */
+    .wm-slider-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      width: 100%;
+    }
+    .wm-slider-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+    }
+    .wm-slider-control-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+    }
+    .wm-range-input {
+      flex: 1;
+      min-height: 44px;
+      cursor: pointer;
+    }
+    .wm-number-input {
+      width: 76px;
+      min-height: 44px;
+      text-align: center;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md, 8px);
+      background: var(--bg-card);
+      color: var(--text-primary);
+      font-weight: 600;
+      font-size: 0.92rem;
+      padding: 4px 8px;
+    }
+    .wm-number-input:focus {
+      outline: none;
+      border-color: var(--tool-color, #EC4899);
+      box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.15);
+    }
+    .wm-val-badge {
+      font-weight: 700;
+      color: var(--tool-color, #EC4899);
+      margin-left: 4px;
+    }
+    .wm-slider-hint {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+    .wm-reset-btn {
+      min-width: 44px;
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md, 8px);
+      background: var(--bg-card);
+      cursor: pointer;
+      color: var(--text-secondary);
+      transition: all 0.15s ease;
+    }
+    .wm-reset-btn:hover {
+      border-color: var(--tool-color, #EC4899);
+      color: var(--tool-color, #EC4899);
+    }
+
+    @media (max-width: 640px) {
+      .wm-slider-control-wrap {
+        width: 100%;
+      }
+      .wm-range-input {
+        width: 100%;
+      }
+    }
     @media (pointer: coarse) {
       .segmented-btn,
       .wm-pos-btn,
       .wm-pos-tile-btn,
       #wmImageUploadBtn,
-      #wmRemoveImageBtn {
+      #wmRemoveImageBtn,
+      .wm-range-input,
+      .wm-number-input,
+      .wm-reset-btn {
         min-height: 44px;
         min-width: 44px;
       }
@@ -408,13 +488,16 @@
               </div>
 
               <!-- Image Scale Range Slider (5% to 100%, default 30%) -->
-              <div class="form-field" style="margin-top: 10px;">
-                <label for="wmScaleRange">
-                  <span data-i18n="watermark.image_scale">Image Size (% of page width)</span>:
-                  <span id="wmScaleVal" style="font-weight: 700; color: var(--tool-color, #EC4899);">30%</span>
-                </label>
-                <div style="display: flex; align-items: center; gap: 12px; margin-top: 6px;">
-                  <input type="range" id="wmScaleRange" min="5" max="100" value="30" style="flex: 1; min-height: 44px;">
+              <div class="form-field wm-slider-row" style="grid-column: 1 / -1; margin-top: 10px;">
+                <div class="wm-slider-header">
+                  <label for="wmScaleRange" style="margin: 0;">
+                    <span data-i18n="watermark.image_scale">Image Size (% of page width)</span>:
+                    <span id="wmScaleVal" class="wm-val-badge">30%</span>
+                  </label>
+                </div>
+                <div class="wm-slider-control-wrap">
+                  <input type="range" id="wmScaleRange" min="5" max="100" value="30" class="wm-range-input">
+                  <input type="number" id="wmScaleNum" min="5" max="100" value="30" class="wm-number-input">
                 </div>
               </div>
             </div>
@@ -459,26 +542,36 @@
               </div>
             </div>
 
-            <!-- Rotation Preset (Shared) -->
-            <div class="form-field">
-              <label data-i18n="watermark.rotation">Rotation Angle</label>
-              <select id="wmRotation">
-                <option value="45" selected>Diagonal (45°)</option>
-                <option value="0">Horizontal (0°)</option>
-                <option value="90">Vertical (90°)</option>
-                <option value="315">Reverse Diagonal (-45°)</option>
-              </select>
+            <!-- Unified Opacity Slider (Shared for Text and Image) -->
+            <div class="form-field wm-slider-row" style="grid-column: 1 / -1;">
+              <div class="wm-slider-header">
+                <label for="wmOpacityRange" style="margin: 0;">
+                  <span data-i18n="watermark.opacity">Opacity</span>:
+                  <span id="wmOpacityVal" class="wm-val-badge">30%</span>
+                </label>
+                <span class="wm-slider-hint" data-i18n="watermark.opacity_hint">100% = full opaque</span>
+              </div>
+              <div class="wm-slider-control-wrap">
+                <input type="range" id="wmOpacityRange" min="1" max="100" value="30" class="wm-range-input">
+                <input type="number" id="wmOpacityNum" min="1" max="100" value="30" class="wm-number-input">
+              </div>
             </div>
 
-            <!-- Transparency / Opacity (Shared) -->
-            <div class="form-field">
-              <label data-i18n="watermark.opacity">Transparency (Opacity)</label>
-              <select id="wmOpacity">
-                <option value="0.15">Light (15%)</option>
-                <option value="0.30" selected>Medium (30%)</option>
-                <option value="0.50">Bold (50%)</option>
-                <option value="0.80">Opaque (80%)</option>
-              </select>
+            <!-- Unified Rotation Slider (Shared for Text and Image) -->
+            <div class="form-field wm-slider-row" style="grid-column: 1 / -1;">
+              <div class="wm-slider-header">
+                <label for="wmRotationRange" style="margin: 0;">
+                  <span data-i18n="watermark.rotation">Rotation Angle</span>:
+                  <span id="wmRotationVal" class="wm-val-badge">0°</span>
+                </label>
+                <button type="button" id="wmResetRotationBtn" class="btn-icon wm-reset-btn" data-i18n-title="watermark.reset_rotation" title="Reset to 0°" aria-label="Reset rotation to 0°">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                </button>
+              </div>
+              <div class="wm-slider-control-wrap">
+                <input type="range" id="wmRotationRange" min="-180" max="180" value="0" class="wm-range-input">
+                <input type="number" id="wmRotationNum" min="-180" max="180" value="0" class="wm-number-input">
+              </div>
             </div>
           </div>
         </div>
@@ -655,7 +748,15 @@
       const wmThumbMeta = document.getElementById('wmThumbMeta');
       const wmRemoveImageBtn = document.getElementById('wmRemoveImageBtn');
       const wmScaleRange = document.getElementById('wmScaleRange');
+      const wmScaleNum = document.getElementById('wmScaleNum');
       const wmScaleVal = document.getElementById('wmScaleVal');
+      const wmOpacityRange = document.getElementById('wmOpacityRange');
+      const wmOpacityNum = document.getElementById('wmOpacityNum');
+      const wmOpacityVal = document.getElementById('wmOpacityVal');
+      const wmRotationRange = document.getElementById('wmRotationRange');
+      const wmRotationNum = document.getElementById('wmRotationNum');
+      const wmRotationVal = document.getElementById('wmRotationVal');
+      const wmResetRotationBtn = document.getElementById('wmResetRotationBtn');
       const wmPosTile = document.getElementById('wmPosTile');
 
       // Mode toggling
@@ -665,6 +766,7 @@
         wmModeImage.classList.remove('active');
         wmTextSection.style.display = 'contents';
         wmImageSection.style.display = 'none';
+        setOpacityValue(30);
       });
 
       wmModeImage.addEventListener('click', function () {
@@ -673,6 +775,7 @@
         wmModeText.classList.remove('active');
         wmTextSection.style.display = 'none';
         wmImageSection.style.display = 'block';
+        setOpacityValue(50);
       });
 
       // Position grid buttons
@@ -693,10 +796,89 @@
         selectedPosition = 'tile';
       });
 
-      // Range slider
-      wmScaleRange.addEventListener('input', function () {
-        wmScaleVal.textContent = `${this.value}%`;
+      // Unified Opacity synchronization
+      function setOpacityValue(val) {
+        val = parseInt(val, 10);
+        if (!Number.isFinite(val) || val < 1) val = 1;
+        if (val > 100) val = 100;
+        wmOpacityRange.value = val;
+        wmOpacityNum.value = val;
+        wmOpacityVal.textContent = `${val}%`;
+      }
+      wmOpacityRange.addEventListener('input', function () {
+        setOpacityValue(this.value);
       });
+      wmOpacityNum.addEventListener('input', function () {
+        const val = parseInt(this.value, 10);
+        if (Number.isFinite(val)) {
+          let clamped = val;
+          if (clamped < 1) clamped = 1;
+          if (clamped > 100) clamped = 100;
+          wmOpacityRange.value = clamped;
+          wmOpacityVal.textContent = `${clamped}%`;
+        }
+      });
+      wmOpacityNum.addEventListener('change', function () {
+        setOpacityValue(this.value);
+      });
+
+      // Unified Rotation synchronization
+      function setRotationValue(val) {
+        val = parseInt(val, 10);
+        if (!Number.isFinite(val)) val = 0;
+        if (val < -180) val = -180;
+        if (val > 180) val = 180;
+        wmRotationRange.value = val;
+        wmRotationNum.value = val;
+        wmRotationVal.textContent = `${val}°`;
+      }
+      wmRotationRange.addEventListener('input', function () {
+        setRotationValue(this.value);
+      });
+      wmRotationNum.addEventListener('input', function () {
+        const val = parseInt(this.value, 10);
+        if (Number.isFinite(val)) {
+          let clamped = val;
+          if (clamped < -180) clamped = -180;
+          if (clamped > 180) clamped = 180;
+          wmRotationRange.value = clamped;
+          wmRotationVal.textContent = `${clamped}°`;
+        }
+      });
+      wmRotationNum.addEventListener('change', function () {
+        setRotationValue(this.value);
+      });
+      wmResetRotationBtn.addEventListener('click', function () {
+        setRotationValue(0);
+      });
+
+      // Scale synchronization
+      function setScaleValue(val) {
+        val = parseInt(val, 10);
+        if (!Number.isFinite(val) || val < 5) val = 5;
+        if (val > 100) val = 100;
+        wmScaleRange.value = val;
+        if (wmScaleNum) wmScaleNum.value = val;
+        wmScaleVal.textContent = `${val}%`;
+      }
+      wmScaleRange.addEventListener('input', function () {
+        setScaleValue(this.value);
+      });
+      if (wmScaleNum) {
+        wmScaleNum.addEventListener('input', function () {
+          const val = parseInt(this.value, 10);
+          if (Number.isFinite(val)) {
+            let clamped = val;
+            if (clamped < 5) clamped = 5;
+            if (clamped > 100) clamped = 100;
+            wmScaleRange.value = clamped;
+            wmScaleVal.textContent = `${clamped}%`;
+          }
+        });
+        wmScaleNum.addEventListener('change', function () {
+          setScaleValue(this.value);
+        });
+      }
 
       // Image selection & removal
       wmImageUploadBtn.addEventListener('click', function () {
@@ -767,10 +949,10 @@
         }
 
         const text = document.getElementById('wmText').value.trim() || 'CONFIDENTIAL';
-        const rotation = parseInt(document.getElementById('wmRotation').value, 10);
+        const rotation = parseInt(wmRotationNum.value, 10) || 0;
         const fontSize = parseInt(document.getElementById('wmFontSize').value, 10);
-        const opacity = parseFloat(document.getElementById('wmOpacity').value);
-        const scale = parseInt(wmScaleRange.value, 10) / 100;
+        const opacity = (parseInt(wmOpacityNum.value, 10) || 30) / 100;
+        const scale = (parseInt(wmScaleNum ? wmScaleNum.value : wmScaleRange.value, 10) || 30) / 100;
 
         applyBtn.disabled = true;
         progress.show(PDFTools.i18n.t('action.processing'));
@@ -974,8 +1156,9 @@
         wmModeImage.classList.remove('active');
         wmTextSection.style.display = 'contents';
         wmImageSection.style.display = 'none';
-        wmScaleRange.value = '30';
-        wmScaleVal.textContent = '30%';
+        setScaleValue(30);
+        setOpacityValue(30);
+        setRotationValue(0);
         posButtons.forEach(b => b.classList.toggle('active', b.getAttribute('data-pos') === 'center'));
         wmPosTile.classList.remove('active');
 
