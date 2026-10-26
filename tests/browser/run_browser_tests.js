@@ -6,6 +6,7 @@ const { runCompressEffectivenessTest } = require('./test_compress_effectiveness'
 const { testAllPagesForErrors } = require('./test_page_errors');
 const { runOcrEnvironmentTests } = require('./test_ocr_environments');
 const { runPageWeightSuite } = require('./test_page_weight');
+const { runMobileHeaderSuite } = require('./test_mobile_header');
 
 const TEST_PORT = 8765;
 const BASE_URL = `http://127.0.0.1:${TEST_PORT}`;
@@ -55,6 +56,12 @@ async function main() {
     const weightResult = await runPageWeightSuite(browser, BASE_URL);
     if (!weightResult || !weightResult.success) {
       throw new Error('Audit beban unduhan halaman dan lazy loading OCR gagal!');
+    }
+
+    // 7. Mobile Responsive Header & Navigation Audit across breakpoints
+    const headerResult = await runMobileHeaderSuite(browser, server);
+    if (!headerResult || !headerResult.success) {
+      throw new Error(`Audit header dan navigasi seluler gagal dengan ${headerResult ? headerResult.failures.length : 0} kegagalan!`);
     }
 
     console.log('========================================================================');

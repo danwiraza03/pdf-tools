@@ -376,6 +376,8 @@ Setiap halaman tool berdiri sendiri (*standalone tool page*) di folder `pages/` 
 7. **Status Hijau CI/CD GitHub Actions Wajib**:
    - Setiap commit di branch `master` **WAJIB berstatus hijau** pada pipeline GitHub Actions (`.github/workflows/test.yml`).
    - Jika status CI berubah menjadi merah (gagal), perbaikan **WAJIB didahulukan** sebelum pekerjaan atau penambahan fitur lain.
+8. **Uji Menu Seluler & Responsivitas Header Wajib**:
+   - Setiap perubahan pada komponen header, navbar, atau styling header (`css/style.css`, `css/home.css`, `js/components/header.js`) wajib lulus test menu seluler (`tests/browser/test_mobile_header.js`).
 
 ---
 
