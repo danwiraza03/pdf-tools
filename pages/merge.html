@@ -496,6 +496,7 @@
 
         const startFileIndex = allUploadedFiles.length;
 
+        const skippedFiles = [];
         for (let f = 0; f < newFiles.length; f++) {
           const file = newFiles[f];
           allUploadedFiles.push(file);
@@ -513,8 +514,9 @@
           };
 
           try {
-            const arrayBuffer = await PDFTools.FileUtils.readAsArrayBuffer(file);
-            const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer).slice(0) });
+            const decryptedDoc = await PDFTools.FileUtils.loadPdfDecrypted(file);
+            const decryptedBytes = await decryptedDoc.save();
+            const loadingTask = pdfjsLib.getDocument({ data: decryptedBytes });
             const pdfDoc = await loadingTask.promise;
             const totalPages = pdfDoc.numPages;
 
@@ -529,7 +531,8 @@
                 pageIndex: p - 1, // 0-indexed for pdf-lib
                 rotation: 0,
                 colorTheme: colorTheme,
-                pdfDocRef: pdfDoc
+                pdfDocRef: pdfDoc,
+                decryptedDoc: decryptedDoc
               };
               pdfDocRefs.add(pdfDoc);
               pageItemsMap.set(pageId, item);
@@ -539,7 +542,14 @@
             fileGroups.push(group);
           } catch (err) {
             console.error('Error loading PDF file:', file.name, err);
-            PDFTools.Toast.error(`Failed to load ${file.name}`);
+            const idx = allUploadedFiles.indexOf(file);
+            if (idx !== -1) allUploadedFiles.splice(idx, 1);
+
+            if (err && err.code === 'PASSWORD_CANCELLED') {
+              skippedFiles.push(file.name);
+            } else {
+              PDFTools.Toast.error(`Failed to load ${file.name}`);
+            }
           }
         }
 
@@ -549,7 +559,11 @@
         progress.hide();
         clearSelection();
         buildGrid();
-        PDFTools.Toast.success(`${newFiles.length} file(s) loaded!`);
+        if (skippedFiles.length > 0) {
+          PDFTools.Toast.info(`${skippedFiles.length} file(s) skipped: ${skippedFiles.join(', ')}`);
+        } else if (newFiles.length > 0 && fileGroups.length > 0) {
+          PDFTools.Toast.success(`${newFiles.length} file(s) loaded!`);
+        }
       }
 
       function saveInitialSnapshot() {
@@ -1907,13 +1921,11 @@
         mergeBtn.disabled = true;
 
         try {
-          // Cache source documents
           const fileDocCache = new Map();
           for (let i = 0; i < allUploadedFiles.length; i++) {
             const file = allUploadedFiles[i];
-            const arrayBuffer = await PDFTools.FileUtils.readAsArrayBuffer(file);
             try {
-              const doc = await PDFLib.PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+              const doc = await PDFTools.FileUtils.loadPdfDecrypted(file);
               fileDocCache.set(file, doc);
             } catch (loadErr) {
               console.warn('PDF load failed for', file.name, loadErr);

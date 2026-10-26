@@ -581,20 +581,28 @@
         if (PDFTools.Toast) PDFTools.Toast.error('Please select a PDF file');
         return;
       }
-      pdfFile = file;
-      pdfArrayBuffer = await file.arrayBuffer();
+      try {
+        const decryptedDoc = await PDFTools.FileUtils.loadPdfDecrypted(file);
+        const decryptedBytes = await decryptedDoc.save();
+        pdfFile = file;
+        pdfArrayBuffer = decryptedBytes.buffer.slice(decryptedBytes.byteOffset, decryptedBytes.byteOffset + decryptedBytes.byteLength);
 
-      if (PDFTools.FileUtils && PDFTools.FileUtils.initPdfJsWorker) {
-        PDFTools.FileUtils.initPdfJsWorker();
+        if (PDFTools.FileUtils && PDFTools.FileUtils.initPdfJsWorker) {
+          PDFTools.FileUtils.initPdfJsWorker();
+        }
+
+        const loadingTask = pdfjsLib.getDocument({ data: decryptedBytes });
+        pdfJsDoc = await loadingTask.promise;
+        totalPages = pdfJsDoc.numPages;
+        currentPage = 1;
+
+        if (PDFTools.Toast) PDFTools.Toast.success(`Loaded: ${file.name} (${totalPages} pages)`);
+        setStep(2);
+      } catch (err) {
+        if (err.code !== 'PASSWORD_CANCELLED') {
+          if (PDFTools.Toast) PDFTools.Toast.error(err.message || 'Could not load PDF');
+        }
       }
-
-      const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(pdfArrayBuffer.slice(0)) });
-      pdfJsDoc = await loadingTask.promise;
-      totalPages = pdfJsDoc.numPages;
-      currentPage = 1;
-
-      if (PDFTools.Toast) PDFTools.Toast.success(`Loaded: ${file.name} (${totalPages} pages)`);
-      setStep(2);
     }
 
     // === STEP 2: SIGNATURE CREATION ===
@@ -1161,9 +1169,8 @@
 
       try {
         const { PDFDocument } = PDFLib;
-        // Always read fresh ArrayBuffer to prevent "detached ArrayBuffer" error
-        const freshBytes = pdfFile ? await pdfFile.arrayBuffer() : pdfArrayBuffer.slice(0);
-        const pdfDoc = await PDFDocument.load(freshBytes, { ignoreEncryption: true });
+        const freshBytes = pdfArrayBuffer ? pdfArrayBuffer.slice(0) : (pdfFile ? await pdfFile.arrayBuffer() : null);
+        const pdfDoc = await PDFTools.FileUtils.loadPdfDecrypted(freshBytes || pdfFile);
         const pages = pdfDoc.getPages();
 
         const imageCache = new Map();
@@ -1246,8 +1253,7 @@
         }
         openStudioBtn.disabled = true;
         try {
-          const { PDFDocument } = PDFLib;
-          const pdfDoc = await PDFDocument.load(pdfArrayBuffer);
+          const pdfDoc = await PDFTools.FileUtils.loadPdfDecrypted(pdfArrayBuffer);
           const pages = pdfDoc.getPages();
 
           for (const item of placedItems) {

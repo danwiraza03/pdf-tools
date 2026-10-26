@@ -960,6 +960,7 @@
 
         try {
           const total = queuedFiles.length;
+          const skippedFiles = [];
           for (let i = 0; i < total; i++) {
             const file = queuedFiles[i];
             const basePct = Math.round((i / total) * 100);
@@ -984,17 +985,34 @@
               position: selectedPosition
             };
 
-            const resBytes = await PDFTools.Watermark.applyWatermark(file, watermarkOptions, function (pct, status) {
-              const fileStep = Math.round(basePct + (pct / total));
-              progress.update(fileStep, `[${i + 1}/${total}] ${file.name} - ${status}`);
-            });
+            try {
+              const resBytes = await PDFTools.Watermark.applyWatermark(file, watermarkOptions, function (pct, status) {
+                const fileStep = Math.round(basePct + (pct / total));
+                progress.update(fileStep, `[${i + 1}/${total}] ${file.name} - ${status}`);
+              });
 
-            const outName = `${file.name.replace(/\.pdf$/i, '')}_watermarked.pdf`;
-            batchResults.push({ name: outName, data: resBytes });
-            if (i === 0) watermarkedData = resBytes;
+              const outName = `${file.name.replace(/\.pdf$/i, '')}_watermarked.pdf`;
+              batchResults.push({ name: outName, data: resBytes });
+              if (!watermarkedData) watermarkedData = resBytes;
+            } catch (err) {
+              if (err.code === 'PASSWORD_CANCELLED') {
+                skippedFiles.push(file.name);
+                continue;
+              }
+              throw err;
+            }
           }
 
           progress.hide();
+
+          if (batchResults.length === 0) {
+            applyBtn.disabled = false;
+            if (skippedFiles.length > 0) {
+              PDFTools.Toast.info(`${skippedFiles.length} file(s) skipped: ${skippedFiles.join(', ')}`);
+            }
+            return;
+          }
+
           optionsPanel.style.display = 'none';
           document.getElementById('fileList').style.display = 'none';
           actionBar.classList.remove('active');
@@ -1019,7 +1037,11 @@
             await renderWatermarkPreview(watermarkedData);
           }
 
-          PDFTools.Toast.success(isBatchMode ? `All ${total} files watermarked successfully!` : PDFTools.i18n.t('result.watermark_success'));
+          if (skippedFiles.length > 0) {
+            PDFTools.Toast.info(`${skippedFiles.length} file(s) skipped: ${skippedFiles.join(', ')}`);
+          } else {
+            PDFTools.Toast.success(isBatchMode ? `All ${total} files watermarked successfully!` : PDFTools.i18n.t('result.watermark_success'));
+          }
         } catch (err) {
           console.error(err);
           progress.hide();

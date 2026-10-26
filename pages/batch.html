@@ -759,11 +759,7 @@
         } else if (operation === 'protect') {
           const pass = document.getElementById('protectPassInput').value;
           if (!pass) throw new Error('Password cannot be empty');
-          const { PDFDocument } = PDFLib;
-          const arrayBuffer = await file.arrayBuffer();
-          const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
-          pdfDoc.encrypt({ userPassword: pass, ownerPassword: pass });
-          return await pdfDoc.save();
+          return await PDFTools.Protect.protectPdf(file, pass, pass);
         }
         throw new Error('Unknown operation');
       }

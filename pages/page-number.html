@@ -281,8 +281,7 @@
             isBatchMode = files.length > 1;
 
             try {
-              const arrayBuffer = await PDFTools.FileUtils.readAsArrayBuffer(currentFile);
-              const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+              const pdfDoc = await PDFTools.FileUtils.loadPdfDecrypted(currentFile);
               totalDocPages = pdfDoc.getPages().length;
 
               if (isBatchMode) {
@@ -312,8 +311,7 @@
             currentFile = file;
             isBatchMode = false;
             try {
-              const arrayBuffer = await PDFTools.FileUtils.readAsArrayBuffer(currentFile);
-              const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+              const pdfDoc = await PDFTools.FileUtils.loadPdfDecrypted(currentFile);
               totalDocPages = pdfDoc.getPages().length;
               fileMetaLabel.textContent = `${currentFile.name} • ${totalDocPages} Pages • ${PDFTools.FileUtils.formatSize(currentFile.size)}`;
               startPageInput.max = totalDocPages;

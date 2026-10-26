@@ -513,18 +513,17 @@
 
         pdfFile = file;
         docTitle.textContent = file.name;
-        pdfArrayBuffer = await file.arrayBuffer();
-
         if (PDFTools.FileUtils && PDFTools.FileUtils.initPdfJsWorker) {
           PDFTools.FileUtils.initPdfJsWorker();
         }
 
-        // 1. Load with pdf-lib to analyze AcroForms
-        const { PDFDocument } = PDFLib;
-        pdfDocLib = await PDFDocument.load(pdfArrayBuffer, { ignoreEncryption: true });
+        // 1. Load with loadPdfDecrypted
+        pdfDocLib = await PDFTools.FileUtils.loadPdfDecrypted(file);
+        const decryptedBytes = await pdfDocLib.save();
+        pdfArrayBuffer = decryptedBytes.buffer.slice(decryptedBytes.byteOffset, decryptedBytes.byteOffset + decryptedBytes.byteLength);
 
         // 2. Load with PDF.js for crisp rendering
-        const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(pdfArrayBuffer.slice(0)) });
+        const loadingTask = pdfjsLib.getDocument({ data: decryptedBytes });
         pdfJsDoc = await loadingTask.promise;
         totalPages = pdfJsDoc.numPages;
         currentPage = 1;
