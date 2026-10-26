@@ -11,6 +11,7 @@ const { runPageWeightSuite } = require('./test_page_weight');
 const { runMobileHeaderSuite } = require('./test_mobile_header');
 const { runMobileInteractionSuite } = require('./test_mobile_interaction');
 const { runWatermarkImageBrowserTests, runNodeWatermarkImageTests } = require('./test_watermark_image');
+const { runWatermarkUiSuite, runWatermarkUiWebKitMobile } = require('./test_watermark_ui');
 
 const TEST_PORT = 8765;
 const BASE_URL = `http://127.0.0.1:${TEST_PORT}`;
@@ -157,6 +158,10 @@ async function main() {
     // 10. Watermark Image & Multi-orientation Tests (Single embed, 90 combinations & Mutation Check)
     await runNodeWatermarkImageTests();
     await runWatermarkImageBrowserTests(browser, BASE_URL);
+
+    // 11. Watermark Image UI Suite & iPhone 13 WebKit Mobile Verification
+    await runWatermarkUiSuite(browser, BASE_URL);
+    await runWatermarkUiWebKitMobile(BASE_URL);
 
     console.log('========================================================================');
     console.log('                 BROWSER TESTS COMPLETE: ALL PASSED!                   ');
