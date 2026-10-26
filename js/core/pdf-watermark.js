@@ -270,6 +270,10 @@ PDFTools.Watermark = {
    * @returns {Promise<Uint8Array>}
    */
   applyWatermark: async function (file, options, onProgress) {
+    if (typeof onProgress === 'object' && onProgress !== null) {
+      options = Object.assign({}, onProgress, options);
+      onProgress = options.onProgress;
+    }
     options = options || {};
     const type = options.type === 'image' ? 'image' : 'text';
     const text = options.text || 'CONFIDENTIAL';
@@ -320,9 +324,8 @@ PDFTools.Watermark = {
       file = file.file;
     }
 
-    const { PDFDocument, StandardFonts, rgb, degrees } = PDFLib;
-    const arrayBuffer = await PDFTools.FileUtils.readAsArrayBuffer(file);
-    const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+    const { StandardFonts, rgb, degrees } = PDFLib;
+    const pdfDoc = await PDFTools.FileUtils.loadPdfDecrypted(file, options);
 
     if (PDFTools.Compress && PDFTools.Compress.removeDigitalSignatures) {
       try {

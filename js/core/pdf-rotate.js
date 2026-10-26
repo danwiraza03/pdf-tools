@@ -10,10 +10,13 @@ PDFTools.Rotate = {
    * @param {Object} rotationsMap - { [pageIndex: number]: degrees (90, 180, 270) }
    * @param {Function} onProgress
    */
-  rotate: async function (file, rotationsMap, onProgress) {
-    const { PDFDocument, degrees } = PDFLib;
-    const arrayBuffer = await PDFTools.FileUtils.readAsArrayBuffer(file);
-    const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+  rotate: async function (file, rotationsMap, onProgress, options) {
+    if (typeof onProgress === 'object' && onProgress !== null && !options) {
+      options = onProgress;
+      onProgress = null;
+    }
+    const { degrees } = PDFLib;
+    const pdfDoc = await PDFTools.FileUtils.loadPdfDecrypted(file, options);
 
     if (PDFTools.Compress && PDFTools.Compress.removeDigitalSignatures) {
       try {

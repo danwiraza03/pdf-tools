@@ -28,12 +28,10 @@ PDFTools.Flatten = {
    * Flattens interactive AcroForms and removes signature/annotation dictionaries while keeping vector text sharp
    */
   vectorFlatten: async function (file, options, onProgress) {
-    onProgress(15, 'Loading PDF document...');
-    const { PDFDocument } = PDFLib;
-    const arrayBuffer = await PDFTools.FileUtils.readAsArrayBuffer(file);
-    const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+    if (typeof onProgress === 'function') onProgress(15, 'Loading PDF document...');
+    const pdfDoc = await PDFTools.FileUtils.loadPdfDecrypted(file, options);
 
-    onProgress(40, 'Flattening form fields & widgets...');
+    if (typeof onProgress === 'function') onProgress(40, 'Flattening form fields & widgets...');
     try {
       const form = pdfDoc.getForm();
       if (form) {
@@ -43,16 +41,16 @@ PDFTools.Flatten = {
       console.warn('Flatten: No active AcroForm found or already flat:', e);
     }
 
-    onProgress(70, 'Removing digital signature fields and locking visual layers...');
+    if (typeof onProgress === 'function') onProgress(70, 'Removing digital signature fields and locking visual layers...');
     if (PDFTools.Compress && PDFTools.Compress.removeDigitalSignatures) {
       try {
         await PDFTools.Compress.removeDigitalSignatures(pdfDoc);
       } catch (e) {}
     }
 
-    onProgress(90, 'Serializing flattened vector PDF...');
+    if (typeof onProgress === 'function') onProgress(90, 'Serializing flattened vector PDF...');
     const pdfBytes = await pdfDoc.save({ useObjectStreams: true });
-    onProgress(100, 'Complete!');
+    if (typeof onProgress === 'function') onProgress(100, 'Complete!');
     return pdfBytes;
   },
 
@@ -61,13 +59,14 @@ PDFTools.Flatten = {
    * Renders every page to high-DPI canvas (200-300 DPI) and bakes into a 100% non-extractable image-based PDF
    */
   rasterFlatten: async function (file, options, onProgress) {
-    onProgress(10, 'Loading PDF.js engine for rasterization...');
+    if (typeof onProgress === 'function') onProgress(10, 'Loading PDF.js engine for rasterization...');
     if (PDFTools.FileUtils && PDFTools.FileUtils.initPdfJsWorker) {
       PDFTools.FileUtils.initPdfJsWorker();
     }
 
-    const arrayBuffer = await PDFTools.FileUtils.readAsArrayBuffer(file);
-    const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer.slice(0)) });
+    const decryptedDoc = await PDFTools.FileUtils.loadPdfDecrypted(file, options);
+    const decryptedBytes = await decryptedDoc.save();
+    const loadingTask = pdfjsLib.getDocument({ data: decryptedBytes });
     const pdfJsDoc = await loadingTask.promise;
     const totalPages = pdfJsDoc.numPages;
 

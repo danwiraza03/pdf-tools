@@ -20,9 +20,7 @@ PDFTools.Crop = {
     const onProgress = options.onProgress || (() => {});
     onProgress(15, 'Loading PDF document for cropping...');
 
-    const { PDFDocument } = PDFLib;
-    const arrayBuffer = await PDFTools.FileUtils.readAsArrayBuffer(file);
-    const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+    const pdfDoc = await PDFTools.FileUtils.loadPdfDecrypted(file, options);
 
     if (PDFTools.Compress && PDFTools.Compress.removeDigitalSignatures) {
       try {

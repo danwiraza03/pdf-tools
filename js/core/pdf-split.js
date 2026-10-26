@@ -35,10 +35,8 @@ PDFTools.Split = {
     return Array.from(pages).sort((a, b) => a - b);
   },
 
-  _loadDoc: async function (file) {
-    const { PDFDocument } = PDFLib;
-    const arrayBuffer = await PDFTools.FileUtils.readAsArrayBuffer(file);
-    const srcDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+  _loadDoc: async function (file, options) {
+    const srcDoc = await PDFTools.FileUtils.loadPdfDecrypted(file, options);
     if (PDFTools.Compress && PDFTools.Compress.removeDigitalSignatures) {
       try {
         await PDFTools.Compress.removeDigitalSignatures(srcDoc);
@@ -50,9 +48,13 @@ PDFTools.Split = {
   /**
    * Extract selected pages into a single new PDF document
    */
-  extractPages: async function (file, pageIndices, onProgress) {
+  extractPages: async function (file, pageIndices, onProgress, options) {
+    if (typeof onProgress === 'object' && onProgress !== null && !options) {
+      options = onProgress;
+      onProgress = null;
+    }
     const { PDFDocument } = PDFLib;
-    const srcDoc = await this._loadDoc(file);
+    const srcDoc = await this._loadDoc(file, options);
 
     const newDoc = await PDFDocument.create();
     const copiedPages = await newDoc.copyPages(srcDoc, pageIndices);
@@ -80,9 +82,13 @@ PDFTools.Split = {
   /**
    * Split PDF into separate individual single-page documents
    */
-  splitAll: async function (file, onProgress) {
+  splitAll: async function (file, onProgress, options) {
+    if (typeof onProgress === 'object' && onProgress !== null && !options) {
+      options = onProgress;
+      onProgress = null;
+    }
     const { PDFDocument } = PDFLib;
-    const srcDoc = await this._loadDoc(file);
+    const srcDoc = await this._loadDoc(file, options);
     const totalPages = srcDoc.getPageCount();
 
     const results = [];
@@ -125,9 +131,13 @@ PDFTools.Split = {
   /**
    * Split PDF every N pages
    */
-  splitEveryN: async function (file, n, onProgress) {
+  splitEveryN: async function (file, n, onProgress, options) {
+    if (typeof onProgress === 'object' && onProgress !== null && !options) {
+      options = onProgress;
+      onProgress = null;
+    }
     const { PDFDocument } = PDFLib;
-    const srcDoc = await this._loadDoc(file);
+    const srcDoc = await this._loadDoc(file, options);
     const totalPages = srcDoc.getPageCount();
 
     const PdfCopy = (typeof PDFTools !== 'undefined' && PDFTools.PdfCopy)
