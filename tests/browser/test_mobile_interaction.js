@@ -221,6 +221,59 @@ async function testLongPressDragReorder(page, cdp, selector) {
   };
 }
 
+async function testGrayscaleSliderTouch(page, cdp) {
+  const pdfBytes = await generateSinglePagePdf('Grayscale Test');
+  await page.setInputFiles('input[type="file"]', {
+    name: 'sample_grayscale.pdf',
+    mimeType: 'application/pdf',
+    buffer: Buffer.from(pdfBytes)
+  });
+  await page.waitForSelector('#splitStage', { state: 'visible', timeout: 10000 });
+  await page.waitForTimeout(600);
+  await page.locator('#splitStage').scrollIntoViewIfNeeded();
+  await page.waitForTimeout(200);
+
+  const initialLeft = await page.evaluate(() => {
+    const line = document.getElementById('splitLine');
+    return line ? (line.style.left || window.getComputedStyle(line).left) : null;
+  });
+
+  const stageBox = await page.locator('#splitStage').boundingBox();
+  if (!stageBox) throw new Error('splitStage bounding box not found');
+
+  const startX = Math.round(stageBox.x + stageBox.width * 0.5);
+  const startY = Math.round(stageBox.y + stageBox.height * 0.5);
+  const targetX = Math.round(stageBox.x + stageBox.width * 0.8);
+
+  await cdp.send('Input.dispatchTouchEvent', {
+    type: 'touchStart',
+    touchPoints: [{ x: startX, y: startY }]
+  });
+  await page.waitForTimeout(60);
+  await cdp.send('Input.dispatchTouchEvent', {
+    type: 'touchMove',
+    touchPoints: [{ x: targetX, y: startY }]
+  });
+  await page.waitForTimeout(60);
+  await cdp.send('Input.dispatchTouchEvent', {
+    type: 'touchEnd',
+    touchPoints: []
+  });
+  await page.waitForTimeout(100);
+
+  const finalLeft = await page.evaluate(() => {
+    const line = document.getElementById('splitLine');
+    return line ? (line.style.left || window.getComputedStyle(line).left) : null;
+  });
+
+  const changed = initialLeft !== finalLeft;
+  return {
+    initialLeft,
+    finalLeft,
+    passed: changed
+  };
+}
+
 async function runMobileInteractionSuite() {
   console.log('========================================================================');
   console.log('       MOBILE TOUCH INTERACTION SUITE: SCROLL VS SORTABLE REORDER       ');
@@ -289,6 +342,26 @@ async function runMobileInteractionSuite() {
         await page.close();
         await context.close();
       }
+    }
+
+    // 4. Test Grayscale comparison slider touch dragging
+    console.log('\n--- Menguji Slider Pembanding pages/grayscale.html dengan Pointer/Touch ---');
+    const grayContext = await browser.newContext({
+      ...devices['iPhone 13'],
+      hasTouch: true
+    });
+    const grayPage = await grayContext.newPage();
+    try {
+      await grayPage.goto(`${BASE_URL}/pages/grayscale.html`, { waitUntil: 'domcontentloaded', timeout: 25000 });
+      const grayCdp = await grayContext.newCDPSession(grayPage);
+      const grayRes = await testGrayscaleSliderTouch(grayPage, grayCdp);
+      console.log(`  Grayscale Slider: Awal=${grayRes.initialLeft}, Akhir=${grayRes.finalLeft}, Berubah=${grayRes.passed ? 'YA (LULUS)' : 'TIDAK (GAGAL)'}`);
+      if (!grayRes.passed) {
+        throw new Error('Test grayscale comparison slider touch drag failed: slider position did not change!');
+      }
+    } finally {
+      await grayPage.close();
+      await grayContext.close();
     }
 
     console.log('\n========================================================================================================================');
