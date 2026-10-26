@@ -153,9 +153,9 @@ async function testFastSwipeScroll(page, cdp, selector) {
 }
 
 /**
- * Test B: Long press (>= 300ms) on a card and drag down to reorder.
+ * Test B: Long press (>= 250ms) on a card/handle and drag to reorder.
  */
-async function testLongPressDragReorder(page, cdp, selector) {
+async function testLongPressDragReorder(page, cdp, selector, pagePath) {
   const initialOrder = await getCardOrder(page, selector);
   const cards = await page.$$(selector);
   if (cards.length < 2) {
@@ -166,8 +166,21 @@ async function testLongPressDragReorder(page, cdp, selector) {
     };
   }
 
-  const box1 = await cards[0].boundingBox();
-  const box2 = await cards[1].boundingBox();
+  const handleSelector = (pagePath.includes('compress.html') || pagePath.includes('jpg-to-pdf.html') || pagePath.includes('watermark.html'))
+    ? '.file-item-handle'
+    : (pagePath.includes('merge.html') ? '.merge-group-drag-handle, .merge-card-preview, .stacked-doc' : null);
+
+  let target1 = cards[0];
+  let target2 = cards[1];
+  if (handleSelector) {
+    const h1 = await cards[0].$(handleSelector);
+    const h2 = await cards[1].$(handleSelector);
+    if (h1) target1 = h1;
+    if (h2) target2 = h2;
+  }
+
+  const box1 = await target1.boundingBox();
+  const box2 = await target2.boundingBox();
   if (!box1 || !box2) {
     return {
       passed: false,
@@ -179,7 +192,7 @@ async function testLongPressDragReorder(page, cdp, selector) {
   const startX = Math.round(box1.x + box1.width / 2);
   const startY = Math.round(box1.y + box1.height / 2);
   const targetX = Math.round(box2.x + box2.width / 2);
-  const targetY = Math.round(box2.y + box2.height + 20);
+  const targetY = Math.round(box2.y + box2.height / 2);
 
   // 1. TouchStart
   await cdp.send('Input.dispatchTouchEvent', {
@@ -187,11 +200,11 @@ async function testLongPressDragReorder(page, cdp, selector) {
     touchPoints: [{ x: startX, y: startY }]
   });
 
-  // 2. Press and hold >= 350ms
-  await page.waitForTimeout(380);
+  // 2. Press and hold 250ms (Sortable touch delay is 200ms)
+  await page.waitForTimeout(250);
 
-  // 3. Drag slowly to target position
-  const dragSteps = 8;
+  // 3. Drag gradually to target position
+  const dragSteps = 12;
   for (let i = 1; i <= dragSteps; i++) {
     const curX = Math.round(startX + ((targetX - startX) / dragSteps) * i);
     const curY = Math.round(startY + ((targetY - startY) / dragSteps) * i);
@@ -199,7 +212,7 @@ async function testLongPressDragReorder(page, cdp, selector) {
       type: 'touchMove',
       touchPoints: [{ x: curX, y: curY }]
     });
-    await page.waitForTimeout(30);
+    await page.waitForTimeout(25);
   }
 
   // 4. TouchEnd
@@ -217,7 +230,7 @@ async function testLongPressDragReorder(page, cdp, selector) {
     passed: orderChanged,
     reliable: orderChanged,
     orderChanged,
-    note: orderChanged ? 'Urutan kartu berhasil berubah via long-press' : 'perlu uji manual di perangkat'
+    note: orderChanged ? 'Urutan kartu berhasil berubah via long-press' : 'perlu uji manual di perangkat (Sortable MultiDrag / complex structure)'
   };
 }
 
@@ -323,8 +336,8 @@ async function runMobileInteractionSuite() {
         console.log(`      - Status Uji A: ${swipeRes.passed ? '✓ LULUS' : '✗ GAGAL'}`);
 
         // b. Long press drag test
-        console.log('  [B] Testing Long-Press (>= 300ms) Drag Reorder...');
-        const longPressRes = await testLongPressDragReorder(page, cdp, selector);
+        console.log('  [B] Testing Long-Press (>= 250ms) Drag Reorder...');
+        const longPressRes = await testLongPressDragReorder(page, cdp, selector, pagePath);
         console.log(`      - Urutan kartu berubah? ${longPressRes.orderChanged ? 'YA' : 'TIDAK'}`);
         console.log(`      - Catatan Uji B: ${longPressRes.note}`);
 
