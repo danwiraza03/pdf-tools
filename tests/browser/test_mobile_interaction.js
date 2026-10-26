@@ -364,8 +364,8 @@ async function runMobileInteractionSuite() {
       await grayContext.close();
     }
 
-    // 5. Test Crop touch-action dynamic behavior and page scroll outside crop box
-    console.log('\n--- Menguji Touch-Action & Scroll pages/crop.html ---');
+    // 5. Test Crop: Handle Drag, Box Body Drag, and Outside Scroll
+    console.log('\n--- Menguji Touch Interaction pages/crop.html (Gagang, Badan Kotak, & Scroll Luar) ---');
     const cropContext = await browser.newContext({
       ...devices['iPhone 13'],
       hasTouch: true
@@ -373,7 +373,13 @@ async function runMobileInteractionSuite() {
     const cropPage = await cropContext.newPage();
     try {
       await cropPage.goto(`${BASE_URL}/pages/crop.html`, { waitUntil: 'domcontentloaded', timeout: 25000 });
-      const docBytes = await generateSinglePagePdf('Crop Test');
+      // Create multi-page PDF so the page has plenty of vertical scroll space
+      const doc = await PDFLib.PDFDocument.create();
+      for (let i = 0; i < 4; i++) {
+        const p = doc.addPage([600, 800]);
+        p.drawText(`Crop Page ${i + 1}`, { x: 50, y: 400, size: 24 });
+      }
+      const docBytes = await doc.save();
       await cropPage.setInputFiles('input[type="file"]', {
         name: 'crop_test.pdf',
         mimeType: 'application/pdf',
@@ -381,35 +387,136 @@ async function runMobileInteractionSuite() {
       });
       await cropPage.waitForSelector('#workspaceState', { state: 'visible', timeout: 10000 });
       await cropPage.waitForTimeout(600);
+      await cropPage.locator('#cropStageContainer').scrollIntoViewIfNeeded();
+      await cropPage.waitForTimeout(400);
 
-      const idleTouchAction = await cropPage.evaluate(() => {
-        return window.getComputedStyle(document.getElementById('cropOverlay')).touchAction;
+      const initialBox = await cropPage.evaluate(() => {
+        const b = document.getElementById('cropBox');
+        const rect = b.getBoundingClientRect();
+        return { x: rect.x, y: rect.y, width: rect.width, height: rect.height, scrollY: window.scrollY };
+      });
+
+      const handleInfo = await cropPage.evaluate(() => {
+        const h = document.querySelector('.crop-handle.tc');
+        const r = h.getBoundingClientRect();
+        return {
+          cx: Math.round(r.x + r.width / 2),
+          cy: Math.round(r.y + r.height / 2),
+          touchAction: window.getComputedStyle(h).touchAction
+        };
       });
 
       const cropCdp = await cropContext.newCDPSession(cropPage);
-      // Fast swipe outside crop box
+      // CDP touch coordinate translation offset under iPhone 13 emulation
+      const cdpOffsetY = 63;
+      const startHandleTouchY = handleInfo.cy - cdpOffsetY;
+
+      // a. Seret gagang crop vertikal 80 px ke bawah: tinggi kotak berkurang ~80 px, scrollY tetap 0
+      console.log('  [A] Seret gagang crop vertikal 80 px...');
       await cropCdp.send('Input.dispatchTouchEvent', {
         type: 'touchStart',
-        touchPoints: [{ x: 100, y: 750 }]
+        touchPoints: [{ x: handleInfo.cx, y: startHandleTouchY }]
       });
-      await cropPage.waitForTimeout(40);
-      await cropCdp.send('Input.dispatchTouchEvent', {
-        type: 'touchMove',
-        touchPoints: [{ x: 100, y: 500 }]
-      });
-      await cropPage.waitForTimeout(40);
+      await cropPage.waitForTimeout(30);
+      const steps = 8;
+      for (let i = 1; i <= steps; i++) {
+        await cropCdp.send('Input.dispatchTouchEvent', {
+          type: 'touchMove',
+          touchPoints: [{ x: handleInfo.cx, y: Math.round(startHandleTouchY + (80 / steps) * i) }]
+        });
+        await cropPage.waitForTimeout(20);
+      }
       await cropCdp.send('Input.dispatchTouchEvent', {
         type: 'touchEnd',
         touchPoints: []
       });
       await cropPage.waitForTimeout(300);
 
-      const cropScrollY = await cropPage.evaluate(() => window.scrollY);
-      console.log(`  Crop Idle touch-action: ${idleTouchAction}, Scrolled Y outside box: ${cropScrollY}px (Harus > 50px)`);
+      const afterHandleDrag = await cropPage.evaluate(() => {
+        const b = document.getElementById('cropBox');
+        const rect = b.getBoundingClientRect();
+        return { x: rect.x, y: rect.y, width: rect.width, height: rect.height, scrollY: window.scrollY };
+      });
 
-      if (cropScrollY < 50) {
-        throw new Error('Test crop scroll outside box failed: page did not scroll!');
+      const heightDiff = Math.abs(initialBox.height - afterHandleDrag.height);
+      const handleScrollDelta = Math.abs(afterHandleDrag.scrollY - initialBox.scrollY);
+      console.log(`      - Perubahan tinggi kotak: ${heightDiff}px (Target ~80px, toleransi 15px)`);
+      console.log(`      - Perubahan scrollY saat seret gagang: ${handleScrollDelta}px (Target: 0px)`);
+
+      if (Math.abs(heightDiff - 80) > 15 || handleScrollDelta !== 0) {
+        throw new Error(`Uji gagang crop gagal: heightDiff=${heightDiff}px, handleScrollDelta=${handleScrollDelta}px`);
       }
+
+      // b. Seret badan kotak: posisinya berpindah dan scrollY tetap
+      console.log('  [B] Seret badan kotak crop...');
+      const boxTouchStart = {
+        x: Math.round(afterHandleDrag.x + afterHandleDrag.width / 2),
+        y: Math.round(afterHandleDrag.y + afterHandleDrag.height / 2) - cdpOffsetY
+      };
+      await cropCdp.send('Input.dispatchTouchEvent', {
+        type: 'touchStart',
+        touchPoints: [{ x: boxTouchStart.x, y: boxTouchStart.y }]
+      });
+      await cropPage.waitForTimeout(30);
+      for (let i = 1; i <= steps; i++) {
+        await cropCdp.send('Input.dispatchTouchEvent', {
+          type: 'touchMove',
+          touchPoints: [{ x: boxTouchStart.x, y: Math.round(boxTouchStart.y + (40 / steps) * i) }]
+        });
+        await cropPage.waitForTimeout(20);
+      }
+      await cropCdp.send('Input.dispatchTouchEvent', {
+        type: 'touchEnd',
+        touchPoints: []
+      });
+      await cropPage.waitForTimeout(300);
+
+      const afterBoxDrag = await cropPage.evaluate(() => {
+        const b = document.getElementById('cropBox');
+        const rect = b.getBoundingClientRect();
+        return { x: rect.x, y: rect.y, width: rect.width, height: rect.height, scrollY: window.scrollY };
+      });
+
+      const boxYDiff = Math.abs(afterBoxDrag.y - afterHandleDrag.y);
+      const boxScrollDelta = Math.abs(afterBoxDrag.scrollY - afterHandleDrag.scrollY);
+      console.log(`      - Perubahan posisi Y kotak: ${boxYDiff}px (Target > 10px)`);
+      console.log(`      - Perubahan scrollY saat seret badan: ${boxScrollDelta}px (Target: 0px)`);
+
+      if (boxYDiff < 10 || boxScrollDelta !== 0) {
+        throw new Error(`Uji badan kotak crop gagal: boxYDiff=${boxYDiff}px, boxScrollDelta=${boxScrollDelta}px`);
+      }
+
+      // c. Swipe vertikal di luar kotak: scrollY bertambah
+      console.log('  [C] Swipe vertikal di luar kotak crop...');
+      const preSwipeScrollY = await cropPage.evaluate(() => window.scrollY);
+      const swipeStartX = 30;
+      const swipeStartY = 500;
+      await cropCdp.send('Input.dispatchTouchEvent', {
+        type: 'touchStart',
+        touchPoints: [{ x: swipeStartX, y: swipeStartY }]
+      });
+      await cropPage.waitForTimeout(30);
+      for (let i = 1; i <= 4; i++) {
+        await cropCdp.send('Input.dispatchTouchEvent', {
+          type: 'touchMove',
+          touchPoints: [{ x: swipeStartX, y: swipeStartY - 50 * i }]
+        });
+        await cropPage.waitForTimeout(20);
+      }
+      await cropCdp.send('Input.dispatchTouchEvent', {
+        type: 'touchEnd',
+        touchPoints: []
+      });
+      await cropPage.waitForTimeout(300);
+
+      const postSwipeScrollY = await cropPage.evaluate(() => window.scrollY);
+      const swipeScrollDelta = postSwipeScrollY - preSwipeScrollY;
+      console.log(`      - Pertambahan scrollY luar kotak: ${swipeScrollDelta}px (Target > 50px)`);
+
+      if (swipeScrollDelta < 50) {
+        throw new Error(`Uji swipe luar kotak crop gagal: scrollDelta=${swipeScrollDelta}px`);
+      }
+      console.log('  ✓ Seluruh uji interaksi sentuh Crop (gagang, badan, luar kotak) LULUS!');
     } finally {
       await cropPage.close();
       await cropContext.close();

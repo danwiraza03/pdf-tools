@@ -84,9 +84,6 @@
       box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.55);
       cursor: move;
       box-sizing: border-box;
-      touch-action: pan-y;
-    }
-    .crop-box.is-dragging {
       touch-action: none;
     }
     .crop-handle {
@@ -99,10 +96,15 @@
       box-sizing: border-box;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
       z-index: 20;
-      touch-action: pan-y;
-    }
-    .crop-handle.is-dragging {
       touch-action: none;
+    }
+    .crop-handle::before {
+      content: '';
+      position: absolute;
+      top: -12px;
+      left: -12px;
+      right: -12px;
+      bottom: -12px;
     }
     .crop-handle.tl { top: -7px; left: -7px; cursor: nwse-resize; }
     .crop-handle.tr { top: -7px; right: -7px; cursor: nesw-resize; }
@@ -428,19 +430,38 @@
       let startX, startY, origRect;
 
       const onPointerDown = (clientX, clientY, target) => {
-        const handle = target.dataset.handle;
+        let handle = (target.dataset && target.dataset.handle) ? target.dataset.handle : null;
+        let actualTarget = target;
+        if (!handle) {
+          const hitEl = document.elementFromPoint(clientX, clientY);
+          if (hitEl && hitEl.dataset && hitEl.dataset.handle) {
+            handle = hitEl.dataset.handle;
+            actualTarget = hitEl;
+          } else {
+            const handles = cropBox.querySelectorAll('.crop-handle');
+            for (const h of handles) {
+              const rect = h.getBoundingClientRect();
+              const hx = rect.x + rect.width / 2;
+              const hy = rect.y + rect.height / 2;
+              if (Math.hypot(clientX - hx, clientY - hy) <= 24) {
+                handle = h.dataset.handle;
+                actualTarget = h;
+                break;
+              }
+            }
+          }
+        }
+
         if (handle) {
           activeHandle = handle;
-          target.classList.add('is-dragging');
-        } else if (target === cropBox || cropBox.contains(target)) {
+          actualTarget.classList.add('is-dragging');
+        } else if (actualTarget === cropBox || cropBox.contains(actualTarget)) {
           isDragging = true;
           cropBox.classList.add('is-dragging');
         } else {
           return false;
         }
         cropOverlay.classList.add('is-dragging');
-        cropOverlay.style.touchAction = 'none';
-        document.body.style.touchAction = 'none';
         startX = clientX;
         startY = clientY;
         origRect = { ...cropRect };
@@ -508,8 +529,6 @@
         cropOverlay.classList.remove('is-dragging');
         cropBox.classList.remove('is-dragging');
         document.querySelectorAll('.crop-handle.is-dragging').forEach(h => h.classList.remove('is-dragging'));
-        cropOverlay.style.touchAction = '';
-        document.body.style.touchAction = '';
       };
 
       window.addEventListener('mouseup', onPointerUp);
