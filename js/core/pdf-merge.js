@@ -38,6 +38,51 @@ PDFTools.Merge = {
     return false;
   },
 
+  /**
+   * Shared source loader for merge operations.
+   * Loads a decrypted PDFDocument from a file, strips digital signatures,
+   * converts them to visual stamps, and returns metadata.
+   *
+   * @param {File|Blob|Object} file - File object or descriptor
+   * @param {Object} [options={}] - Options passed to loadPdfDecrypted
+   * @returns {Promise<{doc: PDFDocument, hadSignatures: boolean, signatureCount: number}>}
+   */
+  loadSource: async function (file, options = {}) {
+    let pdf;
+    try {
+      pdf = await PDFTools.FileUtils.loadPdfDecrypted(file, { ...options, updateMetadata: false });
+    } catch (loadErr) {
+      if (loadErr && (loadErr.code === 'PASSWORD_REQUIRED' || loadErr.code === 'PASSWORD_INCORRECT' || loadErr.code === 'PASSWORD_CANCELLED')) {
+        throw loadErr;
+      }
+      console.warn(`Merge: Initial load failed for "${file && file.name}", retrying with fallback:`, loadErr);
+      pdf = await PDFTools.FileUtils.loadPdfDecrypted(file, options);
+    }
+
+    let hadSignatures = false;
+    let signatureCount = 0;
+
+    // Remove digital signatures and convert them to visual stamps
+    try {
+      if (PDFTools.Compress && PDFTools.Compress.removeDigitalSignatures) {
+        const sigResult = await PDFTools.Compress.removeDigitalSignatures(pdf);
+        if (sigResult && sigResult.removed) {
+          hadSignatures = true;
+          signatureCount = sigResult.count || 0;
+          console.log(`Merge: Processed and embedded ${signatureCount} signature(s) from "${file && file.name}"`);
+        }
+      }
+    } catch (sigErr) {
+      console.warn(`Merge: Signature removal notice for "${file && file.name}":`, sigErr);
+    }
+
+    return {
+      doc: pdf,
+      hadSignatures: hadSignatures,
+      signatureCount: signatureCount
+    };
+  },
+
   merge: async function (items, onProgress, options) {
     if (typeof onProgress === 'object' && onProgress !== null && !options) {
       options = onProgress;
@@ -62,38 +107,19 @@ PDFTools.Merge = {
     const docCache = new Map();
 
     const getOrLoadDoc = async (file) => {
-      const cacheKey = file.name + '_' + file.size + '_' + file.lastModified;
+      const cacheKey = (file && file.name ? file.name : '') + '_' + (file && file.size ? file.size : '') + '_' + (file && file.lastModified ? file.lastModified : '');
       if (docCache.has(cacheKey)) {
         return docCache.get(cacheKey);
       }
 
-      let pdf;
-      try {
-        pdf = await PDFTools.FileUtils.loadPdfDecrypted(file, { ...options, updateMetadata: false });
-      } catch (loadErr) {
-        if (loadErr && (loadErr.code === 'PASSWORD_REQUIRED' || loadErr.code === 'PASSWORD_INCORRECT' || loadErr.code === 'PASSWORD_CANCELLED')) {
-          throw loadErr;
-        }
-        console.warn(`Merge: Initial load failed for "${file.name}", retrying with fallback:`, loadErr);
-        pdf = await PDFTools.FileUtils.loadPdfDecrypted(file, options);
+      const loaded = await PDFTools.Merge.loadSource(file, options);
+      if (loaded.hadSignatures) {
+        hadSignatures = true;
+        sigFileCount++;
       }
 
-      // Remove digital signatures and bake e-materai stamps
-      try {
-        if (PDFTools.Compress && PDFTools.Compress.removeDigitalSignatures) {
-          const sigResult = await PDFTools.Compress.removeDigitalSignatures(pdf);
-          if (sigResult && sigResult.removed) {
-            hadSignatures = true;
-            sigFileCount++;
-            console.log(`Merge: Processed and embedded ${sigResult.count} signature(s) from "${file.name}"`);
-          }
-        }
-      } catch (sigErr) {
-        console.warn(`Merge: Signature removal notice for "${file.name}":`, sigErr);
-      }
-
-      docCache.set(cacheKey, pdf);
-      return pdf;
+      docCache.set(cacheKey, loaded.doc);
+      return loaded.doc;
     };
 
     let totalPagesMerged = 0;

@@ -1924,17 +1924,21 @@
 
         try {
           const fileDocCache = new Map();
+          let hasDigitalSignatures = false;
+          let signatureCount = 0;
           for (let i = 0; i < allUploadedFiles.length; i++) {
             const file = allUploadedFiles[i];
             try {
-              const doc = await PDFTools.FileUtils.loadPdfDecrypted(file);
-              fileDocCache.set(file, doc);
+              const loaded = await PDFTools.Merge.loadSource(file);
+              fileDocCache.set(file, loaded.doc);
+              if (loaded.hadSignatures) {
+                hasDigitalSignatures = true;
+                signatureCount += loaded.signatureCount;
+              }
             } catch (loadErr) {
               console.warn('PDF load failed for', file.name, loadErr);
             }
           }
-
-          let hasDigitalSignatures = false;
 
           const itemsToAssemble = [];
           for (let i = 0; i < ordered.length; i++) {
