@@ -565,6 +565,28 @@ async function runMobileInteractionSuite(existingBrowser, existingBaseUrl) {
       }
     }
 
+    // 7. Test Watermark controls & overflow across 360, 390, 440 px
+    console.log('\n--- Menguji pages/watermark.html pada lebar 360, 390, 440 px ---');
+    for (const w of [360, 390, 440]) {
+      const wmCtx = await browser.newContext({
+        viewport: { width: w, height: 800 },
+        hasTouch: true
+      });
+      const wmPage = await wmCtx.newPage();
+      try {
+        await wmPage.goto(`${baseUrl}/pages/watermark.html`, { waitUntil: 'domcontentloaded' });
+        await wmPage.waitForTimeout(400);
+        const overflow = await wmPage.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
+        if (overflow) {
+          throw new Error(`pages/watermark.html overflow pada lebar ${w}px!`);
+        }
+        console.log(`  ✓ watermark.html pada lebar ${w}px: bebas overflow horizontal`);
+      } finally {
+        await wmPage.close();
+        await wmCtx.close();
+      }
+    }
+
     console.log('\n========================================================================================================================');
     console.log('                                 HASIL PENGUJIAN INTERAKSI SENTUH SELULER (CDP)                                         ');
     console.log('========================================================================================================================');
