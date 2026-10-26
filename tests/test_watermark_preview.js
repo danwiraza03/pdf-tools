@@ -334,7 +334,7 @@ async function runPageRangeTest() {
       cOrig2.width = vp2.width;
       cOrig2.height = vp2.height;
       await origP2.render({ canvasContext: cOrig2.getContext('2d'), viewport: vp2 }).promise;
-      const origP2Data = Array.from(cOrig2.getContext('2d').getImageData(0, 0, vp2.width, vp2.height).data);
+      const origP2Data = cOrig2.getContext('2d').getImageData(0, 0, vp2.width, vp2.height).data;
 
       // Page 2 of watermarked result (wmResultPdfDoc or watermarkedData)
       const wmDoc = window.wmResultPdfDoc || (await pdfjsLib.getDocument({ data: window.watermarkedData }).promise);
@@ -343,7 +343,7 @@ async function runPageRangeTest() {
       cWm2.width = vp2.width;
       cWm2.height = vp2.height;
       await wmP2.render({ canvasContext: cWm2.getContext('2d'), viewport: vp2 }).promise;
-      const wmP2Data = Array.from(cWm2.getContext('2d').getImageData(0, 0, vp2.width, vp2.height).data);
+      const wmP2Data = cWm2.getContext('2d').getImageData(0, 0, vp2.width, vp2.height).data;
 
       // Page 1 of original vs watermarked
       const origP1 = await origDoc.getPage(1);
@@ -352,43 +352,39 @@ async function runPageRangeTest() {
       cOrig1.width = vp1.width;
       cOrig1.height = vp1.height;
       await origP1.render({ canvasContext: cOrig1.getContext('2d'), viewport: vp1 }).promise;
-      const origP1Data = Array.from(cOrig1.getContext('2d').getImageData(0, 0, vp1.width, vp1.height).data);
+      const origP1Data = cOrig1.getContext('2d').getImageData(0, 0, vp1.width, vp1.height).data;
 
       const wmP1 = await wmDoc.getPage(1);
       const cWm1 = document.createElement('canvas');
       cWm1.width = vp1.width;
       cWm1.height = vp1.height;
       await wmP1.render({ canvasContext: cWm1.getContext('2d'), viewport: vp1 }).promise;
-      const wmP1Data = Array.from(cWm1.getContext('2d').getImageData(0, 0, vp1.width, vp1.height).data);
+      const wmP1Data = cWm1.getContext('2d').getImageData(0, 0, vp1.width, vp1.height).data;
+
+      let p2Diffs = 0;
+      for (let i = 0; i < origP2Data.length; i++) {
+        if (origP2Data[i] !== wmP2Data[i]) p2Diffs++;
+      }
+
+      let p1Diffs = 0;
+      for (let i = 0; i < origP1Data.length; i++) {
+        if (origP1Data[i] !== wmP1Data[i]) p1Diffs++;
+      }
 
       return {
-        origP2Data,
-        wmP2Data,
-        origP1Data,
-        wmP1Data
+        p2Diffs,
+        p1Diffs,
+        totalBytes: origP2Data.length
       };
     }, Buffer.from(origBytes).toString('base64'));
 
     // Verify Page 2 (outside range) has ZERO pixel differences
-    assert.strictEqual(comparison.origP2Data.length, comparison.wmP2Data.length);
-    let p2Diffs = 0;
-    for (let i = 0; i < comparison.origP2Data.length; i++) {
-      if (comparison.origP2Data[i] !== comparison.wmP2Data[i]) {
-        p2Diffs++;
-      }
-    }
-    assert.strictEqual(p2Diffs, 0, `Page 2 (outside range) MUST be 100% untouched! Found ${p2Diffs} differences.`);
+    assert.strictEqual(comparison.p2Diffs, 0, `Page 2 (outside range) MUST be 100% untouched! Found ${comparison.p2Diffs} differences.`);
     console.log('  ✓ [PIXEL VERIFIED] Page 2 (outside range "1, 3-5") has 0 pixel differences from original!');
 
     // Verify Page 1 (inside range) has watermark differences
-    let p1Diffs = 0;
-    for (let i = 0; i < comparison.origP1Data.length; i++) {
-      if (comparison.origP1Data[i] !== comparison.wmP1Data[i]) {
-        p1Diffs++;
-      }
-    }
-    assert(p1Diffs > 0, 'Page 1 (inside range "1, 3-5") MUST have watermark applied');
-    console.log(`  ✓ [PIXEL VERIFIED] Page 1 (inside range) has ${p1Diffs} watermark pixel differences from original.`);
+    assert(comparison.p1Diffs > 0, 'Page 1 (inside range "1, 3-5") MUST have watermark applied');
+    console.log(`  ✓ [PIXEL VERIFIED] Page 1 (inside range) has ${comparison.p1Diffs} watermark pixel differences from original.`);
 
     console.log('✅ [PASS] Page range application and pixel verification passed!\n');
   } finally {
@@ -534,13 +530,203 @@ async function runLargePdfDebounceTest() {
   }
 }
 
+async function runMobileTouchAndImageModeTest() {
+  console.log('========================================================================');
+  console.log('>>> [BROWSER TEST] Text/Image Mode, Touch Targets (>=44px), 360px & i18n');
+  console.log('========================================================================');
+
+  const PORT = 8982;
+  const server = http.createServer((req, res) => {
+    const rawUrl = req.url.split('?')[0];
+    const safePath = path.normalize(path.join(__dirname, '..', rawUrl));
+    if (!safePath.startsWith(path.resolve(__dirname, '..'))) {
+      res.writeHead(403);
+      return res.end('Forbidden');
+    }
+    if (fs.existsSync(safePath) && fs.statSync(safePath).isFile()) {
+      const ext = path.extname(safePath).toLowerCase();
+      const mimeMap = {
+        '.html': 'text/html',
+        '.js': 'application/javascript',
+        '.css': 'text/css',
+        '.svg': 'image/svg+xml',
+        '.png': 'image/png',
+        '.jpg': 'image/jpeg',
+        '.pdf': 'application/pdf'
+      };
+      res.writeHead(200, { 'Content-Type': mimeMap[ext] || 'application/octet-stream' });
+      fs.createReadStream(safePath).pipe(res);
+    } else {
+      res.writeHead(404);
+      res.end('Not Found');
+    }
+  });
+
+  await new Promise((resolve, reject) => {
+    server.listen(PORT, '127.0.0.1', resolve);
+    server.on('error', reject);
+  });
+
+  const browser = await chromium.launch({ headless: true });
+  // Set viewport to 360x640 mobile screen
+  const page = await browser.newPage({
+    viewport: { width: 360, height: 640 },
+    hasTouch: true
+  });
+
+  page.on('dialog', dialog => {
+    assert.fail(`Forbidden native dialog triggered: ${dialog.type()} "${dialog.message()}"`);
+  });
+
+  const tempDir = path.join(__dirname, 'temp_wm_mobile_test');
+  if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
+  const testPdfPath = path.join(tempDir, 'mobile_sample.pdf');
+  const testPngPath = path.join(tempDir, 'test_stamp.png');
+
+  try {
+    // Create sample PDF
+    const doc = await PDFLib.PDFDocument.create();
+    const p = doc.addPage([595, 842]);
+    p.drawRectangle({ x: 0, y: 0, width: 595, height: 842, color: PDFLib.rgb(0.9, 0.9, 0.9) });
+    p.drawText('Mobile Test Document', { x: 50, y: 750, size: 24, color: PDFLib.rgb(0.2, 0.2, 0.2) });
+    fs.writeFileSync(testPdfPath, await doc.save());
+
+    await page.goto(`http://127.0.0.1:${PORT}/pages/watermark.html`, { waitUntil: 'domcontentloaded' });
+    await page.waitForFunction(() => !!(window.PDFTools && window.PDFTools.Watermark));
+
+    // Create 100x100 solid test PNG via browser canvas
+    const pngBase64 = await page.evaluate(() => {
+      const c = document.createElement('canvas');
+      c.width = 100;
+      c.height = 100;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#EC4899';
+      ctx.fillRect(0, 0, 100, 100);
+      return c.toDataURL('image/png').split(',')[1];
+    });
+    fs.writeFileSync(testPngPath, Buffer.from(pngBase64, 'base64'));
+
+    // Upload PDF
+    const fileInput = page.locator('#dropzone input[type="file"]');
+    await fileInput.setInputFiles(testPdfPath);
+    await page.waitForSelector('#optionsPanel', { state: 'visible', timeout: 5000 });
+
+    // 1. Touch target >= 44px verification
+    console.log('  --- Checking Touch Target Sizes (>= 44px) ---');
+    const previewBtn = page.locator('#previewBtn');
+    const previewBox = await previewBtn.boundingBox();
+    assert(previewBox && previewBox.height >= 44, `Preview button height (${previewBox?.height}px) must be >= 44px`);
+    console.log(`  ✓ Preview button height: ${previewBox.height.toFixed(1)}px (>= 44px)`);
+
+    // Switch to Custom Range
+    await page.locator('#wmApplyCustom').click();
+    await page.waitForSelector('#wmCustomRangeInput', { state: 'visible' });
+
+    const rangeInput = page.locator('#wmCustomRangeInput');
+    const rangeBox = await rangeInput.boundingBox();
+    assert(rangeBox && rangeBox.height >= 44, `Custom Range input height (${rangeBox?.height}px) must be >= 44px`);
+    console.log(`  ✓ Custom range input height: ${rangeBox.height.toFixed(1)}px (>= 44px)`);
+
+    // 2. Responsive 360px Viewport No Horizontal Overflow
+    console.log('  --- Checking Horizontal Overflow at 360px Viewport ---');
+    const overflowInfo = await page.evaluate(() => {
+      const scrollW = document.documentElement.scrollWidth;
+      const innerW = window.innerWidth;
+      return { scrollW, innerW, hasOverflow: scrollW > innerW };
+    });
+    assert(!overflowInfo.hasOverflow, `Page must NOT have horizontal overflow at 360px! scrollWidth=${overflowInfo.scrollW}px, innerWidth=${overflowInfo.innerW}px`);
+    console.log(`  ✓ Zero horizontal overflow verified at 360px (scrollWidth: ${overflowInfo.scrollW}px <= innerWidth: ${overflowInfo.innerW}px).`);
+
+    // 3. Image Mode Preview & Apply Verification
+    console.log('  --- Testing Image Mode Preview on Mobile ---');
+    await page.locator('#wmModeImage').click();
+    await page.waitForSelector('#wmImageSection', { state: 'visible' });
+
+    // Upload image
+    await page.locator('#wmImageInput').setInputFiles(testPngPath);
+    await page.waitForSelector('#wmImageThumb', { state: 'visible', timeout: 4000 });
+    console.log('  ✓ Stamp image uploaded and thumbnail rendered.');
+
+    // Click Preview for Image Mode
+    await previewBtn.click();
+    await page.waitForFunction(() => {
+      const canvas = document.getElementById('wmResultCanvas');
+      if (!canvas || canvas.width === 0 || canvas.height === 0) return false;
+      const ctx = canvas.getContext('2d');
+      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      return imgData.data.some(b => b > 0);
+    }, { timeout: 10000 });
+    console.log('  ✓ Image mode preview rendered successfully on canvas.');
+
+    // Verify 360px overflow while preview is active
+    const previewOverflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
+    assert(!previewOverflow, 'No horizontal overflow allowed while preview canvas is displayed on 360px viewport');
+    console.log('  ✓ Zero horizontal overflow verified while preview is active.');
+
+    // 4. Bilingual i18n Verification (Indonesian & English, no emojis)
+    console.log('  --- Checking i18n (Indonesian & English, zero emojis) ---');
+    const i18nCheck = await page.evaluate(() => {
+      const emojiRegex = /[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/u;
+      
+      // Indonesian
+      PDFTools.i18n.setLang('id');
+      const idPreview = PDFTools.i18n.t('action.preview');
+      const idAll = PDFTools.i18n.t('watermark.pages_all');
+      const idFirst = PDFTools.i18n.t('watermark.pages_first');
+      const idCustom = PDFTools.i18n.t('watermark.pages_custom');
+
+      // English
+      PDFTools.i18n.setLang('en');
+      const enPreview = PDFTools.i18n.t('action.preview');
+      const enAll = PDFTools.i18n.t('watermark.pages_all');
+      const enFirst = PDFTools.i18n.t('watermark.pages_first');
+      const enCustom = PDFTools.i18n.t('watermark.pages_custom');
+
+      const stringsToCheck = [idPreview, idAll, idFirst, idCustom, enPreview, enAll, enFirst, enCustom];
+      const hasEmojis = stringsToCheck.some(s => emojiRegex.test(s));
+
+      return {
+        idPreview,
+        idAll,
+        idFirst,
+        idCustom,
+        enPreview,
+        enAll,
+        enFirst,
+        enCustom,
+        hasEmojis
+      };
+    });
+
+    assert.strictEqual(i18nCheck.idPreview, 'Pratinjau');
+    assert.strictEqual(i18nCheck.idAll, 'Semua Halaman');
+    assert.strictEqual(i18nCheck.idFirst, 'Halaman Pertama Saja');
+    assert.strictEqual(i18nCheck.idCustom, 'Rentang Halaman');
+    assert.strictEqual(i18nCheck.enPreview, 'Preview');
+    assert.strictEqual(i18nCheck.enAll, 'All Pages');
+    assert.strictEqual(i18nCheck.enFirst, 'First Page Only');
+    assert.strictEqual(i18nCheck.enCustom, 'Page Range');
+    assert(!i18nCheck.hasEmojis, 'No crude emojis allowed in i18n dictionary strings!');
+    console.log('  ✓ Indonesian and English i18n verified without any emojis.');
+
+    console.log('✅ [PASS] Requirement 4 (Text/Image mode, touch targets >=44px, 360px viewport & i18n) passed!\n');
+  } finally {
+    await browser.close();
+    server.close();
+    if (fs.existsSync(testPdfPath)) fs.unlinkSync(testPdfPath);
+    if (fs.existsSync(testPngPath)) fs.unlinkSync(testPngPath);
+    if (fs.existsSync(tempDir)) fs.rmdirSync(tempDir);
+  }
+}
+
 async function main() {
   await runUnitTests();
   await runBrowserPreviewPixelTest();
   await runPageRangeTest();
   await runLargePdfDebounceTest();
+  await runMobileTouchAndImageModeTest();
   console.log('========================================================================');
-  console.log('ALL WATERMARK PREVIEW, RANGE, & PERFORMANCE TESTS PASSED SUCCESSFULLY!');
+  console.log('ALL WATERMARK PREVIEW, RANGE, PERFORMANCE & MOBILE TESTS PASSED!');
   console.log('========================================================================');
 }
 
@@ -551,4 +737,10 @@ if (require.main === module) {
   });
 }
 
-module.exports = { runUnitTests, runBrowserPreviewPixelTest, runPageRangeTest, runLargePdfDebounceTest };
+module.exports = {
+  runUnitTests,
+  runBrowserPreviewPixelTest,
+  runPageRangeTest,
+  runLargePdfDebounceTest,
+  runMobileTouchAndImageModeTest
+};

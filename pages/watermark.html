@@ -62,6 +62,7 @@
       margin-top: 20px;
       width: 100%;
       max-width: 580px;
+      box-sizing: border-box;
       padding: 20px;
       background: var(--bg-card);
       border: 1px solid var(--border-color);
@@ -74,6 +75,7 @@
     }
     .wm-preview-stage {
       width: 100%;
+      box-sizing: border-box;
       min-height: 380px;
       background: var(--bg-stage, #1a1a2e);
       border: 1px solid var(--border-color);
@@ -355,12 +357,50 @@
       color: var(--tool-color, #EC4899);
     }
 
+    #previewBtn,
+    #wmCustomRangeInput {
+      min-height: 44px;
+      box-sizing: border-box;
+    }
+
     @media (max-width: 640px) {
       .wm-slider-control-wrap {
         width: 100%;
       }
       .wm-range-input {
         width: 100%;
+      }
+    }
+    @media (max-width: 480px) {
+      .wm-preview-card {
+        padding: 12px;
+      }
+      .wm-preview-stage {
+        padding: 10px;
+        min-height: 260px;
+      }
+      .action-bar {
+        flex-direction: column;
+        gap: 10px;
+        padding: 12px;
+      }
+      .action-bar .btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+    @media (max-width: 440px) {
+      .segmented-control {
+        max-width: 100%;
+        flex-direction: column;
+      }
+      .segmented-btn {
+        width: 100%;
+        min-height: 44px;
+      }
+      .wm-image-thumb-container {
+        max-width: 100%;
+        box-sizing: border-box;
       }
     }
     @media (pointer: coarse) {
@@ -371,18 +411,12 @@
       #wmRemoveImageBtn,
       .wm-range-input,
       .wm-number-input,
-      .wm-reset-btn {
+      .wm-reset-btn,
+      #previewBtn,
+      #applyBtn,
+      #wmCustomRangeInput {
         min-height: 44px;
         min-width: 44px;
-      }
-    }
-    @media (max-width: 440px) {
-      .segmented-control {
-        max-width: 100%;
-      }
-      .wm-image-thumb-container {
-        max-width: 100%;
-        box-sizing: border-box;
       }
     }
   </style>
