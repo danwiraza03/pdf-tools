@@ -16,6 +16,7 @@ const { runWatermarkUiSuite, runWatermarkUiWebKitMobile } = require('./test_wate
 const { runRotationOpacitySuite, runRotationOpacityWebKitMobile } = require('./test_watermark_rotation_opacity');
 const { runMergeSizeBrowserSuite } = require('./test_merge_size_browser');
 const { runPasswordModalSuite } = require('./test_password_modal');
+const { runMergeSignedBrowserSuite } = require('../test_merge_signed');
 
 const TEST_PORT = 8765;
 const BASE_URL = `http://127.0.0.1:${TEST_PORT}`;
@@ -184,6 +185,10 @@ async function main() {
     // 14. Password Modal & Protected PDF Suite (Chromium & iPhone 13 WebKit)
     const passRes = await runPasswordModalSuite(browser, BASE_URL);
     totalSkippedWebKit += (passRes?.skippedWebKit || 0);
+
+    // 15. Digitally Signed PDF Merging & Stamp Conversion (Chromium & iPhone 13 WebKit)
+    const signedRes = await runMergeSignedBrowserSuite(browser, BASE_URL);
+    totalSkippedWebKit += (signedRes?.skippedWebKit || 0);
 
     console.log('========================================================================');
     console.log('                 BROWSER TESTS COMPLETE: ALL PASSED!                   ');

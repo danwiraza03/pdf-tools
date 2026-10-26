@@ -27,7 +27,8 @@ const tests = [
   { name: 'Repository Hygiene Guard (File Size & Untracked Paths)', file: 'check_repo_hygiene.js' },
   { name: 'Browser Launch Helper & Fallback Audit', file: 'test_launch_helper.js' },
   { name: 'Encrypted Inputs Test Suite (All 15 Tools x 4 Variants)', file: 'test_encrypted_inputs.js' },
-  { name: 'Zero Unsanitized ignoreEncryption: true Guard', file: 'check_no_ignore_encryption.js' }
+  { name: 'Zero Unsanitized ignoreEncryption: true Guard', file: 'check_no_ignore_encryption.js' },
+  { name: 'Digitally Signed PDF Merging & Stamp Conversion', file: 'test_merge_signed.js' }
 ];
 
 console.log('========================================================================');
