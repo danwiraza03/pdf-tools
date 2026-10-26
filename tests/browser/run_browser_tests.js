@@ -17,6 +17,7 @@ const { runRotationOpacitySuite, runRotationOpacityWebKitMobile } = require('./t
 const { runMergeSizeBrowserSuite } = require('./test_merge_size_browser');
 const { runPasswordModalSuite } = require('./test_password_modal');
 const { runMergeSignedBrowserSuite } = require('../test_merge_signed');
+const { runI18nBrowserSuite } = require('../test_i18n_locale');
 
 const TEST_PORT = 8765;
 const BASE_URL = `http://127.0.0.1:${TEST_PORT}`;
@@ -189,6 +190,9 @@ async function main() {
     // 15. Digitally Signed PDF Merging & Stamp Conversion (Chromium & iPhone 13 WebKit)
     const signedRes = await runMergeSignedBrowserSuite(browser, BASE_URL);
     totalSkippedWebKit += (signedRes?.skippedWebKit || 0);
+
+    // 16. i18n Locale Detection, Storage Persistence & Mobile Drawer Navigation
+    await runI18nBrowserSuite(browser, BASE_URL);
 
     console.log('========================================================================');
     console.log('                 BROWSER TESTS COMPLETE: ALL PASSED!                   ');
