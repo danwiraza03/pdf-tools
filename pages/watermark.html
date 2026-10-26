@@ -783,6 +783,8 @@
             const basePct = Math.round((i / total) * 100);
             progress.update(basePct, `Processing (${i + 1}/${total}): ${file.name}...`);
 
+            // Digital signatures: transparently handled by core applyWatermark (removeDigitalSignatures)
+            // without any UI warnings, alert dialogs, or blocking popups.
             const watermarkOptions = currentMode === 'image' ? {
               type: 'image',
               image: preparedImageData,
