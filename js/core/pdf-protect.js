@@ -238,4 +238,8 @@
     unlockPdf,
     hasEncryptDictionary
   };
+
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = globalObj.PDFTools.Protect;
+  }
 })();
