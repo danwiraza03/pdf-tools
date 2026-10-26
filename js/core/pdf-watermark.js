@@ -6,6 +6,119 @@ window.PDFTools = window.PDFTools || {};
 
 PDFTools.Watermark = {
   /**
+   * Validates and prepares an image file for watermarking.
+   * - Decodes image data to guarantee validity (rejects fake files)
+   * - Enforces maximum file size of 15 MB
+   * - Converts WebP/BMP or formats requiring conversion to PNG via canvas
+   * - Downscales image so longest side does not exceed 2000 px
+   * - Preserves alpha transparency
+   *
+   * @param {File|Blob|Object} file - Image file or blob
+   * @returns {Promise<{ bytes: Uint8Array, mime: string, width: number, height: number }>}
+   */
+  prepareImage: async function (file) {
+    if (file && file.file) {
+      file = file.file;
+    }
+    if (!file || typeof file.size !== 'number') {
+      throw new Error('Berkas gambar tidak ditemukan atau tidak valid.');
+    }
+
+    // 1. Check file size limit: 15 MB
+    const MAX_BYTES = 15 * 1024 * 1024;
+    if (file.size > MAX_BYTES) {
+      throw new Error(`Ukuran berkas (${(file.size / (1024 * 1024)).toFixed(1)} MB) melebihi batas maksimum 15 MB.`);
+    }
+
+    // 2. Decode verification: real image decoding, rejecting non-images or corrupted files
+    let bitmap;
+    let cleanupBitmap = false;
+    try {
+      if (typeof createImageBitmap === 'function') {
+        bitmap = await createImageBitmap(file);
+        cleanupBitmap = true;
+      } else {
+        bitmap = await new Promise((resolve, reject) => {
+          const url = URL.createObjectURL(file);
+          const img = new Image();
+          img.onload = () => {
+            URL.revokeObjectURL(url);
+            resolve(img);
+          };
+          img.onerror = () => {
+            URL.revokeObjectURL(url);
+            reject(new Error('Decode error'));
+          };
+          img.src = url;
+        });
+      }
+    } catch (err) {
+      throw new Error('Berkas bukan merupakan format gambar yang valid atau data gambar rusak.');
+    }
+
+    const origWidth = bitmap.width;
+    const origHeight = bitmap.height;
+    if (!origWidth || !origHeight) {
+      if (cleanupBitmap && bitmap.close) bitmap.close();
+      throw new Error('Dimensi gambar tidak valid.');
+    }
+
+    // 3. Determine if downscaling is required (longest edge <= 2000 px)
+    const MAX_DIMENSION = 2000;
+    const longestSide = Math.max(origWidth, origHeight);
+    const needsResize = longestSide > MAX_DIMENSION;
+
+    let targetWidth = origWidth;
+    let targetHeight = origHeight;
+    if (needsResize) {
+      const scaleRatio = MAX_DIMENSION / longestSide;
+      targetWidth = Math.round(origWidth * scaleRatio);
+      targetHeight = Math.round(origHeight * scaleRatio);
+    }
+
+    // 4. Check if format conversion is required:
+    // WebP, BMP, or any resized image MUST be rendered via canvas to PNG preserving alpha
+    const fileName = (file.name || '').toLowerCase();
+    const fileType = (file.type || '').toLowerCase();
+    const isWebP = fileType === 'image/webp' || fileName.endsWith('.webp');
+    const isBmp = fileType === 'image/bmp' || fileName.endsWith('.bmp');
+    const isJpeg = (fileType === 'image/jpeg' || fileType === 'image/jpg' || fileName.endsWith('.jpg') || fileName.endsWith('.jpeg')) && !isWebP && !isBmp;
+
+    // If it's JPEG without resize, keep JPEG bytes
+    if (isJpeg && !needsResize) {
+      const buffer = await (file.arrayBuffer ? file.arrayBuffer() : PDFTools.FileUtils.readAsArrayBuffer(file));
+      if (cleanupBitmap && bitmap.close) bitmap.close();
+      return {
+        bytes: new Uint8Array(buffer),
+        mime: 'image/jpeg',
+        width: origWidth,
+        height: origHeight
+      };
+    }
+
+    // Otherwise render to canvas to export as PNG (preserving alpha)
+    const canvas = document.createElement('canvas');
+    canvas.width = targetWidth;
+    canvas.height = targetHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, targetWidth, targetHeight);
+    ctx.drawImage(bitmap, 0, 0, targetWidth, targetHeight);
+
+    if (cleanupBitmap && bitmap.close) {
+      bitmap.close();
+    }
+
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+    const arrayBuffer = await blob.arrayBuffer();
+
+    return {
+      bytes: new Uint8Array(arrayBuffer),
+      mime: 'image/png',
+      width: targetWidth,
+      height: targetHeight
+    };
+  },
+  /**
    * Unified placement calculation for both text and image watermarks.
    * Takes into account page /Rotate, CropBox, item center-based rotation,
    * margins, and 9 standard positions plus tiling.

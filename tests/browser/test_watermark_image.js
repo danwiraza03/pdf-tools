@@ -361,8 +361,59 @@ async function runWatermarkImageBrowserTests(browser, baseUrl) {
       }
       await opaqueDoc.destroy();
 
+      // =========================================================================
+      // Item 4 Tests: PDFTools.Watermark.prepareImage
+      // =========================================================================
+      // 1. File .txt bernama .png HARUS ditolak (real decode failure)
+      const fakeTextPng = new File(['THIS IS NOT A VALID PNG IMAGE FILE'], 'fake_image.png', { type: 'image/png' });
+      let fakeRejected = false;
+      let fakeErrorMessage = '';
+      try {
+        await window.PDFTools.Watermark.prepareImage(fakeTextPng);
+      } catch (err) {
+        fakeRejected = true;
+        fakeErrorMessage = err.message || String(err);
+      }
+      if (!fakeRejected) {
+        failures.push('PDFTools.Watermark.prepareImage must reject fake .txt named .png');
+      }
+
+      // 2. Reject file > 15 MB
+      const oversizedBlob = new Blob([new Uint8Array(100)], { type: 'image/png' });
+      Object.defineProperty(oversizedBlob, 'size', { value: 16 * 1024 * 1024 });
+      let oversizedRejected = false;
+      try {
+        await window.PDFTools.Watermark.prepareImage(oversizedBlob);
+      } catch (err) {
+        oversizedRejected = true;
+      }
+      if (!oversizedRejected) {
+        failures.push('PDFTools.Watermark.prepareImage must reject files > 15 MB');
+      }
+
+      // 3. Gambar 6000x4000 HARUS keluar <= 2000 px
+      const hugeCanvas = document.createElement('canvas');
+      hugeCanvas.width = 6000;
+      hugeCanvas.height = 4000;
+      const hctx = hugeCanvas.getContext('2d');
+      hctx.fillStyle = '#00FF00';
+      hctx.fillRect(0, 0, 10, 10);
+      const hugeBlob = await new Promise(r => hugeCanvas.toBlob(r, 'image/png'));
+      const preparedHuge = await window.PDFTools.Watermark.prepareImage(hugeBlob);
+
+      const longestEdge = Math.max(preparedHuge.width, preparedHuge.height);
+      if (longestEdge > 2000) {
+        failures.push(`PDFTools.Watermark.prepareImage failed downscaling: longest edge is ${longestEdge}px (> 2000px)`);
+      }
+      if (preparedHuge.width !== 2000 || preparedHuge.height !== 1333) {
+        failures.push(`Expected 6000x4000 to scale to 2000x1333, got ${preparedHuge.width}x${preparedHuge.height}`);
+      }
+
       return {
         totalEvaluated: positions.length * rotations.length * 5,
+        fakeRejected,
+        oversizedRejected,
+        hugeScaled: `${preparedHuge.width}x${preparedHuge.height}`,
         failures
       };
     });
