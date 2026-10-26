@@ -5,6 +5,7 @@ const { runSkippedToolsTests } = require('./test_skipped_tools');
 const { runCompressEffectivenessTest } = require('./test_compress_effectiveness');
 const { testAllPagesForErrors } = require('./test_page_errors');
 const { runOcrEnvironmentTests } = require('./test_ocr_environments');
+const { runPageWeightSuite } = require('./test_page_weight');
 
 const TEST_PORT = 8765;
 const BASE_URL = `http://127.0.0.1:${TEST_PORT}`;
@@ -48,6 +49,12 @@ async function main() {
     const ocrFailed = ocrResults && ocrResults.some(r => r.status !== 'BERHASIL');
     if (ocrFailed) {
       throw new Error('Satu atau lebih skenario pengujian lingkungan OCR gagal!');
+    }
+
+    // 6. Page Weight & On-Demand OCR Lazy Loading Audit
+    const weightResult = await runPageWeightSuite(browser, BASE_URL);
+    if (!weightResult || !weightResult.success) {
+      throw new Error('Audit beban unduhan halaman dan lazy loading OCR gagal!');
     }
 
     console.log('========================================================================');
