@@ -811,6 +811,121 @@ async function run() {
   }
 
   // =========================================================================
+  // S9: Grouping bookmarks preservation & empty bookmark pruning (Item 2)
+  // =========================================================================
+  console.log('\n[S9] Grouping bookmarks preservation & empty bookmark pruning');
+  {
+    const doc = await PDFDocument.create();
+    const font = await doc.embedFont(StandardFonts.Helvetica);
+    const ctx = doc.context;
+
+    const p1 = doc.addPage([300, 300]); p1.drawText('Page 1', { x: 50, y: 250, size: 14, font });
+    const p2 = doc.addPage([300, 300]); p2.drawText('Page 2', { x: 50, y: 250, size: 14, font });
+    const p3 = doc.addPage([300, 300]); p3.drawText('Page 3', { x: 50, y: 250, size: 14, font });
+    const p4 = doc.addPage([300, 300]); p4.drawText('Page 4', { x: 50, y: 250, size: 14, font });
+
+    // 1. Group Active (no dest, has 2 children: one targeting P1, one targeting P4)
+    const c1_1 = ctx.obj({ Title: PDFString.of('Child Survives'), Dest: ctx.obj([p1.ref, PDFName.of('Fit')]) });
+    const c1_2 = ctx.obj({ Title: PDFString.of('Child Discarded'), Dest: ctx.obj([p4.ref, PDFName.of('Fit')]) });
+    const c1_1Ref = ctx.register(c1_1);
+    const c1_2Ref = ctx.register(c1_2);
+    c1_1.set(PDFName.of('Next'), c1_2Ref);
+    c1_2.set(PDFName.of('Prev'), c1_1Ref);
+
+    const grpActive = ctx.obj({
+      Title: PDFString.of('Group Active'),
+      First: c1_1Ref,
+      Last: c1_2Ref,
+      Count: 2
+    });
+    const grpActiveRef = ctx.register(grpActive);
+    c1_1.set(PDFName.of('Parent'), grpActiveRef);
+    c1_2.set(PDFName.of('Parent'), grpActiveRef);
+
+    // 2. Group Dead (no dest, has 1 child targeting P4 which will be discarded)
+    const c2_1 = ctx.obj({ Title: PDFString.of('Child Also Discarded'), Dest: ctx.obj([p4.ref, PDFName.of('Fit')]) });
+    const c2_1Ref = ctx.register(c2_1);
+
+    const grpDead = ctx.obj({
+      Title: PDFString.of('Group Dead'),
+      First: c2_1Ref,
+      Last: c2_1Ref,
+      Count: 1
+    });
+    const grpDeadRef = ctx.register(grpDead);
+    c2_1.set(PDFName.of('Parent'), grpDeadRef);
+
+    // 3. Group Empty (no dest, no children)
+    const grpEmpty = ctx.obj({
+      Title: PDFString.of('Group Empty')
+    });
+    const grpEmptyRef = ctx.register(grpEmpty);
+
+    // 4. Direct Bookmark (has dest pointing to P2)
+    const directBm = ctx.obj({
+      Title: PDFString.of('Direct Bookmark'),
+      Dest: ctx.obj([p2.ref, PDFName.of('Fit')])
+    });
+    const directBmRef = ctx.register(directBm);
+
+    // Link top-level siblings
+    grpActive.set(PDFName.of('Next'), grpDeadRef);
+    grpDead.set(PDFName.of('Prev'), grpActiveRef);
+    grpDead.set(PDFName.of('Next'), grpEmptyRef);
+    grpEmpty.set(PDFName.of('Prev'), grpDeadRef);
+    grpEmpty.set(PDFName.of('Next'), directBmRef);
+    directBm.set(PDFName.of('Prev'), grpEmptyRef);
+
+    // Root Outlines
+    const outlinesDict = ctx.obj({
+      Type: 'Outlines',
+      Count: 4,
+      First: grpActiveRef,
+      Last: directBmRef
+    });
+    const outlinesRef = ctx.register(outlinesDict);
+    grpActive.set(PDFName.of('Parent'), outlinesRef);
+    grpDead.set(PDFName.of('Parent'), outlinesRef);
+    grpEmpty.set(PDFName.of('Parent'), outlinesRef);
+    directBm.set(PDFName.of('Parent'), outlinesRef);
+    doc.catalog.set(PDFName.of('Outlines'), outlinesRef);
+
+    const srcBytes = await doc.save({ useObjectStreams: false });
+    const file = bytesToFile(srcBytes, 'outline_test.pdf');
+
+    // Extract pages 1-2 (page 1 and page 2 survive, 3 and 4 discarded)
+    const outBytes = await PDFTools.Split.extractPages(file, [0, 1]);
+
+    await checkGhostAndLeak(outBytes, [], 'S9: Outline Grouping');
+    assertNoTargetPagePlaceholders(outBytes, 'S9: Outline Grouping');
+
+    const titles = await getOutlineTitles(outBytes);
+    ok(titles.includes('Group Active'), 'S9: Group Active without dest is preserved because it has surviving child');
+    ok(titles.includes('Child Survives'), 'S9: Child Survives is preserved under Group Active');
+    ok(!titles.includes('Child Discarded'), 'S9: Child Discarded (pointing to discarded page 4) is removed');
+    ok(!titles.includes('Group Dead'), 'S9: Group Dead is pruned because all its children were discarded');
+    ok(!titles.includes('Child Also Discarded'), 'S9: Child Also Discarded is removed');
+    ok(!titles.includes('Group Empty'), 'S9: Group Empty without dest or children is pruned');
+    ok(titles.includes('Direct Bookmark'), 'S9: Direct Bookmark pointing to surviving page 2 is preserved');
+
+    // Verify parent-child hierarchy in output PDF
+    const outDoc = await PDFDocument.load(outBytes, { ignoreEncryption: true });
+    const outCtx = outDoc.context;
+    const outOutlinesRef = outDoc.catalog.get(PDFName.of('Outlines'));
+    ok(outOutlinesRef, 'S9: output PDF has /Outlines');
+    const outOutlines = outCtx.lookup(outOutlinesRef);
+    const firstRef = outOutlines.get(PDFName.of('First'));
+    const firstDict = outCtx.lookup(firstRef);
+    equals(firstDict.get(PDFName.of('Title')).toString(), '(Group Active)', 'S9: first outline node is Group Active');
+    ok(!firstDict.get(PDFName.of('Dest')), 'S9: Group Active has no /Dest');
+
+    const childRef = firstDict.get(PDFName.of('First'));
+    const childDict = outCtx.lookup(childRef);
+    equals(childDict.get(PDFName.of('Title')).toString(), '(Child Survives)', 'S9: Group Active first child is Child Survives');
+    ok(childDict.get(PDFName.of('Dest')), 'S9: Child Survives has /Dest');
+  }
+
+  // =========================================================================
   // Final summary
   // =========================================================================
   console.log('\n========================================================================');

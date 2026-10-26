@@ -512,6 +512,7 @@
       }
 
       // Check /A action if /Dest is absent
+      let action = null;
       if (!destRef) {
         const aVal = item.get(PDFName.of('A'));
         if (aVal) {
@@ -532,12 +533,17 @@
                   }
                 }
               }
+            } else if (s && s.toString() === '/URI') {
+              const uriVal = aDict.get(PDFName.of('URI'));
+              if (uriVal) {
+                action = { S: 'URI', URI: uriVal };
+              }
             }
           }
         }
       }
 
-      // Collect children
+      // Collect children recursively
       const childItems = [];
       const firstChild = item.get(PDFName.of('First'));
       if (firstChild instanceof PDFRef) {
@@ -546,8 +552,14 @@
         childItems.push(...sub);
       }
 
-      if (destRef !== null || childItems.length > 0) {
-        items.push({ title, destRef, children: childItems });
+      // Requirement 2:
+      // Preserve grouping bookmarks without a destination if they have surviving children;
+      // Empty grouping bookmarks without children are discarded.
+      const hasTarget = (destRef !== null) || Boolean(action);
+      const hasChildren = childItems.length > 0;
+
+      if (hasTarget || hasChildren) {
+        items.push({ title, destRef, action, children: childItems });
       }
 
       itemRef = item.get(PDFName.of('Next'));
@@ -570,6 +582,8 @@
 
       if (item.destRef) {
         entryData.Dest = ctx.obj([item.destRef, PDFName.of('Fit')]);
+      } else if (item.action) {
+        entryData.A = ctx.obj(item.action);
       }
 
       const entryDict = ctx.obj(entryData);
