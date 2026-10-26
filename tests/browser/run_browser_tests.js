@@ -7,6 +7,7 @@ const { testAllPagesForErrors } = require('./test_page_errors');
 const { runOcrEnvironmentTests } = require('./test_ocr_environments');
 const { runPageWeightSuite } = require('./test_page_weight');
 const { runMobileHeaderSuite } = require('./test_mobile_header');
+const { runMobileInteractionSuite } = require('./test_mobile_interaction');
 
 const TEST_PORT = 8765;
 const BASE_URL = `http://127.0.0.1:${TEST_PORT}`;
@@ -62,6 +63,12 @@ async function main() {
     const headerResult = await runMobileHeaderSuite(browser, server);
     if (!headerResult || !headerResult.success) {
       throw new Error(`Audit header dan navigasi seluler gagal dengan ${headerResult ? headerResult.failures.length : 0} kegagalan!`);
+    }
+
+    // 8. Mobile Touch Drag vs Vertical Scroll Interaction Audit
+    const interactionResult = await runMobileInteractionSuite(browser, BASE_URL);
+    if (!interactionResult || !interactionResult.success) {
+      throw new Error('Audit interaksi sentuh seluler (scroll vs drag reorder) gagal!');
     }
 
     console.log('========================================================================');

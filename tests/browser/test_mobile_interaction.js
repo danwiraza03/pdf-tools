@@ -287,13 +287,14 @@ async function testGrayscaleSliderTouch(page, cdp) {
   };
 }
 
-async function runMobileInteractionSuite() {
+async function runMobileInteractionSuite(existingBrowser, existingBaseUrl) {
   console.log('========================================================================');
   console.log('       MOBILE TOUCH INTERACTION SUITE: SCROLL VS SORTABLE REORDER       ');
   console.log('========================================================================\n');
 
   let server = null;
-  let browser = null;
+  let browser = existingBrowser || null;
+  const baseUrl = existingBaseUrl || BASE_URL;
 
   const targetPages = [
     'pages/merge.html',
@@ -306,8 +307,10 @@ async function runMobileInteractionSuite() {
   const results = [];
 
   try {
-    server = await startTestServer(TEST_PORT);
-    browser = await chromium.launch({ headless: true });
+    if (!existingBrowser) {
+      server = await startTestServer(TEST_PORT);
+      browser = await chromium.launch({ headless: true });
+    }
 
     for (const pagePath of targetPages) {
       console.log(`\n>>> Testing: ${pagePath} on iPhone 13 (Chromium with CDP)...`);
@@ -319,7 +322,7 @@ async function runMobileInteractionSuite() {
       const page = await context.newPage();
 
       try {
-        await page.goto(`${BASE_URL}/${pagePath}`, { waitUntil: 'domcontentloaded', timeout: 25000 });
+        await page.goto(`${baseUrl}/${pagePath}`, { waitUntil: 'domcontentloaded', timeout: 25000 });
         await loadFilesForPage(page, pagePath);
 
         const scrollableHeight = await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight);
@@ -365,7 +368,7 @@ async function runMobileInteractionSuite() {
     });
     const grayPage = await grayContext.newPage();
     try {
-      await grayPage.goto(`${BASE_URL}/pages/grayscale.html`, { waitUntil: 'domcontentloaded', timeout: 25000 });
+      await grayPage.goto(`${baseUrl}/pages/grayscale.html`, { waitUntil: 'domcontentloaded', timeout: 25000 });
       const grayCdp = await grayContext.newCDPSession(grayPage);
       const grayRes = await testGrayscaleSliderTouch(grayPage, grayCdp);
       console.log(`  Grayscale Slider: Awal=${grayRes.initialLeft}, Akhir=${grayRes.finalLeft}, Berubah=${grayRes.passed ? 'YA (LULUS)' : 'TIDAK (GAGAL)'}`);
@@ -385,7 +388,7 @@ async function runMobileInteractionSuite() {
     });
     const cropPage = await cropContext.newPage();
     try {
-      await cropPage.goto(`${BASE_URL}/pages/crop.html`, { waitUntil: 'domcontentloaded', timeout: 25000 });
+      await cropPage.goto(`${baseUrl}/pages/crop.html`, { waitUntil: 'domcontentloaded', timeout: 25000 });
       // Create multi-page PDF so the page has plenty of vertical scroll space
       const doc = await PDFLib.PDFDocument.create();
       for (let i = 0; i < 4; i++) {
@@ -544,7 +547,7 @@ async function runMobileInteractionSuite() {
           ...devices['iPhone 13']
         });
         const batchPage = await batchContext.newPage();
-        await batchPage.goto(`${BASE_URL}/pages/batch.html`, { waitUntil: 'domcontentloaded', timeout: 25000 });
+        await batchPage.goto(`${baseUrl}/pages/batch.html`, { waitUntil: 'domcontentloaded', timeout: 25000 });
         await batchPage.waitForTimeout(600);
 
         const docWidth = await batchPage.evaluate(() => document.documentElement.scrollWidth);
@@ -584,7 +587,7 @@ async function runMobileInteractionSuite() {
     return { success: allPassed, results };
 
   } finally {
-    if (browser) await browser.close();
+    if (browser && !existingBrowser) await browser.close();
     if (server) server.close();
   }
 }
