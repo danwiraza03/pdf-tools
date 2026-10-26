@@ -147,13 +147,6 @@
               <div class="result-stat-label" data-i18n="result.new_size">New Size</div>
             </div>
           </div>
-          <!-- Digital Signature Removal Notice -->
-          <div id="sigNotice" class="sig-notice" style="display: none;">
-            <span class="sig-notice-icon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>
-            </span>
-            <span id="sigNoticeText" data-i18n="compress.sig_removed_notice">Digital signature protection has been removed to enable merging</span>
-          </div>
           <div class="result-actions-container">
             <div class="result-actions-primary">
               <button id="downloadBtn" class="btn btn-primary btn-lg" data-i18n="action.download">Download Merged PDF</button>
@@ -1970,8 +1963,6 @@
           document.getElementById('resFiles').textContent = fileGroups.length;
           document.getElementById('resSize').textContent = PDFTools.FileUtils.formatSize(mergedData.byteLength);
 
-          const sigNotice = document.getElementById('sigNotice');
-          if (sigNotice) sigNotice.style.display = hasDigitalSignatures ? 'flex' : 'none';
 
           PDFTools.Toast.success(PDFTools.i18n.t('result.merge_success', 'PDFs merged successfully!'));
         } catch (err) {
