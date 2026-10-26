@@ -487,6 +487,9 @@ PDFTools.i18n = (function () {
       'action.clear': 'Clear All',
 
       // Watermark Options
+      'watermark.mode': 'Watermark Type',
+      'watermark.mode_text': 'Text',
+      'watermark.mode_image': 'Image',
       'watermark.text': 'Watermark Text',
       'watermark.text_placeholder': 'e.g. CONFIDENTIAL, DRAFT, SAMPLE',
       'watermark.opacity': 'Transparency',
@@ -497,6 +500,15 @@ PDFTools.i18n = (function () {
       'watermark.diagonal': 'Diagonal (45°)',
       'watermark.horizontal': 'Horizontal (0°)',
       'watermark.vertical': 'Vertical (90°)',
+      'watermark.image_select': 'Select Image',
+      'watermark.image_browse': 'Choose Image',
+      'watermark.image_hint': 'Supports PNG, JPG, or WebP',
+      'watermark.image_scale': 'Image Size (% of page width)',
+      'watermark.image_remove': 'Remove image',
+      'watermark.pos_tile': 'Tile (Repeat)',
+      'watermark.error_no_image': 'Please select an image for watermark.',
+      'watermark.error_invalid_image': 'Invalid image file or unsupported format.',
+      'watermark.error_oversized': 'Image file is too large (maximum 15 MB).',
 
       // PDF to JPG Options
       'pdf_jpg.quality': 'Image Quality',
@@ -1153,6 +1165,9 @@ PDFTools.i18n = (function () {
       'action.clear': 'Hapus Semua',
 
       // Watermark Options
+      'watermark.mode': 'Tipe Watermark',
+      'watermark.mode_text': 'Teks',
+      'watermark.mode_image': 'Gambar',
       'watermark.text': 'Teks Watermark',
       'watermark.text_placeholder': 'cth: RAHASIA, DRAFT, CONTOH',
       'watermark.opacity': 'Transparansi',
@@ -1163,6 +1178,15 @@ PDFTools.i18n = (function () {
       'watermark.diagonal': 'Diagonal (45°)',
       'watermark.horizontal': 'Horizontal (0°)',
       'watermark.vertical': 'Vertikal (90°)',
+      'watermark.image_select': 'Pilih Gambar',
+      'watermark.image_browse': 'Pilih Gambar',
+      'watermark.image_hint': 'Mendukung PNG, JPG, atau WebP',
+      'watermark.image_scale': 'Ukuran Gambar (% lebar halaman)',
+      'watermark.image_remove': 'Hapus gambar',
+      'watermark.pos_tile': 'Ubin (Berulang)',
+      'watermark.error_no_image': 'Silakan pilih gambar watermark terlebih dahulu.',
+      'watermark.error_invalid_image': 'File gambar tidak valid atau format tidak didukung.',
+      'watermark.error_oversized': 'Ukuran file gambar terlalu besar (maksimal 15 MB).',
 
       // PDF to JPG Options
       'pdf_jpg.quality': 'Kualitas Gambar',
