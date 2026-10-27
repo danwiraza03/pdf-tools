@@ -18,6 +18,7 @@ const { runMergeSizeBrowserSuite } = require('./test_merge_size_browser');
 const { runPasswordModalSuite } = require('./test_password_modal');
 const { runNodeMergeSignedTest, runMutationCheck, runMergeSignedBrowserSuite } = require('../test_merge_signed');
 const { runI18nBrowserSuite } = require('../test_i18n_locale');
+const { runOcrDefaultLangSuite } = require('./test_ocr_default_lang');
 const { runWatermarkPreviewSuite } = require('../test_watermark_preview');
 const { run: runLaunchHelperTest } = require('../test_launch_helper');
 const { runSignFlowSuite } = require('./test_sign_flow');
@@ -266,6 +267,14 @@ async function main() {
         run: async () => {
           const signRes = await runSignFlowSuite(browser, BASE_URL);
           if (signRes?.skippedWebKit > 0) totalSkippedWebKit += signRes.skippedWebKit;
+        }
+      },
+      {
+        id: 'ocrlang',
+        name: 'OCR Default Language Follows UI Language',
+        run: async () => {
+          const res = await runOcrDefaultLangSuite(browser, BASE_URL);
+          if (!res || !res.success) throw new Error('OCR default language suite gagal: ' + ((res && res.failures) || []).join(' | '));
         }
       }
     ];

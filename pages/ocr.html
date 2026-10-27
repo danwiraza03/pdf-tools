@@ -797,7 +797,27 @@
       let showWordBoxes = true;
       let showHeatmap = false;
 
+      // OCR language: the default follows the active UI language (id -> ind, en -> eng).
+      // langSource records who decided: 'default' (follows UI), 'manual' (user click), 'detected' (from PDF text).
+      // Only 'default' is ever moved automatically when the UI language changes.
       let selectedLang = 'ind';
+      let langSource = 'default';
+      function uiDefaultOcrLang() {
+        const ui = (window.PDFTools && PDFTools.i18n && typeof PDFTools.i18n.getLang === 'function')
+          ? PDFTools.i18n.getLang()
+          : (document.documentElement.lang || 'id');
+        return ui === 'en' ? 'eng' : 'ind';
+      }
+      function applyOcrLang(lang) {
+        selectedLang = lang;
+        document.querySelectorAll('#langSelector .ocr-seg-btn').forEach(b => {
+          b.classList.toggle('active', b.getAttribute('data-lang') === lang);
+        });
+      }
+      applyOcrLang(uiDefaultOcrLang());
+      window.addEventListener('pdftools:langchange', function () {
+        if (langSource === 'default') applyOcrLang(uiDefaultOcrLang());
+      });
       let selectedFormat = 'both';
       let selectedPreprocess = 'auto';
       let selectedDpi = 200;
@@ -821,9 +841,8 @@
       // Language selection
       document.querySelectorAll('#langSelector .ocr-seg-btn').forEach(btn => {
         btn.addEventListener('click', function () {
-          document.querySelectorAll('#langSelector .ocr-seg-btn').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          selectedLang = btn.getAttribute('data-lang');
+          langSource = 'manual';
+          applyOcrLang(btn.getAttribute('data-lang'));
         });
       });
 
@@ -935,10 +954,8 @@
               const sampleStr = (textContent.items || []).map(i => i.str).join(' ');
               if (sampleStr && sampleStr.length > 20 && PDFTools.OCR.detectLanguageFromText) {
                 const detected = PDFTools.OCR.detectLanguageFromText(sampleStr);
-                selectedLang = detected;
-                document.querySelectorAll('#langSelector .ocr-seg-btn').forEach(b => {
-                  b.classList.toggle('active', b.getAttribute('data-lang') === detected);
-                });
+                langSource = 'detected';
+                applyOcrLang(detected);
                 const langName = detected === 'ind' ? 'Bahasa Indonesia' : (detected === 'eng' ? 'English' : 'ID + EN');
                 PDFTools.Toast.info(`Auto-detected: ${langName}`);
               }
