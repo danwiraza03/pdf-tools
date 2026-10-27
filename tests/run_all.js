@@ -27,7 +27,8 @@ const tests = [
   { name: 'Repository Hygiene Guard (File Size & Untracked Paths)', file: 'check_repo_hygiene.js' },
   { name: 'Static Guard: Zero Browser/Playwright in Node Tests', file: 'check_node_test_isolation.js' },
   { name: 'Encrypted Inputs Test Suite (All 15 Tools x 4 Variants)', file: 'test_encrypted_inputs.js' },
-  { name: 'Zero Unsanitized ignoreEncryption: true Guard', file: 'check_no_ignore_encryption.js' }
+  { name: 'Zero Unsanitized ignoreEncryption: true Guard', file: 'check_no_ignore_encryption.js' },
+  { name: 'Browser Runner Summary Logic Verification', file: 'test_browser_runner_summary.js' }
 ];
 
 console.log('========================================================================');
