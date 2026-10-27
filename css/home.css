@@ -610,6 +610,31 @@
   color: var(--text-muted);
 }
 
+@media (max-width: 991px) {
+  .app-logo {
+    min-width: 0;
+    flex: 0 1 auto;
+    overflow: hidden;
+  }
+  .app-logo .logo-badge {
+    flex-shrink: 0;
+  }
+  .app-logo .logo-title {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 0 1 auto;
+  }
+  .app-logo .logo-title span:first-child {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+  }
+}
+
 @media (max-width: 380px) {
   .app-logo {
     gap: 4px;

@@ -2281,34 +2281,81 @@ a {
     width: 36px;
     height: 36px;
     padding: 0;
+    box-sizing: border-box;
+    flex-shrink: 0;
   }
 
   .lang-toggle {
     min-width: 36px;
     height: 36px;
-    padding: 0 6px;
+    padding: 0 4px;
     font-size: 0.78rem;
+    box-sizing: border-box;
+    flex-shrink: 0;
   }
 
   .nine-dots-btn {
     width: 36px;
     height: 36px;
+    box-sizing: border-box;
+    flex-shrink: 0;
   }
 
   .mobile-menu-btn {
     width: 36px;
     height: 36px;
+    box-sizing: border-box;
+    flex-shrink: 0;
   }
 
   .header-controls {
     gap: 8px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+  }
+
+  /* Robust Logo Font Handling: Logo text can shrink/ellipsis without hiding icon */
+  .app-logo,
+  .header-logo {
+    min-width: 0;
+    flex: 0 1 auto;
+    overflow: hidden;
+  }
+
+  .app-logo .logo-badge,
+  .header-logo .logo-icon {
+    flex-shrink: 0;
+  }
+
+  .app-logo .logo-title,
+  .header-logo .logo-title {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 0 1 auto;
+  }
+
+  .app-logo .logo-title span:first-child,
+  .header-logo .logo-title span:first-child {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+  }
+
+  .logo-status-dot {
+    flex-shrink: 0;
   }
 }
 
 @media (max-width: 640px) {
   .header-inner {
-    padding: 0 14px;
+    padding: 0 10px;
     gap: 8px;
+    box-sizing: border-box;
   }
 
   .btn-header-studio {
@@ -2317,13 +2364,49 @@ a {
 
   .header-controls {
     gap: 6px;
+    flex-shrink: 0;
+  }
+}
+
+@media (max-width: 430px) {
+  .header-inner {
+    padding: 0 8px;
+    gap: 6px;
+    box-sizing: border-box;
+  }
+
+  .header-controls {
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  .app-logo,
+  .header-logo {
+    gap: 6px;
+    font-size: 1.05rem;
+    min-width: 0;
+  }
+
+  .app-logo .logo-badge,
+  .header-logo .logo-icon {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+  }
+
+  .lang-toggle {
+    min-width: 36px;
+    height: 36px;
+    padding: 0 4px;
+    font-size: 0.75rem;
   }
 }
 
 @media (max-width: 380px) {
   .header-inner {
-    padding: 0 4px;
+    padding: 0 6px;
     gap: 4px;
+    box-sizing: border-box;
   }
 
   .app-logo,
@@ -2337,24 +2420,12 @@ a {
     width: 30px;
     height: 30px;
     font-size: 0.95rem;
+    flex-shrink: 0;
   }
 
   .header-controls {
-    gap: 2px;
-  }
-
-  .theme-toggle,
-  .nine-dots-btn,
-  .mobile-menu-btn {
-    width: 34px;
-    height: 34px;
-  }
-
-  .lang-toggle {
-    min-width: 32px;
-    height: 34px;
-    padding: 0 4px;
-    font-size: 0.75rem;
+    gap: 3px;
+    flex-shrink: 0;
   }
 }
 
@@ -2753,23 +2824,29 @@ a {
     width: 44px !important;
     height: 44px !important;
     min-width: 44px !important;
+    max-width: 44px !important;
     min-height: 44px !important;
     padding: 0 !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
     box-sizing: border-box !important;
+    flex-shrink: 0 !important;
   }
 
   .lang-toggle {
-    min-width: 44px !important;
+    width: 44px !important;
     height: 44px !important;
+    min-width: 44px !important;
+    max-width: 44px !important;
     min-height: 44px !important;
-    padding: 0 10px !important;
+    padding: 0 !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
     box-sizing: border-box !important;
+    flex-shrink: 0 !important;
+    font-size: 0.8rem !important;
   }
 
   /* Icons inside header buttons remain strictly 20x20px */

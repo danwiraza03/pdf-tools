@@ -829,7 +829,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const current = (lang || (window.PDFTools && PDFTools.i18n && PDFTools.i18n.getLang()) || 'id').toLowerCase();
     const buttons = document.querySelectorAll('#langToggle, .lang-toggle, [data-action="toggle-lang"]');
     buttons.forEach(btn => {
-      btn.textContent = current === 'id' ? 'ID 🇮🇩' : 'EN 🇬🇧';
+      btn.textContent = current === 'id' ? 'ID' : 'EN';
       btn.setAttribute('aria-label', current === 'id' ? 'Ganti ke Bahasa Inggris' : 'Switch to Indonesian');
       btn.setAttribute('title', current === 'id' ? 'Klik untuk beralih ke English' : 'Click to switch to Indonesian');
     });
@@ -847,7 +847,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const newLang = PDFTools.i18n.toggleLang();
       updateAllLangButtons(newLang);
       if (window.PDFTools.Toast) {
-        PDFTools.Toast.info(newLang === 'id' ? 'Bahasa Indonesia Aktif 🇮🇩' : 'English Active 🇬🇧');
+        PDFTools.Toast.info(newLang === 'id' ? 'Bahasa Indonesia Aktif' : 'English Active');
       }
     }
   });
