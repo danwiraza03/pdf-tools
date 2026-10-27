@@ -27,3 +27,8 @@ tests/browser/screenshots/
 test-results/
 playwright-report/
 .tmp/
+*.tmp
+
+# Temporary dumps & logs
+npm.txt
+

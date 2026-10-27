@@ -1,4 +1,0 @@
-npm.cmd ci
-npx.cmd playwright install chromium webkit
-node tests/run_all.js
-npm.cmd run test:browser
