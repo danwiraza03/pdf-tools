@@ -254,6 +254,31 @@
     }
     .sign-step.active .sign-step-num { background: var(--tool-color); color: #fff; }
     .sign-step.done .sign-step-num { background: #10B981; color: #fff; }
+
+    @media (pointer: coarse) {
+      .sig-tab, .sig-tab-btn, .btn, .btn-sm, .btn-md, .btn-lg, .sig-font-btn, .sign-page-nav button {
+        min-height: 44px;
+        min-width: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .sig-color-dot {
+        width: 36px;
+        height: 36px;
+      }
+    }
+    @media (max-width: 480px) {
+      .sign-toolbar-floating {
+        justify-content: center;
+      }
+      .sig-tabs {
+        flex-wrap: wrap;
+      }
+      .sign-preview-container {
+        padding: 10px;
+      }
+    }
   </style>
 </head>
 <body class="tool-page-sign">
@@ -274,13 +299,13 @@
       <!-- Steps Progress -->
       <div class="sign-steps">
         <div class="sign-step active" id="step1Indicator">
-          <span class="sign-step-num">1</span> Upload PDF
+          <span class="sign-step-num">1</span> <span data-i18n="sign.step1">Upload PDF</span>
         </div>
         <div class="sign-step" id="step2Indicator">
-          <span class="sign-step-num">2</span> Create Signature
+          <span class="sign-step-num">2</span> <span data-i18n="sign.step2">Create Signature</span>
         </div>
         <div class="sign-step" id="step3Indicator">
-          <span class="sign-step-num">3</span> Place & Download
+          <span class="sign-step-num">3</span> <span data-i18n="sign.step3">Place & Download</span>
         </div>
       </div>
 
@@ -290,7 +315,7 @@
         <div id="step1">
           <div class="sign-section-title" style="display: flex; align-items: center; gap: 8px;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-            <span>Select PDF Document</span>
+            <span data-i18n="sign.select_doc">Select PDF Document</span>
           </div>
           <div class="dropzone" id="dropzone" style="margin-bottom: 0;">
             <div class="dropzone-content">
@@ -310,21 +335,21 @@
         <!-- STEP 2: Create Signature -->
         <div id="step2" style="display: none;">
           <div class="sign-section">
-            <div class="sign-section-title">Create Your Signature</div>
+            <div class="sign-section-title" data-i18n="sign.create_title">Create Your Signature</div>
             
             <!-- Type / Draw / Upload Tabs -->
             <div class="sig-tabs" id="sigTypeTabs">
               <button type="button" class="sig-tab-btn active" data-tab="draw">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-                <span>Draw</span>
+                <span data-i18n="sign.tab_draw">Draw</span>
               </button>
               <button type="button" class="sig-tab-btn" data-tab="type">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
-                <span>Type</span>
+                <span data-i18n="sign.tab_type">Type</span>
               </button>
               <button type="button" class="sig-tab-btn" data-tab="upload">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-                <span>Upload Image</span>
+                <span data-i18n="sign.tab_upload">Upload Image</span>
               </button>
             </div>
 
@@ -332,7 +357,7 @@
             <div class="sig-tab-content" id="tabDraw" style="margin-top: 16px;">
               <div class="sig-draw-area" id="sigDrawArea">
                 <canvas class="sig-draw-canvas" id="sigDrawCanvas"></canvas>
-                <div class="sig-draw-hint" id="sigDrawHint">Draw your signature here with mouse or finger</div>
+                <div class="sig-draw-hint" id="sigDrawHint" data-i18n="sign.draw_hint">Draw your signature here with mouse or finger</div>
                 <div class="sig-baseline"></div>
               </div>
               <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px; flex-wrap: wrap; gap: 8px;">
@@ -344,19 +369,19 @@
                 </div>
                 <div style="display: flex; gap: 12px; align-items: center;">
                   <label style="font-size: 0.78rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px;">
-                    Thickness:
+                    <span data-i18n="sign.thickness">Thickness:</span>
                     <input type="range" id="sigPenSize" min="1" max="5" value="2.5" step="0.5" style="width: 70px;">
                   </label>
-                  <button type="button" class="btn btn-ghost btn-sm" id="clearDrawBtn">Clear</button>
+                  <button type="button" class="btn btn-ghost btn-sm" id="clearDrawBtn" data-i18n="sign.clear_draw">Clear</button>
                 </div>
               </div>
             </div>
 
             <!-- Type Tab -->
             <div class="sig-tab-content" id="tabType" style="display: none; margin-top: 16px;">
-              <input type="text" class="sig-type-input" id="sigTypeInput" placeholder="Type your full name..." value="">
+              <input type="text" class="sig-type-input" id="sigTypeInput" placeholder="Type your full name..." data-i18n-placeholder="sign.type_placeholder" value="">
               <div class="sig-type-preview" id="sigTypePreview" style="margin-top: 12px; font-family: 'Great Vibes', cursive;">
-                <span style="color: #94a3b8;">Signature Preview</span>
+                <span style="color: #94a3b8;" data-i18n="sign.type_preview">Signature Preview</span>
               </div>
               <div class="sig-font-grid" style="margin-top: 12px;">
                 <button class="sig-font-btn active" data-font="'Great Vibes', cursive" style="font-family: 'Great Vibes', cursive;">Great Vibes</button>
@@ -379,14 +404,14 @@
                 <div style="display: flex; justify-content: center; margin-bottom: 8px; color: var(--tool-color);">
                   <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
                 </div>
-                <strong>Click or drag an image of your signature</strong>
-                <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 4px;">Supports PNG, JPG, WebP — white background will be automatically removed</p>
+                <strong data-i18n="sign.upload_drag">Click or drag an image of your signature</strong>
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 4px;" data-i18n="sign.upload_sub">Supports PNG, JPG, WebP — white background will be automatically removed</p>
                 <input type="file" id="sigUploadInput" accept="image/*" style="display: none;">
               </div>
               <div id="uploadPreviewArea" style="display: none; text-align: center; margin-top: 12px;">
                 <img id="sigUploadPreview" class="sig-upload-preview" alt="Signature preview">
                 <div style="margin-top: 8px;">
-                  <button type="button" class="btn btn-ghost btn-sm" id="reuploadSigBtn">Change Image</button>
+                  <button type="button" class="btn btn-ghost btn-sm" id="reuploadSigBtn" data-i18n="sign.change_image">Change Image</button>
                 </div>
               </div>
             </div>
@@ -400,10 +425,10 @@
             <div class="sig-actions" style="margin-top: 20px;">
               <button type="button" class="btn btn-primary btn-md" id="useSignatureBtn" disabled style="display: flex; align-items: center; gap: 6px;">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                <span>Place on Document →</span>
+                <span data-i18n="sign.place_btn">Place on Document →</span>
               </button>
               <label style="font-size: 0.78rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px; cursor: pointer;">
-                <input type="checkbox" id="saveSigCheck" checked> Save this signature for 1-click reuse
+                <input type="checkbox" id="saveSigCheck" checked> <span data-i18n="sign.save_reuse">Save this signature for 1-click reuse</span>
               </label>
             </div>
           </div>
@@ -412,21 +437,21 @@
         <!-- STEP 3: Place & Download -->
         <div id="step3" style="display: none;">
           <div class="sign-section">
-            <div class="sign-section-title">Place Signature & Stamps on PDF</div>
+            <div class="sign-section-title" data-i18n="sign.place_title">Place Signature & Stamps on PDF</div>
 
             <!-- Quick Add Floating Bar -->
             <div class="sign-toolbar-floating">
               <button type="button" class="btn btn-ghost btn-sm" id="quickAddSigBtn" style="display: flex; align-items: center; gap: 6px;">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 19.5c0 .8-.7 1.5-1.5 1.5H5.5c-.8 0-1.5-.7-1.5-1.5 0-.8.7-1.5 1.5-1.5h13c.8 0 1.5.7 1.5 1.5zM18.4 4.6a2 2 0 0 1 2.8 2.8L8.8 19.8l-4.2.9.9-4.2L18.4 4.6z"/></svg>
-                <span>Add Signature</span>
+                <span data-i18n="sign.add_sig">Add Signature</span>
               </button>
               <button type="button" class="btn btn-ghost btn-sm" id="quickAddDateBtn" style="display: flex; align-items: center; gap: 6px;">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                <span>Add Date Stamp</span>
+                <span data-i18n="sign.add_date">Add Date Stamp</span>
               </button>
               <button type="button" class="btn btn-ghost btn-sm" id="quickAddNameBtn" style="display: flex; align-items: center; gap: 6px;">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
-                <span>Add Name</span>
+                <span data-i18n="sign.add_name">Add Name</span>
               </button>
               <button type="button" class="btn btn-ghost btn-sm" id="changeSigBtn" style="display: flex; align-items: center; gap: 6px;">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
@@ -447,9 +472,9 @@
 
               <!-- Page Navigation -->
               <div class="sign-page-nav">
-                <button type="button" id="prevPageBtn" disabled>← Previous Page</button>
+                <button type="button" id="prevPageBtn" disabled data-i18n="sign.prev_page">← Previous Page</button>
                 <span id="pageInfo" style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 600;">Page 1 / 1</span>
-                <button type="button" id="nextPageBtn" disabled>Next Page →</button>
+                <button type="button" id="nextPageBtn" disabled data-i18n="sign.next_page">Next Page →</button>
               </div>
             </div>
 
@@ -592,6 +617,9 @@
       if (step === 2) {
         // Crucial fix: initialize draw canvas when container is actually visible in DOM!
         setTimeout(resizeDrawCanvas, 50);
+      }
+      if (window.PDFTools && PDFTools.i18n && PDFTools.i18n.updatePage) {
+        PDFTools.i18n.updatePage();
       }
     }
 
@@ -999,9 +1027,13 @@
       ctx.fillRect(0, 0, viewport.width, viewport.height);
       await page.render({ canvasContext: ctx, viewport }).promise;
 
-      pageInfo.textContent = `Page ${pageNum} of ${totalPages}`;
+      const isId = (window.PDFTools && PDFTools.i18n && PDFTools.i18n.getLang() === 'id');
+      pageInfo.textContent = isId ? `Halaman ${pageNum} dari ${totalPages}` : `Page ${pageNum} of ${totalPages}`;
       prevPageBtn.disabled = pageNum <= 1;
       nextPageBtn.disabled = pageNum >= totalPages;
+      if (window.PDFTools && PDFTools.i18n && PDFTools.i18n.updatePage) {
+        PDFTools.i18n.updatePage();
+      }
 
       renderPlacedItems();
     }
