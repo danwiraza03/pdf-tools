@@ -26,6 +26,7 @@ Rilis stabil pertama. Seluruh pemrosesan berjalan di browser Anda; berkas tidak 
 
 ### Diubah
 
+- Ditambahkan pengecekan kode otomatis (ESLint) untuk menangkap variabel tak terdefinisi dan nama ganda, serta test yang memastikan operasi salin halaman tidak bergantung pada fitur khusus Node.
 - **OCR dimuat saat dibutuhkan.** Membuka halaman tidak lagi mengunduh mesin dan model OCR (turun dari sekitar 25 MB menjadi 0,3 MB untuk beranda dan sekitar 3 MB untuk PDF Studio). Hanya model bahasa yang dipilih yang diunduh.
 - **Gabung PDF jauh lebih hemat ukuran:** dua berkas 5,5 MB yang sebelumnya menjadi 136 MB kini sekitar 5,2 MB. Daftar isi (link internal), bookmark, dan metadata dokumen ikut terbawa ke hasil.
 - Tanda tangan digital pada berkas yang ditulis ulang (Watermark, Gabung, Tanda Tangan, dan lainnya) diubah menjadi stempel visual tanpa dialog. Tanda tangan itu tidak lagi sah secara kriptografi (lihat Masalah yang Diketahui).
@@ -36,6 +37,8 @@ Rilis stabil pertama. Seluruh pemrosesan berjalan di browser Anda; berkas tidak 
 
 ### Diperbaiki
 
+- **Gabung PDF gagal di browser pada PDF tertentu.** Jika judul bookmark (daftar isi di panel samping) disimpan sebagai string heksadesimal UTF-16, penyalinan bookmark memakai fungsi khusus Node yang tidak ada di browser, sehingga proses berhenti dengan galat. Alat lain yang menyalin bookmark (Hapus Halaman, Pisah/Ekstrak, Urutkan, Buka Kunci) memakai kode yang sama dan ikut diperbaiki.
+- **Judul bookmark rusak pada karakter di luar Latin-1.** Tanda pisah "–", tanda kutip lengkung, dan huruf non-Latin pada judul bookmark sebelumnya berubah menjadi karakter kontrol saat bookmark disalin. Kini judul tersalin utuh.
 - OCR offline yang rusak sejak awal: berkas bundel mesin OCR memuat tanda kutip yang tidak di-escape sehingga jalur offline tidak pernah berjalan dan OCR hanya bekerja lewat server. Kini OCR berjalan lewat server lokal maupun dibuka langsung dari berkas.
 - Grayscale yang selalu gagal karena variabel tidak terdefinisi.
 - Statistik ukuran berkas yang tidak tampil di halaman Gabung.
