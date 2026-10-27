@@ -46,7 +46,7 @@
   // ============================================================================
   function getPdfLib() {
     if (globalObj.PDFLib) return globalObj.PDFLib;
-    if (typeof PDFLib !== 'undefined') return PDFLib; // eslint-disable-line no-undef
+    if (typeof PDFLib !== 'undefined') return PDFLib;
     try {
       return require('../lib/pdf-lib.min.js');
     } catch (e) {
@@ -373,6 +373,21 @@
   // ============================================================================
   // Internal: Rebuild Outlines (Bookmarks)
   // ============================================================================
+  /**
+   * Decode a PDF hex string body ("FEFF0042...") into a latin1 string without Node's Buffer,
+   * so it also works in browsers. Whitespace is ignored and an odd digit count is padded
+   * with a trailing 0, as the PDF specification requires.
+   */
+  function hexToLatin1(hex) {
+    const clean = String(hex).replace(/\s+/g, '');
+    const padded = clean.length % 2 ? clean + '0' : clean;
+    let out = '';
+    for (let i = 0; i < padded.length; i += 2) {
+      out += String.fromCharCode(parseInt(padded.substr(i, 2), 16) || 0);
+    }
+    return out;
+  }
+
   function remapOutlines(destDoc, pageMap, options) {
     const L = getPdfLib();
     const { PDFRef, PDFDict, PDFName } = L;
@@ -482,7 +497,7 @@
         if (title.startsWith('(') && title.endsWith(')')) title = title.slice(1, -1);
         if (title.startsWith('<') && title.endsWith('>')) {
           const hex = title.slice(1, -1);
-          const decoded = Buffer.from(hex, 'hex').toString('latin1');
+          const decoded = hexToLatin1(hex);
           if (decoded.startsWith('\xfe\xff')) {
             const chars = [];
             for (let i = 2; i < decoded.length; i += 2) {
@@ -569,7 +584,7 @@
   }
 
   function writeOutlineItems(destDoc, items, parentRef, L) {
-    const { PDFName, PDFString } = L;
+    const { PDFName, PDFString, PDFHexString } = L;
     const ctx = destDoc.context;
     const written = [];
 
@@ -577,7 +592,9 @@
       if (!item.title) continue;
 
       const entryData = {
-        Title: PDFString.of(item.title)
+        // PDFString.of would truncate characters above Latin-1 (en dash, curly quotes, accents
+        // outside Latin-1) to one byte. Non-ASCII titles are written as UTF-16BE hex instead.
+        Title: /^[\x20-\x7E]*$/.test(item.title) ? PDFString.of(item.title) : PDFHexString.fromText(item.title)
       };
 
       if (item.destRef) {

@@ -55,7 +55,7 @@ class RedactionEngine {
    */
   static getPdfLib() {
     if (typeof window !== 'undefined' && window.PDFLib) return window.PDFLib;
-    if (typeof PDFLib !== 'undefined') return PDFLib; // eslint-disable-line no-undef
+    if (typeof PDFLib !== 'undefined') return PDFLib;
     return require('../lib/pdf-lib.min.js');
   }
 
