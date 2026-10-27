@@ -1886,12 +1886,195 @@
 
 .stacked-doc-handle,
 .expanded-page-handle {
-  display: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: absolute;
   top: 8px;
   right: 8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  opacity: 0;
+  transition: opacity 0.18s ease, transform 0.18s ease;
   z-index: 8;
   cursor: grab;
+  cursor: -webkit-grab;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  pointer-events: none;
+}
+
+.stacked-doc-handle svg,
+.expanded-page-handle svg {
+  width: 16px;
+  height: 16px;
+  stroke: #ffffff;
+  display: block;
+}
+
+.merge-page-card:hover .stacked-doc-handle,
+.merge-page-card:hover .expanded-page-handle {
+  opacity: 1;
+}
+
+.merge-page-card.stacked-doc,
+.merge-page-card.expanded-page {
+  cursor: grab;
+  cursor: -webkit-grab;
+}
+
+.merge-page-card.stacked-doc:active,
+.merge-page-card.stacked-doc.sortable-chosen,
+.merge-page-card.stacked-doc.sortable-drag,
+.merge-page-card.expanded-page:active,
+.merge-page-card.expanded-page.sortable-chosen,
+.merge-page-card.expanded-page.sortable-drag {
+  cursor: grabbing !important;
+  cursor: -webkit-grabbing !important;
+}
+
+/* Full workspace drop overlay */
+.merge-drag-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 2px dashed #e11d48;
+  border-radius: var(--radius-xl, 16px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  pointer-events: none;
+  animation: fadeIn 0.15s ease-out;
+  box-shadow: 0 12px 36px rgba(225, 29, 72, 0.15);
+}
+
+[data-theme="dark"] .merge-drag-overlay,
+.dark-theme .merge-drag-overlay {
+  background: rgba(11, 15, 25, 0.94);
+  border-color: #e11d48;
+  box-shadow: 0 12px 36px rgba(225, 29, 72, 0.3);
+}
+
+.merge-drag-overlay-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+  padding: 32px 48px;
+  pointer-events: none;
+}
+
+.merge-drag-overlay-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(225, 29, 72, 0.12);
+  color: #e11d48;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: pulse 1.8s infinite ease-in-out;
+}
+
+.merge-drag-overlay-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-main, #0f172a);
+}
+
+.merge-drag-overlay-subtitle {
+  font-size: 0.9rem;
+  color: var(--text-muted, #64748b);
+}
+
+/* In-Grid "+ Add More Files" Drop Card */
+.merge-add-drop-card {
+  min-height: 250px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px 16px;
+  gap: 12px;
+  border: 2px dashed var(--border-color, #cbd5e1);
+  border-radius: var(--radius-md, 12px);
+  background: var(--bg-card, #ffffff);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+  box-sizing: border-box;
+}
+
+[data-theme="dark"] .merge-add-drop-card,
+.dark-theme .merge-add-drop-card {
+  border-color: rgba(255, 255, 255, 0.16);
+  background: rgba(22, 30, 46, 0.6);
+}
+
+.merge-add-drop-card:hover,
+.merge-add-drop-card:focus-visible {
+  border-color: #e11d48;
+  background: rgba(225, 29, 72, 0.04);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(225, 29, 72, 0.12);
+  outline: none;
+}
+
+[data-theme="dark"] .merge-add-drop-card:hover,
+[data-theme="dark"] .merge-add-drop-card:focus-visible,
+.dark-theme .merge-add-drop-card:hover,
+.dark-theme .merge-add-drop-card:focus-visible {
+  background: rgba(225, 29, 72, 0.1);
+  box-shadow: 0 8px 24px rgba(225, 29, 72, 0.25);
+}
+
+.merge-add-drop-card.drag-over {
+  border-color: #e11d48 !important;
+  background: rgba(225, 29, 72, 0.12) !important;
+  transform: scale(1.02);
+  box-shadow: 0 0 24px rgba(225, 29, 72, 0.35) !important;
+}
+
+.merge-add-drop-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(225, 29, 72, 0.1);
+  color: #e11d48;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.merge-add-drop-card:hover .merge-add-drop-icon,
+.merge-add-drop-card.drag-over .merge-add-drop-icon {
+  transform: scale(1.1);
+  background: #e11d48;
+  color: #ffffff;
+}
+
+.merge-add-drop-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-main, #0f172a);
+}
+
+.merge-add-drop-hint {
+  font-size: 0.78rem;
+  color: var(--text-muted, #64748b);
+  max-width: 150px;
+  line-height: 1.35;
 }
 
 /* ============================================================

@@ -727,6 +727,12 @@ PDFTools.i18n = (function () {
       'merge.new_page': 'New Page',
       'merge.old_page': 'Old Page',
       'merge.orig': 'Orig',
+      'merge.drop_more_title': 'Drop PDF files here to add',
+      'merge.drop_more_desc': 'Drop anywhere on the workspace to add more files to merge',
+      'merge.add_card_title': 'Add More Files',
+      'merge.add_card_hint': 'Drop PDF here or click to browse',
+      'merge.drag_to_reorder': 'Drag to reorder',
+
 
       // Protect & Unlock PDF
       'protect.tab_protect': 'Protect PDF (Add Password)',
@@ -1482,6 +1488,12 @@ PDFTools.i18n = (function () {
       'merge.new_page': 'Hal. Baru',
       'merge.old_page': 'Hal. Asal',
       'merge.orig': 'Asal',
+      'merge.drop_more_title': 'Lepaskan berkas PDF di sini untuk menambahkan',
+      'merge.drop_more_desc': 'Lepaskan di area mana saja untuk menambah berkas yang digabung',
+      'merge.add_card_title': 'Tambah Berkas Lain',
+      'merge.add_card_hint': 'Tarik berkas PDF ke sini atau klik untuk memilih',
+      'merge.drag_to_reorder': 'Tarik untuk mengatur urutan',
+
 
       // Protect & Unlock PDF
       'protect.tab_protect': 'Proteksi PDF (Tambah Sandi)',

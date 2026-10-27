@@ -36,6 +36,17 @@
         <!-- Hidden extra file input for "+ Add More" -->
         <input type="file" id="extraFileInput" accept="application/pdf,.pdf" multiple style="display: none;">
 
+        <!-- Workspace Drag & Drop Overlay for adding more files -->
+        <div id="mergeDragOverlay" class="merge-drag-overlay" style="display: none;">
+          <div class="merge-drag-overlay-card">
+            <div class="merge-drag-overlay-icon">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg>
+            </div>
+            <div class="merge-drag-overlay-title" data-i18n="merge.drop_more_title">Drop PDF files here to add</div>
+            <div class="merge-drag-overlay-subtitle" data-i18n="merge.drop_more_desc">Drop anywhere on the workspace to add more files to merge</div>
+          </div>
+        </div>
+
         <!-- Main Page Organizer Area (Opens immediately on file drop) -->
         <div id="organizerArea" class="merge-organizer-wrapper" style="display: none;">
           <!-- Toolbar -->
@@ -234,6 +245,7 @@
     document.addEventListener('DOMContentLoaded', function () {
       const dropzoneEl = document.getElementById('dropzone');
       const organizerArea = document.getElementById('organizerArea');
+      const mergeDragOverlay = document.getElementById('mergeDragOverlay');
       const mergePageGrid = document.getElementById('mergePageGrid');
       const organizerCount = document.getElementById('organizerCount');
       const addMoreFilesBtn = document.getElementById('addMoreFilesBtn');
@@ -281,6 +293,7 @@
       let pageSortables = [];
       let pdfDocRefs = new Set();
       let thumbnailObserver = null;
+      let isDraggingCard = false;
 
       // Undo / Redo History Stack (Item 2)
       const MAX_HISTORY = 25;
@@ -476,6 +489,62 @@
       });
 
       // ============================================================
+      // DRAG & DROP EXTERNAL FILES ON WORKSPACE / OVERLAY
+      // ============================================================
+      function isExternalFileDrag(e) {
+        if (!e.dataTransfer) return false;
+        const types = Array.from(e.dataTransfer.types || []);
+        return types.includes('Files');
+      }
+
+      let workspaceDragCounter = 0;
+
+      window.addEventListener('dragenter', function (e) {
+        if (organizerArea.style.display !== 'none' && isExternalFileDrag(e)) {
+          e.preventDefault();
+          workspaceDragCounter++;
+          if (mergeDragOverlay) mergeDragOverlay.style.display = 'flex';
+        }
+      });
+
+      window.addEventListener('dragover', function (e) {
+        if (organizerArea.style.display !== 'none' && isExternalFileDrag(e)) {
+          e.preventDefault();
+          if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
+          if (mergeDragOverlay) mergeDragOverlay.style.display = 'flex';
+        }
+      });
+
+      window.addEventListener('dragleave', function (e) {
+        if (organizerArea.style.display !== 'none' && isExternalFileDrag(e)) {
+          e.preventDefault();
+          workspaceDragCounter--;
+          if (workspaceDragCounter <= 0) {
+            workspaceDragCounter = 0;
+            if (mergeDragOverlay) mergeDragOverlay.style.display = 'none';
+          }
+        }
+      });
+
+      window.addEventListener('drop', async function (e) {
+        if (organizerArea.style.display !== 'none' && isExternalFileDrag(e)) {
+          e.preventDefault();
+          workspaceDragCounter = 0;
+          if (mergeDragOverlay) mergeDragOverlay.style.display = 'none';
+          const dt = e.dataTransfer;
+          if (!dt) return;
+          const droppedFiles = Array.from(dt.files || []).filter(function (f) {
+            return f.name.toLowerCase().endsWith('.pdf') || f.type === 'application/pdf';
+          });
+          if (droppedFiles.length > 0) {
+            await handleNewFilesAdded(droppedFiles);
+          } else if ((dt.files || []).length > 0) {
+            PDFTools.Toast.error(PDFTools.i18n.t('error.unsupported_format', 'Please drop PDF files (.pdf)'));
+          }
+        }
+      });
+
+      // ============================================================
       // FILE LOADING
       // ============================================================
 
@@ -652,6 +721,91 @@
       }
 
       // ============================================================
+      // IN-GRID "+ ADD MORE FILES" DROP CARD
+      // ============================================================
+      function createAddMoreDropCard() {
+        const card = document.createElement('div');
+        card.className = 'merge-add-drop-card';
+        card.setAttribute('role', 'button');
+        card.setAttribute('tabindex', '0');
+        card.title = PDFTools.i18n.t('action.add_more', 'Add More Files');
+
+        card.innerHTML = `
+          <div class="merge-add-drop-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+          </div>
+          <div class="merge-add-drop-title">${PDFTools.i18n.t('merge.add_card_title', 'Add More Files')}</div>
+          <div class="merge-add-drop-hint">${PDFTools.i18n.t('merge.add_card_hint', 'Drop PDF here or click to browse')}</div>
+        `;
+
+        card.addEventListener('click', function () {
+          extraFileInput.click();
+        });
+
+        card.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            extraFileInput.click();
+          }
+        });
+
+        let cardDragCount = 0;
+        card.addEventListener('dragenter', function (e) {
+          if (isExternalFileDrag(e)) {
+            e.preventDefault();
+            e.stopPropagation();
+            cardDragCount++;
+            card.classList.add('drag-over');
+          }
+        });
+
+        card.addEventListener('dragover', function (e) {
+          if (isExternalFileDrag(e)) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
+            card.classList.add('drag-over');
+          }
+        });
+
+        card.addEventListener('dragleave', function (e) {
+          if (isExternalFileDrag(e)) {
+            e.preventDefault();
+            e.stopPropagation();
+            cardDragCount--;
+            if (cardDragCount <= 0) {
+              cardDragCount = 0;
+              card.classList.remove('drag-over');
+            }
+          }
+        });
+
+        card.addEventListener('drop', async function (e) {
+          if (isExternalFileDrag(e)) {
+            e.preventDefault();
+            e.stopPropagation();
+            cardDragCount = 0;
+            card.classList.remove('drag-over');
+            const dt = e.dataTransfer;
+            if (!dt) return;
+            const droppedFiles = Array.from(dt.files || []).filter(function (f) {
+              return f.name.toLowerCase().endsWith('.pdf') || f.type === 'application/pdf';
+            });
+            if (droppedFiles.length > 0) {
+              await handleNewFilesAdded(droppedFiles);
+            } else if ((dt.files || []).length > 0) {
+              PDFTools.Toast.error(PDFTools.i18n.t('error.unsupported_format', 'Please drop PDF files (.pdf)'));
+            }
+          }
+        });
+
+        return card;
+      }
+
+      // ============================================================
       // GRID BUILDER
       // ============================================================
 
@@ -677,6 +831,9 @@
             if (thumbnailObserver) thumbnailObserver.observe(stackedCard);
           }
         });
+
+        // Append visual "+ Add More Files" drop-card at the end of the grid
+        mergePageGrid.appendChild(createAddMoreDropCard());
 
         initSortables();
         updateGlobalSequenceUI();
@@ -896,6 +1053,7 @@
 
         // Click handler: Ctrl+Click toggles multi-select; normal click expands
         card.addEventListener('click', function (e) {
+          if (isDraggingCard) return;
           if (e.ctrlKey || e.metaKey) {
             e.preventDefault();
             const shouldSel = !allSel;
@@ -1562,11 +1720,14 @@
           handle: '.merge-group-drag-handle, .stacked-doc',
           draggable: '.merge-file-group-wrap, .merge-page-card.stacked-doc',
           ghostClass: 'sortable-ghost',
-          filter: '.merge-file-group-body, .merge-floating-pill, .merge-group-header-btn, .merge-pill-btn',
+          filter: '.merge-file-group-body, .merge-floating-pill, .merge-group-header-btn, .merge-pill-btn, .merge-add-drop-card',
           preventOnFilter: false,
           delay: 200,
           delayOnTouchOnly: true,
           touchStartThreshold: 8,
+          onStart: function () {
+            isDraggingCard = true;
+          },
 
           onAdd: function (evt) {
             const droppedEl = evt.item;
@@ -1652,6 +1813,9 @@
           },
 
           onEnd: function () {
+            setTimeout(function () {
+              isDraggingCard = false;
+            }, 80);
             // Read DOM order of group wraps and stacked cards
             const newOrder = [];
             const elements = mergePageGrid.children;
