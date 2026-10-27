@@ -2,7 +2,7 @@ const assert = require('assert');
 const path = require('path');
 const fs = require('fs');
 const http = require('http');
-const { chromium } = require('playwright');
+const { launchChromium } = require('./browser/helpers/launch');
 
 // Load PDFLib
 const PDFLib = require(path.resolve(__dirname, '../js/lib/pdf-lib.min.js'));
@@ -100,7 +100,7 @@ async function runBrowserPreviewPixelTest() {
   });
   console.log(`  ✓ Local test server listening on http://127.0.0.1:${PORT}`);
 
-  const browser = await chromium.launch({ headless: true });
+  const browser = await launchChromium({ headless: true });
   const page = await browser.newPage();
 
   page.on('dialog', dialog => {
@@ -254,7 +254,7 @@ async function runPageRangeTest() {
     server.on('error', reject);
   });
 
-  const browser = await chromium.launch({ headless: true });
+  const browser = await launchChromium({ headless: true });
   const page = await browser.newPage();
 
   page.on('dialog', dialog => {
@@ -432,7 +432,7 @@ async function runLargePdfDebounceTest() {
     server.on('error', reject);
   });
 
-  const browser = await chromium.launch({ headless: true });
+  const browser = await launchChromium({ headless: true });
   const page = await browser.newPage();
 
   page.on('dialog', dialog => {
@@ -567,7 +567,7 @@ async function runMobileTouchAndImageModeTest() {
     server.on('error', reject);
   });
 
-  const browser = await chromium.launch({ headless: true });
+  const browser = await launchChromium({ headless: true });
   // Set viewport to 360x640 mobile screen
   const page = await browser.newPage({
     viewport: { width: 360, height: 640 },
@@ -738,6 +738,7 @@ if (require.main === module) {
 }
 
 module.exports = {
+  runWatermarkPreviewSuite: main,
   runUnitTests,
   runBrowserPreviewPixelTest,
   runPageRangeTest,

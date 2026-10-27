@@ -16,8 +16,10 @@ const { runWatermarkUiSuite, runWatermarkUiWebKitMobile } = require('./test_wate
 const { runRotationOpacitySuite, runRotationOpacityWebKitMobile } = require('./test_watermark_rotation_opacity');
 const { runMergeSizeBrowserSuite } = require('./test_merge_size_browser');
 const { runPasswordModalSuite } = require('./test_password_modal');
-const { runMergeSignedBrowserSuite } = require('../test_merge_signed');
+const { runNodeMergeSignedTest, runMutationCheck, runMergeSignedBrowserSuite } = require('../test_merge_signed');
 const { runI18nBrowserSuite } = require('../test_i18n_locale');
+const { runWatermarkPreviewSuite } = require('../test_watermark_preview');
+const { run: runLaunchHelperTest } = require('../test_launch_helper');
 
 const TEST_PORT = 8765;
 const BASE_URL = `http://127.0.0.1:${TEST_PORT}`;
@@ -188,11 +190,19 @@ async function main() {
     totalSkippedWebKit += (passRes?.skippedWebKit || 0);
 
     // 15. Digitally Signed PDF Merging & Stamp Conversion (Chromium & iPhone 13 WebKit)
+    await runNodeMergeSignedTest();
+    await runMutationCheck();
     const signedRes = await runMergeSignedBrowserSuite(browser, BASE_URL);
     totalSkippedWebKit += (signedRes?.skippedWebKit || 0);
 
-    // 16. i18n Locale Detection, Storage Persistence & Mobile Drawer Navigation
+    // 16. Watermark Preview & Pixel Identity Verification
+    await runWatermarkPreviewSuite();
+
+    // 17. i18n Locale Detection, Storage Persistence & Mobile Drawer Navigation
     await runI18nBrowserSuite(browser, BASE_URL);
+
+    // 18. Browser Launch Helper & Fallback Audit
+    await runLaunchHelperTest();
 
     console.log('========================================================================');
     console.log('                 BROWSER TESTS COMPLETE: ALL PASSED!                   ');

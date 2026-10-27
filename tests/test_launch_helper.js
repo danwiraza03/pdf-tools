@@ -97,8 +97,12 @@ async function run() {
   console.log('========================================================================\n');
 }
 
-run().catch(err => {
-  console.error('\n❌ [FAIL] Browser Launch Helper Test Failed:');
-  console.error(err.message || err);
-  process.exit(1);
-});
+if (require.main === module) {
+  run().catch(err => {
+    console.error('\n❌ [FAIL] Browser Launch Helper Test Failed:');
+    console.error(err.message || err);
+    process.exit(1);
+  });
+}
+
+module.exports = { run };
