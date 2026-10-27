@@ -1157,15 +1157,27 @@
 
     changeSigBtn.addEventListener('click', () => setStep(2));
 
+    // Helper to update download button label without destroying SVG icon
+    function setLabel(textOrKey) {
+      const dlText = document.getElementById('downloadSignedText');
+      if (dlText) {
+        const translated = (window.PDFTools && PDFTools.i18n && PDFTools.i18n.t)
+          ? PDFTools.i18n.t(textOrKey)
+          : null;
+        dlText.textContent = (translated && translated !== textOrKey) ? translated : (textOrKey.startsWith('sign.') ? (PDFTools.i18n ? PDFTools.i18n.t(textOrKey) : textOrKey) : textOrKey);
+      }
+    }
+
     // === DOWNLOAD SIGNED PDF (100% PRECISE RATIO BAKING) ===
     downloadSignedBtn.addEventListener('click', async () => {
       if (placedItems.length === 0) {
-        if (PDFTools.Toast) PDFTools.Toast.error('Please place at least one signature on the PDF');
+        const msg = (window.PDFTools && PDFTools.i18n) ? PDFTools.i18n.t('sign.place_required') : 'Please place at least one signature on the PDF';
+        if (PDFTools.Toast) PDFTools.Toast.error(msg);
         return;
       }
 
       downloadSignedBtn.disabled = true;
-      downloadSignedBtn.textContent = 'Baking signatures into PDF...';
+      setLabel('sign.baking');
 
       try {
         const { PDFDocument } = PDFLib;
@@ -1220,7 +1232,10 @@
 
         saveAs(blob, fileName);
 
-        if (PDFTools.Toast) PDFTools.Toast.success(`Signed PDF downloaded: ${fileName}`);
+        const successMsg = (window.PDFTools && PDFTools.i18n)
+          ? `${PDFTools.i18n.t('sign.download_success')}: ${fileName}`
+          : `Signed PDF downloaded: ${fileName}`;
+        if (PDFTools.Toast) PDFTools.Toast.success(successMsg);
 
         if (PDFTools.RecentFiles) {
           PDFTools.RecentFiles.add({
@@ -1232,11 +1247,26 @@
         }
       } catch (err) {
         console.error('Sign export error:', err);
-        if (PDFTools.Toast) PDFTools.Toast.error('Failed to export signed PDF: ' + err.message);
+        const errMsg = (window.PDFTools && PDFTools.i18n)
+          ? `${PDFTools.i18n.t('sign.download_error')}: ${err.message}`
+          : `Failed to export signed PDF: ${err.message}`;
+        if (PDFTools.Toast) PDFTools.Toast.error(errMsg);
       } finally {
         downloadSignedBtn.disabled = false;
-        const dlText = document.getElementById('downloadSignedText');
-        if (dlText) dlText.textContent = 'Download Signed PDF';
+        if (!downloadSignedBtn.querySelector('svg')) {
+          const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+          svg.setAttribute('width', '18');
+          svg.setAttribute('height', '18');
+          svg.setAttribute('viewBox', '0 0 24 24');
+          svg.setAttribute('fill', 'none');
+          svg.setAttribute('stroke', 'currentColor');
+          svg.setAttribute('stroke-width', '2.3');
+          svg.setAttribute('stroke-linecap', 'round');
+          svg.setAttribute('stroke-linejoin', 'round');
+          svg.innerHTML = '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>';
+          downloadSignedBtn.insertBefore(svg, downloadSignedBtn.firstChild);
+        }
+        setLabel('sign.download_btn');
       }
     });
 
