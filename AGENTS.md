@@ -12,5 +12,6 @@
 > 4. **PDF Studio In-Memory Workflow**: All document tools inside `pages/viewer.html` must apply directly to `currentDoc` in-memory with live canvas refresh. Never trigger intermediate downloads. The only download must occur on the final "Save PDF" button.
 > 5. **Bilingual i18n Rules**: Never place emojis inside `js/utils/i18n.js` translation strings. Always update both English (`en`) and Indonesian (`id`) dictionaries.
 > 6. **Consistent Standalone Page Structure**: Header -> Tool Hero with SVG badge -> Dropzone with SVG Cloud -> Workspace State -> Action Bar -> Result with SVG checkmark -> "Open in PDF Studio" secondary action.
+> 7. **Clean Lint Mandate**: Lint wajib bersih (`npm run lint` lulus 0 error) sebelum melakukan commit.
 
 Any agent failing to adhere to `PROJECT_RULES.md` will produce inconsistent UI that violates the project standards.
