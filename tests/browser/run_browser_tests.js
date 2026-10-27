@@ -120,225 +120,93 @@ async function main() {
 
     let totalSkippedWebKit = 0;
 
-    const suites = [
-      {
-        name: 'PDF Studio Redaction Tests',
-        run: async () => {
-          await runStudioRedactionTests(browser, BASE_URL);
-        }
-      },
-      {
-        name: 'Previously Skipped Tools Audit',
-        run: async () => {
-          await runSkippedToolsTests(browser, BASE_URL);
-        }
-      },
-      {
-        name: 'Measure Compress Effectiveness on Photo PDF',
-        run: async () => {
-          await runCompressEffectivenessTest(browser, BASE_URL);
-        }
-      },
-      {
-        name: 'Page Console & Runtime Error Audit',
-        run: async () => {
-          const auditPassed = await testAllPagesForErrors(browser, BASE_URL);
-          if (!auditPassed) {
-            throw new Error('Audit kegagalan konsol / pageerror pada halaman HTML gagal!');
-          }
-        }
-      },
-      {
-        name: 'OCR Environments Test',
-        run: async () => {
-          const ocrResults = await runOcrEnvironmentTests(browser, BASE_URL);
-          const ocrFailed = ocrResults && ocrResults.some(r => r.status !== 'BERHASIL');
-          if (ocrFailed) {
-            throw new Error('Satu atau lebih skenario pengujian lingkungan OCR gagal!');
-          }
-        }
-      },
-      {
-        name: 'Page Weight & On-Demand OCR Lazy Loading Audit',
-        run: async () => {
-          const weightResult = await runPageWeightSuite(browser, BASE_URL);
-          if (!weightResult || !weightResult.success) {
-            throw new Error('Audit beban unduhan halaman dan lazy loading OCR gagal!');
-          }
-        }
-      },
-      {
-        name: 'Mobile Responsive Header & Navigation Audit',
-        run: async () => {
-          const headerResult = await runMobileHeaderSuite(browser, server);
-          if (!headerResult || !headerResult.success) {
-            throw new Error(`Audit header dan navigasi seluler gagal dengan ${headerResult ? headerResult.failures.length : 0} kegagalan!`);
-          }
-          if (headerResult.skippedWebKit > 0) totalSkippedWebKit += headerResult.skippedWebKit;
-        }
-      },
-      {
-        name: 'Mobile Touch Drag vs Vertical Scroll Interaction Audit',
-        run: async () => {
-          const interactionResult = await runMobileInteractionSuite(browser, BASE_URL);
-          if (!interactionResult || !interactionResult.success) {
-            throw new Error('Audit interaksi sentuh seluler (scroll vs drag reorder) gagal!');
-          }
-          if (interactionResult.skippedWebKit > 0) totalSkippedWebKit += interactionResult.skippedWebKit;
-        }
-      },
-      {
-        name: 'Mobile iPhone 13 Audit: Zero Horizontal Overflow & Errors',
-        run: async () => {
-          const mobileAuditResult = await runMobileOverflowAndConsoleAudit(browser, BASE_URL);
-          if (!mobileAuditResult || !mobileAuditResult.success) {
-            throw new Error('Audit mobile iPhone 13 (horizontal overflow / console error) gagal!');
-          }
-        }
-      },
-      {
-        name: 'Watermark Image & Multi-orientation Tests',
-        run: async () => {
-          await runNodeWatermarkImageTests();
-          await runWatermarkImageBrowserTests(browser, BASE_URL);
-        }
-      },
-      {
-        name: 'Watermark Image UI Suite & iPhone 13 WebKit Mobile Verification',
-        run: async () => {
-          await runWatermarkUiSuite(browser, BASE_URL);
-          const wmUiRes = await runWatermarkUiWebKitMobile(BASE_URL);
-          if (wmUiRes?.skippedWebKit > 0) totalSkippedWebKit += wmUiRes.skippedWebKit;
-        }
-      },
-      {
-        name: 'Watermark Rotation & Opacity Unified Controls Suite',
-        run: async () => {
-          await runRotationOpacitySuite(browser, BASE_URL);
-          const wmRotRes = await runRotationOpacityWebKitMobile(BASE_URL);
-          if (wmRotRes?.skippedWebKit > 0) totalSkippedWebKit += wmRotRes.skippedWebKit;
-        }
-      },
-      {
-        name: 'Merge Size Optimization & UI Reordering Suite',
-        run: async () => {
-          const mergeRes = await runMergeSizeBrowserSuite(browser, BASE_URL);
-          if (mergeRes?.skippedWebKit > 0) totalSkippedWebKit += mergeRes.skippedWebKit;
-        }
-      },
-      {
-        name: 'Password Modal & Protected PDF Suite',
-        run: async () => {
-          const passRes = await runPasswordModalSuite(browser, BASE_URL);
-          if (passRes?.skippedWebKit > 0) totalSkippedWebKit += passRes.skippedWebKit;
-        }
-      },
-      {
-        name: 'Digitally Signed PDF Merging & Stamp Conversion',
-        run: async () => {
-          await runNodeMergeSignedTest();
-          await runMutationCheck();
-          const signedRes = await runMergeSignedBrowserSuite(browser, BASE_URL);
-          if (signedRes?.skippedWebKit > 0) totalSkippedWebKit += signedRes.skippedWebKit;
-        }
-      },
-      {
-        name: 'Watermark Preview & Pixel Identity Verification',
-        run: async () => {
-          await runWatermarkPreviewSuite();
-        }
-      },
-      {
-        name: 'i18n Locale Detection, Storage Persistence & Mobile Drawer Navigation',
-        run: async () => {
-          await runI18nBrowserSuite(browser, BASE_URL);
-        }
-      },
-      {
-        name: 'Browser Launch Helper & Fallback Audit',
-        run: async () => {
-          await runLaunchHelperTest();
-        }
-      },
-      {
-        id: 'sign',
-        name: 'Sign PDF Flow, Interaction & Digital Signature Sanitization',
-        run: async () => {
-          const signRes = await runSignFlowSuite(browser, BASE_URL);
-          if (signRes?.skippedWebKit > 0) totalSkippedWebKit += signRes.skippedWebKit;
-        }
-      }
-    ];
+    // 1. PDF Studio Redaction Tests (Normal & /Rotate 90)
+    await runStudioRedactionTests(browser, BASE_URL);
 
-    // Filter by --only argument if provided
-    let targetSuites = suites;
-    const onlyArg = process.argv.find(a => a.startsWith('--only=') || a === '--only');
-    let onlyFilter = null;
-    if (onlyArg) {
-      if (onlyArg.startsWith('--only=')) {
-        onlyFilter = onlyArg.split('=')[1].trim().toLowerCase();
-      } else {
-        const idx = process.argv.indexOf('--only');
-        if (idx >= 0 && idx + 1 < process.argv.length) {
-          onlyFilter = process.argv[idx + 1].trim().toLowerCase();
-        }
-      }
-    }
-    if (onlyFilter) {
-      targetSuites = suites.filter(s =>
-        (s.id && s.id.toLowerCase() === onlyFilter) ||
-        s.name.toLowerCase().includes(onlyFilter)
-      );
-      console.log(`Menjalankan hanya suite dengan filter: "${onlyFilter}" (${targetSuites.length} suite ditemukan)\n`);
+    // 2. Previously Skipped Tools Audit (DOCX, XLSX, JPG, Grayscale, OCR, Sign)
+    await runSkippedToolsTests(browser, BASE_URL);
+
+    // 3. Measure Compress Effectiveness on Photo PDF (Extreme, Recommended, Less)
+    await runCompressEffectivenessTest(browser, BASE_URL);
+
+    // 4. Page Console & Runtime Error Audit across all HTML pages
+    const auditPassed = await testAllPagesForErrors(browser, BASE_URL);
+    if (!auditPassed) {
+      throw new Error('Audit kegagalan konsol / pageerror pada halaman HTML gagal!');
     }
 
-    const suiteResults = [];
-
-    for (const suite of targetSuites) {
-      console.log(`\n========================================================================`);
-      console.log(`>>> [BROWSER SUITE] ${suite.name}`);
-      console.log(`========================================================================`);
-
-      const t0 = Date.now();
-      let status = 'lulus';
-      let errObj = null;
-
-      try {
-        await suite.run();
-        console.log(`\n✅ [PASS] ${suite.name}`);
-      } catch (err) {
-        status = 'gagal';
-        errObj = err;
-        console.error(`\n❌ [FAIL] ${suite.name} gagal dengan error:`, err.message || err);
-      }
-
-      const durationSec = ((Date.now() - t0) / 1000).toFixed(2);
-      suiteResults.push({
-        name: suite.name,
-        status,
-        duration: `${durationSec}s`,
-        durationRaw: (Date.now() - t0) / 1000,
-        error: errObj
-      });
+    // 5. OCR Environments Test (Local HTTP & Direct file:///, with optional live site)
+    const ocrResults = await runOcrEnvironmentTests(browser, BASE_URL);
+    const ocrFailed = ocrResults && ocrResults.some(r => r.status !== 'BERHASIL');
+    if (ocrFailed) {
+      throw new Error('Satu atau lebih skenario pengujian lingkungan OCR gagal!');
     }
 
-    // Print summary table
-    console.log('\n========================================================================================');
-    console.log('                          RINGKASAN HASIL TEST BROWSER                                  ');
-    console.log('========================================================================================');
+    // 6. Page Weight & On-Demand OCR Lazy Loading Audit
+    const weightResult = await runPageWeightSuite(browser, BASE_URL);
+    if (!weightResult || !weightResult.success) {
+      throw new Error('Audit beban unduhan halaman dan lazy loading OCR gagal!');
+    }
 
-    const formattedTable = suiteResults.map(r => ({
-      'Nama Suite': r.name,
-      'Status': r.status === 'lulus' ? 'LULUS' : (r.status === 'dilewati' ? 'DILEWATI' : 'GAGAL'),
-      'Durasi': r.duration
-    }));
-    console.table(formattedTable);
+    // 7. Mobile Responsive Header & Navigation Audit across breakpoints
+    const headerResult = await runMobileHeaderSuite(browser, server);
+    if (!headerResult || !headerResult.success) {
+      throw new Error(`Audit header dan navigasi seluler gagal dengan ${headerResult ? headerResult.failures.length : 0} kegagalan!`);
+    }
+    totalSkippedWebKit += (headerResult.skippedWebKit || 0);
 
-    const failures = suiteResults.filter(r => r.status === 'gagal');
-    const passedCount = suiteResults.filter(r => r.status === 'lulus').length;
-    const skippedCount = suiteResults.filter(r => r.status === 'dilewati').length;
+    // 8. Mobile Touch Drag vs Vertical Scroll Interaction Audit
+    const interactionResult = await runMobileInteractionSuite(browser, BASE_URL);
+    if (!interactionResult || !interactionResult.success) {
+      throw new Error('Audit interaksi sentuh seluler (scroll vs drag reorder) gagal!');
+    }
+    totalSkippedWebKit += (interactionResult.skippedWebKit || 0);
 
-    console.log(`Total: ${suiteResults.length} suite | ${passedCount} lulus | ${failures.length} gagal | ${skippedCount} dilewati`);
+    // 9. Mobile iPhone 13 Audit: Zero Horizontal Overflow & Zero Console Errors
+    const mobileAuditResult = await runMobileOverflowAndConsoleAudit(browser, BASE_URL);
+    if (!mobileAuditResult || !mobileAuditResult.success) {
+      throw new Error('Audit mobile iPhone 13 (horizontal overflow / console error) gagal!');
+    }
+
+    // 10. Watermark Image & Multi-orientation Tests (Single embed, 90 combinations & Mutation Check)
+    await runNodeWatermarkImageTests();
+    await runWatermarkImageBrowserTests(browser, BASE_URL);
+
+    // 11. Watermark Image UI Suite & iPhone 13 WebKit Mobile Verification
+    await runWatermarkUiSuite(browser, BASE_URL);
+    const wmUiRes = await runWatermarkUiWebKitMobile(BASE_URL);
+    totalSkippedWebKit += (wmUiRes?.skippedWebKit || 0);
+
+    // 12. Watermark Rotation & Opacity Unified Controls Suite (Chromium & iPhone 13 WebKit)
+    await runRotationOpacitySuite(browser, BASE_URL);
+    const wmRotRes = await runRotationOpacityWebKitMobile(BASE_URL);
+    totalSkippedWebKit += (wmRotRes?.skippedWebKit || 0);
+
+    // 13. Merge Size Optimization & UI Reordering Suite (Chromium & iPhone 13 WebKit)
+    const mergeRes = await runMergeSizeBrowserSuite(browser, BASE_URL);
+    totalSkippedWebKit += (mergeRes?.skippedWebKit || 0);
+
+    // 14. Password Modal & Protected PDF Suite (Chromium & iPhone 13 WebKit)
+    const passRes = await runPasswordModalSuite(browser, BASE_URL);
+    totalSkippedWebKit += (passRes?.skippedWebKit || 0);
+
+    // 15. Digitally Signed PDF Merging & Stamp Conversion (Chromium & iPhone 13 WebKit)
+    await runNodeMergeSignedTest();
+    await runMutationCheck();
+    const signedRes = await runMergeSignedBrowserSuite(browser, BASE_URL);
+    totalSkippedWebKit += (signedRes?.skippedWebKit || 0);
+
+    // 16. Watermark Preview & Pixel Identity Verification
+    await runWatermarkPreviewSuite();
+
+    // 17. i18n Locale Detection, Storage Persistence & Mobile Drawer Navigation
+    await runI18nBrowserSuite(browser, BASE_URL);
+
+    // 18. Browser Launch Helper & Fallback Audit
+    await runLaunchHelperTest();
+
+    console.log('========================================================================');
+    console.log('                 BROWSER TESTS COMPLETE: ALL PASSED!                   ');
     if (totalSkippedWebKit > 0) {
       console.log(`(Total skenario WebKit dilewati lokal: ${totalSkippedWebKit})`);
     }
