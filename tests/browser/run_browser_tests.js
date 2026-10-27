@@ -20,6 +20,7 @@ const { runNodeMergeSignedTest, runMutationCheck, runMergeSignedBrowserSuite } =
 const { runI18nBrowserSuite } = require('../test_i18n_locale');
 const { runWatermarkPreviewSuite } = require('../test_watermark_preview');
 const { run: runLaunchHelperTest } = require('../test_launch_helper');
+const { runSignFlowSuite } = require('./test_sign_flow');
 
 const TEST_PORT = 8765;
 const BASE_URL = `http://127.0.0.1:${TEST_PORT}`;
@@ -258,12 +259,42 @@ async function main() {
         run: async () => {
           await runLaunchHelperTest();
         }
+      },
+      {
+        id: 'sign',
+        name: 'Sign PDF Flow, Interaction & Digital Signature Sanitization',
+        run: async () => {
+          const signRes = await runSignFlowSuite(browser, BASE_URL);
+          if (signRes?.skippedWebKit > 0) totalSkippedWebKit += signRes.skippedWebKit;
+        }
       }
     ];
 
+    // Filter by --only argument if provided
+    let targetSuites = suites;
+    const onlyArg = process.argv.find(a => a.startsWith('--only=') || a === '--only');
+    let onlyFilter = null;
+    if (onlyArg) {
+      if (onlyArg.startsWith('--only=')) {
+        onlyFilter = onlyArg.split('=')[1].trim().toLowerCase();
+      } else {
+        const idx = process.argv.indexOf('--only');
+        if (idx >= 0 && idx + 1 < process.argv.length) {
+          onlyFilter = process.argv[idx + 1].trim().toLowerCase();
+        }
+      }
+    }
+    if (onlyFilter) {
+      targetSuites = suites.filter(s =>
+        (s.id && s.id.toLowerCase() === onlyFilter) ||
+        s.name.toLowerCase().includes(onlyFilter)
+      );
+      console.log(`Menjalankan hanya suite dengan filter: "${onlyFilter}" (${targetSuites.length} suite ditemukan)\n`);
+    }
+
     const suiteResults = [];
 
-    for (const suite of suites) {
+    for (const suite of targetSuites) {
       console.log(`\n========================================================================`);
       console.log(`>>> [BROWSER SUITE] ${suite.name}`);
       console.log(`========================================================================`);
