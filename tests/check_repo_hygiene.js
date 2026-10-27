@@ -162,6 +162,25 @@ for (const relFile of trackedFiles) {
   }
 }
 
+// 3. Check for forbidden .txt, .log, or .tmp files tracked in project root
+// Whitelist: berkas di akar proyek yang secara sah merupakan bagian dari proyek
+const ROOT_EXT_WHITELIST = [
+  // Contoh: 'LICENSE.txt' (jika ada di masa mendatang)
+];
+
+for (const relFile of trackedFiles) {
+  // Berkas di akar proyek tidak mengandung '/'
+  if (!relFile.includes('/')) {
+    const ext = path.extname(relFile).toLowerCase();
+    if (['.txt', '.log', '.tmp'].includes(ext)) {
+      if (!ROOT_EXT_WHITELIST.includes(relFile)) {
+        errors.push(`Berkas terlacak terlarang (.txt/.log/.tmp) ditemukan di akar proyek: ${relFile} (daftar putih: ${JSON.stringify(ROOT_EXT_WHITELIST)})`);
+        passed = false;
+      }
+    }
+  }
+}
+
 if (!passed) {
   console.error('❌ [FAIL] Repository Hygiene Checks Failed:');
   for (const err of errors) {
@@ -173,6 +192,7 @@ if (!passed) {
   console.log('✓ Tidak ada berkas terlacak > 20 MB di luar js/lib/tesseract.');
   console.log('✓ Tidak ada berkas terlacak di scratch/, trash/, atau tests/browser/screenshots/.');
   console.log('✓ Tidak ada berkas sisa sw.js atau js/editor/font-engine.js.');
+  console.log('✓ Tidak ada berkas .txt, .log, atau .tmp terlacak di akar proyek (di luar daftar putih).');
   console.log('\n✅ [PASS] Repository Hygiene Guard PASSED');
   console.log('========================================================================\n');
   process.exit(0);
