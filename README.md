@@ -1,6 +1,8 @@
 # ⚡ PDF Tools — 100% Offline Client-Side PDF Suite
 
-[![Tests](https://github.com/danwiraza03/pdf/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/danwiraza03/pdf/actions/workflows/test.yml)
+[![Tests](https://github.com/danwiraza03/pdf-tools/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/danwiraza03/pdf-tools/actions/workflows/test.yml)
+
+**Versi 1.0.0** — lihat [CHANGELOG.md](CHANGELOG.md) untuk daftar perubahan.
 
 Aplikasi pengolah dokumen PDF serbaguna yang berjalan **100% di browser lokal Anda tanpa memerlukan koneksi internet ataupun server web**. Semua proses penggabungan, pemotongan, kompresi, OCR, penandatanganan, dan pengeditan PDF dieksekusi secara instan di komputer Anda.
 
@@ -238,7 +240,18 @@ git archive --format=zip -o ..\pdf-ringan.zip HEAD -- . ':(exclude)js/lib/tesser
 
 ## ⚠️ Masalah yang Diketahui (Known Issues)
 
-- **Unlock PDF**: Unlock pada PDF terenkripsi buatan alat lain tidak membawa Title dan Author.
+Keterbatasan berikut sudah diketahui pada versi 1.0.0:
+
+- **Redaksi permanen:** halaman yang diredaksi menjadi gambar, sehingga teksnya tidak bisa dipilih atau dicari lagi, dan struktur tag aksesibilitas halaman itu dihapus.
+- **Tanda tangan digital:** alat yang menulis ulang berkas (Watermark, Gabung, Tanda Tangan, Kompres, dan lainnya) mengubah tanda tangan digital menjadi stempel visual. Tanda tangan itu tidak lagi sah secara kriptografi, karena setiap perubahan pada berkas membatalkannya. Tambahkan tanda tangan atau paraf sebelum dokumen ditandatangani secara elektronik.
+- **PDF Studio:** belum dioptimalkan untuk layar sentuh dan HP (memakai event mouse), belum menangani PDF berproteksi seperti alat lainnya, dan OCR bawaannya (ID + EN) mengunduh dua model bahasa sekaligus. Disarankan memakai komputer.
+- **Menyalin halaman antar dokumen** (Gabung, Pisah, Hapus Halaman, Urutkan): struktur tag aksesibilitas dan kolom formulir tidak ikut terbawa, dan bookmark tanpa tujuan serta tanpa anak tidak dibawa.
+- **Buka Kunci (Unlock)** pada PDF terenkripsi buatan alat lain tidak membawa Title dan Author.
+- **Kompres:** preset Extreme dan Recommended mengubah halaman menjadi gambar (teks tidak bisa dipilih atau dicari); pada uji PDF foto besar pengurangannya sekitar 95% dan 88%. Preset Less mempertahankan teks vektor tetapi bisa tidak mengecilkan ukuran (0% pada uji yang sama).
+- **OCR:** pemakaian pertama mengunduh model bahasa (sekitar 5 MB untuk Indonesia dan 14,6 MB untuk Inggris; terkompres sekitar 4 MB dan 11 MB). Versi web membutuhkan internet saat dimuat; untuk pemakaian sepenuhnya offline, jalankan salinan lokal.
+- **Tampilan:** font Inter belum disertakan di proyek, sehingga tampilan memakai font sistem dan lebar teks sedikit berbeda antar perangkat.
+- **Belum diuji** pada dokumen sangat besar (ratusan halaman atau puluhan MB); di HP, memori browser terbatas.
+- **Belum diuji pada perangkat fisik iOS dan Android.** Pengujian memakai emulasi (Chromium dan WebKit). <!-- hapus baris ini setelah diuji di HP fisik -->
 
 ---
 

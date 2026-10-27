@@ -498,7 +498,7 @@
     if (menuHelpAbout) {
       menuHelpAbout.addEventListener('click', async () => {
         if (window.PDFTools && window.PDFTools.Modal && window.PDFTools.Modal.alert) {
-          await window.PDFTools.Modal.alert('PDF Studio Pro — 100% Offline Client-side PDF Suite.\nVersion 2.0\nAll files are processed locally in your browser.', { title: 'About PDF Studio Pro' });
+          await window.PDFTools.Modal.alert('PDF Studio Pro — 100% Offline Client-side PDF Suite.\nVersion 1.0.0\nAll files are processed locally in your browser.', { title: 'About PDF Studio Pro' });
         } else if (window.PDFTools && window.PDFTools.Toast) {
           window.PDFTools.Toast.info('PDF Studio Pro — 100% Offline Client-side PDF Suite.');
         }

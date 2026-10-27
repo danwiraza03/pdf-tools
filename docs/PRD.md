@@ -2,7 +2,7 @@
 
 **Nama Produk:** PDF Tools (100% Client-Side Offline PDF Suite)  
 **Status:** Production-Ready / Active  
-**Versi:** 2.1.0  
+**Versi:** 1.0.0  
 **Target Platform:** Web Browser Modern (Chrome, Edge, Firefox, Safari) & Desktop Local  
 **Arsitektur:** 100% Client-Side Offline, Zero Server Transfer, Pure Vanilla JS/CSS/HTML  
 
