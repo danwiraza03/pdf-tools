@@ -5,11 +5,14 @@
   "private": true,
   "scripts": {
     "clean": "node scripts/clean.js",
+    "lint": "eslint .",
     "test": "node tests/run_all.js",
     "test:browser": "node tests/browser/run_browser_tests.js",
     "test:mobile": "node tests/browser/test_mobile_audit.js"
   },
   "devDependencies": {
+    "eslint": "^10.13.0",
+    "globals": "^17.13.0",
     "playwright": "^1.50.0"
   }
 }
