@@ -30,7 +30,8 @@ const tests = [
   { name: 'Zero Unsanitized ignoreEncryption: true Guard', file: 'check_no_ignore_encryption.js' },
   { name: 'Browser Runner Summary Logic Verification', file: 'test_browser_runner_summary.js' },
   { name: 'Page Copy Works Without Node-only Globals (Buffer)', file: 'test_copy_browser_safe.js' },
-  { name: 'ESLint: undefined and redeclared names', file: 'check_eslint.js' }
+  { name: 'ESLint: undefined and redeclared names', file: 'check_eslint.js' },
+  { name: 'Static Guard: Zero Global Collisions Across Scripts', file: 'check_global_collisions.js' }
 ];
 
 console.log('========================================================================');
