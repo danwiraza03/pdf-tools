@@ -181,11 +181,11 @@ async function runSignFlowChromium(browser, baseUrl) {
     await changeFileBtn.click();
 
     // Verify custom modal confirmation appeared (NOT native confirm)
-    await page.waitForSelector('.modal-overlay:not([style*="display: none"]), .modal-confirm, .modal-dialog', { timeout: 3000 });
+    await page.waitForSelector('.pdftools-modal-backdrop, .pdftools-modal-dialog', { timeout: 3000 });
     console.log('  ✓ Tombol "Ganti file" memicu modal kustom saat ada item tanda tangan.');
 
     // Cancel the modal
-    const cancelModalBtn = page.locator('.modal-footer .btn-secondary, .modal-btn-cancel, .modal-cancel');
+    const cancelModalBtn = page.locator('.pdftools-modal-cancel');
     await cancelModalBtn.click();
     await page.waitForTimeout(200);
 
@@ -309,8 +309,8 @@ async function runSignFlowChromium(browser, baseUrl) {
 
     // Reset again
     await page.locator('#changeFileBtn').click();
-    await page.waitForSelector('.modal-overlay:not([style*="display: none"]), .modal-confirm, .modal-dialog');
-    const confirmModalBtn = page.locator('.modal-footer .btn-primary, .modal-btn-confirm, .modal-confirm-btn');
+    await page.waitForSelector('.pdftools-modal-backdrop, .pdftools-modal-dialog', { timeout: 3000 });
+    const confirmModalBtn = page.locator('.pdftools-modal-confirm');
     await confirmModalBtn.click();
     await page.waitForSelector('#step1', { state: 'visible', timeout: 5000 });
 
