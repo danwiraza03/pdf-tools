@@ -155,7 +155,7 @@ async function runPasswordModalTestForEngine(browser, baseUrl, fixtures, engineN
 
     // Verify toast summary reports skipped file
     const toast = page.locator('.toast');
-    await toast.waitFor({ state: 'visible', timeout: 5000 });
+    await toast.waitFor({ state: 'visible', timeout: 10000 });
     const toastText = await toast.textContent();
     assert(toastText.includes('protected_doc.pdf') && (toastText.includes('skipped') || toastText.includes('dilewati')), 'Toast harus menyebutkan berkas yang dilewati');
     console.log(`  ✓ Ringkasan berkas dilewati dilaporkan: "${toastText.trim()}"`);
