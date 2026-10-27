@@ -36,9 +36,9 @@ module.exports = [
     }
   },
 
-  // 1b. UMD guards only for js/core/** and js/editor/** (no Buffer here)
+  // 1b. UMD guards for js/core/**, js/editor/**, and js/utils/file-utils.js (no Buffer here)
   {
-    files: ['js/core/**/*.js', 'js/editor/**/*.js'],
+    files: ['js/core/**/*.js', 'js/editor/**/*.js', 'js/utils/file-utils.js'],
     languageOptions: {
       globals: {
         require: 'readonly',
