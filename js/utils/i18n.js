@@ -1640,7 +1640,7 @@ PDFTools.i18n = (function () {
     document.querySelectorAll('#langToggle, .lang-toggle, [data-action="toggle-lang"]').forEach(function (langBtn) {
       langBtn.textContent = currentLang === 'id' ? 'ID' : 'EN';
       langBtn.setAttribute('title', currentLang === 'id' ? 'Klik untuk beralih ke English' : 'Click to switch to Indonesian');
-      langBtn.setAttribute('aria-label', currentLang === 'id' ? 'Ganti ke Bahasa Inggris' : 'Switch to Indonesian');
+      langBtn.setAttribute('aria-label', currentLang === 'id' ? 'ID - Ganti ke Bahasa Inggris' : 'EN - Switch to Indonesian');
     });
   }
 

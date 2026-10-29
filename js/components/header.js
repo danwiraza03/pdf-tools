@@ -473,7 +473,7 @@
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
               <span>Dark</span>
             </button>
-            <button class="lang-toggle" id="langToggle" aria-label="Toggle Language">ID</button>
+            <button class="lang-toggle" id="langToggle" aria-label="ID - Toggle Language">ID</button>
             <a href="${pagesUrl}viewer.html" class="btn-header-studio" data-i18n="nav.studio" aria-label="Open PDF Studio">
               <svg class="btn-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>

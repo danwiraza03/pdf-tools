@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', function () {
         <!-- Right Controls -->
         <div class="header-controls">
           <button class="theme-toggle" id="themeToggle" title="Toggle Light/Dark Theme" aria-label="Toggle Light/Dark Theme">Light</button>
-          <button class="lang-toggle" id="langToggle" aria-label="Toggle Language">ID</button>
+          <button class="lang-toggle" id="langToggle" aria-label="ID - Toggle Language">ID</button>
           <a href="${pagesUrl}viewer.html" class="btn-header-studio" data-i18n="nav.studio" aria-label="Open PDF Studio"><svg class="btn-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> PDF Studio</a>
           <button type="button" class="nine-dots-btn" id="nineDotsBtn" title="All Quick Actions" aria-label="Quick Actions Menu">⠿</button>
           <button type="button" class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open Navigation Menu" aria-expanded="false">
@@ -444,7 +444,7 @@ document.addEventListener('DOMContentLoaded', function () {
       },
       'jpg-to-pdf.html': {
         color: '#EAB308',
-        svg: `<span style="font-weight:800;font-size:1.2rem;color:#ffffff;letter-spacing:-0.05em;line-height:1;user-select:none;">JPG</span>`
+        svg: `<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#713f12" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><circle cx="9.5" cy="12.5" r="1.5"/><path d="M16 18l-3-3-4 4"/></svg>`
       },
       'docx-to-pdf.html': {
         color: '#2563EB',
@@ -691,18 +691,20 @@ document.addEventListener('DOMContentLoaded', function () {
     const allToolsTrigger = document.getElementById('allToolsTrigger');
     if (allToolsTrigger) allToolsTrigger.setAttribute('aria-expanded', 'false');
 
-    // Add keyboard support to dropzones
+    // Add keyboard support to dropzones (only if they do not contain nested interactive controls)
     document.querySelectorAll('.dropzone').forEach(function (dz) {
-      if (!dz.getAttribute('role')) dz.setAttribute('role', 'button');
-      if (!dz.getAttribute('tabindex')) dz.setAttribute('tabindex', '0');
-      if (!dz.getAttribute('aria-label')) dz.setAttribute('aria-label', 'Click or drop files here to upload');
+      const hasInteractiveDescendant = dz.querySelector('button, a, input:not([type="file"])');
+      if (!hasInteractiveDescendant) {
+        if (!dz.getAttribute('role')) dz.setAttribute('role', 'button');
+        if (!dz.getAttribute('tabindex')) dz.setAttribute('tabindex', '0');
 
-      dz.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          dz.click();
-        }
-      });
+        dz.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            dz.click();
+          }
+        });
+      }
     });
 
     // Close mega menu / quick modal on Escape
@@ -839,7 +841,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const buttons = document.querySelectorAll('#langToggle, .lang-toggle, [data-action="toggle-lang"]');
     buttons.forEach(btn => {
       btn.textContent = current === 'id' ? 'ID' : 'EN';
-      btn.setAttribute('aria-label', current === 'id' ? 'Ganti ke Bahasa Inggris' : 'Switch to Indonesian');
+      btn.setAttribute('aria-label', current === 'id' ? 'ID - Ganti ke Bahasa Inggris' : 'EN - Switch to Indonesian');
       btn.setAttribute('title', current === 'id' ? 'Klik untuk beralih ke English' : 'Click to switch to Indonesian');
     });
   }

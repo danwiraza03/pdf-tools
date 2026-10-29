@@ -59,10 +59,12 @@ PDFTools.Dropzone = function (elementId, options) {
   var dropzoneEl = document.getElementById(elementId);
   if (!dropzoneEl) return;
 
-  // Accessibility: ensure dropzone is keyboard-focusable
-  if (!dropzoneEl.getAttribute('role')) dropzoneEl.setAttribute('role', 'button');
-  if (!dropzoneEl.getAttribute('tabindex')) dropzoneEl.setAttribute('tabindex', '0');
-  if (!dropzoneEl.getAttribute('aria-label')) dropzoneEl.setAttribute('aria-label', 'Click or drop files here to upload');
+  // Accessibility: ensure dropzone is keyboard-focusable only if no nested interactive controls
+  var hasInteractive = dropzoneEl.querySelector('button, a, input:not([type="file"])');
+  if (!hasInteractive) {
+    if (!dropzoneEl.getAttribute('role')) dropzoneEl.setAttribute('role', 'button');
+    if (!dropzoneEl.getAttribute('tabindex')) dropzoneEl.setAttribute('tabindex', '0');
+  }
 
   var inputEl = dropzoneEl.querySelector('.dropzone-input') || createInput();
   if (inputEl) inputEl.accept = accept;

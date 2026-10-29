@@ -22,6 +22,7 @@ const { runOcrDefaultLangSuite } = require('./test_ocr_default_lang');
 const { runWatermarkPreviewSuite } = require('../test_watermark_preview');
 const { run: runLaunchHelperTest } = require('../test_launch_helper');
 const { runSignFlowSuite } = require('./test_sign_flow');
+const { runA11ySuite } = require('./test_a11y_axe');
 
 const TEST_PORT = 8765;
 const BASE_URL = `http://127.0.0.1:${TEST_PORT}`;
@@ -275,6 +276,13 @@ async function main() {
         run: async () => {
           const res = await runOcrDefaultLangSuite(browser, BASE_URL);
           if (!res || !res.success) throw new Error('OCR default language suite gagal: ' + ((res && res.failures) || []).join(' | '));
+        }
+      },
+      {
+        id: 'a11y',
+        name: 'Automated Axe-Core Accessibility & Dialog Focus Suite',
+        run: async () => {
+          await runA11ySuite(browser, BASE_URL);
         }
       }
     ];

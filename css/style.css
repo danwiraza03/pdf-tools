@@ -640,9 +640,9 @@ a {
 :root.light-theme .header-nav .nav-link-item.active,
 [data-theme="light"] .header-nav a.active,
 [data-theme="light"] .header-nav .nav-link-item.active {
-  color: #6366F1;
-  background: rgba(99, 102, 241, 0.08);
-  box-shadow: inset 0 0 0 1px rgba(99, 102, 241, 0.25);
+  color: #4F46E5;
+  background: rgba(79, 70, 229, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(79, 70, 229, 0.25);
 }
 
 /* ALL PDF TOOLS Special Toggle Pill Button */
@@ -2617,6 +2617,10 @@ a {
   top: 16px;
   outline: 3px solid #ffffff;
   outline-offset: 2px;
+}
+
+#main-content:focus {
+  outline: none;
 }
 
 :focus-visible {

@@ -82,7 +82,7 @@
       padding: 3px 8px;
       border-radius: 12px;
       background: color-mix(in srgb, var(--tool-color), transparent 85%);
-      color: var(--tool-color);
+      color: #0f766e;
       font-weight: 700;
     }
 
@@ -250,6 +250,10 @@
       margin-top: 2px;
     }
 
+    .op-radio-card.active .op-info span {
+      color: var(--text-secondary);
+    }
+
     /* Sub-options box */
     .op-settings-box {
       padding: 14px;
@@ -293,7 +297,7 @@
   <!-- Header -->
   <header class="header" id="appHeader"></header>
 
-  <main id="main-content" class="main-content">
+  <main id="main-content" class="main-content" tabindex="-1">
     <div class="container">
       <!-- Hero -->
       <section class="tool-hero">

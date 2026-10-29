@@ -393,7 +393,7 @@
   <!-- Header -->
   <header class="header" id="appHeader"></header>
 
-  <main id="main-content" class="main-content">
+  <main id="main-content" class="main-content" tabindex="-1">
     <div class="container">
       <!-- Tool Hero -->
       <section class="tool-hero">
@@ -402,7 +402,7 @@
         </div>
         <h1 data-i18n="tool.ocr">OCR PDF & Image (100% Offline)</h1>
         <p data-i18n="tool.ocr.desc">Extract text from scanned PDFs or images & create searchable PDF documents directly in your browser.</p>
-        <div id="simdBadge" style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; margin-top: 10px; background: rgba(6, 182, 212, 0.12); border: 1px solid rgba(6, 182, 212, 0.25); color: #22d3ee;">
+        <div id="simdBadge" style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; margin-top: 10px; background: rgba(6, 182, 212, 0.12); border: 1px solid rgba(6, 182, 212, 0.25); color: #0891b2;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
           <span id="simdText">Checking Hardware Acceleration...</span>
         </div>
@@ -837,7 +837,8 @@
         if (hasSimd) {
           simdText.textContent = 'WebAssembly SIMD 128-bit Active (Up to 50% Faster)';
           simdBadge.style.borderColor = 'rgba(16, 185, 129, 0.4)';
-          simdBadge.style.color = '#34d399';
+          const isDark = document.documentElement.getAttribute('data-theme') === 'dark' || document.documentElement.classList.contains('dark-theme');
+          simdBadge.style.color = isDark ? '#34d399' : '#047857';
           simdBadge.style.background = 'rgba(16, 185, 129, 0.12)';
         } else {
           simdText.textContent = 'Standard WebAssembly Active (Compatible Mode)';
