@@ -1,9 +1,9 @@
 {
-  "version": "pdf-tools-v2f63218a27",
-  "compositeHash": "2f63218a272af4c5d0c7af40b7c2bed65dbf5410be54236ca5bfa61b0f1fbd8d",
-  "builtAt": "2026-10-29T10:41:44.105Z",
-  "totalFiles": 82,
-  "totalBytes": 3716304,
+  "version": "pdf-tools-veef30c386d",
+  "compositeHash": "eef30c386da8591cac753f4b5fc5d86e7403d2a69582b38e4d47770bec5b6eec",
+  "builtAt": "2026-10-29T10:50:59.666Z",
+  "totalFiles": 86,
+  "totalBytes": 3714724,
   "totalMB": "3.54",
   "files": [
     {
@@ -222,6 +222,16 @@
       "hash": "feabdf309770"
     },
     {
+      "url": "./js/pages/batch.js",
+      "size": 13190,
+      "hash": "5e56b69f3906"
+    },
+    {
+      "url": "./js/pages/compress.js",
+      "size": 16596,
+      "hash": "1248713129a8"
+    },
+    {
       "url": "./js/pages/crop.js",
       "size": 13052,
       "hash": "7e3039301748"
@@ -247,6 +257,11 @@
       "hash": "239c68fa8d78"
     },
     {
+      "url": "./js/pages/page-number.js",
+      "size": 10490,
+      "hash": "7200fc7247ed"
+    },
+    {
       "url": "./js/pages/pdf-to-docx.js",
       "size": 6089,
       "hash": "bba379ae8599"
@@ -260,6 +275,11 @@
       "url": "./js/pages/pdf-to-xlsx.js",
       "size": 6277,
       "hash": "76ffce60efdf"
+    },
+    {
+      "url": "./js/pages/protect.js",
+      "size": 12115,
+      "hash": "cf0aeafb63a2"
     },
     {
       "url": "./js/pages/remove-pages.js",
@@ -308,13 +328,13 @@
     },
     {
       "url": "./pages/batch.html",
-      "size": 35317,
-      "hash": "2d1afb0cb0b5"
+      "size": 21833,
+      "hash": "f8dac94244be"
     },
     {
       "url": "./pages/compress.html",
-      "size": 29635,
-      "hash": "ab98688cd3b6"
+      "size": 12551,
+      "hash": "639640b9f370"
     },
     {
       "url": "./pages/crop.html",
@@ -358,8 +378,8 @@
     },
     {
       "url": "./pages/page-number.html",
-      "size": 24160,
-      "hash": "ba3c1fe5ecbb"
+      "size": 13423,
+      "hash": "69339fdea166"
     },
     {
       "url": "./pages/pdf-to-docx.html",
@@ -378,8 +398,8 @@
     },
     {
       "url": "./pages/protect.html",
-      "size": 25372,
-      "hash": "5f1955079b11"
+      "size": 12706,
+      "hash": "f9ec7a4bef27"
     },
     {
       "url": "./pages/remove-pages.html",

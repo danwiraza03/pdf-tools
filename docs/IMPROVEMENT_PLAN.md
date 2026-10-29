@@ -451,6 +451,10 @@ sehingga butir ini tidak mendesak.
 | `pages/split.html` | `js/pages/split.js` | ✅ Selesai (Fase 3) |
 | `pages/crop.html` | `js/pages/crop.js` | ✅ Selesai (Fase 3) |
 | `pages/grayscale.html` | `js/pages/grayscale.js` | ✅ Selesai (Fase 3) |
+| `pages/protect.html` | `js/pages/protect.js` | ✅ Selesai (Fase 4) |
+| `pages/page-number.html` | `js/pages/page-number.js` | ✅ Selesai (Fase 4) |
+| `pages/batch.html` | `js/pages/batch.js` | ✅ Selesai (Fase 4) |
+| `pages/compress.html` | `js/pages/compress.js` | ✅ Selesai (Fase 4) |
 
 ---
 
