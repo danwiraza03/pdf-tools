@@ -2579,6 +2579,21 @@ a {
   color: var(--text-muted);
 }
 
+.footer-unified .footer-credits {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+  letter-spacing: 0.02em;
+}
+
+.footer-unified .footer-links a {
+  transition: color var(--transition-fast);
+}
+
+.footer-unified .footer-links a:hover {
+  color: var(--text-main);
+}
+
 /* ============================================
    Accessibility: Focus Visible Outlines
    ============================================ */

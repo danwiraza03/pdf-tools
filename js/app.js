@@ -530,10 +530,19 @@ document.addEventListener('DOMContentLoaded', function () {
     const footer = document.querySelector('footer.footer');
     if (!footer || document.body.classList.contains('tool-page-viewer')) return;
 
+    const isPagesDir = window.location.pathname.replace(/\\/g, '/').includes('/pages/');
+    const licenseHref = isPagesDir ? '../LICENSE' : 'LICENSE';
+    const noticesHref = isPagesDir ? '../THIRD_PARTY_NOTICES.md' : 'THIRD_PARTY_NOTICES.md';
+
     footer.innerHTML = `
       <div class="container">
         <div class="footer-unified">
           <p data-i18n="footer.text">PDF Tools (DN.) — All processing is done locally in your browser.</p>
+          <p class="footer-credits" data-i18n="footer.credits">Crafted with care by DN.</p>
+          <div class="footer-links" style="margin-top: 8px; font-size: 0.8rem; display: flex; justify-content: center; gap: 16px;">
+            <a href="${licenseHref}" style="color: var(--text-muted); text-decoration: underline;">License (MIT)</a>
+            <a href="${noticesHref}" style="color: var(--text-muted); text-decoration: underline;">Third-Party Notices</a>
+          </div>
         </div>
       </div>
     `;
