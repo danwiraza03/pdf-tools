@@ -463,7 +463,7 @@ sehingga butir ini tidak mendesak.
 
 ---
 
-## Butir 9 — Content Security Policy (opsional)
+## Butir 9 — Content Security Policy (Selesai ✅)
 
 ### Latar Belakang
 
@@ -474,17 +474,16 @@ worker dan WebAssembly, sehingga kebijakan harus diuji dengan cermat.
 
 ### Tindakan
 
-1. Mulai dari kebijakan yang hanya mengizinkan sumber dari situs sendiri (`'self'`) ditambah
+1. Menerapkan kebijakan yang mengizinkan sumber dari situs sendiri (`'self'`) ditambah
    `blob:` dan `data:` di tempat yang memang dibutuhkan (worker, gambar, unduhan), `object-src 'none'`,
-   dan `base-uri 'self'`. Selama skrip inline masih ada, `'unsafe-inline'` untuk skrip masih
-   diperlukan; catat sebagai utang yang dilunasi oleh Butir 8.
-2. Test browser memantau peristiwa `securitypolicyviolation` di semua halaman dan alur utama
-   (termasuk OCR dan PDF Studio jika diizinkan) dan gagal bila ada pelanggaran.
+   dan `base-uri 'self'`, `'unsafe-eval'` & `'wasm-unsafe-eval'` untuk PDF.js dan Tesseract OCR, serta `form-action 'self'`.
+2. Guard statis `tests/check_csp_presence.js` memastikan seluruh 23 halaman publik memuat meta CSP valid tanpa wildcard eksternal.
+3. Test browser `tests/browser/test_csp.js` memantau peristiwa `securitypolicyviolation` (0 pelanggaran pada alur normal, dan membuktikan injeksi skrip/telemetry/gambar eksternal diblokir aktif oleh browser).
 
 ### Kriteria Penerimaan
 
-- Semua halaman dan alur utama berjalan tanpa pelanggaran CSP.
-- Pemuatan skrip dari domain lain terbukti ditolak browser.
+- Semua halaman dan alur utama berjalan tanpa pelanggaran CSP. (✅ Selesai)
+- Pemuatan skrip dari domain lain terbukti ditolak browser. (✅ Selesai)
 
 ### Perkiraan Cakupan
 

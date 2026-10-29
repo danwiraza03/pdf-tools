@@ -1,10 +1,10 @@
 {
-  "version": "pdf-tools-v8e0d545d3c",
-  "compositeHash": "8e0d545d3c5932a6d0a07027bd3f1593f7054de1665296aa185728a32b701a63",
-  "builtAt": "2026-10-29T10:53:47.885Z",
+  "version": "pdf-tools-v69b5d13fc8",
+  "compositeHash": "69b5d13fc838bc2ebb74406840344bc5c7de4f5be4ee9ed67f47966ab37caf04",
+  "builtAt": "2026-10-29T10:58:07.448Z",
   "totalFiles": 91,
-  "totalBytes": 3715511,
-  "totalMB": "3.54",
+  "totalBytes": 3724071,
+  "totalMB": "3.55",
   "files": [
     {
       "url": "./css/home.css",
@@ -63,8 +63,8 @@
     },
     {
       "url": "./index.html",
-      "size": 45024,
-      "hash": "255cdab7e1c3"
+      "size": 45396,
+      "hash": "4486e11ba0af"
     },
     {
       "url": "./js/app.js",
@@ -223,13 +223,13 @@
     },
     {
       "url": "./js/pages/batch.js",
-      "size": 13190,
-      "hash": "5e56b69f3906"
+      "size": 13191,
+      "hash": "e0e0ba789354"
     },
     {
       "url": "./js/pages/compress.js",
-      "size": 16596,
-      "hash": "1248713129a8"
+      "size": 16597,
+      "hash": "414155821cc9"
     },
     {
       "url": "./js/pages/crop.js",
@@ -273,8 +273,8 @@
     },
     {
       "url": "./js/pages/page-number.js",
-      "size": 10490,
-      "hash": "7200fc7247ed"
+      "size": 10491,
+      "hash": "9b5267fb7838"
     },
     {
       "url": "./js/pages/pdf-to-docx.js",
@@ -293,8 +293,8 @@
     },
     {
       "url": "./js/pages/protect.js",
-      "size": 12115,
-      "hash": "cf0aeafb63a2"
+      "size": 12116,
+      "hash": "38f9358efa73"
     },
     {
       "url": "./js/pages/remove-pages.js",
@@ -353,113 +353,113 @@
     },
     {
       "url": "./pages/batch.html",
-      "size": 21833,
-      "hash": "f8dac94244be"
+      "size": 22205,
+      "hash": "ffd951baecfb"
     },
     {
       "url": "./pages/compress.html",
-      "size": 12551,
-      "hash": "639640b9f370"
+      "size": 12923,
+      "hash": "2d4e4cdec687"
     },
     {
       "url": "./pages/crop.html",
-      "size": 14162,
-      "hash": "88b74aa4b90c"
+      "size": 14534,
+      "hash": "b6a156b80b0b"
     },
     {
       "url": "./pages/docx-to-pdf.html",
-      "size": 11033,
-      "hash": "1581f3eeb1aa"
+      "size": 11405,
+      "hash": "0b5f5026d4d1"
     },
     {
       "url": "./pages/flatten.html",
-      "size": 10495,
-      "hash": "38c04cb2c142"
+      "size": 10867,
+      "hash": "846e39249772"
     },
     {
       "url": "./pages/form-fill.html",
-      "size": 18214,
-      "hash": "c9efb3667207"
+      "size": 18586,
+      "hash": "ef6aed82f435"
     },
     {
       "url": "./pages/grayscale.html",
-      "size": 18378,
-      "hash": "49a758a8edbb"
+      "size": 18750,
+      "hash": "b2736a73fea8"
     },
     {
       "url": "./pages/jpg-to-pdf.html",
-      "size": 8107,
-      "hash": "cf68b561474f"
+      "size": 8479,
+      "hash": "729d92c753f3"
     },
     {
       "url": "./pages/merge.html",
-      "size": 17277,
-      "hash": "7f7d02958aaa"
+      "size": 17649,
+      "hash": "5d1b0357a93b"
     },
     {
       "url": "./pages/ocr.html",
-      "size": 37947,
-      "hash": "90abbefd39c1"
+      "size": 38319,
+      "hash": "f610cc0e9e5f"
     },
     {
       "url": "./pages/page-number.html",
-      "size": 13423,
-      "hash": "69339fdea166"
+      "size": 13795,
+      "hash": "666b6953f0e0"
     },
     {
       "url": "./pages/pdf-to-docx.html",
-      "size": 12198,
-      "hash": "2a074aa1080a"
+      "size": 12570,
+      "hash": "dedd5059692e"
     },
     {
       "url": "./pages/pdf-to-jpg.html",
-      "size": 10110,
-      "hash": "c63ebedfa8bc"
+      "size": 10482,
+      "hash": "9a013afece07"
     },
     {
       "url": "./pages/pdf-to-xlsx.html",
-      "size": 13548,
-      "hash": "9150f497dc94"
+      "size": 13920,
+      "hash": "4e262ca8a44c"
     },
     {
       "url": "./pages/protect.html",
-      "size": 12706,
-      "hash": "f9ec7a4bef27"
+      "size": 13078,
+      "hash": "51092488ac0a"
     },
     {
       "url": "./pages/remove-pages.html",
-      "size": 8112,
-      "hash": "74f84a1e3223"
+      "size": 8484,
+      "hash": "484b4af1a83f"
     },
     {
       "url": "./pages/reorder.html",
-      "size": 6897,
-      "hash": "aaef4074fd84"
+      "size": 7269,
+      "hash": "724caf6ace1d"
     },
     {
       "url": "./pages/rotate.html",
-      "size": 8358,
-      "hash": "8e05ea512120"
+      "size": 8730,
+      "hash": "84f4c8d3bda6"
     },
     {
       "url": "./pages/sign.html",
-      "size": 31791,
-      "hash": "b4425ae0b02c"
+      "size": 32163,
+      "hash": "264e5fe21620"
     },
     {
       "url": "./pages/split.html",
-      "size": 8947,
-      "hash": "903dd881162d"
+      "size": 9319,
+      "hash": "725688e26c04"
     },
     {
       "url": "./pages/watermark.html",
-      "size": 33708,
-      "hash": "7dd4e217668d"
+      "size": 34080,
+      "hash": "0ff66dedf2d7"
     },
     {
       "url": "./pages/xlsx-to-pdf.html",
-      "size": 11163,
-      "hash": "cb3d85ced5f5"
+      "size": 11535,
+      "hash": "e27e3ee217c2"
     }
   ]
 }

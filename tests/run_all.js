@@ -34,7 +34,8 @@ const tests = [
   { name: 'Static Guard: Zero Global Collisions Across Scripts', file: 'check_global_collisions.js' },
   { name: 'Static Guard: Unified Footer Presence & Structure', file: 'check_footer_presence.js' },
   { name: 'Static Guard: SEO Metadata, Open Graph & Sitemap Audit', file: 'check_seo_meta.js' },
-  { name: 'Static Guard: Service Worker Manifest & Precache Integrity', file: 'check_sw_manifest.js' }
+  { name: 'Static Guard: Service Worker Manifest & Precache Integrity', file: 'check_sw_manifest.js' },
+  { name: 'Static Guard: Content Security Policy (CSP) Audit', file: 'check_csp_presence.js' }
 ];
 
 console.log('========================================================================');

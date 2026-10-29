@@ -13,6 +13,7 @@
     "test:large": "node tests/browser/test_large_documents.js",
     "test:mobile": "node tests/browser/test_mobile_audit.js",
     "test:sw": "node tests/browser/test_service_worker.js",
+    "test:csp": "node tests/browser/test_csp.js",
     "build:sw": "node scripts/build_sw_manifest.js"
   },
   "devDependencies": {
