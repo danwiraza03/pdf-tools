@@ -229,6 +229,7 @@ Rangkaian tes ini mencakup 13 suite pengujian otomatis: validasi sintaks JavaScr
 ## Privasi, Keamanan, & Pemrosesan di Perangkat
 - Berjalan Lokal di Sisi Klien: Tidak ada data yang dikirim ke server cloud pihak ketiga mana pun.
 - Bebas Ketergantungan Eksternal: Seluruh berkas CSS, font kaligrafi, JavaScript, biner WASM, dan model bahasa Tesseract tersimpan lokal di dalam repositori.
+- Dukungan Dwibahasa: Bahasa tampilan bawaan adalah Bahasa Inggris untuk semua pengguna baru. Bahasa Indonesia tetap tersedia melalui tombol bahasa di header, dan pilihan Anda disimpan di peramban.
 
 ---
 

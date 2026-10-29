@@ -16,7 +16,7 @@ PDF Tools adalah rangkaian lengkap alat pengolah dokumen PDF berstandar profesio
 1. **Zero-Server Client-Side Guarantee**: Dokumen pengguna tidak pernah keluar dari memori lokal (RAM). Semua proses manipulasi PDF, OCR, konversi, rendering, dan kompresi dieksekusi secara lokal menggunakan WebAssembly dan Web APIs.
 2. **Zero External URLs**: Tidak ada dependensi font eksternal (Google Fonts), CDN eksternal, atau layanan analitik/telemetri yang dihubungi saat aplikasi berjalan.
 3. **No Intermediate Downloads (PDF Studio)**: Dalam workspace PDF Studio (`pages/viewer.html`), seluruh operasi dokumen diterapkan langsung ke memori dokumen (`currentDoc`) secara in-memory. Unduhan hanya dipicu saat pengguna secara eksplisit menekan tombol "Save PDF".
-4. **Bilingual Support (ID & EN)**: Seluruh antarmuka mendukung Bahasa Indonesia dan Bahasa Inggris secara penuh melalui kamus lokal di `js/utils/i18n.js`.
+4. **Bilingual Support (ID & EN)**: Seluruh antarmuka mendukung Bahasa Indonesia dan Bahasa Inggris secara penuh melalui kamus lokal di `js/utils/i18n.js`. Bahasa bawaan adalah Bahasa Inggris untuk semua pengguna baru, dengan opsi peralihan manual ke Bahasa Indonesia yang tersimpan di `localStorage`.
 5. **Strict Icon Standard (Zero Emojis)**: Seluruh ikon tombol, header, status, dan dropzone menggunakan inline vector SVG monokrom/tema (`viewBox="0 0 24 24"`), tanpa emoji Unicode mentah.
 
 ---

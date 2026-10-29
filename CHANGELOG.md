@@ -7,6 +7,7 @@ Format mengacu pada [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) 
 ### Diubah
 
 - Aplikasi difokuskan sebagai aplikasi web; server pengembangan dipindahkan ke `scripts/dev-server.js`.
+- Bahasa tampilan bawaan kini bahasa Inggris; bahasa Indonesia tetap tersedia lewat tombol bahasa di header, dan pilihan Anda diingat.
 
 ### Dihapus
 
