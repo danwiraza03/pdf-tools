@@ -2,6 +2,16 @@
 
 Format mengacu pada [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan penomoran versi mengikuti [Semantic Versioning](https://semver.org/lang/id/). Daftar keterbatasan yang sudah diketahui ada di bagian *Masalah yang Diketahui* pada [README](README.md).
 
+## [Unreleased]
+
+### Diubah
+
+- Aplikasi difokuskan sebagai aplikasi web; server pengembangan dipindahkan ke `scripts/dev-server.js`.
+
+### Dihapus
+
+- Peluncur Windows (.bat), dukungan membuka aplikasi langsung dari berkas (file://), dokumen arsip lama (`docs/archive/`), dan berkas tidak terpakai (`scripts/validate_workflow_yaml.js`).
+
 ## [1.0.0] - 2026-10-27
 
 Rilis stabil pertama. Seluruh pemrosesan berjalan di browser Anda; berkas tidak dikirim ke server mana pun.
