@@ -10,6 +10,7 @@
     "test": "node tests/run_all.js",
     "test:browser": "node tests/browser/run_browser_tests.js",
     "test:a11y": "node tests/browser/test_a11y_axe.js",
+    "test:large": "node tests/browser/test_large_documents.js",
     "test:mobile": "node tests/browser/test_mobile_audit.js"
   },
   "devDependencies": {
