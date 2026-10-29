@@ -765,7 +765,9 @@ PDFTools.i18n = (function () {
       'modal.password_incorrect': 'Incorrect password, please try again (Attempt {attempt} of {max}).',
       'modal.password_unlock': 'Open',
       'modal.password_skip': 'Skip',
-      'modal.password_placeholder': 'Enter document password'
+      'modal.password_placeholder': 'Enter document password',
+      'sw.update_available': 'A new version of PDF Tools is available.',
+      'sw.reload': 'Update Now'
     },
 
     id: {
@@ -1528,7 +1530,9 @@ PDFTools.i18n = (function () {
       'modal.password_incorrect': 'Password salah, silakan coba lagi (Percobaan {attempt} dari {max}).',
       'modal.password_unlock': 'Buka',
       'modal.password_skip': 'Lewati',
-      'modal.password_placeholder': 'Masukkan kata sandi dokumen'
+      'modal.password_placeholder': 'Masukkan kata sandi dokumen',
+      'sw.update_available': 'Versi baru PDF Tools telah tersedia.',
+      'sw.reload': 'Perbarui Sekarang'
     }
   };
 

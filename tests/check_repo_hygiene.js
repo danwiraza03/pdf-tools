@@ -9,7 +9,6 @@
  *    - scratch/
  *    - trash/
  *    - tests/browser/screenshots/
- *    - sw.js
  *    - js/editor/font-engine.js
  */
 
@@ -136,14 +135,13 @@ for (const relFile of trackedFiles) {
   }
 }
 
-// 2. Check forbidden tracked paths: scratch/, trash/, tests/browser/screenshots/, sw.js, js/editor/font-engine.js
+// 2. Check forbidden tracked paths: scratch/, trash/, tests/browser/screenshots/, js/editor/font-engine.js
 const forbiddenPrefixes = [
   'scratch/',
   'trash/',
   'tests/browser/screenshots/'
 ];
 const forbiddenExact = [
-  'sw.js',
   'js/editor/font-engine.js'
 ];
 
@@ -191,7 +189,7 @@ if (!passed) {
 } else {
   console.log('✓ Tidak ada berkas terlacak > 20 MB di luar js/lib/tesseract.');
   console.log('✓ Tidak ada berkas terlacak di scratch/, trash/, atau tests/browser/screenshots/.');
-  console.log('✓ Tidak ada berkas sisa sw.js atau js/editor/font-engine.js.');
+  console.log('✓ Tidak ada berkas sisa js/editor/font-engine.js.');
   console.log('✓ Tidak ada berkas .txt, .log, atau .tmp terlacak di akar proyek (di luar daftar putih).');
   console.log('\n✅ [PASS] Repository Hygiene Guard PASSED');
   console.log('========================================================================\n');

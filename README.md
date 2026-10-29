@@ -269,6 +269,41 @@ git archive --format=zip -o ..\pdf-ringan.zip HEAD -- . ':(exclude)js/lib/tesser
 
 ---
 
+## ⚡ Dukungan Offline PWA & Service Worker
+
+PDF Tools dilengkapi Service Worker (`sw.js`) standar PWA yang memungkinkan aplikasi dibuka dan dioperasikan 100% tanpa koneksi internet setelah kunjungan pertama:
+
+- **App Shell Precache**: Memuat 69 berkas inti (HTML, CSS, JS pustaka lokal, ikon, font Inter) dengan total ukuran ~3.55 MB (di bawah anggaran 5.0 MB).
+- **Strategi Caching**:
+  - *Network-First* untuk dokumen HTML (memastikan konten terbaru selalu diutamakan bila terhubung).
+  - *Cache-First* untuk aset statis berkode versi hash (`css/`, `js/`, `fonts/`, `icons/`).
+  - *Runtime On-Demand* untuk modul besar PDF Studio dan model OCR.
+- **Deteksi Pembaruan Versi**: Setiap perubahan berkas inti memicu hash komposit baru (`CACHE_VERSION`). Notifikasi Toast interaktif akan muncul secara otomatis (*"Versi baru PDF Tools telah tersedia"* / *"A new version of PDF Tools is available"*) dengan tombol **Perbarui Sekarang** (`SKIP_WAITING`).
+- **Membangun Ulang Manifest**:
+  ```bash
+  npm run build:sw
+  ```
+- **Pengujian Otomatis Service Worker**:
+  ```bash
+  npm run test:sw
+  ```
+
+### Tombol Darurat / Kill-Switch Service Worker
+Jika sewaktu-waktu terjadi kendala atau kebutuhan *rollback* instan pada Service Worker di produksi, ganti isi berkas `sw.js` di akar repositori dengan skrip pembatal berikut untuk menghapus seluruh cache dan mencabut registrasi Service Worker pada seluruh peramban pengguna:
+
+```javascript
+self.addEventListener('install', () => self.skipWaiting());
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys()
+      .then((keys) => Promise.all(keys.map((k) => caches.delete(k))))
+      .then(() => self.registration.unregister())
+  );
+});
+```
+
+---
+
 ## ⚠️ Masalah yang Diketahui (Known Issues)
 
 Keterbatasan berikut sudah diketahui pada versi 1.0.0:

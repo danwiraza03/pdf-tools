@@ -914,4 +914,68 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     }
   });
+
+  // --- 4. Service Worker Registration & Offline PWA Lifecycle ---
+  function registerServiceWorker() {
+    if (!('serviceWorker' in navigator)) return;
+
+    var isSecure = window.location.protocol === 'https:' ||
+      window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1';
+    if (!isSecure) return;
+
+    var isPagesDir = window.location.pathname.replace(/\\/g, '/').includes('/pages/');
+    var swUrl = isPagesDir ? '../sw.js' : 'sw.js';
+    var swScope = isPagesDir ? '../' : './';
+
+    function notifyUpdateAvailable(worker) {
+      var msg = (window.PDFTools && PDFTools.i18n)
+        ? PDFTools.i18n.t('sw.update_available')
+        : 'A new version of PDF Tools is available.';
+      var btnText = (window.PDFTools && PDFTools.i18n)
+        ? PDFTools.i18n.t('sw.reload')
+        : 'Update Now';
+
+      if (window.PDFTools && PDFTools.Toast && typeof PDFTools.Toast.action === 'function') {
+        PDFTools.Toast.action(msg, btnText, function () {
+          if (worker) {
+            worker.postMessage({ type: 'SKIP_WAITING' });
+          }
+        }, 0);
+      }
+    }
+
+    var refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', function () {
+      if (!refreshing) {
+        refreshing = true;
+        window.location.reload();
+      }
+    });
+
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register(swUrl, { scope: swScope })
+        .then(function (registration) {
+          registration.addEventListener('updatefound', function () {
+            var installingWorker = registration.installing;
+            if (!installingWorker) return;
+
+            installingWorker.addEventListener('statechange', function () {
+              if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                notifyUpdateAvailable(installingWorker);
+              }
+            });
+          });
+
+          if (registration.waiting && navigator.serviceWorker.controller) {
+            notifyUpdateAvailable(registration.waiting);
+          }
+        })
+        .catch(function (err) {
+          console.debug('Service Worker registration skipped or failed:', err);
+        });
+    });
+  }
+
+  registerServiceWorker();
 });
