@@ -67,7 +67,7 @@ Berikut adalah 23 tool mandiri yang tersedia secara aktual di direktori `pages/`
 | 19 | **Page Numbers** | `pages/page-number.html` | `js/core/pdf-page-number.js` | Edit | Menambahkan penomoran halaman otomatis, header, dan footer dinamis dengan format kustom (`Halaman {n} dari {total}`). |
 | 20 | **Sign PDF (E-Sign)** | `pages/sign.html` | `js/core/pdf-sign.js` (inline) | Security | Menambahkan tanda tangan digital: menggambar bebas (*draw*), mengetik dengan font kaligrafi lokal (*type*), atau mengunggah gambar stempel (*upload*). |
 | 21 | **Fill PDF Forms** | `pages/form-fill.html` | `js/editor/form-engine.js` | Edit | Mengisi form field interaktif AcroForm (text field, checkbox, radio button, dropdown) dengan fitur ekspor data dan simpan PDF. |
-| 22 | **OCR PDF (100% Offline)**| `pages/ocr.html` | `js/core/pdf-ocr.js` | Optimize | Mengekstrak teks dari pindaian/gambar menggunakan Tesseract WASM offline untuk menghasilkan Searchable PDF atau teks murni (.txt). |
+| 22 | **OCR PDF (berkas diproses di perangkat Anda, tidak diunggah)**| `pages/ocr.html` | `js/core/pdf-ocr.js` | Optimize | Mengekstrak teks dari pindaian/gambar menggunakan Tesseract WASM offline untuk menghasilkan Searchable PDF atau teks murni (.txt). |
 | 23 | **Batch Processing** | `pages/batch.html` | `js/core/pdf-batch.js` (inline) | Workflow | Mengotomatisasi pemrosesan banyak berkas PDF sekaligus (watermark, compress, rotate, number) dan mengunduh seluruh hasil dalam 1 file ZIP. |
 
 ---

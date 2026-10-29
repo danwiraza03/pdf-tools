@@ -1,19 +1,49 @@
-# ⚡ PDF Tools — 100% Offline Client-Side PDF Suite
+# PDF Tools — Berkas Diproses di Perangkat Anda, Tidak Diunggah
 
 [![Tests](https://github.com/danwiraza03/pdf-tools/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/danwiraza03/pdf-tools/actions/workflows/test.yml)
 
 **Versi 1.0.0** — lihat [CHANGELOG.md](CHANGELOG.md) untuk daftar perubahan.
 
-Aplikasi pengolah dokumen PDF serbaguna yang berjalan **100% di browser lokal Anda tanpa memerlukan koneksi internet ataupun server web**. Semua proses penggabungan, pemotongan, kompresi, OCR, penandatanganan, dan pengeditan PDF dieksekusi secara instan di komputer Anda.
+Aplikasi pengolah dokumen PDF serbaguna yang berjalan di peramban Anda. Semua proses penggabungan, pemotongan, kompresi, OCR, penandatanganan, dan pengeditan PDF dieksekusi secara instan di komputer Anda.
 
 ---
 
-## 🚀 Cara Menjalankan Aplikasi
+## Cara Memakai
 
-Cukup **klik dua kali (*double-click*) file `index.html`** pada File Explorer di Windows / Mac / Linux untuk langsung membukanya di browser favorit Anda (Google Chrome, Microsoft Edge, Mozilla Firefox, Brave, atau Safari).
+Aplikasi dapat langsung diakses melalui peramban di:
+https://danwiraza03.github.io/pdf-tools/
 
-> [!NOTE]
-> Aplikasi ini adalah **100% Client-Side Standalone**. Anda **tidak membutuhkan web server** (seperti Laragon, Apache, Node.js, atau Nginx). Seluruh berkas PDF yang Anda proses **tidak pernah diunggah ke internet**, menjamin keamanan dan privasi data 100%.
+Seluruh pemrosesan berkas PDF dieksekusi langsung di perangkat Anda tanpa pernah diunggah ke server.
+
+## Untuk Pengembang
+
+Untuk menjalankan dan mengembangkan aplikasi secara lokal:
+
+1. Pasang dependensi pengujian dan linting:
+   ```bash
+   npm ci
+   ```
+
+2. Jalankan server pengembangan lokal:
+   ```bash
+   npm run dev
+   ```
+   Aplikasi akan terbuka pada `http://127.0.0.1:8080/`.
+
+3. Jalankan rangkaian pengujian otomatis:
+   ```bash
+   npm test
+   ```
+
+4. Jalankan pengujian peramban:
+   ```bash
+   npm run test:browser
+   ```
+
+5. Jalankan pemeriksaan linting kode:
+   ```bash
+   npm run lint
+   ```
 
 ---
 
@@ -40,7 +70,7 @@ Cukup **klik dua kali (*double-click*) file `index.html`** pada File Explorer di
 | 17 | **Protect & Unlock PDF** | [pages/protect.html](pages/protect.html) | Enkripsi sandi dokumen dengan algoritma keamanan standar PDF atau buka kunci sandi dokumen. |
 | 18 | **Sign PDF (E-Sign)** | [pages/sign.html](pages/sign.html) | Tanda tangan elektronik offline: gambar tangan (*draw*), ketik dengan font kaligrafi lokal (*type*), atau unggah stempel (*upload*). |
 | 19 | **Fill PDF Forms** | [pages/form-fill.html](pages/form-fill.html) | Isi formulir PDF interaktif AcroForm (teks, checkbox, radio button, dropdown) dengan ekspor data & simpan dokumen. |
-| 20 | **OCR PDF (100% Offline)** | [pages/ocr.html](pages/ocr.html) | Ekstrak teks (Bahasa Indonesia & English) & buat Searchable PDF tanpa internet menggunakan Tesseract WASM. |
+| 20 | **OCR PDF (berkas diproses di perangkat Anda, tidak diunggah)** | [pages/ocr.html](pages/ocr.html) | Ekstrak teks (Bahasa Indonesia & English) & buat Searchable PDF tanpa internet menggunakan Tesseract WASM. |
 | 21 | **PDF to Grayscale** | [pages/grayscale.html](pages/grayscale.html) | Ubah dokumen berwarna ke skala abu-abu / fotokopi B&W dengan slider perbandingan interaktif *Before/After*. |
 | 22 | **Flatten PDF** | [pages/flatten.html](pages/flatten.html) | Kunci isian formulir, tanda tangan, dan stempel menjadi lapisan permanen anti-edit (*read-only*). |
 | 23 | **Batch Processing** | [pages/batch.html](pages/batch.html) | Memproses puluhan berkas PDF sekaligus secara otomatis (watermark, compress, rotate, number) ke dalam satu file ZIP. |
@@ -97,7 +127,7 @@ Cukup **klik dua kali (*double-click*) file `index.html`** pada File Explorer di
    - **Photocopy / Pure B&W**: Mengubah teks menjadi hitam pekat dan latar belakang menjadi putih 100% (sangat hemat tinta printer).
 4. Klik **Convert & Download PDF**.
 
-### 7. OCR PDF Offline (`pages/ocr.html`)
+### 7. OCR PDF (berkas diproses di perangkat Anda, tidak diunggah) (`pages/ocr.html`)
 1. Buka `pages/ocr.html` dan pilih berkas PDF pindaian (*scanned PDF*) atau gambar dokumen.
 2. Pilih bahasa pengenalan teks: *Bahasa Indonesia (ID)*, *English (EN)*, atau keduanya.
 3. Pilih format output:
@@ -147,7 +177,7 @@ pdf/
 │   ├── protect.html            # Protect & Unlock PDF
 │   ├── sign.html               # Sign PDF (E-Sign)
 │   ├── form-fill.html          # Fill PDF Forms
-│   ├── ocr.html                # OCR PDF Offline
+│   ├── ocr.html                # OCR PDF (berkas diproses di perangkat Anda, tidak diunggah)
 │   ├── grayscale.html          # PDF to Grayscale & B/W
 │   ├── flatten.html            # Flatten PDF
 │   └── batch.html              # Batch PDF Processing ke ZIP
@@ -165,8 +195,7 @@ pdf/
 │   └── utils/                  # Helper download, format ukuran, file parser, i18n
 ├── docs/                       # Dokumentasi Resmi Proyek
 │   ├── PRD.md                  # Product Requirements Document (Kondisi Aktual 23 Tools)
-│   ├── svg-library.md          # Pustaka Ikon SVG Standar Terpusat
-│   └── archive/                # Arsip Dokumen Spesifikasi Lama
+│   └── svg-library.md          # Pustaka Ikon SVG Standar Terpusat
 ├── scripts/                    # Skrip Otomasi & Server Pengembangan
 │   ├── dev-server.js           # Local dev static server (127.0.0.1, proteksi path traversal)
 │   ├── build_ocr_bundle.js     # Bundler OCR Tesseract lokal
@@ -197,10 +226,9 @@ Rangkaian tes ini mencakup 13 suite pengujian otomatis: validasi sintaks JavaScr
 
 ---
 
-## 🔒 Privasi, Keamanan, & Kepatuhan Standalone
-- **100% Berjalan Lokal di Sisi Klien**: Tidak ada data yang dikirim ke server cloud pihak ketiga manapun.
-- **Bebas Ketergantungan Eksternal**: Seluruh file CSS, font kaligrafi, JavaScript, WASM binary, dan model bahasa Tesseract tersimpan lokal di dalam repositori.
-- **Dukungan Protokol `file:///` Penuh**: Dapat dijalankan langsung dari USB Flashdisk, hard drive lokal, atau jaringan lokal tanpa instalasi server.
+## Privasi, Keamanan, & Pemrosesan di Perangkat
+- Berjalan Lokal di Sisi Klien: Tidak ada data yang dikirim ke server cloud pihak ketiga mana pun.
+- Bebas Ketergantungan Eksternal: Seluruh berkas CSS, font kaligrafi, JavaScript, biner WASM, dan model bahasa Tesseract tersimpan lokal di dalam repositori.
 
 ---
 
@@ -250,7 +278,7 @@ Keterbatasan berikut sudah diketahui pada versi 1.0.0:
 - **Menyalin halaman antar dokumen** (Gabung, Pisah, Hapus Halaman, Urutkan): struktur tag aksesibilitas dan kolom formulir tidak ikut terbawa, dan bookmark tanpa tujuan serta tanpa anak tidak dibawa.
 - **Buka Kunci (Unlock)** pada PDF terenkripsi buatan alat lain tidak membawa Title dan Author.
 - **Kompres:** preset Extreme dan Recommended mengubah halaman menjadi gambar (teks tidak bisa dipilih atau dicari); pada uji PDF foto besar pengurangannya sekitar 95% dan 88%. Preset Less mempertahankan teks vektor tetapi bisa tidak mengecilkan ukuran (0% pada uji yang sama).
-- **OCR:** pemakaian pertama mengunduh model bahasa (sekitar 5 MB untuk Indonesia dan 14,6 MB untuk Inggris; terkompres sekitar 4 MB dan 11 MB). Versi web membutuhkan internet saat dimuat; untuk pemakaian sepenuhnya offline, jalankan salinan lokal.
+- **OCR:** pemakaian pertama mengunduh model bahasa (sekitar 5 MB untuk Indonesia dan 14,6 MB untuk Inggris; terkompres sekitar 4 MB dan 11 MB). Versi web membutuhkan internet saat pertama kali memuat model bahasa.
 - **Tampilan:** font Inter belum disertakan di proyek, sehingga tampilan memakai font sistem dan lebar teks sedikit berbeda antar perangkat.
 - **Belum diuji** pada dokumen sangat besar (ratusan halaman atau puluhan MB); di HP, memori browser terbatas.
 - **Belum diuji pada perangkat fisik iOS dan Android.** Pengujian memakai emulasi (Chromium dan WebKit). <!-- hapus baris ini setelah diuji di HP fisik -->
