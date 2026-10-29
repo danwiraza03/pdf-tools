@@ -1,146 +1,146 @@
 {
   "index.html": {
-    "baselineBytes": 328573,
-    "maxBytes": 394288,
-    "baselineRequests": 8,
-    "maxRequests": 10
+    "baselineBytes": 453834,
+    "maxBytes": 544601,
+    "baselineRequests": 13,
+    "maxRequests": 16
   },
   "pages/batch.html": {
-    "baselineBytes": 1448003,
-    "maxBytes": 1737604,
-    "baselineRequests": 16,
-    "maxRequests": 20
+    "baselineBytes": 1573264,
+    "maxBytes": 1887917,
+    "baselineRequests": 21,
+    "maxRequests": 26
   },
   "pages/compress.html": {
-    "baselineBytes": 2565345,
-    "maxBytes": 3078414,
-    "baselineRequests": 20,
-    "maxRequests": 24
+    "baselineBytes": 2690606,
+    "maxBytes": 3228728,
+    "baselineRequests": 25,
+    "maxRequests": 30
   },
   "pages/crop.html": {
-    "baselineBytes": 2418770,
-    "maxBytes": 2902524,
-    "baselineRequests": 17,
-    "maxRequests": 21
-  },
-  "pages/docx-to-pdf.html": {
-    "baselineBytes": 1065879,
-    "maxBytes": 1279055,
-    "baselineRequests": 12,
-    "maxRequests": 15
-  },
-  "pages/flatten.html": {
-    "baselineBytes": 2407410,
-    "maxBytes": 2888892,
-    "baselineRequests": 17,
-    "maxRequests": 21
-  },
-  "pages/form-fill.html": {
-    "baselineBytes": 1315081,
-    "maxBytes": 1578098,
-    "baselineRequests": 12,
-    "maxRequests": 15
-  },
-  "pages/grayscale.html": {
-    "baselineBytes": 2419917,
-    "maxBytes": 2903901,
-    "baselineRequests": 17,
-    "maxRequests": 21
-  },
-  "pages/jpg-to-pdf.html": {
-    "baselineBytes": 1015476,
-    "maxBytes": 1218572,
-    "baselineRequests": 16,
-    "maxRequests": 20
-  },
-  "pages/merge.html": {
-    "baselineBytes": 2598901,
-    "maxBytes": 3118682,
+    "baselineBytes": 2544031,
+    "maxBytes": 3052838,
     "baselineRequests": 22,
     "maxRequests": 27
   },
+  "pages/docx-to-pdf.html": {
+    "baselineBytes": 1191140,
+    "maxBytes": 1429368,
+    "baselineRequests": 17,
+    "maxRequests": 21
+  },
+  "pages/flatten.html": {
+    "baselineBytes": 2532671,
+    "maxBytes": 3039206,
+    "baselineRequests": 22,
+    "maxRequests": 27
+  },
+  "pages/form-fill.html": {
+    "baselineBytes": 1440342,
+    "maxBytes": 1728411,
+    "baselineRequests": 17,
+    "maxRequests": 21
+  },
+  "pages/grayscale.html": {
+    "baselineBytes": 2545178,
+    "maxBytes": 3054214,
+    "baselineRequests": 22,
+    "maxRequests": 27
+  },
+  "pages/jpg-to-pdf.html": {
+    "baselineBytes": 1140737,
+    "maxBytes": 1368885,
+    "baselineRequests": 21,
+    "maxRequests": 26
+  },
+  "pages/merge.html": {
+    "baselineBytes": 2724162,
+    "maxBytes": 3268995,
+    "baselineRequests": 27,
+    "maxRequests": 33
+  },
   "pages/ocr.html": {
-    "baselineBytes": 2466782,
-    "maxBytes": 2960139,
-    "baselineRequests": 16,
-    "maxRequests": 20
+    "baselineBytes": 2592043,
+    "maxBytes": 3110452,
+    "baselineRequests": 21,
+    "maxRequests": 26
   },
   "pages/page-number.html": {
-    "baselineBytes": 2507505,
-    "maxBytes": 3009006,
-    "baselineRequests": 17,
-    "maxRequests": 21
+    "baselineBytes": 2632766,
+    "maxBytes": 3159320,
+    "baselineRequests": 22,
+    "maxRequests": 27
   },
   "pages/pdf-to-docx.html": {
-    "baselineBytes": 770037,
-    "maxBytes": 924045,
-    "baselineRequests": 12,
-    "maxRequests": 15
-  },
-  "pages/pdf-to-jpg.html": {
-    "baselineBytes": 1870469,
-    "maxBytes": 2244563,
-    "baselineRequests": 18,
-    "maxRequests": 22
-  },
-  "pages/pdf-to-xlsx.html": {
-    "baselineBytes": 774064,
-    "maxBytes": 928877,
-    "baselineRequests": 12,
-    "maxRequests": 15
-  },
-  "pages/protect.html": {
-    "baselineBytes": 1107716,
-    "maxBytes": 1329260,
-    "baselineRequests": 15,
-    "maxRequests": 18
-  },
-  "pages/remove-pages.html": {
-    "baselineBytes": 2405214,
-    "maxBytes": 2886257,
-    "baselineRequests": 18,
-    "maxRequests": 22
-  },
-  "pages/reorder.html": {
-    "baselineBytes": 2447905,
-    "maxBytes": 2937486,
-    "baselineRequests": 19,
-    "maxRequests": 23
-  },
-  "pages/rotate.html": {
-    "baselineBytes": 2379605,
-    "maxBytes": 2855526,
+    "baselineBytes": 895298,
+    "maxBytes": 1074358,
     "baselineRequests": 17,
     "maxRequests": 21
   },
-  "pages/sign.html": {
-    "baselineBytes": 1374310,
-    "maxBytes": 1649172,
-    "baselineRequests": 14,
-    "maxRequests": 17
+  "pages/pdf-to-jpg.html": {
+    "baselineBytes": 1995730,
+    "maxBytes": 2394876,
+    "baselineRequests": 23,
+    "maxRequests": 28
   },
-  "pages/split.html": {
-    "baselineBytes": 2511142,
-    "maxBytes": 3013371,
+  "pages/pdf-to-xlsx.html": {
+    "baselineBytes": 899325,
+    "maxBytes": 1079190,
+    "baselineRequests": 17,
+    "maxRequests": 21
+  },
+  "pages/protect.html": {
+    "baselineBytes": 1232977,
+    "maxBytes": 1479573,
+    "baselineRequests": 20,
+    "maxRequests": 24
+  },
+  "pages/remove-pages.html": {
+    "baselineBytes": 2530475,
+    "maxBytes": 3036570,
+    "baselineRequests": 23,
+    "maxRequests": 28
+  },
+  "pages/reorder.html": {
+    "baselineBytes": 2573166,
+    "maxBytes": 3087800,
+    "baselineRequests": 24,
+    "maxRequests": 29
+  },
+  "pages/rotate.html": {
+    "baselineBytes": 2504866,
+    "maxBytes": 3005840,
+    "baselineRequests": 22,
+    "maxRequests": 27
+  },
+  "pages/sign.html": {
+    "baselineBytes": 1503288,
+    "maxBytes": 1803946,
     "baselineRequests": 19,
     "maxRequests": 23
   },
+  "pages/split.html": {
+    "baselineBytes": 2636403,
+    "maxBytes": 3163684,
+    "baselineRequests": 24,
+    "maxRequests": 29
+  },
   "pages/viewer.html": {
-    "baselineBytes": 3259040,
-    "maxBytes": 3910848,
+    "baselineBytes": 3263157,
+    "maxBytes": 3915789,
     "baselineRequests": 62,
     "maxRequests": 75
   },
   "pages/watermark.html": {
-    "baselineBytes": 2623486,
-    "maxBytes": 3148184,
-    "baselineRequests": 22,
-    "maxRequests": 27
+    "baselineBytes": 2748747,
+    "maxBytes": 3298497,
+    "baselineRequests": 27,
+    "maxRequests": 33
   },
   "pages/xlsx-to-pdf.html": {
-    "baselineBytes": 1065374,
-    "maxBytes": 1278449,
-    "baselineRequests": 12,
-    "maxRequests": 15
+    "baselineBytes": 1190635,
+    "maxBytes": 1428762,
+    "baselineRequests": 17,
+    "maxRequests": 21
   }
 }

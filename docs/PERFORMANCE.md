@@ -13,30 +13,30 @@ Batas toleransi maksimum ditetapkan sebesar **angka dasar aktual + 20%** untuk m
 
 | Halaman | Ukuran Aktual | Batas Anggaran (+20%) | Permintaan Aktual | Batas Permintaan (+20%) | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| `index.html` | 328.573 bytes (~0,31 MB) | 394.288 bytes | 8 reqs | 10 reqs | LULUS |
-| `pages/batch.html` | 1.448.003 bytes (~1,38 MB) | 1.737.604 bytes | 16 reqs | 20 reqs | LULUS |
-| `pages/compress.html` | 2.565.345 bytes (~2,45 MB) | 3.078.414 bytes | 20 reqs | 24 reqs | LULUS |
-| `pages/crop.html` | 2.418.770 bytes (~2,31 MB) | 2.902.524 bytes | 17 reqs | 21 reqs | LULUS |
-| `pages/docx-to-pdf.html` | 1.065.879 bytes (~1,02 MB) | 1.279.055 bytes | 12 reqs | 15 reqs | LULUS |
-| `pages/flatten.html` | 2.407.410 bytes (~2,30 MB) | 2.888.892 bytes | 17 reqs | 21 reqs | LULUS |
-| `pages/form-fill.html` | 1.315.081 bytes (~1,25 MB) | 1.578.098 bytes | 12 reqs | 15 reqs | LULUS |
-| `pages/grayscale.html` | 2.419.917 bytes (~2,31 MB) | 2.903.901 bytes | 17 reqs | 21 reqs | LULUS |
-| `pages/jpg-to-pdf.html` | 1.015.476 bytes (~0,97 MB) | 1.218.572 bytes | 16 reqs | 20 reqs | LULUS |
-| `pages/merge.html` | 2.598.901 bytes (~2,48 MB) | 3.118.682 bytes | 22 reqs | 27 reqs | LULUS |
-| `pages/ocr.html` (tanpa model) | 2.466.782 bytes (~2,35 MB) | 2.960.139 bytes | 16 reqs | 20 reqs | LULUS |
-| `pages/page-number.html` | 2.507.505 bytes (~2,39 MB) | 3.009.006 bytes | 17 reqs | 21 reqs | LULUS |
-| `pages/pdf-to-docx.html` | 770.037 bytes (~0,73 MB) | 924.045 bytes | 12 reqs | 15 reqs | LULUS |
-| `pages/pdf-to-jpg.html` | 1.870.469 bytes (~1,78 MB) | 2.244.563 bytes | 18 reqs | 22 reqs | LULUS |
-| `pages/pdf-to-xlsx.html` | 774.064 bytes (~0,74 MB) | 928.877 bytes | 12 reqs | 15 reqs | LULUS |
-| `pages/protect.html` | 1.107.716 bytes (~1,06 MB) | 1.329.260 bytes | 15 reqs | 18 reqs | LULUS |
-| `pages/remove-pages.html` | 2.405.214 bytes (~2,29 MB) | 2.886.257 bytes | 18 reqs | 22 reqs | LULUS |
-| `pages/reorder.html` | 2.447.905 bytes (~2,33 MB) | 2.937.486 bytes | 19 reqs | 23 reqs | LULUS |
-| `pages/rotate.html` | 2.379.605 bytes (~2,27 MB) | 2.855.526 bytes | 17 reqs | 21 reqs | LULUS |
-| `pages/sign.html` | 1.374.310 bytes (~1,31 MB) | 1.649.172 bytes | 14 reqs | 17 reqs | LULUS |
-| `pages/split.html` | 2.511.142 bytes (~2,39 MB) | 3.013.371 bytes | 19 reqs | 23 reqs | LULUS |
-| `pages/viewer.html` | 3.259.040 bytes (~3,11 MB) | 3.910.848 bytes | 62 reqs | 75 reqs | LULUS |
-| `pages/watermark.html` | 2.623.486 bytes (~2,50 MB) | 3.148.184 bytes | 22 reqs | 27 reqs | LULUS |
-| `pages/xlsx-to-pdf.html` | 1.065.374 bytes (~1,02 MB) | 1.278.449 bytes | 12 reqs | 15 reqs | LULUS |
+| `index.html` | 453.834 bytes (~0,43 MB) | 544.601 bytes | 13 reqs | 16 reqs | LULUS |
+| `pages/batch.html` | 1.573.264 bytes (~1,50 MB) | 1.887.917 bytes | 21 reqs | 26 reqs | LULUS |
+| `pages/compress.html` | 2.690.606 bytes (~2,57 MB) | 3.228.728 bytes | 25 reqs | 30 reqs | LULUS |
+| `pages/crop.html` | 2.544.031 bytes (~2,43 MB) | 3.052.838 bytes | 22 reqs | 27 reqs | LULUS |
+| `pages/docx-to-pdf.html` | 1.191.140 bytes (~1,14 MB) | 1.429.368 bytes | 17 reqs | 21 reqs | LULUS |
+| `pages/flatten.html` | 2.532.671 bytes (~2,42 MB) | 3.039.206 bytes | 22 reqs | 27 reqs | LULUS |
+| `pages/form-fill.html` | 1.440.342 bytes (~1,37 MB) | 1.728.411 bytes | 17 reqs | 21 reqs | LULUS |
+| `pages/grayscale.html` | 2.545.178 bytes (~2,43 MB) | 3.054.214 bytes | 22 reqs | 27 reqs | LULUS |
+| `pages/jpg-to-pdf.html` | 1.140.737 bytes (~1,09 MB) | 1.368.885 bytes | 21 reqs | 26 reqs | LULUS |
+| `pages/merge.html` | 2.724.162 bytes (~2,60 MB) | 3.268.995 bytes | 27 reqs | 33 reqs | LULUS |
+| `pages/ocr.html` (tanpa model) | 2.592.043 bytes (~2,47 MB) | 3.110.452 bytes | 21 reqs | 26 reqs | LULUS |
+| `pages/page-number.html` | 2.632.766 bytes (~2,51 MB) | 3.159.320 bytes | 22 reqs | 27 reqs | LULUS |
+| `pages/pdf-to-docx.html` | 895.298 bytes (~0,85 MB) | 1.074.358 bytes | 17 reqs | 21 reqs | LULUS |
+| `pages/pdf-to-jpg.html` | 1.995.730 bytes (~1,90 MB) | 2.394.876 bytes | 23 reqs | 28 reqs | LULUS |
+| `pages/pdf-to-xlsx.html` | 899.325 bytes (~0,86 MB) | 1.079.190 bytes | 17 reqs | 21 reqs | LULUS |
+| `pages/protect.html` | 1.232.977 bytes (~1,18 MB) | 1.479.573 bytes | 20 reqs | 24 reqs | LULUS |
+| `pages/remove-pages.html` | 2.530.475 bytes (~2,41 MB) | 3.036.570 bytes | 23 reqs | 28 reqs | LULUS |
+| `pages/reorder.html` | 2.573.166 bytes (~2,45 MB) | 3.087.800 bytes | 24 reqs | 29 reqs | LULUS |
+| `pages/rotate.html` | 2.504.866 bytes (~2,39 MB) | 3.005.840 bytes | 22 reqs | 27 reqs | LULUS |
+| `pages/sign.html` | 1.503.288 bytes (~1,43 MB) | 1.803.946 bytes | 19 reqs | 23 reqs | LULUS |
+| `pages/split.html` | 2.636.403 bytes (~2,51 MB) | 3.163.684 bytes | 24 reqs | 29 reqs | LULUS |
+| `pages/viewer.html` | 3.263.157 bytes (~3,11 MB) | 3.915.789 bytes | 62 reqs | 75 reqs | LULUS |
+| `pages/watermark.html` | 2.748.747 bytes (~2,62 MB) | 3.298.497 bytes | 27 reqs | 33 reqs | LULUS |
+| `pages/xlsx-to-pdf.html` | 1.190.635 bytes (~1,14 MB) | 1.428.762 bytes | 17 reqs | 21 reqs | LULUS |
 
 > **Catatan On-Demand OCR:** Model bahasa Tesseract (`ind.js`, `eng.js`, dll.) **tidak dimuat** pada saat halaman dibuka (`0 premature requests`). Berkas hanya dimuat sesuai permintaan saat tombol proses pengenalan teks ditekan.
 
@@ -82,3 +82,4 @@ Untuk menjalankan benchmark pemrosesan dokumen besar:
 ```bash
 npm run test:large
 ```
+

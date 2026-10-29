@@ -30,6 +30,7 @@ The authors and contributors of **PDF Tools** gratefully acknowledge the develop
 | **Great Vibes** | `fonts/greatvibes-regular.ttf` | 1.1 | SIL OFL 1.1 | Copyright (c) 2012, TypeSETit, LLC (typesetit@att.net) |
 | **Pacifico** | `fonts/pacifico-regular.ttf` | 1.1 | SIL OFL 1.1 | Copyright (c) 2011 by Vernon Adams (vern@sansoxygen.com) |
 | **Sacramento** | `fonts/sacramento-regular.ttf` | 1.1 | SIL OFL 1.1 | Copyright (c) 2012, Brian J. Bonislawsky DBA Astigmatic (astigma@astigmatic.com) |
+| **Inter** | `fonts/inter-*.woff2` | 4.1 | SIL OFL 1.1 | Copyright (c) 2016-2024 The Inter Project Authors (https://github.com/rsms/inter) |
 
 ---
 
