@@ -1538,13 +1538,6 @@ PDFTools.i18n = (function () {
       }
     } catch (e) {}
 
-    try {
-      const navLang = (typeof navigator !== 'undefined' && (navigator.language || (navigator.languages && navigator.languages[0]))) || '';
-      if (typeof navLang === 'string' && navLang.toLowerCase().startsWith('id')) {
-        return 'id';
-      }
-    } catch (e) {}
-
     return 'en';
   }
 
