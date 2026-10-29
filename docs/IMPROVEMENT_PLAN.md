@@ -441,6 +441,11 @@ sehingga butir ini tidak mendesak.
 | `pages/remove-pages.html` | `js/pages/remove-pages.js` | ✅ Selesai (Fase 1) |
 | `pages/reorder.html` | `js/pages/reorder.js` | ✅ Selesai (Fase 1) |
 | `pages/jpg-to-pdf.html` | `js/pages/jpg-to-pdf.js` | ✅ Selesai (Fase 1) |
+| `pages/pdf-to-docx.html` | `js/pages/pdf-to-docx.js` | ✅ Selesai (Fase 2) |
+| `pages/docx-to-pdf.html` | `js/pages/docx-to-pdf.js` | ✅ Selesai (Fase 2) |
+| `pages/pdf-to-xlsx.html` | `js/pages/pdf-to-xlsx.js` | ✅ Selesai (Fase 2) |
+| `pages/xlsx-to-pdf.html` | `js/pages/xlsx-to-pdf.js` | ✅ Selesai (Fase 2) |
+| `pages/pdf-to-jpg.html` | `js/pages/pdf-to-jpg.js` | ✅ Selesai (Fase 2) |
 
 ---
 

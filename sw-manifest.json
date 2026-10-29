@@ -1,9 +1,9 @@
 {
-  "version": "pdf-tools-v5116ad1734",
-  "compositeHash": "5116ad17348161ffc008f1a92090fdda5bcf398ed16b4d4b3dc35bfa68bb191a",
-  "builtAt": "2026-10-29T10:24:38.782Z",
-  "totalFiles": 72,
-  "totalBytes": 3717785,
+  "version": "pdf-tools-v70096f7d49",
+  "compositeHash": "70096f7d49c6c6ed6bc2dd5273e5b13d90fea3f5bcd5d2447faa8a898250d83a",
+  "builtAt": "2026-10-29T10:33:03.050Z",
+  "totalFiles": 77,
+  "totalBytes": 3717361,
   "totalMB": "3.55",
   "files": [
     {
@@ -222,9 +222,29 @@
       "hash": "feabdf309770"
     },
     {
+      "url": "./js/pages/docx-to-pdf.js",
+      "size": 5426,
+      "hash": "df6ab6555eea"
+    },
+    {
       "url": "./js/pages/jpg-to-pdf.js",
       "size": 5035,
       "hash": "239c68fa8d78"
+    },
+    {
+      "url": "./js/pages/pdf-to-docx.js",
+      "size": 6089,
+      "hash": "bba379ae8599"
+    },
+    {
+      "url": "./js/pages/pdf-to-jpg.js",
+      "size": 6608,
+      "hash": "d642fb4fc702"
+    },
+    {
+      "url": "./js/pages/pdf-to-xlsx.js",
+      "size": 6277,
+      "hash": "76ffce60efdf"
     },
     {
       "url": "./js/pages/remove-pages.js",
@@ -235,6 +255,11 @@
       "url": "./js/pages/reorder.js",
       "size": 5084,
       "hash": "09665437e3f4"
+    },
+    {
+      "url": "./js/pages/xlsx-to-pdf.js",
+      "size": 5435,
+      "hash": "4e22b5f20b7a"
     },
     {
       "url": "./js/utils/download.js",
@@ -273,8 +298,8 @@
     },
     {
       "url": "./pages/docx-to-pdf.html",
-      "size": 16517,
-      "hash": "3e282793efc6"
+      "size": 11033,
+      "hash": "1581f3eeb1aa"
     },
     {
       "url": "./pages/flatten.html",
@@ -313,18 +338,18 @@
     },
     {
       "url": "./pages/pdf-to-docx.html",
-      "size": 18369,
-      "hash": "00b92a95f10a"
+      "size": 12198,
+      "hash": "2a074aa1080a"
     },
     {
       "url": "./pages/pdf-to-jpg.html",
-      "size": 16858,
-      "hash": "0258ee7b475d"
+      "size": 10110,
+      "hash": "c63ebedfa8bc"
     },
     {
       "url": "./pages/pdf-to-xlsx.html",
-      "size": 19912,
-      "hash": "726e895a25db"
+      "size": 13548,
+      "hash": "9150f497dc94"
     },
     {
       "url": "./pages/protect.html",
@@ -363,8 +388,8 @@
     },
     {
       "url": "./pages/xlsx-to-pdf.html",
-      "size": 16655,
-      "hash": "4814c5b23734"
+      "size": 11163,
+      "hash": "cb3d85ced5f5"
     }
   ]
 }
