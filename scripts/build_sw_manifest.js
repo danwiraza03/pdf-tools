@@ -62,6 +62,16 @@ function getAppShellFileList() {
     }
   });
 
+  // Extracted standalone page scripts (js/pages/*.js)
+  const pagesJsDir = path.join(ROOT_DIR, 'js/pages');
+  if (fs.existsSync(pagesJsDir)) {
+    fs.readdirSync(pagesJsDir).forEach(f => {
+      if (f.endsWith('.js')) {
+        files.push(`js/pages/${f}`);
+      }
+    });
+  }
+
   // Fonts (Inter Latin subsets for weights 400, 500, 600, 700, 800)
   ['400', '500', '600', '700', '800'].forEach(w => {
     files.push(`fonts/inter-latin-${w}-normal.woff2`);
@@ -279,3 +289,4 @@ module.exports = {
   buildManifest,
   writeOutputs
 };
+

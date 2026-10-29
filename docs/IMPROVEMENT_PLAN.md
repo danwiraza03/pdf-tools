@@ -436,9 +436,11 @@ sehingga butir ini tidak mendesak.
 - Per halaman: 1 berkas baru, 1 halaman diubah, 1 komit
 - Risiko: Sedang per halaman (lingkup variabel, *event listener*, rujukan DOM)
 
-| Halaman | Status |
-|---|---|
-| (belum ada) | -- |
+| Halaman | Berkas Skrip | Status |
+|---|---|---|
+| `pages/remove-pages.html` | `js/pages/remove-pages.js` | ✅ Selesai (Fase 1) |
+| `pages/reorder.html` | `js/pages/reorder.js` | ✅ Selesai (Fase 1) |
+| `pages/jpg-to-pdf.html` | `js/pages/jpg-to-pdf.js` | ✅ Selesai (Fase 1) |
 
 ---
 

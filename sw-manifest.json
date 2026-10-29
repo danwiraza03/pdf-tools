@@ -1,9 +1,9 @@
 {
-  "version": "pdf-tools-v52463b1adf",
-  "compositeHash": "52463b1adf999698dc4c6cce4a44f0c8f67053741eecfe3b31e756404228e8eb",
-  "builtAt": "2026-10-29T08:15:41.487Z",
-  "totalFiles": 69,
-  "totalBytes": 3717947,
+  "version": "pdf-tools-v5116ad1734",
+  "compositeHash": "5116ad17348161ffc008f1a92090fdda5bcf398ed16b4d4b3dc35bfa68bb191a",
+  "builtAt": "2026-10-29T10:24:38.782Z",
+  "totalFiles": 72,
+  "totalBytes": 3717785,
   "totalMB": "3.55",
   "files": [
     {
@@ -222,6 +222,21 @@
       "hash": "feabdf309770"
     },
     {
+      "url": "./js/pages/jpg-to-pdf.js",
+      "size": 5035,
+      "hash": "239c68fa8d78"
+    },
+    {
+      "url": "./js/pages/remove-pages.js",
+      "size": 4898,
+      "hash": "f17ffc8da6c1"
+    },
+    {
+      "url": "./js/pages/reorder.js",
+      "size": 5084,
+      "hash": "09665437e3f4"
+    },
+    {
       "url": "./js/utils/download.js",
       "size": 1238,
       "hash": "f9c578cc9176"
@@ -278,8 +293,8 @@
     },
     {
       "url": "./pages/jpg-to-pdf.html",
-      "size": 13189,
-      "hash": "27be761fb24c"
+      "size": 8107,
+      "hash": "cf68b561474f"
     },
     {
       "url": "./pages/merge.html",
@@ -318,13 +333,13 @@
     },
     {
       "url": "./pages/remove-pages.html",
-      "size": 13050,
-      "hash": "d152bdf8e030"
+      "size": 8112,
+      "hash": "74f84a1e3223"
     },
     {
       "url": "./pages/reorder.html",
-      "size": 12056,
-      "hash": "d05cb9747543"
+      "size": 6897,
+      "hash": "aaef4074fd84"
     },
     {
       "url": "./pages/rotate.html",
