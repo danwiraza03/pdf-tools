@@ -446,6 +446,11 @@ sehingga butir ini tidak mendesak.
 | `pages/pdf-to-xlsx.html` | `js/pages/pdf-to-xlsx.js` | ✅ Selesai (Fase 2) |
 | `pages/xlsx-to-pdf.html` | `js/pages/xlsx-to-pdf.js` | ✅ Selesai (Fase 2) |
 | `pages/pdf-to-jpg.html` | `js/pages/pdf-to-jpg.js` | ✅ Selesai (Fase 2) |
+| `pages/rotate.html` | `js/pages/rotate.js` | ✅ Selesai (Fase 3) |
+| `pages/flatten.html` | `js/pages/flatten.js` | ✅ Selesai (Fase 3) |
+| `pages/split.html` | `js/pages/split.js` | ✅ Selesai (Fase 3) |
+| `pages/crop.html` | `js/pages/crop.js` | ✅ Selesai (Fase 3) |
+| `pages/grayscale.html` | `js/pages/grayscale.js` | ✅ Selesai (Fase 3) |
 
 ---
 

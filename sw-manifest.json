@@ -1,10 +1,10 @@
 {
-  "version": "pdf-tools-v70096f7d49",
-  "compositeHash": "70096f7d49c6c6ed6bc2dd5273e5b13d90fea3f5bcd5d2447faa8a898250d83a",
-  "builtAt": "2026-10-29T10:33:03.050Z",
-  "totalFiles": 77,
-  "totalBytes": 3717361,
-  "totalMB": "3.55",
+  "version": "pdf-tools-v2f63218a27",
+  "compositeHash": "2f63218a272af4c5d0c7af40b7c2bed65dbf5410be54236ca5bfa61b0f1fbd8d",
+  "builtAt": "2026-10-29T10:41:44.105Z",
+  "totalFiles": 82,
+  "totalBytes": 3716304,
+  "totalMB": "3.54",
   "files": [
     {
       "url": "./css/home.css",
@@ -222,9 +222,24 @@
       "hash": "feabdf309770"
     },
     {
+      "url": "./js/pages/crop.js",
+      "size": 13052,
+      "hash": "7e3039301748"
+    },
+    {
       "url": "./js/pages/docx-to-pdf.js",
       "size": 5426,
       "hash": "df6ab6555eea"
+    },
+    {
+      "url": "./js/pages/flatten.js",
+      "size": 5570,
+      "hash": "e040463626da"
+    },
+    {
+      "url": "./js/pages/grayscale.js",
+      "size": 10345,
+      "hash": "d355e9ab162d"
     },
     {
       "url": "./js/pages/jpg-to-pdf.js",
@@ -255,6 +270,16 @@
       "url": "./js/pages/reorder.js",
       "size": 5084,
       "hash": "09665437e3f4"
+    },
+    {
+      "url": "./js/pages/rotate.js",
+      "size": 6060,
+      "hash": "ff5e2637dad1"
+    },
+    {
+      "url": "./js/pages/split.js",
+      "size": 8227,
+      "hash": "15ead32bfbc3"
     },
     {
       "url": "./js/pages/xlsx-to-pdf.js",
@@ -293,8 +318,8 @@
     },
     {
       "url": "./pages/crop.html",
-      "size": 27603,
-      "hash": "4df0e1337597"
+      "size": 14162,
+      "hash": "88b74aa4b90c"
     },
     {
       "url": "./pages/docx-to-pdf.html",
@@ -303,8 +328,8 @@
     },
     {
       "url": "./pages/flatten.html",
-      "size": 16134,
-      "hash": "412cad199ce1"
+      "size": 10495,
+      "hash": "38c04cb2c142"
     },
     {
       "url": "./pages/form-fill.html",
@@ -313,8 +338,8 @@
     },
     {
       "url": "./pages/grayscale.html",
-      "size": 29019,
-      "hash": "b49c48be1d6b"
+      "size": 18378,
+      "hash": "49a758a8edbb"
     },
     {
       "url": "./pages/jpg-to-pdf.html",
@@ -368,8 +393,8 @@
     },
     {
       "url": "./pages/rotate.html",
-      "size": 14530,
-      "hash": "2b45942310d9"
+      "size": 8358,
+      "hash": "8e05ea512120"
     },
     {
       "url": "./pages/sign.html",
@@ -378,8 +403,8 @@
     },
     {
       "url": "./pages/split.html",
-      "size": 17365,
-      "hash": "5dbe48cabd95"
+      "size": 8947,
+      "hash": "903dd881162d"
     },
     {
       "url": "./pages/watermark.html",
