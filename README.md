@@ -167,9 +167,11 @@ pdf/
 │   ├── PRD.md                  # Product Requirements Document (Kondisi Aktual 23 Tools)
 │   ├── svg-library.md          # Pustaka Ikon SVG Standar Terpusat
 │   └── archive/                # Arsip Dokumen Spesifikasi Lama
+├── scripts/                    # Skrip Otomasi & Server Pengembangan
+│   ├── dev-server.js           # Local dev static server (127.0.0.1, proteksi path traversal)
+│   ├── build_ocr_bundle.js     # Bundler OCR Tesseract lokal
+│   └── clean.js                # Skrip pembersih berkas sementara
 ├── tests/                      # Automated Quality Gates & Security Tests (13 test suites)
-│   └── run_all.js              # Runner utama pengujian otomatis (`node tests/run_all.js`)
-├── server.js                   # Local static server (127.0.0.1, proteksi path traversal)
 ├── LICENSE                     # Lisensi Perangkat Lunak MIT
 ├── THIRD_PARTY_NOTICES.md      # Pemberitahuan Lisensi Pihak Ketiga & Font
 ├── PROJECT_RULES.md            # Standar Arsitektur & Kepatuhan Proyek

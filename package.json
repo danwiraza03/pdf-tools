@@ -4,6 +4,7 @@
   "description": "100% Offline Client-Side PDF Tools & PDF Studio Pro",
   "private": true,
   "scripts": {
+    "dev": "node scripts/dev-server.js",
     "clean": "node scripts/clean.js",
     "lint": "eslint .",
     "test": "node tests/run_all.js",

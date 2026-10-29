@@ -13,7 +13,7 @@ const { exec } = require('child_process');
 
 const PORT = parseInt(process.env.PORT, 10) || 8080;
 const HOST = '127.0.0.1';
-const ROOT_DIR = __dirname;
+const ROOT_DIR = path.resolve(__dirname, '..');
 
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',

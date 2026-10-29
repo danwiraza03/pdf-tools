@@ -1,6 +1,6 @@
 /**
  * tests/test_server_security.js
- * Automated Security & Path Traversal Verification for server.js
+ * Automated Security & Path Traversal Verification for scripts/dev-server.js
  * Tests:
  * 1. Server binds strictly to 127.0.0.1 (local only)
  * 2. Access-Control-Allow-Origin: * is removed (no unneeded external CORS)
@@ -10,7 +10,7 @@
 const http = require('http');
 const assert = require('assert');
 const path = require('path');
-const { handleRequest, HOST, ROOT_DIR } = require('../server.js');
+const { handleRequest, HOST, ROOT_DIR } = require('../scripts/dev-server.js');
 
 const TEST_PORT = 8999;
 let passedCount = 0;

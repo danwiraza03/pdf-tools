@@ -32,7 +32,7 @@ PDF Tools adalah rangkaian lengkap alat pengolah dokumen PDF berstandar profesio
 - **SortableJS (`Sortable.min.js`)**: Interaksi drag-and-drop untuk pengurutan halaman visual.
 - **Local Fonts (`fonts/`)**: Font kaligrafi lokal bertanda tangan (Caveat, Dancing Script, Great Vibes, Pacifico, Sacramento) berlisensi SIL Open Font License 1.1.
 
-### Server Pendukung Lokal (`server.js`):
+### Server Pendukung Pengembangan (`scripts/dev-server.js`):
 - Node.js HTTP server lokal tanpa dependensi eksternal.
 - Mengikat secara ketat hanya ke `127.0.0.1` (`HOST = '127.0.0.1'`).
 - Bebas dari header `Access-Control-Allow-Origin: *` yang tidak diperlukan.

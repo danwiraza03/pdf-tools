@@ -252,7 +252,10 @@ pdf/
 ├── PROJECT_RULES.md             # Dokumen ini (Single Source of Truth)
 ├── AGENTS.md                    # Panduan mandat AI agent
 ├── README.md                    # Panduan pengguna publik (23 Tools)
-├── server.js                    # Local static server (127.0.0.1, path-traversal protected)
+├── scripts/                     # Skrip Otomasi & Server Pengembangan
+│   ├── dev-server.js            # Local dev static server (127.0.0.1, path-traversal protected)
+│   ├── build_ocr_bundle.js      # Bundler OCR Tesseract lokal
+│   └── clean.js                 # Skrip pembersih berkas sementara
 ├── manifest.json                # Web App Manifest PWA
 ├── icon.svg                     # Vector App Logo Icon
 ├── docs/                        # Dokumentasi Proyek

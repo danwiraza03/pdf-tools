@@ -68,10 +68,10 @@ module.exports = [
     }
   },
 
-  // 1c. Node files: tests/**, scripts/**, server.js, eslint.config.js
+  // 1c. Node files: tests/**, scripts/**, eslint.config.js
   // sourceType 'commonjs' resolves no-redeclare for `const crypto = require('crypto')`
   {
-    files: ['tests/**/*.js', 'scripts/**/*.js', 'server.js', 'eslint.config.js'],
+    files: ['tests/**/*.js', 'scripts/**/*.js', 'eslint.config.js'],
     languageOptions: {
       sourceType: 'commonjs',
       globals: {

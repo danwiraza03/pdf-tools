@@ -1,7 +1,7 @@
 const path = require('path');
 const JSZip = require(path.resolve(__dirname, '../../js/lib/jszip.min.js'));
 const PDFLib = require(path.resolve(__dirname, '../../js/lib/pdf-lib.min.js'));
-const { startStandaloneServer } = require(path.resolve(__dirname, '../../server.js'));
+const { startStandaloneServer } = require(path.resolve(__dirname, '../../scripts/dev-server.js'));
 
 async function createTestPdf({ text = 'SECRET_TEXT', rotation = 0, width = 600, height = 400, textX = 100, textY = 250, textSize = 20 } = {}) {
   const doc = await PDFLib.PDFDocument.create();
