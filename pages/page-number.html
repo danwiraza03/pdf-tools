@@ -270,6 +270,8 @@
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       let currentFile = null;
+      let queuedFiles = [];
+      let isBatchMode = false;
       let totalDocPages = 1;
       let selectedPosition = 'bottom_right';
 
