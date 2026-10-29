@@ -1,0 +1,146 @@
+{
+  "index.html": {
+    "baselineBytes": 328573,
+    "maxBytes": 394288,
+    "baselineRequests": 8,
+    "maxRequests": 10
+  },
+  "pages/batch.html": {
+    "baselineBytes": 1448003,
+    "maxBytes": 1737604,
+    "baselineRequests": 16,
+    "maxRequests": 20
+  },
+  "pages/compress.html": {
+    "baselineBytes": 2565345,
+    "maxBytes": 3078414,
+    "baselineRequests": 20,
+    "maxRequests": 24
+  },
+  "pages/crop.html": {
+    "baselineBytes": 2418770,
+    "maxBytes": 2902524,
+    "baselineRequests": 17,
+    "maxRequests": 21
+  },
+  "pages/docx-to-pdf.html": {
+    "baselineBytes": 1065879,
+    "maxBytes": 1279055,
+    "baselineRequests": 12,
+    "maxRequests": 15
+  },
+  "pages/flatten.html": {
+    "baselineBytes": 2407410,
+    "maxBytes": 2888892,
+    "baselineRequests": 17,
+    "maxRequests": 21
+  },
+  "pages/form-fill.html": {
+    "baselineBytes": 1315081,
+    "maxBytes": 1578098,
+    "baselineRequests": 12,
+    "maxRequests": 15
+  },
+  "pages/grayscale.html": {
+    "baselineBytes": 2419917,
+    "maxBytes": 2903901,
+    "baselineRequests": 17,
+    "maxRequests": 21
+  },
+  "pages/jpg-to-pdf.html": {
+    "baselineBytes": 1015476,
+    "maxBytes": 1218572,
+    "baselineRequests": 16,
+    "maxRequests": 20
+  },
+  "pages/merge.html": {
+    "baselineBytes": 2598901,
+    "maxBytes": 3118682,
+    "baselineRequests": 22,
+    "maxRequests": 27
+  },
+  "pages/ocr.html": {
+    "baselineBytes": 2466782,
+    "maxBytes": 2960139,
+    "baselineRequests": 16,
+    "maxRequests": 20
+  },
+  "pages/page-number.html": {
+    "baselineBytes": 2507505,
+    "maxBytes": 3009006,
+    "baselineRequests": 17,
+    "maxRequests": 21
+  },
+  "pages/pdf-to-docx.html": {
+    "baselineBytes": 770037,
+    "maxBytes": 924045,
+    "baselineRequests": 12,
+    "maxRequests": 15
+  },
+  "pages/pdf-to-jpg.html": {
+    "baselineBytes": 1870469,
+    "maxBytes": 2244563,
+    "baselineRequests": 18,
+    "maxRequests": 22
+  },
+  "pages/pdf-to-xlsx.html": {
+    "baselineBytes": 774064,
+    "maxBytes": 928877,
+    "baselineRequests": 12,
+    "maxRequests": 15
+  },
+  "pages/protect.html": {
+    "baselineBytes": 1107716,
+    "maxBytes": 1329260,
+    "baselineRequests": 15,
+    "maxRequests": 18
+  },
+  "pages/remove-pages.html": {
+    "baselineBytes": 2405214,
+    "maxBytes": 2886257,
+    "baselineRequests": 18,
+    "maxRequests": 22
+  },
+  "pages/reorder.html": {
+    "baselineBytes": 2447905,
+    "maxBytes": 2937486,
+    "baselineRequests": 19,
+    "maxRequests": 23
+  },
+  "pages/rotate.html": {
+    "baselineBytes": 2379605,
+    "maxBytes": 2855526,
+    "baselineRequests": 17,
+    "maxRequests": 21
+  },
+  "pages/sign.html": {
+    "baselineBytes": 1374310,
+    "maxBytes": 1649172,
+    "baselineRequests": 14,
+    "maxRequests": 17
+  },
+  "pages/split.html": {
+    "baselineBytes": 2511142,
+    "maxBytes": 3013371,
+    "baselineRequests": 19,
+    "maxRequests": 23
+  },
+  "pages/viewer.html": {
+    "baselineBytes": 3259040,
+    "maxBytes": 3910848,
+    "baselineRequests": 62,
+    "maxRequests": 75
+  },
+  "pages/watermark.html": {
+    "baselineBytes": 2623486,
+    "maxBytes": 3148184,
+    "baselineRequests": 22,
+    "maxRequests": 27
+  },
+  "pages/xlsx-to-pdf.html": {
+    "baselineBytes": 1065374,
+    "maxBytes": 1278449,
+    "baselineRequests": 12,
+    "maxRequests": 15
+  }
+}

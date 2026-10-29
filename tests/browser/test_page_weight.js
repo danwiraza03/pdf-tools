@@ -1,14 +1,16 @@
+const fs = require('fs');
 const path = require('path');
 const { startTestServer, launchChromium } = require('./helpers');
 
 const TEST_PORT = 8765;
 const BASE_URL = `http://127.0.0.1:${TEST_PORT}`;
+const BUDGET_FILE = path.join(__dirname, 'page_weight_budget.json');
 
 /**
  * Measures the total network transfer weight (in bytes) when loading a page,
  * and tracks all requested resources from js/lib/tesseract/.
  */
-async function measurePageWeight(browser, pagePath) {
+async function measurePageWeight(browser, pagePath, baseUrl = BASE_URL) {
   const context = await browser.newContext();
   const page = await context.newPage();
 
@@ -35,9 +37,9 @@ async function measurePageWeight(browser, pagePath) {
     }
   });
 
-  const fullUrl = `${BASE_URL}/${pagePath}`;
+  const fullUrl = `${baseUrl}/${pagePath}`;
   await page.goto(fullUrl, { waitUntil: 'networkidle', timeout: 30000 });
-  await page.waitForTimeout(500);
+  await page.waitForTimeout(400);
 
   await page.close();
   await context.close();
@@ -56,7 +58,7 @@ async function measurePageWeight(browser, pagePath) {
  * - Running OCR with 'ind' only loads tesseract bundle & ind.js, NOT eng.js
  * - Running OCR a second time does not re-download scripts
  */
-async function testDynamicOcrLoading(browser) {
+async function testDynamicOcrLoading(browser, baseUrl = BASE_URL) {
   const context = await browser.newContext();
   const page = await context.newPage();
 
@@ -69,7 +71,7 @@ async function testDynamicOcrLoading(browser) {
     }
   });
 
-  await page.goto(`${BASE_URL}/pages/ocr.html`, { waitUntil: 'networkidle', timeout: 30000 });
+  await page.goto(`${baseUrl}/pages/ocr.html`, { waitUntil: 'networkidle', timeout: 30000 });
 
   const initialTesseractDownloads = [...downloadedScripts];
 
@@ -111,13 +113,29 @@ async function testDynamicOcrLoading(browser) {
 
 async function runPageWeightSuite(passedBrowser = null, passedBaseUrl = null) {
   console.log('========================================================================');
-  console.log('               PAGE WEIGHT & ON-DEMAND OCR AUDIT                        ');
+  console.log('         PAGE WEIGHT BUDGET & ON-DEMAND OCR AUDIT SUITE                 ');
   console.log('========================================================================\n');
 
   let server = null;
   let browser = passedBrowser;
-  const targetPages = ['index.html', 'pages/viewer.html', 'pages/ocr.html'];
+  const baseUrl = passedBaseUrl || BASE_URL;
+
+  // Load concrete budget thresholds (+20% tolerance over baseline)
+  let budgets = {};
+  if (fs.existsSync(BUDGET_FILE)) {
+    try {
+      budgets = JSON.parse(fs.readFileSync(BUDGET_FILE, 'utf8'));
+    } catch (err) {
+      console.warn('⚠️  Gagal membaca page_weight_budget.json:', err.message);
+    }
+  }
+
+  const targetPages = Object.keys(budgets).length > 0
+    ? Object.keys(budgets)
+    : ['index.html', 'pages/viewer.html', 'pages/ocr.html'];
+
   const metrics = [];
+  const budgetViolations = [];
 
   try {
     if (!browser) {
@@ -125,41 +143,69 @@ async function runPageWeightSuite(passedBrowser = null, passedBaseUrl = null) {
       browser = await launchChromium({ headless: true });
     }
 
-    console.log('Measuring initial load weight for target pages (without OCR activity)...');
+    console.log(`Measuring load weight & request budget across ${targetPages.length} pages...`);
     for (const p of targetPages) {
-      const res = await measurePageWeight(browser, p);
+      const res = await measurePageWeight(browser, p, baseUrl);
       metrics.push(res);
-      console.log(`  • ${res.page.padEnd(20)}: ${res.totalBytes.toLocaleString('id-ID')} bytes (${res.totalMB} MB) across ${res.requestCount} requests.`);
-      if (res.tesseractRequests.length > 0) {
-        console.log(`    ⚠ Tesseract files loaded immediately on page load:`);
-        res.tesseractRequests.forEach(r => console.log(`      - ${r.url.split('/').pop()} (${(r.size / 1024 / 1024).toFixed(2)} MB)`));
-      } else {
-        console.log(`    ✓ Zero Tesseract files loaded on initial page load.`);
+
+      const budget = budgets[p];
+      let budgetStatus = '✓ OK';
+
+      if (budget) {
+        if (res.totalBytes > budget.maxBytes) {
+          budgetStatus = `❌ MELEBIHI ANGGARAN UKURAN (${res.totalBytes} > ${budget.maxBytes})`;
+          budgetViolations.push({
+            page: p,
+            type: 'bytes',
+            actual: res.totalBytes,
+            limit: budget.maxBytes
+          });
+        } else if (res.requestCount > budget.maxRequests) {
+          budgetStatus = `❌ MELEBIHI ANGGARAN REQUEST (${res.requestCount} > ${budget.maxRequests})`;
+          budgetViolations.push({
+            page: p,
+            type: 'requests',
+            actual: res.requestCount,
+            limit: budget.maxRequests
+          });
+        }
       }
+
+      console.log(`  • ${res.page.padEnd(24)}: ${res.totalBytes.toLocaleString('id-ID').padStart(10)} bytes | ${res.requestCount.toString().padStart(2)} reqs | ${budgetStatus}`);
     }
 
     // Check if initial page loads triggered Tesseract downloads
     const prematureTesseractLoads = metrics.filter(m => (m.page === 'pages/viewer.html' || m.page === 'pages/ocr.html') && m.tesseractRequests.length > 0);
 
-    console.log('\n========================================================================');
-    console.log('                        PAGE WEIGHT SUMMARY                             ');
-    console.log('========================================================================');
-    console.log('| Halaman            | Total Ukuran (Bytes) | Ukuran (MB) | Tesseract Preloaded? |');
-    console.log('------------------------------------------------------------------------');
+    console.log('\n========================================================================================');
+    console.log('                              PAGE WEIGHT SUMMARY TABLE                                 ');
+    console.log('========================================================================================');
+    console.log('| Halaman                  | Aktual (Bytes) | Batas Maks (+20%) | Aktual Reqs | Batas Reqs |');
+    console.log('----------------------------------------------------------------------------------------');
     for (const m of metrics) {
-      const hasTess = m.tesseractRequests.length > 0 ? `YA (${m.tesseractRequests.length} berkas)` : 'TIDAK (0 berkas)';
-      console.log(`| ${m.page.padEnd(18)} | ${m.totalBytes.toLocaleString('id-ID').padEnd(20)} | ${(m.totalMB + ' MB').padEnd(11)} | ${hasTess.padEnd(20)} |`);
+      const b = budgets[m.page] || { maxBytes: '-', maxRequests: '-' };
+      const actualBytesStr = m.totalBytes.toLocaleString('id-ID');
+      const maxBytesStr = typeof b.maxBytes === 'number' ? b.maxBytes.toLocaleString('id-ID') : String(b.maxBytes);
+      console.log(`| ${m.page.padEnd(24)} | ${actualBytesStr.padEnd(14)} | ${maxBytesStr.padEnd(17)} | ${String(m.requestCount).padEnd(11)} | ${String(b.maxRequests).padEnd(10)} |`);
     }
-    console.log('========================================================================\n');
+    console.log('========================================================================================\n');
+
+    if (budgetViolations.length > 0) {
+      console.error(`❌ GAGAL: Terdeteksi ${budgetViolations.length} pelanggaran anggaran beban halaman (+20% terlampaui):`);
+      for (const v of budgetViolations) {
+        console.error(`  - [${v.page}] ${v.type}: ${v.actual} melebihi batas anggaran ${v.limit}`);
+      }
+      return { success: false, metrics, budgetViolations };
+    }
 
     if (prematureTesseractLoads.length > 0) {
       console.error('❌ GAGAL: viewer.html dan/atau ocr.html mengunduh file tesseract sebelum OCR digunakan!');
       return { success: false, metrics };
     }
 
-    // Now test dynamic OCR loading
+    // Test dynamic OCR loading
     console.log('Testing dynamic on-demand loading during OCR execution...');
-    const dynamicRes = await testDynamicOcrLoading(browser);
+    const dynamicRes = await testDynamicOcrLoading(browser, baseUrl);
 
     const initialLoads = dynamicRes.initialTesseractDownloads;
     if (initialLoads.length > 0) {
