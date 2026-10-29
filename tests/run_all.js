@@ -31,7 +31,8 @@ const tests = [
   { name: 'Browser Runner Summary Logic Verification', file: 'test_browser_runner_summary.js' },
   { name: 'Page Copy Works Without Node-only Globals (Buffer)', file: 'test_copy_browser_safe.js' },
   { name: 'ESLint: undefined and redeclared names', file: 'check_eslint.js' },
-  { name: 'Static Guard: Zero Global Collisions Across Scripts', file: 'check_global_collisions.js' }
+  { name: 'Static Guard: Zero Global Collisions Across Scripts', file: 'check_global_collisions.js' },
+  { name: 'Static Guard: Unified Footer Presence & Structure', file: 'check_footer_presence.js' }
 ];
 
 console.log('========================================================================');
