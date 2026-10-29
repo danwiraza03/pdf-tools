@@ -605,6 +605,7 @@ PDFTools.i18n = (function () {
       'result.pages': 'Pages',
 
       // Misc
+      'a11y.skip': 'Skip to content',
       'file.pages': 'pages',
       'file.page': 'page',
       'page': 'Page',
@@ -1366,6 +1367,7 @@ PDFTools.i18n = (function () {
       'result.pages': 'Halaman',
 
       // Misc
+      'a11y.skip': 'Lewati ke konten utama',
       'file.pages': 'halaman',
       'file.page': 'halaman',
       'page': 'Halaman',

@@ -444,7 +444,7 @@
           </a>
 
           <!-- Main Navigation Menu -->
-          <nav class="header-nav">
+          <nav class="header-nav" aria-label="Main Navigation">
             <a href="${pagesUrl}merge.html" class="nav-link-item ${currentFile === 'merge.html' ? 'active' : ''}" data-i18n="nav.merge">MERGE PDF</a>
             <a href="${pagesUrl}split.html" class="nav-link-item ${currentFile === 'split.html' ? 'active' : ''}" data-i18n="nav.split">SPLIT PDF</a>
             <a href="${pagesUrl}compress.html" class="nav-link-item ${currentFile === 'compress.html' ? 'active' : ''}" data-i18n="nav.compress">COMPRESS PDF</a>

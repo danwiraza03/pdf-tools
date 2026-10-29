@@ -10,6 +10,9 @@ PDFTools.Toast = (function () {
     if (!container) {
       container = document.createElement('div');
       container.className = 'toast-container';
+      container.setAttribute('aria-live', 'polite');
+      container.setAttribute('aria-atomic', 'true');
+      container.setAttribute('role', 'status');
       document.body.appendChild(container);
     }
   }

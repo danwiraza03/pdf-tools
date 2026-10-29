@@ -28,6 +28,53 @@
     close: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'
   };
 
+  let modalIdCounter = 0;
+
+  function trapFocus(modalEl, initialFocusEl, previousActiveEl) {
+    const focusableSelectors = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+
+    if (initialFocusEl && typeof initialFocusEl.focus === 'function') {
+      try { initialFocusEl.focus(); } catch (err) {}
+    } else {
+      const focusableElements = Array.from(modalEl.querySelectorAll(focusableSelectors))
+        .filter(el => !el.disabled && el.offsetParent !== null);
+      if (focusableElements.length > 0) {
+        try { focusableElements[0].focus(); } catch (err) {}
+      }
+    }
+
+    function handleKeyDown(e) {
+      if (e.key !== 'Tab') return;
+      const currentFocusables = Array.from(modalEl.querySelectorAll(focusableSelectors))
+        .filter(el => !el.disabled && el.offsetParent !== null);
+      if (currentFocusables.length === 0) return;
+
+      const firstEl = currentFocusables[0];
+      const lastEl = currentFocusables[currentFocusables.length - 1];
+
+      if (e.shiftKey) {
+        if (document.activeElement === firstEl) {
+          e.preventDefault();
+          lastEl.focus();
+        }
+      } else {
+        if (document.activeElement === lastEl) {
+          e.preventDefault();
+          firstEl.focus();
+        }
+      }
+    }
+
+    modalEl.addEventListener('keydown', handleKeyDown);
+
+    return function restore() {
+      modalEl.removeEventListener('keydown', handleKeyDown);
+      if (previousActiveEl && typeof previousActiveEl.focus === 'function') {
+        try { previousActiveEl.focus(); } catch (err) {}
+      }
+    };
+  }
+
   const Modal = {
     /**
      * Show a confirmation modal
@@ -37,6 +84,10 @@
      */
     confirm: function (message, options = {}) {
       return new Promise((resolve) => {
+        const previousActive = document.activeElement;
+        const modalId = ++modalIdCounter;
+        const titleId = `pdftools-modal-title-${modalId}`;
+
         const title = options.title || 'Confirmation';
         const confirmText = options.confirmText || 'Confirm';
         const cancelText = options.cancelText || 'Cancel';
@@ -48,6 +99,7 @@
         backdrop.className = 'pdftools-modal-backdrop';
         backdrop.setAttribute('role', 'dialog');
         backdrop.setAttribute('aria-modal', 'true');
+        backdrop.setAttribute('aria-labelledby', titleId);
 
         backdrop.innerHTML = `
           <div class="pdftools-modal-dialog">
@@ -55,7 +107,7 @@
               <div class="pdftools-modal-icon-wrap ${iconType}">
                 ${iconSvg}
               </div>
-              <div class="pdftools-modal-title">${escapeHtml(title)}</div>
+              <div id="${titleId}" class="pdftools-modal-title">${escapeHtml(title)}</div>
               <button type="button" class="pdftools-modal-close" aria-label="Close">
                 ${ICONS.close}
               </button>
@@ -79,10 +131,11 @@
         const cancelBtn = backdrop.querySelector('.pdftools-modal-cancel');
         const closeBtn = backdrop.querySelector('.pdftools-modal-close');
 
-        confirmBtn.focus();
+        const restoreFocus = trapFocus(backdrop, confirmBtn, previousActive);
 
         function cleanup(result) {
           document.removeEventListener('keydown', onKeyDown);
+          restoreFocus();
           backdrop.classList.remove('active');
           setTimeout(() => {
             if (backdrop.parentNode) backdrop.parentNode.removeChild(backdrop);
@@ -121,6 +174,10 @@
      */
     prompt: function (label, defaultValue = '', options = {}) {
       return new Promise((resolve) => {
+        const previousActive = document.activeElement;
+        const modalId = ++modalIdCounter;
+        const titleId = `pdftools-modal-title-${modalId}`;
+
         const title = options.title || 'Enter Value';
         const confirmText = options.confirmText || 'OK';
         const cancelText = options.cancelText || 'Cancel';
@@ -129,6 +186,7 @@
         backdrop.className = 'pdftools-modal-backdrop';
         backdrop.setAttribute('role', 'dialog');
         backdrop.setAttribute('aria-modal', 'true');
+        backdrop.setAttribute('aria-labelledby', titleId);
 
         backdrop.innerHTML = `
           <div class="pdftools-modal-dialog">
@@ -136,7 +194,7 @@
               <div class="pdftools-modal-icon-wrap prompt">
                 ${ICONS.prompt}
               </div>
-              <div class="pdftools-modal-title">${escapeHtml(title)}</div>
+              <div id="${titleId}" class="pdftools-modal-title">${escapeHtml(title)}</div>
               <button type="button" class="pdftools-modal-close" aria-label="Close">
                 ${ICONS.close}
               </button>
@@ -161,11 +219,12 @@
         const cancelBtn = backdrop.querySelector('.pdftools-modal-cancel');
         const closeBtn = backdrop.querySelector('.pdftools-modal-close');
 
-        inputEl.focus();
+        const restoreFocus = trapFocus(backdrop, inputEl, previousActive);
         inputEl.select();
 
         function cleanup(result) {
           document.removeEventListener('keydown', onKeyDown);
+          restoreFocus();
           backdrop.classList.remove('active');
           setTimeout(() => {
             if (backdrop.parentNode) backdrop.parentNode.removeChild(backdrop);
@@ -203,6 +262,10 @@
      */
     alert: function (message, options = {}) {
       return new Promise((resolve) => {
+        const previousActive = document.activeElement;
+        const modalId = ++modalIdCounter;
+        const titleId = `pdftools-modal-title-${modalId}`;
+
         const title = options.title || 'Notice';
         const buttonText = options.buttonText || 'OK';
 
@@ -210,6 +273,7 @@
         backdrop.className = 'pdftools-modal-backdrop';
         backdrop.setAttribute('role', 'dialog');
         backdrop.setAttribute('aria-modal', 'true');
+        backdrop.setAttribute('aria-labelledby', titleId);
 
         backdrop.innerHTML = `
           <div class="pdftools-modal-dialog">
@@ -217,7 +281,7 @@
               <div class="pdftools-modal-icon-wrap info">
                 ${ICONS.info}
               </div>
-              <div class="pdftools-modal-title">${escapeHtml(title)}</div>
+              <div id="${titleId}" class="pdftools-modal-title">${escapeHtml(title)}</div>
               <button type="button" class="pdftools-modal-close" aria-label="Close">
                 ${ICONS.close}
               </button>
@@ -238,10 +302,11 @@
         const confirmBtn = backdrop.querySelector('.pdftools-modal-confirm');
         const closeBtn = backdrop.querySelector('.pdftools-modal-close');
 
-        confirmBtn.focus();
+        const restoreFocus = trapFocus(backdrop, confirmBtn, previousActive);
 
         function cleanup() {
           document.removeEventListener('keydown', onKeyDown);
+          restoreFocus();
           backdrop.classList.remove('active');
           setTimeout(() => {
             if (backdrop.parentNode) backdrop.parentNode.removeChild(backdrop);
@@ -276,6 +341,10 @@
      */
     requestPassword: function (fileName, attempt = 1, options = {}) {
       return new Promise((resolve) => {
+        const previousActive = document.activeElement;
+        const modalId = ++modalIdCounter;
+        const titleId = `pdftools-modal-title-${modalId}`;
+
         const i18n = (window.PDFTools && window.PDFTools.i18n) ? window.PDFTools.i18n : null;
         const t = (key, fallback) => i18n ? i18n.t(key, fallback) : fallback;
 
@@ -294,6 +363,7 @@
         backdrop.className = 'pdftools-modal-backdrop';
         backdrop.setAttribute('role', 'dialog');
         backdrop.setAttribute('aria-modal', 'true');
+        backdrop.setAttribute('aria-labelledby', titleId);
 
         backdrop.innerHTML = `
           <div class="pdftools-modal-dialog">
@@ -301,7 +371,7 @@
               <div class="pdftools-modal-icon-wrap" style="color: var(--tool-color, #ef4444); background: rgba(239, 68, 68, 0.1);">
                 ${ICONS.lock}
               </div>
-              <div class="pdftools-modal-title">${escapeHtml(title)}</div>
+              <div id="${titleId}" class="pdftools-modal-title">${escapeHtml(title)}</div>
               <button type="button" class="pdftools-modal-close" aria-label="Close">
                 ${ICONS.close}
               </button>
@@ -327,10 +397,11 @@
         const cancelBtn = backdrop.querySelector('.pdftools-modal-cancel');
         const closeBtn = backdrop.querySelector('.pdftools-modal-close');
 
-        inputEl.focus();
+        const restoreFocus = trapFocus(backdrop, inputEl, previousActive);
 
         function cleanup(result) {
           document.removeEventListener('keydown', onKeyDown);
+          restoreFocus();
           backdrop.classList.remove('active');
           setTimeout(() => {
             if (backdrop.parentNode) backdrop.parentNode.removeChild(backdrop);
