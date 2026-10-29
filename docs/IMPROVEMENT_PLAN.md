@@ -455,6 +455,11 @@ sehingga butir ini tidak mendesak.
 | `pages/page-number.html` | `js/pages/page-number.js` | ✅ Selesai (Fase 4) |
 | `pages/batch.html` | `js/pages/batch.js` | ✅ Selesai (Fase 4) |
 | `pages/compress.html` | `js/pages/compress.js` | ✅ Selesai (Fase 4) |
+| `pages/form-fill.html` | `js/pages/form-fill.js` | ✅ Selesai (Fase 5) |
+| `pages/watermark.html` | `js/pages/watermark.js` | ✅ Selesai (Fase 5) |
+| `pages/sign.html` | `js/pages/sign.js` | ✅ Selesai (Fase 5) |
+| `pages/ocr.html` | `js/pages/ocr.js` | ✅ Selesai (Fase 5) |
+| `pages/merge.html` | `js/pages/merge.js` | ✅ Selesai (Fase 5) |
 
 ---
 
