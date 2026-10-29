@@ -67,6 +67,18 @@ function isNamespaceOrIgnored(url, line) {
     return true;
   }
 
+  // Narrow exception: allow our own canonical and social share meta tags (passive metadata)
+  // ONLY for https://danwiraza03.github.io/pdf-tools/ and strictly within <link rel="canonical"> or <meta property="og:*"> or <meta name="twitter:*">
+  const isOwnSiteUrl = /^https:\/\/danwiraza03\.github\.io\/pdf-tools\//.test(url);
+  if (isOwnSiteUrl) {
+    const isCanonicalTag = /<link\s+[^>]*rel=["']canonical["'][^>]*>/i.test(line);
+    const isOgMetaTag = /<meta\s+[^>]*property=["']og:(?:url|image)["'][^>]*>/i.test(line);
+    const isTwitterMetaTag = /<meta\s+[^>]*name=["']twitter:image["'][^>]*>/i.test(line);
+    if (isCanonicalTag || isOgMetaTag || isTwitterMetaTag) {
+      return true;
+    }
+  }
+
   return false;
 }
 
@@ -133,6 +145,22 @@ function runAudit() {
 
   console.log('✅ [PASS] Zero external HTTP(S) URLs detected across all inspected directories.');
   console.log('100% Offline Client-Side Guarantee verified.');
+
+  // Sensitivity Mutation Check: ensure that scripts, stylesheets, or fetch to own domain or foreign domains are still strictly rejected
+  const mutationChecks = [
+    '<script src="https://danwiraza03.github.io/pdf-tools/malicious.js"></script>',
+    '<link rel="stylesheet" href="https://danwiraza03.github.io/pdf-tools/style.css">',
+    'fetch("https://danwiraza03.github.io/pdf-tools/api")',
+    '<link rel="canonical" href="https://evil.com/phishing">'
+  ];
+  for (const snippet of mutationChecks) {
+    const urlMatch = /https?:\/\/[^\s"'`><\)\]\}]+/i.exec(snippet);
+    if (urlMatch && isNamespaceOrIgnored(urlMatch[0], snippet)) {
+      console.error(`❌ [FAIL] Test sensitivity check failed: snippet was incorrectly permitted:\n  ${snippet}`);
+      process.exit(1);
+    }
+  }
+  console.log('✅ [PASS] Security Test Sensitivity verified: scripts, styles, fetches, and non-self canonicals correctly rejected.');
   process.exit(0);
 }
 

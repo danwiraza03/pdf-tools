@@ -32,7 +32,8 @@ const tests = [
   { name: 'Page Copy Works Without Node-only Globals (Buffer)', file: 'test_copy_browser_safe.js' },
   { name: 'ESLint: undefined and redeclared names', file: 'check_eslint.js' },
   { name: 'Static Guard: Zero Global Collisions Across Scripts', file: 'check_global_collisions.js' },
-  { name: 'Static Guard: Unified Footer Presence & Structure', file: 'check_footer_presence.js' }
+  { name: 'Static Guard: Unified Footer Presence & Structure', file: 'check_footer_presence.js' },
+  { name: 'Static Guard: SEO Metadata, Open Graph & Sitemap Audit', file: 'check_seo_meta.js' }
 ];
 
 console.log('========================================================================');
