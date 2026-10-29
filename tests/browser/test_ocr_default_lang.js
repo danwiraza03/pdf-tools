@@ -2,13 +2,13 @@
  * Browser Test: default OCR language follows the UI language (pages/ocr.html)
  *
  * Rules under test:
- *  1. No saved UI language: id-ID browser -> 'ind', en-US browser -> 'eng'.
- *  2. Saved UI language ('pdftools-lang') wins over the browser locale.
+ *  1. Default UI language is English ('en') -> active OCR language is 'eng' (even on id-ID browser).
+ *  2. Saved UI language ('pdftools-lang') wins over defaults: stored 'id' -> 'ind'.
  *  3. Switching the UI language BEFORE choosing an OCR language updates the default.
  *  4. A manual OCR language choice is never overridden by a later UI language switch.
  *  5. Exactly one language button is active at any time.
  *  6. Running OCR with the untouched default downloads ONLY that language model
- *     (eng.js for 'eng', ind.js for 'ind'; never both).
+ *     (eng.js for default 'eng', ind.js for saved 'ind'; never both).
  *
  * Run alone: node tests/browser/test_ocr_default_lang.js
  */
@@ -83,9 +83,10 @@ async function runOcrDefaultLangSuite(existingBrowser, existingBaseUrl) {
     console.log('\n--- 1/2. Default from browser locale / saved UI language ---');
     for (const [label, opts, expected] of [
       ['en-US, no saved language', { locale: 'en-US' }, 'eng'],
-      ['id-ID, no saved language', { locale: 'id-ID' }, 'ind'],
+      ['id-ID, no saved language (defaults to English UI)', { locale: 'id-ID' }, 'eng'],
       ['id-ID browser but saved UI language = en', { locale: 'id-ID', storedLang: 'en' }, 'eng'],
-      ['en-US browser but saved UI language = id', { locale: 'en-US', storedLang: 'id' }, 'ind']
+      ['en-US browser but saved UI language = id', { locale: 'en-US', storedLang: 'id' }, 'ind'],
+      ['id-ID browser and saved UI language = id', { locale: 'id-ID', storedLang: 'id' }, 'ind']
     ]) {
       const { context, page } = await openOcrPage(browser, baseUrl, opts);
       const act = await activeLangs(page);
@@ -96,31 +97,41 @@ async function runOcrDefaultLangSuite(existingBrowser, existingBaseUrl) {
     console.log('\n--- 3. UI language switch before any manual choice moves the default ---');
     {
       const { context, page } = await openOcrPage(browser, baseUrl, { locale: 'id-ID' });
-      check(JSON.stringify(await activeLangs(page)) === '["ind"]', 'starts as ind in Indonesian UI');
-      await page.evaluate(() => PDFTools.i18n.setLang('en'));
-      check(JSON.stringify(await activeLangs(page)) === '["eng"]', 'switching UI to English moves default to eng');
+      check(JSON.stringify(await activeLangs(page)) === '["eng"]', 'starts as eng in default English UI');
       await page.evaluate(() => PDFTools.i18n.setLang('id'));
-      check(JSON.stringify(await activeLangs(page)) === '["ind"]', 'switching UI back to Indonesian moves default to ind');
+      check(JSON.stringify(await activeLangs(page)) === '["ind"]', 'switching UI to Indonesian moves default to ind');
+      await page.evaluate(() => PDFTools.i18n.setLang('en'));
+      check(JSON.stringify(await activeLangs(page)) === '["eng"]', 'switching UI back to English moves default to eng');
       await context.close();
     }
 
     console.log('\n--- 4. Manual choice is never overridden ---');
-    for (const pick of ['ind+eng', 'eng']) {
-      const { context, page } = await openOcrPage(browser, baseUrl, { locale: 'id-ID' });
+    for (const pick of ['ind+eng', 'ind']) {
+      const { context, page } = await openOcrPage(browser, baseUrl, { locale: 'en-US' });
       await loadScan(page, tmp, `manual_${pick.replace('+', '_')}`);
       await page.click(`#langSelector .ocr-seg-btn[data-lang="${pick}"]`);
-      await page.evaluate(() => PDFTools.i18n.setLang('en'));
       await page.evaluate(() => PDFTools.i18n.setLang('id'));
+      await page.evaluate(() => PDFTools.i18n.setLang('en'));
       const act = await activeLangs(page);
       check(act.length === 1 && act[0] === pick, `manual "${pick}" survives UI language switches (active: ${JSON.stringify(act)})`);
       await context.close();
     }
 
     console.log('\n--- 6. OCR with the untouched default downloads only that model ---');
-    for (const [locale, want, other] of [['en-US', 'eng.js', 'ind.js'], ['id-ID', 'ind.js', 'eng.js']]) {
-      const r = await runOcrWithDefault(browser, baseUrl, locale, tmp);
-      check(r.loaded.includes(want) && !r.loaded.includes(other),
-        `${locale}: downloaded ${JSON.stringify(r.loaded)} (needs ${want}, must NOT include ${other})`);
+    for (const [label, opts, want, other] of [
+      ['Default English UI (no stored choice)', { locale: 'id-ID' }, 'eng.js', 'ind.js'],
+      ['Saved Indonesian UI (storedLang=id)', { locale: 'en-US', storedLang: 'id' }, 'ind.js', 'eng.js']
+    ]) {
+      const { context, page } = await openOcrPage(browser, baseUrl, opts);
+      const loaded = [];
+      page.on('requestfinished', r => { const u = r.url(); if (u.includes('/js/lib/tesseract/')) loaded.push(u.split('/').pop()); });
+      await loadScan(page, tmp, opts.storedLang || opts.locale);
+      await page.click('#startOcrBtn');
+      await page.waitForFunction(() => performance.getEntriesByType('resource').some(e => /lang-data\/(eng|ind)\.js/.test(e.name)), { timeout: 30000 });
+      await page.waitForTimeout(500);
+      await context.close();
+      check(loaded.includes(want) && !loaded.includes(other),
+        `${label}: downloaded ${JSON.stringify(loaded)} (needs ${want}, must NOT include ${other})`);
     }
 
     console.log('\n========================================================================');

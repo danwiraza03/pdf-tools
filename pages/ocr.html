@@ -453,8 +453,8 @@
                   <span data-i18n="ocr.lang_title">Recognition Language</span>
                 </div>
                 <div class="ocr-segmented-group" id="langSelector">
-                  <button type="button" class="ocr-seg-btn active" data-lang="ind">ID (Indonesian)</button>
-                  <button type="button" class="ocr-seg-btn" data-lang="eng">EN (English)</button>
+                  <button type="button" class="ocr-seg-btn" data-lang="ind">ID (Indonesian)</button>
+                  <button type="button" class="ocr-seg-btn active" data-lang="eng">EN (English)</button>
                   <button type="button" class="ocr-seg-btn" data-lang="ind+eng">ID + EN</button>
                 </div>
               </div>
@@ -805,7 +805,7 @@
       function uiDefaultOcrLang() {
         const ui = (window.PDFTools && PDFTools.i18n && typeof PDFTools.i18n.getLang === 'function')
           ? PDFTools.i18n.getLang()
-          : (document.documentElement.lang || 'id');
+          : (document.documentElement.lang || 'en');
         return ui === 'en' ? 'eng' : 'ind';
       }
       function applyOcrLang(lang) {
