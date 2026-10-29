@@ -1,6 +1,7 @@
 'use strict';
 
 const globals = require('globals');
+const html = require('eslint-plugin-html');
 
 module.exports = [
   // Ignores
@@ -9,7 +10,8 @@ module.exports = [
       'node_modules/**',
       'dist/**',
       'js/lib/**',
-      'tests/browser/screenshots/**'
+      'tests/browser/screenshots/**',
+      'pages/viewer.html'
     ]
   },
 
@@ -95,6 +97,31 @@ module.exports = [
         pdfjsLib: 'readonly',
         Image: 'readonly'
       }
+    }
+  },
+
+  // HTML inline scripts
+  {
+    files: ['index.html', 'pages/*.html'],
+    plugins: {
+      html
+    },
+    languageOptions: {
+      sourceType: 'script',
+      globals: {
+        ...globals.browser,
+        PDFTools: 'writable',
+        Tesseract: 'readonly',
+        PDFLib: 'readonly',
+        pdfjsLib: 'readonly',
+        JSZip: 'readonly',
+        Sortable: 'readonly',
+        saveAs: 'readonly'
+      }
+    },
+    rules: {
+      'no-undef': 'error',
+      'no-redeclare': 'error'
     }
   }
 ];
