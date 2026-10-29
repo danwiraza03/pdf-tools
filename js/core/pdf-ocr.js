@@ -434,7 +434,6 @@ PDFTools.OCR = (function () {
         }
 
         const isIndonesian = typeof window !== 'undefined' && window.PDFTools?.i18n?.currentLang === 'id';
-        const isFileProtocol = typeof window !== 'undefined' && window.location.protocol === 'file:';
 
         const firstCauseText = firstPathError
           ? (firstPathError.message || String(firstPathError))
@@ -442,19 +441,9 @@ PDFTools.OCR = (function () {
 
         let errorMsg;
         if (isIndonesian) {
-          errorMsg = `Gagal memuat modul OCR offline lokal. Jalur utama offline gagal: "${firstCauseText}".`;
-          if (isFileProtocol) {
-            errorMsg += ' Jika membuka via file:///, jalankan aplikasi melalui server lokal portabel (klik ganda "Jalankan_PDF_Tools.bat" atau "Buka_Aplikasi.bat") agar fitur OCR dapat beroperasi dengan izin peramban penuh.';
-          } else {
-            errorMsg += ' Pastikan file model bahasa dan runtime WASM di folder js/lib/tesseract/ tersedia.';
-          }
+          errorMsg = `Gagal memuat modul OCR offline lokal. Jalur utama offline gagal: "${firstCauseText}". Pastikan file model bahasa dan runtime WASM di folder js/lib/tesseract/ tersedia.`;
         } else {
-          errorMsg = `Failed to load local offline OCR module. Primary offline path failed: "${firstCauseText}".`;
-          if (isFileProtocol) {
-            errorMsg += ' If accessing via file:///, please run the application through the portable local server (double-click "Jalankan_PDF_Tools.bat" or run "node server.js") to grant full browser worker permissions.';
-          } else {
-            errorMsg += ' Please ensure language model and WASM runtime files in js/lib/tesseract/ are available.';
-          }
+          errorMsg = `Failed to load local offline OCR module. Primary offline path failed: "${firstCauseText}". Please ensure language model and WASM runtime files in js/lib/tesseract/ are available.`;
         }
 
         if (typeof window !== 'undefined' && window.PDFTools?.Toast?.error) {
@@ -834,7 +823,7 @@ PDFTools.OCR = (function () {
       reportProgress(15, 'Extracting PDF pages with PDF.js engine...');
 
       // Dynamic worker setup
-      if (typeof pdfjsLib !== 'undefined' && window.location.protocol !== 'file:' && (!pdfjsLib.GlobalWorkerOptions.workerSrc || !pdfjsLib.GlobalWorkerOptions.workerSrc.includes('pdf.worker'))) {
+      if (typeof pdfjsLib !== 'undefined' && (!pdfjsLib.GlobalWorkerOptions.workerSrc || !pdfjsLib.GlobalWorkerOptions.workerSrc.includes('pdf.worker'))) {
         const isSubPage = window.location.pathname.includes('/pages/') || window.location.href.includes('/pages/');
         pdfjsLib.GlobalWorkerOptions.workerSrc = isSubPage ? '../js/lib/pdf.worker.min.js' : 'js/lib/pdf.worker.min.js';
       }

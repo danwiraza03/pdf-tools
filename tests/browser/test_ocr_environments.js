@@ -3,19 +3,15 @@ const { startTestServer, createTestPdf, launchChromium } = require('./helpers');
 
 const TEST_PORT = 8765;
 const BASE_HTTP = `http://127.0.0.1:${TEST_PORT}`;
-const REPO_ROOT = path.resolve(__dirname, '../..');
-const FILE_PROTOCOL_ROOT = 'file:///' + REPO_ROOT.replace(/\\/g, '/');
 
 /**
  * Runs OCR test scenarios on pages/ocr.html and pages/viewer.html
- * under two conditions:
- *   a. Local HTTP server (http://127.0.0.1:8765)
- *   b. Direct file protocol (file:///)
+ * under Local HTTP server (http://127.0.0.1:8765)
  * across three languages: 'ind', 'eng', and 'ind+eng'.
  */
 async function runOcrEnvironmentTests(passedBrowser = null, passedBaseUrl = null) {
   console.log('========================================================================');
-  console.log('    OCR ENVIRONMENTS TEST SUITE (HTTP & FILE PROTOCOL, MULTI-LANG)     ');
+  console.log('         OCR ENVIRONMENTS TEST SUITE (HTTP, MULTI-LANG)                 ');
   console.log('========================================================================\n');
 
   let server = null;
@@ -41,8 +37,7 @@ async function runOcrEnvironmentTests(passedBrowser = null, passedBaseUrl = null
     ];
 
     const conditions = [
-      { name: 'http://127.0.0.1 (Server Lokal)', base: baseUrl },
-      { name: 'file:/// (Tanpa Server)', base: FILE_PROTOCOL_ROOT }
+      { name: 'http://127.0.0.1 (Server Lokal)', base: baseUrl }
     ];
 
     if (process.env.OCR_TEST_LIVE === '1') {

@@ -227,7 +227,7 @@ const FileUtils = {
 
   /**
    * Universal PDF.js Worker Initializer (A2 Deduplication)
-   * Ensures seamless main-thread execution on file:/// or worker fallback
+   * Ensures worker is configured for PDF.js
    */
   initPdfJsWorker: function () {
     if (typeof pdfjsLib === 'undefined') return;
@@ -236,11 +236,6 @@ const FileUtils = {
       return;
     }
     try {
-      if (window.location.protocol === 'file:') {
-        // Under file:// protocol, Chromium disables external Web Workers due to null origin.
-        // PDF.js safely falls back to fake worker in the main thread.
-        return;
-      }
       if (!pdfjsLib.GlobalWorkerOptions.workerSrc || !pdfjsLib.GlobalWorkerOptions.workerSrc.includes('pdf.worker')) {
         const scriptTag = document.querySelector('script[src*="pdf.min.js"]') || document.querySelector('script[src*="pdf.js"]');
         if (scriptTag) {
