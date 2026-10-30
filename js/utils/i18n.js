@@ -729,11 +729,22 @@ PDFTools.i18n = (function () {
       'merge.new_page': 'New Page',
       'merge.old_page': 'Old Page',
       'merge.orig': 'Orig',
-      'merge.drop_more_title': 'Drop PDF files here to add',
-      'merge.drop_more_desc': 'Drop anywhere on the workspace to add more files to merge',
+      'merge.drop_more_title': 'Drop files here to add',
+      'merge.drop_more_desc': 'Drag files to this page to add',
       'merge.add_card_title': 'Add More Files',
       'merge.add_card_hint': 'Drop PDF here or click to browse',
       'merge.drag_to_reorder': 'Drag to reorder',
+
+      // Page Drop Component
+      'page_drop.drop_add_title': 'Drop files here to add',
+      'page_drop.drop_add_desc': 'Drag files to this page to add',
+      'page_drop.drop_replace_title': 'Drop file here to replace current file',
+      'page_drop.unsupported_skipped': '{n} unsupported file(s) skipped',
+      'page_drop.single_file_notice': 'This tool processes one file; the first file is used.',
+      'page_drop.confirm_replace_title': 'Replace Current File?',
+      'page_drop.confirm_replace_msg': 'You have unsaved changes. Are you sure you want to replace the current file?',
+      'page_drop.confirm_replace_btn': 'Replace',
+      'page_drop.confirm_cancel_btn': 'Cancel',
 
 
       // Protect & Unlock PDF
@@ -1494,11 +1505,22 @@ PDFTools.i18n = (function () {
       'merge.new_page': 'Hal. Baru',
       'merge.old_page': 'Hal. Asal',
       'merge.orig': 'Asal',
-      'merge.drop_more_title': 'Lepaskan berkas PDF di sini untuk menambahkan',
-      'merge.drop_more_desc': 'Lepaskan di area mana saja untuk menambah berkas yang digabung',
+      'merge.drop_more_title': 'Lepaskan berkas di sini untuk menambahkan',
+      'merge.drop_more_desc': 'Seret berkas ke halaman ini untuk menambah',
       'merge.add_card_title': 'Tambah Berkas Lain',
       'merge.add_card_hint': 'Tarik berkas PDF ke sini atau klik untuk memilih',
       'merge.drag_to_reorder': 'Tarik untuk mengatur urutan',
+
+      // Page Drop Component
+      'page_drop.drop_add_title': 'Lepaskan berkas di sini untuk menambahkan',
+      'page_drop.drop_add_desc': 'Seret berkas ke halaman ini untuk menambah',
+      'page_drop.drop_replace_title': 'Lepaskan berkas di sini untuk mengganti berkas yang sedang dibuka',
+      'page_drop.unsupported_skipped': '{n} berkas tidak didukung dilewati',
+      'page_drop.single_file_notice': 'Alat ini memproses satu berkas; berkas pertama dipakai',
+      'page_drop.confirm_replace_title': 'Ganti Berkas Saat Ini?',
+      'page_drop.confirm_replace_msg': 'Anda memiliki perubahan yang belum diunduh. Yakin ingin mengganti berkas saat ini dengan yang baru?',
+      'page_drop.confirm_replace_btn': 'Ganti',
+      'page_drop.confirm_cancel_btn': 'Batal',
 
 
       // Protect & Unlock PDF

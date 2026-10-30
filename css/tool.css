@@ -1938,31 +1938,35 @@
   cursor: -webkit-grabbing !important;
 }
 
-/* Full workspace drop overlay */
+/* Full page / workspace drop overlay */
+.page-drag-overlay,
 .merge-drag-overlay {
-  position: absolute;
-  inset: 0;
+  position: fixed;
+  inset: 16px;
   background: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  border: 2px dashed #e11d48;
+  border: 2px dashed var(--tool-color, #e11d48);
   border-radius: var(--radius-xl, 16px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 200;
+  z-index: 9999;
   pointer-events: none;
   animation: fadeIn 0.15s ease-out;
-  box-shadow: 0 12px 36px rgba(225, 29, 72, 0.15);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.15);
 }
 
+[data-theme="dark"] .page-drag-overlay,
+.dark-theme .page-drag-overlay,
 [data-theme="dark"] .merge-drag-overlay,
 .dark-theme .merge-drag-overlay {
   background: rgba(11, 15, 25, 0.94);
-  border-color: #e11d48;
-  box-shadow: 0 12px 36px rgba(225, 29, 72, 0.3);
+  border-color: var(--tool-color, #e11d48);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4);
 }
 
+.page-drag-overlay-card,
 .merge-drag-overlay-card {
   display: flex;
   flex-direction: column;
@@ -1973,27 +1977,44 @@
   pointer-events: none;
 }
 
+.page-drag-overlay-icon,
 .merge-drag-overlay-icon {
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background: rgba(225, 29, 72, 0.12);
-  color: #e11d48;
+  background: color-mix(in srgb, var(--tool-color, #e11d48), transparent 85%);
+  color: var(--tool-color, #e11d48);
   display: flex;
   align-items: center;
   justify-content: center;
   animation: pulse 1.8s infinite ease-in-out;
 }
 
+.page-drag-overlay-title,
 .merge-drag-overlay-title {
   font-size: 1.25rem;
   font-weight: 700;
   color: var(--text-main, #0f172a);
 }
 
+[data-theme="dark"] .page-drag-overlay-title,
+.dark-theme .page-drag-overlay-title,
+[data-theme="dark"] .merge-drag-overlay-title,
+.dark-theme .merge-drag-overlay-title {
+  color: #f8fafc;
+}
+
+.page-drag-overlay-subtitle,
 .merge-drag-overlay-subtitle {
   font-size: 0.9rem;
   color: var(--text-muted, #64748b);
+}
+
+@media (pointer: coarse) {
+  .page-drag-overlay-subtitle,
+  .merge-drag-overlay-subtitle {
+    display: none !important;
+  }
 }
 
 /* In-Grid "+ Add More Files" Drop Card */

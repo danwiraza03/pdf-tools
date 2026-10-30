@@ -1,10 +1,10 @@
 {
-  "version": "pdf-tools-v69b5d13fc8",
-  "compositeHash": "69b5d13fc838bc2ebb74406840344bc5c7de4f5be4ee9ed67f47966ab37caf04",
-  "builtAt": "2026-10-29T10:58:07.448Z",
-  "totalFiles": 91,
-  "totalBytes": 3724071,
-  "totalMB": "3.55",
+  "version": "pdf-tools-ve217bdabdc",
+  "compositeHash": "e217bdabdcb397c2849b44bc3c2025820d96a6a494240fa10f55eae702c9c2cd",
+  "builtAt": "2026-10-30T08:25:45.564Z",
+  "totalFiles": 92,
+  "totalBytes": 3735633,
+  "totalMB": "3.56",
   "files": [
     {
       "url": "./css/home.css",
@@ -18,8 +18,8 @@
     },
     {
       "url": "./css/tool.css",
-      "size": 52234,
-      "hash": "bf44a6e0f18d"
+      "size": 52848,
+      "hash": "0189fc167083"
     },
     {
       "url": "./fonts/inter-latin-400-normal.woff2",
@@ -85,6 +85,11 @@
       "url": "./js/components/modal.js",
       "size": 18610,
       "hash": "c41fff72e6a7"
+    },
+    {
+      "url": "./js/components/page-drop.js",
+      "size": 9546,
+      "hash": "bf477ff4f014"
     },
     {
       "url": "./js/components/toast.js",
@@ -223,13 +228,13 @@
     },
     {
       "url": "./js/pages/batch.js",
-      "size": 13191,
-      "hash": "e0e0ba789354"
+      "size": 13190,
+      "hash": "5e56b69f3906"
     },
     {
       "url": "./js/pages/compress.js",
-      "size": 16597,
-      "hash": "414155821cc9"
+      "size": 16596,
+      "hash": "1248713129a8"
     },
     {
       "url": "./js/pages/crop.js",
@@ -273,8 +278,8 @@
     },
     {
       "url": "./js/pages/page-number.js",
-      "size": 10491,
-      "hash": "9b5267fb7838"
+      "size": 10490,
+      "hash": "7200fc7247ed"
     },
     {
       "url": "./js/pages/pdf-to-docx.js",
@@ -293,8 +298,8 @@
     },
     {
       "url": "./js/pages/protect.js",
-      "size": 12116,
-      "hash": "38f9358efa73"
+      "size": 12115,
+      "hash": "cf0aeafb63a2"
     },
     {
       "url": "./js/pages/remove-pages.js",
@@ -343,8 +348,8 @@
     },
     {
       "url": "./js/utils/i18n.js",
-      "size": 82647,
-      "hash": "27eab16abc65"
+      "size": 84053,
+      "hash": "e1bd12be5d44"
     },
     {
       "url": "./manifest.json",

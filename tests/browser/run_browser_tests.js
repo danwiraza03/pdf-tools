@@ -23,6 +23,7 @@ const { runWatermarkPreviewSuite } = require('../test_watermark_preview');
 const { run: runLaunchHelperTest } = require('../test_launch_helper');
 const { runSignFlowSuite } = require('./test_sign_flow');
 const { runA11ySuite } = require('./test_a11y_axe');
+const { runPageDropSuite } = require('./test_page_drop');
 
 const TEST_PORT = 8765;
 const BASE_URL = `http://127.0.0.1:${TEST_PORT}`;
@@ -283,6 +284,13 @@ async function main() {
         name: 'Automated Axe-Core Accessibility & Dialog Focus Suite',
         run: async () => {
           await runA11ySuite(browser, BASE_URL);
+        }
+      },
+      {
+        id: 'pagedrop',
+        name: 'Whole Page Drag & Drop (PageDrop) Across All Tools',
+        run: async () => {
+          await runPageDropSuite(browser, BASE_URL);
         }
       }
     ];

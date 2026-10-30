@@ -35,6 +35,7 @@ function getAppShellFileList() {
     'js/components/modal.js',
     'js/components/toast.js',
     'js/components/dropzone.js',
+    'js/components/page-drop.js',
     'js/utils/i18n.js',
     'js/utils/file-utils.js',
     'js/utils/download.js',
