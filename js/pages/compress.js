@@ -58,6 +58,17 @@
       }
     });
 
+    if (PDFTools.PageDrop) {
+      PDFTools.PageDrop.attach({
+        accept: '.pdf',
+        multiple: true,
+        enabled: () => rawFiles.length > 0,
+        onFiles: function (files) {
+          fileList.addFiles(files);
+        }
+      });
+    }
+
     addMoreBtn.addEventListener('click', () => extraFileInput.click());
     extraFileInput.addEventListener('change', (e) => {
       if (e.target.files.length > 0) {

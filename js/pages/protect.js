@@ -98,6 +98,36 @@
       }
     });
 
+    function appendFiles(newFiles) {
+      if (!newFiles || newFiles.length === 0) return;
+      queuedFiles = queuedFiles.concat(newFiles);
+      if (!currentFile && queuedFiles.length > 0) {
+        currentFile = queuedFiles[0];
+      }
+      isBatchMode = (currentMode === 'protect' && queuedFiles.length > 1);
+      if (isBatchMode) {
+        fileNameLabel.textContent = `Batch Queue: ${queuedFiles.length} Files Selected`;
+        fileSizeLabel.textContent = `Primary: ${currentFile.name}`;
+        btnApplyProtect.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> <span>Encrypt ${queuedFiles.length} Documents & Download (.ZIP)</span>`;
+      } else if (currentFile) {
+        fileNameLabel.textContent = currentFile.name;
+        fileSizeLabel.textContent = PDFTools.FileUtils.formatSize(currentFile.size);
+        btnApplyProtect.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> <span>Encrypt & Download PDF</span>`;
+      }
+      if (PDFTools.Toast) {
+        PDFTools.Toast.success(`${newFiles.length} ${PDFTools.i18n.t('toast.files_added')}`);
+      }
+    }
+
+    if (PDFTools.PageDrop) {
+      PDFTools.PageDrop.attach({
+        accept: '.pdf',
+        multiple: true,
+        enabled: () => Boolean(currentFile || queuedFiles.length > 0),
+        onFiles: appendFiles
+      });
+    }
+
     // Check for pending handoff file from homepage
     if (PDFTools.FileUtils && PDFTools.FileUtils.consumePendingFile) {
       PDFTools.FileUtils.consumePendingFile().then(file => {

@@ -53,6 +53,17 @@
       if (e.dataTransfer.files) addFilesToQueue(Array.from(e.dataTransfer.files));
     });
 
+    if (PDFTools.PageDrop) {
+      PDFTools.PageDrop.attach({
+        accept: '.pdf',
+        multiple: true,
+        enabled: () => fileQueue.length > 0,
+        onFiles: function (files) {
+          addFilesToQueue(files);
+        }
+      });
+    }
+
     function addFilesToQueue(files) {
       const validPdfs = files.filter(f => f.name.toLowerCase().endsWith('.pdf'));
       if (validPdfs.length === 0) {

@@ -48,6 +48,18 @@
       }
     });
 
+    if (PDFTools.PageDrop) {
+      PDFTools.PageDrop.attach({
+        accept: 'image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp',
+        multiple: true,
+        enabled: () => fileList.getFiles().length > 0,
+        onFiles: function (files) {
+          fileList.addFiles(files);
+          PDFTools.Toast.success(`${files.length} ${PDFTools.i18n.t('toast.files_added')}`);
+        }
+      });
+    }
+
     addMoreBtn.addEventListener('click', () => dropzone.open());
 
     function setupOptionGroup(groupId, onChange) {

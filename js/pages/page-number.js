@@ -62,6 +62,34 @@
       }
     });
 
+    function appendFiles(newFiles) {
+      if (!newFiles || newFiles.length === 0) return;
+      queuedFiles = queuedFiles.concat(newFiles);
+      if (!currentFile && queuedFiles.length > 0) {
+        currentFile = queuedFiles[0];
+      }
+      isBatchMode = queuedFiles.length > 1;
+      if (isBatchMode) {
+        fileMetaLabel.textContent = `Batch Queue: ${queuedFiles.length} Files Selected • Primary: ${currentFile.name}`;
+        applyPageNumbersBtn.textContent = `Number ${queuedFiles.length} Documents & Download (.ZIP)`;
+      } else if (currentFile) {
+        fileMetaLabel.textContent = `${currentFile.name} • ${totalDocPages} Pages • ${PDFTools.FileUtils.formatSize(currentFile.size)}`;
+        applyPageNumbersBtn.textContent = 'Apply Page Numbers & Download';
+      }
+      if (PDFTools.Toast) {
+        PDFTools.Toast.success(`${newFiles.length} ${PDFTools.i18n.t('toast.files_added')}`);
+      }
+    }
+
+    if (PDFTools.PageDrop) {
+      PDFTools.PageDrop.attach({
+        accept: '.pdf',
+        multiple: true,
+        enabled: () => Boolean(currentFile || queuedFiles.length > 0),
+        onFiles: appendFiles
+      });
+    }
+
     // Check for pending handoff file from homepage (B1)
     if (PDFTools.FileUtils && PDFTools.FileUtils.consumePendingFile) {
       PDFTools.FileUtils.consumePendingFile().then(async file => {

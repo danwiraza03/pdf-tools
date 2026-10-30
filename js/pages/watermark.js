@@ -76,6 +76,17 @@
         }
       });
 
+      if (PDFTools.PageDrop) {
+        PDFTools.PageDrop.attach({
+          accept: '.pdf',
+          multiple: true,
+          enabled: () => queuedFiles.length > 0,
+          onFiles: function (files) {
+            fileList.addFiles(files);
+          }
+        });
+      }
+
       // Watermark state
       let currentMode = 'text'; // 'text' | 'image'
       let selectedPosition = 'center';
