@@ -945,8 +945,13 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     }
 
+    var hadController = Boolean(navigator.serviceWorker.controller);
     var refreshing = false;
     navigator.serviceWorker.addEventListener('controllerchange', function () {
+      if (!hadController) {
+        hadController = true;
+        return;
+      }
       if (!refreshing) {
         refreshing = true;
         window.location.reload();

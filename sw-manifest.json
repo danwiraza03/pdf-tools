@@ -1,9 +1,9 @@
 {
-  "version": "pdf-tools-v13300db377",
-  "compositeHash": "13300db37731de0cdb820d768ff77ef3d2d3e572113ed2e7f1edfcee027b0b26",
-  "builtAt": "2026-10-30T09:11:04.719Z",
+  "version": "pdf-tools-v1caad55db1",
+  "compositeHash": "1caad55db1e1844cc2429ccd5b22990fe63344ac1b4b6ac507f81af428e8a883",
+  "builtAt": "2026-10-30T09:16:03.901Z",
   "totalFiles": 92,
-  "totalBytes": 3745891,
+  "totalBytes": 3746042,
   "totalMB": "3.57",
   "files": [
     {
@@ -68,8 +68,8 @@
     },
     {
       "url": "./js/app.js",
-      "size": 63330,
-      "hash": "dcc5dc94b250"
+      "size": 63481,
+      "hash": "8221275cce87"
     },
     {
       "url": "./js/components/dropzone.js",
