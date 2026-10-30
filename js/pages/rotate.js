@@ -38,37 +38,54 @@
       });
     }
 
+    async function loadFile(file) {
+      currentFile = file;
+      dropzoneEl.style.display = 'none';
+      controlsPanel.style.display = 'block';
+      pageGrid.style.display = 'grid';
+      actionBar.classList.add('active');
+      resultArea.classList.remove('active');
+
+      rotations = {};
+      const res = await PDFTools.Preview.renderAllPages(currentFile, pageGrid, {
+        selectable: false
+      });
+
+      // Add individual click to rotate handler
+      res.pageCards.forEach((card, idx) => {
+        rotations[idx] = 0;
+
+        const badge = document.createElement('div');
+        badge.className = 'rotate-badge';
+        badge.textContent = '+90°';
+        card.appendChild(badge);
+
+        card.addEventListener('click', function () {
+          rotations[idx] = (rotations[idx] + 90) % 360;
+          updateCardRotation(card, rotations[idx]);
+        });
+      });
+    }
+
     PDFTools.Dropzone('dropzone', {
       accept: '.pdf',
       multiple: false,
       onFiles: async function (files) {
-        currentFile = files[0];
-        dropzoneEl.style.display = 'none';
-        controlsPanel.style.display = 'block';
-        pageGrid.style.display = 'grid';
-        actionBar.classList.add('active');
-
-        rotations = {};
-        const res = await PDFTools.Preview.renderAllPages(currentFile, pageGrid, {
-          selectable: false
-        });
-
-        // Add individual click to rotate handler
-        res.pageCards.forEach((card, idx) => {
-          rotations[idx] = 0;
-
-          const badge = document.createElement('div');
-          badge.className = 'rotate-badge';
-          badge.textContent = '+90°';
-          card.appendChild(badge);
-
-          card.addEventListener('click', function () {
-            rotations[idx] = (rotations[idx] + 90) % 360;
-            updateCardRotation(card, rotations[idx]);
-          });
-        });
+        if (files && files[0]) await loadFile(files[0]);
       }
     });
+
+    if (PDFTools.PageDrop) {
+      PDFTools.PageDrop.attach({
+        accept: '.pdf',
+        multiple: false,
+        enabled: () => Boolean(currentFile),
+        hasUnsavedWork: () => Object.values(rotations).some(deg => deg !== 0),
+        onFiles: async (files) => {
+          if (files && files[0]) await loadFile(files[0]);
+        }
+      });
+    }
 
     document.getElementById('rotateLeftAllBtn').addEventListener('click', () => rotateAllBy(-90));
     document.getElementById('rotateRightAllBtn').addEventListener('click', () => rotateAllBy(90));

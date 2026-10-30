@@ -40,6 +40,17 @@
       if (e.dataTransfer.files && e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
     });
 
+    if (PDFTools.PageDrop) {
+      PDFTools.PageDrop.attach({
+        accept: '.pdf',
+        multiple: false,
+        enabled: () => Boolean(currentFile),
+        onFiles: async (files) => {
+          if (files && files[0]) await handleFile(files[0]);
+        }
+      });
+    }
+
     changeFileBtn.addEventListener('click', () => {
       workspaceState.style.display = 'none';
       uploadState.style.display = 'block';

@@ -185,6 +185,17 @@
         }
       });
 
+      if (PDFTools.PageDrop) {
+        PDFTools.PageDrop.attach({
+          accept: '.pdf, .jpg, .jpeg, .png, .webp',
+          multiple: false,
+          enabled: () => Boolean(currentFile),
+          onFiles: async function (files) {
+            if (files && files[0]) await loadDocument(files[0]);
+          }
+        });
+      }
+
       // Check for pending handoff file from homepage (B1)
       if (PDFTools.FileUtils && PDFTools.FileUtils.consumePendingFile) {
         PDFTools.FileUtils.consumePendingFile().then(async file => {

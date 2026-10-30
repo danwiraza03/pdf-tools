@@ -102,6 +102,27 @@
       if (e.dataTransfer.files && e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
     });
 
+    if (PDFTools.PageDrop) {
+      PDFTools.PageDrop.attach({
+        accept: '.pdf',
+        multiple: false,
+        enabled: () => Boolean(pdfFile),
+        hasUnsavedWork: () => placedItems.length > 0 && !lastSignedBlob,
+        onFiles: async function (files) {
+          if (files && files[0]) {
+            placedItems = [];
+            lastSignedBlob = null;
+            await handleFile(files[0]);
+          }
+        }
+      });
+    }
+
+    // Test hook for automated test suites
+    window.testTriggerSignaturePlacement = function () {
+      placedItems.push({ id: 1, page: 1, xRatio: 0.1, yRatio: 0.1, wRatio: 0.2, hRatio: 0.1, dataUrl: '' });
+    };
+
     (async function checkPending() {
       if (window.PDFTools && PDFTools.FileUtils && PDFTools.FileUtils.getPendingFile) {
         const pending = await PDFTools.FileUtils.getPendingFile();
@@ -119,6 +140,9 @@
         const decryptedBytes = await decryptedDoc.save();
         pdfFile = file;
         pdfArrayBuffer = decryptedBytes.buffer.slice(decryptedBytes.byteOffset, decryptedBytes.byteOffset + decryptedBytes.byteLength);
+
+        const docTitleEl = document.getElementById('docTitle');
+        if (docTitleEl) docTitleEl.textContent = file.name;
 
         if (PDFTools.FileUtils && PDFTools.FileUtils.initPdfJsWorker) {
           PDFTools.FileUtils.initPdfJsWorker();

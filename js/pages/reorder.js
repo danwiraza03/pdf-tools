@@ -21,33 +21,53 @@
     let sortable = null;
     const progress = PDFTools.Progress('progressBar');
 
+    async function loadFile(file) {
+      currentFile = file;
+      dropzoneEl.style.display = 'none';
+      instructionBanner.style.display = 'flex';
+      pageGrid.style.display = 'grid';
+      actionBar.classList.add('active');
+      resultArea.classList.remove('active');
+
+      await PDFTools.Preview.renderAllPages(currentFile, pageGrid, {
+        selectable: false
+      });
+
+      if (typeof Sortable !== 'undefined') {
+        if (sortable) sortable.destroy();
+        sortable = new Sortable(pageGrid, {
+          animation: 200,
+          ghostClass: 'sortable-ghost',
+          dragClass: 'sortable-drag',
+          delay: 200,
+          delayOnTouchOnly: true,
+          touchStartThreshold: 8
+        });
+      }
+    }
+
     PDFTools.Dropzone('dropzone', {
       accept: '.pdf',
       multiple: false,
       onFiles: async function (files) {
-        currentFile = files[0];
-        dropzoneEl.style.display = 'none';
-        instructionBanner.style.display = 'flex';
-        pageGrid.style.display = 'grid';
-        actionBar.classList.add('active');
-
-        await PDFTools.Preview.renderAllPages(currentFile, pageGrid, {
-          selectable: false
-        });
-
-        if (typeof Sortable !== 'undefined') {
-          if (sortable) sortable.destroy();
-          sortable = new Sortable(pageGrid, {
-            animation: 200,
-            ghostClass: 'sortable-ghost',
-            dragClass: 'sortable-drag',
-            delay: 200,
-            delayOnTouchOnly: true,
-            touchStartThreshold: 8
-          });
-        }
+        if (files && files[0]) await loadFile(files[0]);
       }
     });
+
+    if (PDFTools.PageDrop) {
+      PDFTools.PageDrop.attach({
+        accept: '.pdf',
+        multiple: false,
+        enabled: () => Boolean(currentFile),
+        hasUnsavedWork: () => {
+          const cards = pageGrid.querySelectorAll('.page-card');
+          return Array.from(cards).some((c, idx) => parseInt(c.getAttribute('data-page'), 10) !== idx + 1);
+        },
+        onFiles: async (files) => {
+          if (files && files[0]) await loadFile(files[0]);
+        }
+      });
+    }
 
     saveOrderBtn.addEventListener('click', async function () {
       if (!currentFile) return;

@@ -17,6 +17,7 @@
 
       // Detected AcroForm Fields map: name -> { field, type, pageNum, rect, value }
       let formFieldsMap = new Map();
+      let isFormDirty = false;
 
       const uploadState = document.getElementById('uploadState');
       const workspaceState = document.getElementById('workspaceState');
@@ -54,6 +55,21 @@
         if (e.dataTransfer.files && e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
       });
 
+      if (PDFTools.PageDrop) {
+        PDFTools.PageDrop.attach({
+          accept: '.pdf',
+          multiple: false,
+          enabled: () => Boolean(pdfFile),
+          hasUnsavedWork: () => isFormDirty,
+          onFiles: async function (files) {
+            if (files && files[0]) {
+              isFormDirty = false;
+              await handleFile(files[0]);
+            }
+          }
+        });
+      }
+
       changeDocBtn.addEventListener('click', () => {
         workspaceState.style.display = 'none';
         uploadState.style.display = 'block';
@@ -75,6 +91,7 @@
           return;
         }
 
+        isFormDirty = false;
         pdfFile = file;
         docTitle.textContent = file.name;
         if (PDFTools.FileUtils && PDFTools.FileUtils.initPdfJsWorker) {
@@ -260,6 +277,7 @@
           if (item.type === 'text') {
             const input = document.createElement('input');
             input.type = 'text';
+            input.className = 'form-field-input';
             input.value = item.value || '';
             input.placeholder = item.name;
             input.addEventListener('input', (e) => {
@@ -295,6 +313,7 @@
       }
 
       function updateFieldSync(item, key) {
+        isFormDirty = true;
         // Sync into pdf-lib field instance
         try {
           if (item.type === 'text') {

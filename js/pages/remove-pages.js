@@ -21,22 +21,39 @@
     let removeResult = null;
     const progress = PDFTools.Progress('progressBar');
 
+    async function loadFile(file) {
+      currentFile = file;
+      dropzoneEl.style.display = 'none';
+      selectionHeader.style.display = 'flex';
+      pageGrid.style.display = 'grid';
+      actionBar.classList.add('active');
+      resultArea.classList.remove('active');
+
+      await PDFTools.Preview.renderAllPages(currentFile, pageGrid, {
+        selectable: true,
+        initiallySelected: false
+      });
+    }
+
     PDFTools.Dropzone('dropzone', {
       accept: '.pdf',
       multiple: false,
       onFiles: async function (files) {
-        currentFile = files[0];
-        dropzoneEl.style.display = 'none';
-        selectionHeader.style.display = 'flex';
-        pageGrid.style.display = 'grid';
-        actionBar.classList.add('active');
-
-        await PDFTools.Preview.renderAllPages(currentFile, pageGrid, {
-          selectable: true,
-          initiallySelected: false
-        });
+        if (files && files[0]) await loadFile(files[0]);
       }
     });
+
+    if (PDFTools.PageDrop) {
+      PDFTools.PageDrop.attach({
+        accept: '.pdf',
+        multiple: false,
+        enabled: () => Boolean(currentFile),
+        hasUnsavedWork: () => pageGrid.querySelectorAll('.page-card.selected').length > 0,
+        onFiles: async (files) => {
+          if (files && files[0]) await loadFile(files[0]);
+        }
+      });
+    }
 
     clearSelectionBtn.addEventListener('click', () => {
       pageGrid.querySelectorAll('.page-card').forEach(c => c.classList.remove('selected'));

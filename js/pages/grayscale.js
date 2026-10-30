@@ -125,6 +125,17 @@
       }
     });
 
+    if (PDFTools.PageDrop) {
+      PDFTools.PageDrop.attach({
+        accept: '.pdf',
+        multiple: false,
+        enabled: () => Boolean(selectedFile),
+        onFiles: async (files) => {
+          if (files && files[0]) handleFile(files[0]);
+        }
+      });
+    }
+
     if (PDFTools.FileUtils && PDFTools.FileUtils.consumePendingFile) {
       PDFTools.FileUtils.consumePendingFile().then(file => {
         if (file) handleFile(file);

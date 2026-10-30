@@ -43,6 +43,17 @@
       if (e.dataTransfer.files && e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
     });
 
+    if (PDFTools.PageDrop) {
+      PDFTools.PageDrop.attach({
+        accept: '.xlsx',
+        multiple: false,
+        enabled: () => Boolean(currentFile),
+        onFiles: async (files) => {
+          if (files && files[0]) handleFile(files[0]);
+        }
+      });
+    }
+
     function handleFile(file) {
       if (!file.name.toLowerCase().endsWith('.xlsx')) {
         if (PDFTools.Toast) PDFTools.Toast.error('Please select a valid Excel workbook (.xlsx).');

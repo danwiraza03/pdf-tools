@@ -121,6 +121,22 @@
       }
     });
 
+    if (PDFTools.PageDrop) {
+      PDFTools.PageDrop.attach({
+        accept: '.pdf',
+        multiple: false,
+        enabled: () => Boolean(selectedFile),
+        hasUnsavedWork: () => {
+          return cropRect.x !== 0.05 || cropRect.y !== 0.05 ||
+            cropRect.width !== 0.90 || cropRect.height !== 0.90 ||
+            Object.keys(pageCrops).length > 0;
+        },
+        onFiles: async (files) => {
+          if (files && files[0]) handleFile(files[0]);
+        }
+      });
+    }
+
     if (PDFTools.FileUtils && PDFTools.FileUtils.consumePendingFile) {
       PDFTools.FileUtils.consumePendingFile().then(file => {
         if (file) handleFile(file);

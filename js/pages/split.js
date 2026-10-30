@@ -29,27 +29,43 @@
     let splitOutput = null; // Uint8Array or Array of {name, data}
     const progress = PDFTools.Progress('progressBar');
 
+    async function loadFile(file) {
+      currentFile = file;
+      dropzoneEl.style.display = 'none';
+      optionsPanel.style.display = 'block';
+      pageGridContainer.style.display = 'block';
+      actionBar.classList.add('active');
+      resultArea.classList.remove('active');
+
+      try {
+        const res = await PDFTools.Preview.renderAllPages(currentFile, pageGrid, {
+          initiallySelected: true
+        });
+        totalPages = res.totalPages;
+        everyNInput.max = totalPages;
+      } catch (e) {
+        PDFTools.Toast.error('Could not render PDF pages.');
+      }
+    }
+
     PDFTools.Dropzone('dropzone', {
       accept: '.pdf',
       multiple: false,
       onFiles: async function (files) {
-        currentFile = files[0];
-        dropzoneEl.style.display = 'none';
-        optionsPanel.style.display = 'block';
-        pageGridContainer.style.display = 'block';
-        actionBar.classList.add('active');
-
-        try {
-          const res = await PDFTools.Preview.renderAllPages(currentFile, pageGrid, {
-            initiallySelected: true
-          });
-          totalPages = res.totalPages;
-          everyNInput.max = totalPages;
-        } catch (e) {
-          PDFTools.Toast.error('Could not render PDF pages.');
-        }
+        if (files && files[0]) await loadFile(files[0]);
       }
     });
+
+    if (PDFTools.PageDrop) {
+      PDFTools.PageDrop.attach({
+        accept: '.pdf',
+        multiple: false,
+        enabled: () => Boolean(currentFile),
+        onFiles: async (files) => {
+          if (files && files[0]) await loadFile(files[0]);
+        }
+      });
+    }
 
     // Mode toggle
     document.querySelectorAll('.option-group .option-btn').forEach(btn => {

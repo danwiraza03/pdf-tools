@@ -48,6 +48,20 @@
       }
     });
 
+    if (PDFTools.PageDrop) {
+      PDFTools.PageDrop.attach({
+        accept: '.pdf',
+        multiple: false,
+        enabled: () => Boolean(currentFile),
+        onFiles: function (files) {
+          if (files && files[0]) {
+            fileList.clear();
+            fileList.addFiles([files[0]]);
+          }
+        }
+      });
+    }
+
     // Quality Toggle
     document.querySelectorAll('#qualityOptions .option-btn').forEach(btn => {
       btn.addEventListener('click', function () {
