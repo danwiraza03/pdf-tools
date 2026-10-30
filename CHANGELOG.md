@@ -4,6 +4,10 @@ Format mengacu pada [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) 
 
 ## [Unreleased]
 
+### Ditambahkan
+
+- Seret dan lepas berkas ke mana saja di semua alat: alat banyak berkas menambahkan berkas, alat satu berkas mengganti berkas yang sedang dibuka (dengan konfirmasi bila ada pekerjaan yang belum diunduh).
+
 ### Diubah
 
 - Aplikasi difokuskan sebagai aplikasi web; server pengembangan dipindahkan ke `scripts/dev-server.js`.
