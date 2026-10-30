@@ -1,9 +1,9 @@
 {
-  "version": "pdf-tools-v1caad55db1",
-  "compositeHash": "1caad55db1e1844cc2429ccd5b22990fe63344ac1b4b6ac507f81af428e8a883",
-  "builtAt": "2026-10-30T09:16:03.901Z",
+  "version": "pdf-tools-v606f4e4655",
+  "compositeHash": "606f4e46554feeeb59285c7f4e7e9c03c965896d722cca992d92b1987bd001c9",
+  "builtAt": "2026-10-30T09:24:42.169Z",
   "totalFiles": 92,
-  "totalBytes": 3746042,
+  "totalBytes": 3746040,
   "totalMB": "3.57",
   "files": [
     {
@@ -448,8 +448,8 @@
     },
     {
       "url": "./pages/sign.html",
-      "size": 32282,
-      "hash": "727970cd2330"
+      "size": 32280,
+      "hash": "1a8094149cdd"
     },
     {
       "url": "./pages/split.html",
