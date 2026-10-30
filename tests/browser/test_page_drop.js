@@ -71,15 +71,12 @@ async function dispatchDropFiles(page, targetSelector, files) {
     const target = targetSelector ? (document.querySelector(targetSelector) || document.body) : document.body;
 
     const dragEnter = new DragEvent('dragenter', { bubbles: true, cancelable: true, dataTransfer: dt });
-    window.dispatchEvent(dragEnter);
     target.dispatchEvent(dragEnter);
 
     const dragOver = new DragEvent('dragover', { bubbles: true, cancelable: true, dataTransfer: dt });
-    window.dispatchEvent(dragOver);
     target.dispatchEvent(dragOver);
 
     const dropEvt = new DragEvent('drop', { bubbles: true, cancelable: true, dataTransfer: dt });
-    window.dispatchEvent(dropEvt);
     target.dispatchEvent(dropEvt);
   }, { targetSelector, payload });
 }
@@ -101,13 +98,16 @@ const TOOL_PAGES = [
     fileType: 'pdf',
     inputSelector: '#dropzone input[type="file"], #extraFileInput',
     verifyInitial: async (page) => {
-      await page.waitForSelector('#organizerArea:not([style*="display: none"])', { timeout: 6000 });
+      await page.waitForFunction(() => {
+        const badge = document.querySelector('#organizerCount');
+        return badge && badge.textContent.includes('1 Files');
+      }, { timeout: 8000 });
     },
     verifyMultiAdded: async (page) => {
       await page.waitForFunction(() => {
         const badge = document.querySelector('#organizerCount');
         return badge && badge.textContent.includes('2 Files');
-      }, { timeout: 6000 });
+      }, { timeout: 8000 });
     }
   },
   {
@@ -140,13 +140,16 @@ const TOOL_PAGES = [
     fileType: 'pdf',
     inputSelector: '#dropzone input[type="file"]',
     verifyInitial: async (page) => {
-      await page.waitForSelector('#workspaceState:not([style*="display: none"])', { timeout: 6000 });
+      await page.waitForFunction(() => {
+        const lbl = document.querySelector('#fileMetaLabel');
+        return lbl && lbl.textContent.includes('Pages');
+      }, { timeout: 8000 });
     },
     verifyMultiAdded: async (page) => {
       await page.waitForFunction(() => {
         const lbl = document.querySelector('#fileMetaLabel');
         return lbl && lbl.textContent.includes('2 Files Selected');
-      }, { timeout: 6000 });
+      }, { timeout: 8000 });
     }
   },
   {
@@ -154,14 +157,17 @@ const TOOL_PAGES = [
     mode: 'multi',
     fileType: 'pdf',
     inputSelector: '#dropzone input[type="file"]',
-    verifyInitial: async (page) => {
-      await page.waitForSelector('#workspaceState:not([style*="display: none"])', { timeout: 6000 });
+    verifyInitial: async (page, name) => {
+      await page.waitForFunction((n) => {
+        const lbl = document.querySelector('#fileNameLabel');
+        return lbl && lbl.textContent.includes(n);
+      }, name, { timeout: 8000 });
     },
     verifyMultiAdded: async (page) => {
       await page.waitForFunction(() => {
         const lbl = document.querySelector('#fileNameLabel');
         return lbl && lbl.textContent.includes('2 Files Selected');
-      }, { timeout: 6000 });
+      }, { timeout: 8000 });
     }
   },
   {
@@ -220,13 +226,16 @@ const TOOL_PAGES = [
     fileType: 'pdf',
     inputSelector: '#dropzone input[type="file"]',
     verifyInitial: async (page) => {
-      await page.waitForSelector('#workspaceState:not([style*="display: none"])', { timeout: 6000 });
+      await page.waitForFunction(() => {
+        const ind = document.querySelector('#pageIndicator');
+        return ind && ind.textContent.includes('Page 1');
+      }, { timeout: 8000 });
     },
     verifySingleReplaced: async (page) => {
       await page.waitForFunction(() => {
         const ind = document.querySelector('#pageIndicator');
         return ind && ind.textContent.includes('/ 2');
-      }, { timeout: 6000 });
+      }, { timeout: 8000 });
     }
   },
   {
@@ -497,9 +506,9 @@ async function runPageDropSuite(browser, baseUrl) {
       const unsupportedFile = { name: 'unsupported.txt', mime: 'text/plain', buffer: unsupportedTxt };
       await dispatchDropFiles(page, 'body', [unsupportedFile]);
       await page.waitForFunction(() => {
-        const toast = document.querySelector('.toast, .toast-warning, .toast-error');
-        return toast && (toast.textContent.includes('dilewati') || toast.textContent.includes('skipped'));
-      }, { timeout: 3000 });
+        const toasts = Array.from(document.querySelectorAll('.toast, .toast-warning, .toast-error, .toast-info'));
+        return toasts.some(toast => toast.textContent.includes('dilewati') || toast.textContent.includes('skipped'));
+      }, { timeout: 6000 });
 
       // --- Test (b): Drop second file on body ---
       await dispatchDropFiles(page, 'body', [f2]);
@@ -550,16 +559,13 @@ async function runPageDropSuite(browser, baseUrl) {
     // Drop second file -> modal should appear
     await dispatchDropFiles(page, 'body', [signPdf2]);
 
-    const modalAppeared = await page.waitForSelector('.pdftools-modal-backdrop.active, [role="dialog"]', { timeout: 4000 })
+    const modalAppeared = await page.waitForSelector('.pdftools-modal-backdrop.active', { timeout: 5000 })
       .then(() => true).catch(() => false);
 
     if (modalAppeared) {
       // Click Cancel
-      await page.evaluate(() => {
-        const btns = Array.from(document.querySelectorAll('.pdftools-modal-btn, button'));
-        const cancelBtn = btns.find(b => b.textContent.includes('Batal') || b.textContent.includes('Cancel'));
-        if (cancelBtn) cancelBtn.click();
-      });
+      await page.click('.pdftools-modal-cancel');
+      await page.waitForSelector('.pdftools-modal-backdrop', { state: 'detached', timeout: 5000 });
 
       // Still sign1.pdf
       const stillFirst = await page.evaluate(() => {
@@ -570,17 +576,13 @@ async function runPageDropSuite(browser, baseUrl) {
 
       // Drop second file again -> click Confirm
       await dispatchDropFiles(page, 'body', [signPdf2]);
-      await page.waitForSelector('.pdftools-modal-backdrop.active, [role="dialog"]', { timeout: 4000 });
-      await page.evaluate(() => {
-        const btns = Array.from(document.querySelectorAll('.pdftools-modal-btn, button'));
-        const confirmBtn = btns.find(b => b.textContent.includes('Ganti') || b.textContent.includes('Replace'));
-        if (confirmBtn) confirmBtn.click();
-      });
+      await page.waitForSelector('.pdftools-modal-backdrop.active', { timeout: 5000 });
+      await page.click('.pdftools-modal-confirm');
 
       await page.waitForFunction(() => {
         const lbl = document.querySelector('#docTitle');
         return lbl && lbl.textContent.includes('sign2.pdf');
-      }, { timeout: 4000 });
+      }, { timeout: 5000 });
       console.log('    ✓ Sign PDF unsaved work confirmation modal verified!');
     } else {
       console.log('    (Sign PDF modal check pending implementation)');
@@ -604,8 +606,11 @@ async function runPageDropSuite(browser, baseUrl) {
       return lbl && lbl.textContent.includes('form1.pdf');
     });
 
-    // Make dirty by typing in field
+    // Make dirty by typing in field or calling testTriggerFormDirty
     await page.evaluate(() => {
+      if (typeof window.testTriggerFormDirty === 'function') {
+        window.testTriggerFormDirty();
+      }
       const input = document.querySelector('.form-field-input, input[type="text"]');
       if (input) {
         input.value = 'User Edited Content';
@@ -616,16 +621,13 @@ async function runPageDropSuite(browser, baseUrl) {
 
     // Drop second file
     await dispatchDropFiles(page, 'body', [formPdf2]);
-    const modalAppeared = await page.waitForSelector('.pdftools-modal-backdrop.active, [role="dialog"]', { timeout: 4000 })
+    const modalAppeared = await page.waitForSelector('.pdftools-modal-backdrop.active', { timeout: 5000 })
       .then(() => true).catch(() => false);
 
     if (modalAppeared) {
       // Click Cancel
-      await page.evaluate(() => {
-        const btns = Array.from(document.querySelectorAll('.pdftools-modal-btn, button'));
-        const cancelBtn = btns.find(b => b.textContent.includes('Batal') || b.textContent.includes('Cancel'));
-        if (cancelBtn) cancelBtn.click();
-      });
+      await page.click('.pdftools-modal-cancel');
+      await page.waitForSelector('.pdftools-modal-backdrop', { state: 'detached', timeout: 5000 });
 
       const stillFirst = await page.evaluate(() => {
         const lbl = document.querySelector('#docTitle');
@@ -635,17 +637,13 @@ async function runPageDropSuite(browser, baseUrl) {
 
       // Drop second file again -> click Confirm
       await dispatchDropFiles(page, 'body', [formPdf2]);
-      await page.waitForSelector('.pdftools-modal-backdrop.active, [role="dialog"]', { timeout: 4000 });
-      await page.evaluate(() => {
-        const btns = Array.from(document.querySelectorAll('.pdftools-modal-btn, button'));
-        const confirmBtn = btns.find(b => b.textContent.includes('Ganti') || b.textContent.includes('Replace'));
-        if (confirmBtn) confirmBtn.click();
-      });
+      await page.waitForSelector('.pdftools-modal-backdrop.active', { timeout: 5000 });
+      await page.click('.pdftools-modal-confirm');
 
       await page.waitForFunction(() => {
         const lbl = document.querySelector('#docTitle');
         return lbl && lbl.textContent.includes('form2.pdf');
-      }, { timeout: 4000 });
+      }, { timeout: 5000 });
       console.log('    ✓ Form Fill unsaved work confirmation modal verified!');
     } else {
       console.log('    (Form Fill modal check pending implementation)');

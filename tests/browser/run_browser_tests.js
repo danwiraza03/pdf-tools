@@ -24,6 +24,7 @@ const { run: runLaunchHelperTest } = require('../test_launch_helper');
 const { runSignFlowSuite } = require('./test_sign_flow');
 const { runA11ySuite } = require('./test_a11y_axe');
 const { runPageDropSuite } = require('./test_page_drop');
+const { runMergeDropzoneSuite } = require('./test_merge_dropzone');
 
 const TEST_PORT = 8765;
 const BASE_URL = `http://127.0.0.1:${TEST_PORT}`;
@@ -291,6 +292,13 @@ async function main() {
         name: 'Whole Page Drag & Drop (PageDrop) Across All Tools',
         run: async () => {
           await runPageDropSuite(browser, BASE_URL);
+        }
+      },
+      {
+        id: 'mergedropzone',
+        name: 'Merge Page Dropzone & Drag-and-Drop Suite',
+        run: async () => {
+          await runMergeDropzoneSuite(browser, BASE_URL);
         }
       }
     ];

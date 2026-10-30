@@ -9,7 +9,6 @@
   document.addEventListener('DOMContentLoaded', function () {
       const dropzoneEl = document.getElementById('dropzone');
       const organizerArea = document.getElementById('organizerArea');
-      const mergeDragOverlay = document.getElementById('mergeDragOverlay');
       const mergePageGrid = document.getElementById('mergePageGrid');
       const organizerCount = document.getElementById('organizerCount');
       const addMoreFilesBtn = document.getElementById('addMoreFilesBtn');
@@ -253,60 +252,24 @@
       });
 
       // ============================================================
-      // DRAG & DROP EXTERNAL FILES ON WORKSPACE / OVERLAY
+      // DRAG & DROP PDF FILES ANYWHERE ON THE PAGE (SHARED COMPONENT)
       // ============================================================
       function isExternalFileDrag(e) {
-        if (!e.dataTransfer) return false;
+        if (!e || !e.dataTransfer) return false;
         const types = Array.from(e.dataTransfer.types || []);
         return types.includes('Files');
       }
 
-      let workspaceDragCounter = 0;
-
-      window.addEventListener('dragenter', function (e) {
-        if (organizerArea.style.display !== 'none' && isExternalFileDrag(e)) {
-          e.preventDefault();
-          workspaceDragCounter++;
-          if (mergeDragOverlay) mergeDragOverlay.style.display = 'flex';
-        }
-      });
-
-      window.addEventListener('dragover', function (e) {
-        if (organizerArea.style.display !== 'none' && isExternalFileDrag(e)) {
-          e.preventDefault();
-          if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
-          if (mergeDragOverlay) mergeDragOverlay.style.display = 'flex';
-        }
-      });
-
-      window.addEventListener('dragleave', function (e) {
-        if (organizerArea.style.display !== 'none' && isExternalFileDrag(e)) {
-          e.preventDefault();
-          workspaceDragCounter--;
-          if (workspaceDragCounter <= 0) {
-            workspaceDragCounter = 0;
-            if (mergeDragOverlay) mergeDragOverlay.style.display = 'none';
+      if (PDFTools.PageDrop) {
+        PDFTools.PageDrop.attach({
+          accept: '.pdf',
+          multiple: true,
+          enabled: () => organizerArea.style.display !== 'none' && fileGroups.length > 0,
+          onFiles: async function (files) {
+            await handleNewFilesAdded(files);
           }
-        }
-      });
-
-      window.addEventListener('drop', async function (e) {
-        if (organizerArea.style.display !== 'none' && isExternalFileDrag(e)) {
-          e.preventDefault();
-          workspaceDragCounter = 0;
-          if (mergeDragOverlay) mergeDragOverlay.style.display = 'none';
-          const dt = e.dataTransfer;
-          if (!dt) return;
-          const droppedFiles = Array.from(dt.files || []).filter(function (f) {
-            return f.name.toLowerCase().endsWith('.pdf') || f.type === 'application/pdf';
-          });
-          if (droppedFiles.length > 0) {
-            await handleNewFilesAdded(droppedFiles);
-          } else if ((dt.files || []).length > 0) {
-            PDFTools.Toast.error(PDFTools.i18n.t('error.unsupported_format', 'Please drop PDF files (.pdf)'));
-          }
-        }
-      });
+        });
+      }
 
       // ============================================================
       // FILE LOADING

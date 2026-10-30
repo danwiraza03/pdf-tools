@@ -50,17 +50,6 @@
         <!-- Hidden extra file input for "+ Add More" -->
         <input type="file" id="extraFileInput" accept="application/pdf,.pdf" multiple style="display: none;">
 
-        <!-- Workspace Drag & Drop Overlay for adding more files -->
-        <div id="mergeDragOverlay" class="merge-drag-overlay" style="display: none;">
-          <div class="merge-drag-overlay-card">
-            <div class="merge-drag-overlay-icon">
-              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg>
-            </div>
-            <div class="merge-drag-overlay-title" data-i18n="merge.drop_more_title">Drop PDF files here to add</div>
-            <div class="merge-drag-overlay-subtitle" data-i18n="merge.drop_more_desc">Drop anywhere on the workspace to add more files to merge</div>
-          </div>
-        </div>
-
         <!-- Main Page Organizer Area (Opens immediately on file drop) -->
         <div id="organizerArea" class="merge-organizer-wrapper" style="display: none;">
           <!-- Toolbar -->
@@ -252,6 +241,7 @@
   <script src="../js/components/modal.js"></script>
   <script src="../js/core/pdf-protect.js"></script>
   <script src="../js/components/header.js"></script>
+  <script src="../js/components/page-drop.js"></script>
   <script src="../js/app.js"></script>
 
   <!-- Tool Script -->

@@ -28,6 +28,7 @@ PDFTools.Toast = (function () {
     var icons = {
       success: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align: middle;"><polyline points="20 6 9 17 4 12"/></svg>',
       error: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align: middle;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+      warning: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
       info: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>'
     };
     var iconSpan = '<span style="display:inline-flex;align-items:center;margin-right:6px;">' + (icons[type] || '') + '</span> ';
@@ -69,6 +70,7 @@ PDFTools.Toast = (function () {
   return {
     success: function (msg, dur) { show(msg, 'success', dur); },
     error: function (msg, dur) { show(msg, 'error', dur); },
+    warning: function (msg, dur) { show(msg, 'warning', dur); },
     info: function (msg, dur) { show(msg, 'info', dur); },
     action: function (msg, actionText, onAction, dur) {
       show(msg, 'info', dur !== undefined ? dur : 0, { text: actionText, onClick: onAction });

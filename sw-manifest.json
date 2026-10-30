@@ -1,9 +1,9 @@
 {
-  "version": "pdf-tools-v3bf6c43f54",
-  "compositeHash": "3bf6c43f545af6e0bddbb9d7a6e19740727875da2f2b293cac81f4bced46184a",
-  "builtAt": "2026-10-30T08:36:08.894Z",
+  "version": "pdf-tools-v13300db377",
+  "compositeHash": "13300db37731de0cdb820d768ff77ef3d2d3e572113ed2e7f1edfcee027b0b26",
+  "builtAt": "2026-10-30T09:11:04.719Z",
   "totalFiles": 92,
-  "totalBytes": 3747033,
+  "totalBytes": 3745891,
   "totalMB": "3.57",
   "files": [
     {
@@ -88,13 +88,13 @@
     },
     {
       "url": "./js/components/page-drop.js",
-      "size": 9546,
-      "hash": "bf477ff4f014"
+      "size": 10274,
+      "hash": "6fe07893aa82"
     },
     {
       "url": "./js/components/toast.js",
-      "size": 3057,
-      "hash": "2f81bfc25858"
+      "size": 3443,
+      "hash": "c8688ece343a"
     },
     {
       "url": "./js/core/docx-to-pdf.js",
@@ -253,8 +253,8 @@
     },
     {
       "url": "./js/pages/form-fill.js",
-      "size": 19043,
-      "hash": "98967b48b850"
+      "size": 19176,
+      "hash": "7429b7eabac8"
     },
     {
       "url": "./js/pages/grayscale.js",
@@ -268,8 +268,8 @@
     },
     {
       "url": "./js/pages/merge.js",
-      "size": 80517,
-      "hash": "239ce3aa755f"
+      "size": 78927,
+      "hash": "54b6b0a189b6"
     },
     {
       "url": "./js/pages/ocr.js",
@@ -398,8 +398,8 @@
     },
     {
       "url": "./pages/merge.html",
-      "size": 17649,
-      "hash": "5d1b0357a93b"
+      "size": 16850,
+      "hash": "86de54c8ea2a"
     },
     {
       "url": "./pages/ocr.html",

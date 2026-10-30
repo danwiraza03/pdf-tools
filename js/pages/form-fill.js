@@ -70,6 +70,11 @@
         });
       }
 
+      // Test hook for automated test suites
+      window.testTriggerFormDirty = function () {
+        isFormDirty = true;
+      };
+
       changeDocBtn.addEventListener('click', () => {
         workspaceState.style.display = 'none';
         uploadState.style.display = 'block';

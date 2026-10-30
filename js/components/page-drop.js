@@ -100,6 +100,18 @@
     }
   }
 
+  // Prevent browser default navigation when dropping files anywhere on window
+  window.addEventListener('dragover', function (e) {
+    if (isExternalFileDrag(e)) {
+      e.preventDefault();
+    }
+  }, false);
+  window.addEventListener('drop', function (e) {
+    if (isExternalFileDrag(e)) {
+      e.preventDefault();
+    }
+  }, false);
+
   const PageDrop = {
     attach: function (options) {
       options = options || {};
@@ -140,6 +152,7 @@
         if (!isExternalFileDrag(e)) return;
         if (!isPageReady()) return;
         e.preventDefault();
+        e.stopPropagation();
         dragCounter++;
         updateOverlayText(overlay, multiple);
         overlay.style.display = 'flex';
@@ -149,6 +162,7 @@
         if (!isExternalFileDrag(e)) return;
         if (!isPageReady()) return;
         e.preventDefault();
+        e.stopPropagation();
         if (e.dataTransfer) {
           e.dataTransfer.dropEffect = 'copy';
         }
@@ -175,6 +189,7 @@
         }
 
         e.preventDefault();
+        e.stopPropagation();
         dragCounter = 0;
         overlay.style.display = 'none';
 
@@ -185,10 +200,16 @@
         const unsupportedCount = droppedFiles.length - validFiles.length;
 
         if (unsupportedCount > 0) {
-          const tmpl = (PDFTools.i18n && PDFTools.i18n.t('page_drop.unsupported_skipped')) ||
+          const tmpl = (window.PDFTools && PDFTools.i18n && PDFTools.i18n.t('page_drop.unsupported_skipped')) ||
                        '{n} berkas tidak didukung dilewati';
-          if (PDFTools.Toast) {
-            PDFTools.Toast.warning(tmpl.replace('{n}', String(unsupportedCount)));
+          const msg = tmpl.replace('{n}', String(unsupportedCount));
+          const toast = window.PDFTools && window.PDFTools.Toast;
+          if (toast) {
+            if (typeof toast.warning === 'function') {
+              toast.warning(msg);
+            } else if (typeof toast.info === 'function') {
+              toast.info(msg);
+            }
           }
         }
 
@@ -229,18 +250,18 @@
         }
       }
 
-      window.addEventListener('dragenter', onDragEnter);
-      window.addEventListener('dragover', onDragOver);
-      window.addEventListener('dragleave', onDragLeave);
-      window.addEventListener('drop', onDrop);
+      window.addEventListener('dragenter', onDragEnter, true);
+      window.addEventListener('dragover', onDragOver, true);
+      window.addEventListener('dragleave', onDragLeave, true);
+      window.addEventListener('drop', onDrop, true);
 
       return {
         overlayEl: overlay,
         detach: function () {
-          window.removeEventListener('dragenter', onDragEnter);
-          window.removeEventListener('dragover', onDragOver);
-          window.removeEventListener('dragleave', onDragLeave);
-          window.removeEventListener('drop', onDrop);
+          window.removeEventListener('dragenter', onDragEnter, true);
+          window.removeEventListener('dragover', onDragOver, true);
+          window.removeEventListener('dragleave', onDragLeave, true);
+          window.removeEventListener('drop', onDrop, true);
           if (overlay && overlay.parentNode) {
             overlay.parentNode.removeChild(overlay);
           }
