@@ -1,10 +1,10 @@
 {
-  "version": "pdf-tools-vf55f8f697b",
-  "compositeHash": "f55f8f697b8a5bdd85adbc11cff0c021df677be3def8d7b570d718b3439f4e16",
-  "builtAt": "2026-11-02T04:12:52.713Z",
+  "version": "pdf-tools-v0e14b59328",
+  "compositeHash": "0e14b59328da80ca26b61ec6ccd27be6d4e3d486247a4f42a2705675bf02618b",
+  "builtAt": "2026-11-02T07:41:45.689Z",
   "totalFiles": 92,
-  "totalBytes": 3777770,
-  "totalMB": "3.60",
+  "totalBytes": 3787491,
+  "totalMB": "3.61",
   "files": [
     {
       "url": "./css/home.css",
@@ -278,8 +278,8 @@
     },
     {
       "url": "./js/pages/page-number.js",
-      "size": 11642,
-      "hash": "f8ad38f933d3"
+      "size": 18911,
+      "hash": "6fb9720dc653"
     },
     {
       "url": "./js/pages/pdf-to-docx.js",
@@ -348,8 +348,8 @@
     },
     {
       "url": "./js/utils/i18n.js",
-      "size": 85020,
-      "hash": "cee109132c8b"
+      "size": 85145,
+      "hash": "2507cb588d18"
     },
     {
       "url": "./manifest.json",
@@ -408,8 +408,8 @@
     },
     {
       "url": "./pages/page-number.html",
-      "size": 13851,
-      "hash": "872a011db714"
+      "size": 16178,
+      "hash": "0fee8099631b"
     },
     {
       "url": "./pages/pdf-to-docx.html",
