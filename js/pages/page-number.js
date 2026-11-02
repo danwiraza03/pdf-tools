@@ -284,7 +284,16 @@
 
       liveMarker.textContent = previewText;
       liveMarker.style.color = colorPicker.value;
-      liveMarker.style.fontFamily = fontFamilySelect.value === 'TimesRoman' ? 'Times New Roman, serif' : (fontFamilySelect.value === 'Courier' ? 'Courier, monospace' : 'Helvetica, sans-serif');
+      const fontFamVal = fontFamilySelect.value;
+      if (fontFamVal === 'TimesRoman') {
+        liveMarker.style.fontFamily = '"Times New Roman", Times, serif';
+      } else if (fontFamVal === 'Courier') {
+        liveMarker.style.fontFamily = '"Courier New", Courier, monospace';
+      } else if (fontFamVal === 'Arial') {
+        liveMarker.style.fontFamily = 'Arial, Helvetica, sans-serif';
+      } else {
+        liveMarker.style.fontFamily = 'Helvetica, Arial, sans-serif';
+      }
 
       const sheetW = previewSheet ? (previewSheet.clientWidth || 300) : 300;
       const scaleRatio = pdfPageWidth > 0 ? (sheetW / pdfPageWidth) : 0.5;

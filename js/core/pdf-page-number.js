@@ -45,11 +45,12 @@ PDFTools.PageNumber = (function () {
     const fontSize = parseInt(options.fontSize || 10, 10);
     const margin = parseInt(options.margin || 25, 10);
     const colorHex = options.color || '#333333';
-    const fontName = options.fontFamily || 'Helvetica'; // 'Helvetica', 'TimesRoman', 'Courier'
+    const fontName = options.fontFamily || 'Helvetica'; // 'Arial', 'Helvetica', 'TimesRoman', 'Courier'
 
     let font = await pdfDoc.embedFont(StandardFonts.Helvetica);
     if (fontName === 'TimesRoman') font = await pdfDoc.embedFont(StandardFonts.TimesRoman);
     if (fontName === 'Courier') font = await pdfDoc.embedFont(StandardFonts.Courier);
+    if (fontName === 'Arial' || fontName === 'Helvetica') font = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
     const textColor = parseColorRgb(colorHex, rgb);
 

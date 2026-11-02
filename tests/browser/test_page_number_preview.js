@@ -133,6 +133,13 @@ async function runPageNumberPreviewSuite(browser, baseUrl) {
     assert.strictEqual(numOnlyText, '2', 'Format number_only pada halaman 2 harus menampilkan "2"');
     console.log('  ✓ Pengubahan format penomoran langsung tercermin pada live placement preview.');
 
+    // 6b. Test Arial font selection
+    await page.selectOption('#fontFamilySelect', 'Arial');
+    await page.waitForTimeout(100);
+    const markerFont = await page.evaluate(() => document.getElementById('liveMarker').style.fontFamily);
+    assert(markerFont.includes('Arial'), 'Marker font family harus menyertakan Arial');
+    console.log('  ✓ Pemilihan font Arial berhasil diterapkan pada marker penomoran.');
+
     // 7. Test Apply Page Numbers & Reset
     await page.click('#applyPageNumbersBtn');
     await page.waitForSelector('.toast', { timeout: 8000 });
@@ -165,3 +172,4 @@ if (require.main === module) {
 }
 
 module.exports = { runPageNumberPreviewSuite };
+

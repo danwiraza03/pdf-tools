@@ -1,9 +1,9 @@
 {
-  "version": "pdf-tools-v0e14b59328",
-  "compositeHash": "0e14b59328da80ca26b61ec6ccd27be6d4e3d486247a4f42a2705675bf02618b",
-  "builtAt": "2026-11-02T07:41:45.689Z",
+  "version": "pdf-tools-v5fce1ff21a",
+  "compositeHash": "5fce1ff21a8f0fd59d20ebeaf3029a23ac37c4648af3e0baa4f1e86e001a8d4a",
+  "builtAt": "2026-11-02T08:01:00.029Z",
   "totalFiles": 92,
-  "totalBytes": 3787491,
+  "totalBytes": 3787964,
   "totalMB": "3.61",
   "files": [
     {
@@ -138,8 +138,8 @@
     },
     {
       "url": "./js/core/pdf-page-number.js",
-      "size": 4969,
-      "hash": "3d835a622d93"
+      "size": 5092,
+      "hash": "1c49822f747f"
     },
     {
       "url": "./js/core/pdf-protect.js",
@@ -278,8 +278,8 @@
     },
     {
       "url": "./js/pages/page-number.js",
-      "size": 18911,
-      "hash": "6fb9720dc653"
+      "size": 19206,
+      "hash": "61b2dbe4938c"
     },
     {
       "url": "./js/pages/pdf-to-docx.js",
@@ -408,8 +408,8 @@
     },
     {
       "url": "./pages/page-number.html",
-      "size": 16178,
-      "hash": "0fee8099631b"
+      "size": 16233,
+      "hash": "1822aae1090e"
     },
     {
       "url": "./pages/pdf-to-docx.html",
