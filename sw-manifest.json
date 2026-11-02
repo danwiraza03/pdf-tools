@@ -1,10 +1,10 @@
 {
-  "version": "pdf-tools-v606f4e4655",
-  "compositeHash": "606f4e46554feeeb59285c7f4e7e9c03c965896d722cca992d92b1987bd001c9",
-  "builtAt": "2026-10-30T09:24:42.169Z",
+  "version": "pdf-tools-v618752b5e6",
+  "compositeHash": "618752b5e6eec90d76280fa6d0e692b6deca7c47087d8ad9aea6c066b52b7782",
+  "builtAt": "2026-11-02T03:24:03.268Z",
   "totalFiles": 92,
-  "totalBytes": 3746040,
-  "totalMB": "3.57",
+  "totalBytes": 3754028,
+  "totalMB": "3.58",
   "files": [
     {
       "url": "./css/home.css",
@@ -158,8 +158,8 @@
     },
     {
       "url": "./js/core/pdf-rotate.js",
-      "size": 1630,
-      "hash": "78fd586bb077"
+      "size": 3273,
+      "hash": "28eff1cabaf4"
     },
     {
       "url": "./js/core/pdf-split.js",
@@ -313,8 +313,8 @@
     },
     {
       "url": "./js/pages/rotate.js",
-      "size": 6516,
-      "hash": "a342eb571bfd"
+      "size": 10870,
+      "hash": "5fd3451f5379"
     },
     {
       "url": "./js/pages/sign.js",
@@ -348,8 +348,8 @@
     },
     {
       "url": "./js/utils/i18n.js",
-      "size": 84053,
-      "hash": "e1bd12be5d44"
+      "size": 84708,
+      "hash": "ac84a03b553d"
     },
     {
       "url": "./manifest.json",
@@ -443,8 +443,8 @@
     },
     {
       "url": "./pages/rotate.html",
-      "size": 8786,
-      "hash": "300ea0af3092"
+      "size": 10122,
+      "hash": "4103faeedf22"
     },
     {
       "url": "./pages/sign.html",

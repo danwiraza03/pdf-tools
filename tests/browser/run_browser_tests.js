@@ -25,6 +25,7 @@ const { runSignFlowSuite } = require('./test_sign_flow');
 const { runA11ySuite } = require('./test_a11y_axe');
 const { runPageDropSuite } = require('./test_page_drop');
 const { runMergeDropzoneSuite } = require('./test_merge_dropzone');
+const { runRotatePageActionsSuite } = require('./test_rotate_page_actions');
 
 const TEST_PORT = 8765;
 const BASE_URL = `http://127.0.0.1:${TEST_PORT}`;
@@ -299,6 +300,13 @@ async function main() {
         name: 'Merge Page Dropzone & Drag-and-Drop Suite',
         run: async () => {
           await runMergeDropzoneSuite(browser, BASE_URL);
+        }
+      },
+      {
+        id: 'rotateactions',
+        name: 'Rotate PDF Page Card Actions (Left, Right, Delete) Suite',
+        run: async () => {
+          await runRotatePageActionsSuite(browser, BASE_URL);
         }
       }
     ];

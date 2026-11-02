@@ -434,6 +434,13 @@ PDFTools.i18n = (function () {
       'rotate.left': 'Rotate Left All',
       'rotate.right': 'Rotate Right All',
       'rotate.180': 'Rotate 180° All',
+      'rotate.page_left': 'Rotate left',
+      'rotate.page_right': 'Rotate right',
+      'rotate.delete_page': 'Delete page',
+      'rotate.page_deleted': 'Page {n} deleted',
+      'rotate.page_restored': 'Page {n} restored',
+      'rotate.min_one_page': 'At least one page must remain.',
+      'action.undo': 'Undo',
 
       // Compress Tool
       'compress.level_label': 'Compression Profile / Level',
@@ -1209,6 +1216,13 @@ PDFTools.i18n = (function () {
       'rotate.left': 'Putar Kiri Semua',
       'rotate.right': 'Putar Kanan Semua',
       'rotate.180': 'Putar 180° Semua',
+      'rotate.page_left': 'Putar kiri',
+      'rotate.page_right': 'Putar kanan',
+      'rotate.delete_page': 'Hapus halaman',
+      'rotate.page_deleted': 'Halaman {n} dihapus',
+      'rotate.page_restored': 'Halaman {n} dipulihkan',
+      'rotate.min_one_page': 'Minimal satu halaman harus tersisa.',
+      'action.undo': 'Urungkan',
 
       // Compress Tool
       'compress.level_label': 'Profil / Level Kompresi',
