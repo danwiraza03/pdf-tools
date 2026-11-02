@@ -81,6 +81,10 @@
       color: #ef4444;
       border-color: #ef4444;
     }
+    .rotate-preview-modal .merge-modal-badge {
+      background: color-mix(in srgb, var(--tool-color, #3b82f6), transparent 85%);
+      color: var(--tool-color, #3b82f6);
+    }
     @media (pointer: coarse) {
       .page-card-actions {
         padding: 8px;
@@ -166,6 +170,37 @@
       </div>
     </div>
   </main>
+
+  <!-- Quick Preview Modal -->
+  <div id="previewModal" class="merge-modal-backdrop rotate-preview-modal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="modalFileName">
+    <div class="merge-modal-dialog">
+      <div class="merge-modal-header">
+        <div class="merge-modal-title-wrap">
+          <h3 id="modalFileName" class="merge-modal-title">Document Preview</h3>
+          <span id="modalPageBadge" class="merge-modal-badge">Page 1 / 1</span>
+        </div>
+        <div class="merge-modal-header-actions">
+          <button type="button" id="modalRotateBtn" class="merge-modal-btn" title="Rotate Clockwise" aria-label="Rotate Clockwise">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><polyline points="21 3 21 8 16 8"/></svg>
+          </button>
+          <button type="button" id="modalCloseBtn" class="merge-modal-btn btn-close" title="Close (Esc)" aria-label="Close">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="merge-modal-body">
+        <button type="button" id="modalPrevBtn" class="merge-modal-nav-btn prev" title="Previous Page" aria-label="Previous Page">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <div class="merge-modal-canvas-wrap">
+          <canvas id="modalCanvas"></canvas>
+        </div>
+        <button type="button" id="modalNextBtn" class="merge-modal-nav-btn next" title="Next Page" aria-label="Next Page">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
 
   <footer class="footer">
     <div class="container">

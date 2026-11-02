@@ -16,7 +16,20 @@
     const downloadBtn = document.getElementById('downloadBtn');
     const resetBtn = document.getElementById('resetBtn');
 
+    // Quick Preview Modal Elements
+    const previewModal = document.getElementById('previewModal');
+    const modalFileName = document.getElementById('modalFileName');
+    const modalPageBadge = document.getElementById('modalPageBadge');
+    const modalRotateBtn = document.getElementById('modalRotateBtn');
+    const modalCloseBtn = document.getElementById('modalCloseBtn');
+    const modalPrevBtn = document.getElementById('modalPrevBtn');
+    const modalNextBtn = document.getElementById('modalNextBtn');
+    const modalCanvas = document.getElementById('modalCanvas');
+
     let currentFile = null;
+    let pdfjsDoc = null;
+    let modalCurrentIndex = 0;
+    let modalRenderTask = null;
     let rotations = {}; // pageIndex: degrees (0, 90, 180, 270)
     let deletedPages = new Set(); // set of 0-based page indices
     let rotatedPdfBytes = null;
@@ -38,6 +51,9 @@
         rotations[idx] = ((rotations[idx] || 0) + degDelta + 360) % 360;
         updateCardRotation(card, rotations[idx]);
       });
+      if (previewModal.style.display === 'flex') {
+        modalCanvas.style.transform = `rotate(${rotations[modalCurrentIndex] || 0}deg)`;
+      }
     }
 
     function handleDeletePage(idx, card) {
@@ -48,6 +64,10 @@
         const minMsg = (PDFTools.i18n && PDFTools.i18n.t('rotate.min_one_page')) || 'At least one page must remain.';
         if (PDFTools.Toast) PDFTools.Toast.error(minMsg);
         return;
+      }
+
+      if (previewModal.style.display === 'flex' && modalCurrentIndex === idx) {
+        closePreviewModal();
       }
 
       deletedPages.add(idx);
@@ -88,8 +108,122 @@
       if (PDFTools.Toast) PDFTools.Toast.success(msg);
     }
 
+    function getActivePageIndices() {
+      const cards = pageGrid.querySelectorAll('.page-card');
+      const active = [];
+      cards.forEach((card, idx) => {
+        if (!deletedPages.has(idx)) {
+          active.push(idx);
+        }
+      });
+      return active;
+    }
+
+    function openPreviewModal(pageIndex) {
+      if (!pdfjsDoc) return;
+      modalCurrentIndex = pageIndex;
+      previewModal.style.display = 'flex';
+      renderModalPage();
+    }
+
+    function closePreviewModal() {
+      if (modalRenderTask) {
+        try { modalRenderTask.cancel(); } catch (_) {}
+        modalRenderTask = null;
+      }
+      previewModal.style.display = 'none';
+    }
+
+    async function renderModalPage() {
+      if (!pdfjsDoc) return;
+      const activeIndices = getActivePageIndices();
+      const activePos = activeIndices.indexOf(modalCurrentIndex);
+
+      modalPrevBtn.disabled = (activePos <= 0);
+      modalNextBtn.disabled = (activePos === -1 || activePos >= activeIndices.length - 1);
+
+      const displayPageNum = modalCurrentIndex + 1;
+      const totalPages = pdfjsDoc.numPages;
+      const fileName = currentFile ? currentFile.name : 'Document';
+      modalFileName.textContent = fileName;
+      const pageLabel = (PDFTools.i18n && PDFTools.i18n.t('page')) || 'Page';
+      modalPageBadge.textContent = `${pageLabel} ${displayPageNum} / ${totalPages}`;
+
+      const currentRot = rotations[modalCurrentIndex] || 0;
+      modalCanvas.style.transform = `rotate(${currentRot}deg)`;
+
+      if (modalRenderTask) {
+        try { modalRenderTask.cancel(); } catch (_) {}
+        modalRenderTask = null;
+      }
+
+      try {
+        const page = await pdfjsDoc.getPage(modalCurrentIndex + 1);
+        const viewport = page.getViewport({ scale: 1.2 });
+        modalCanvas.width = viewport.width;
+        modalCanvas.height = viewport.height;
+        const ctx = modalCanvas.getContext('2d');
+        modalRenderTask = page.render({
+          canvasContext: ctx,
+          viewport: viewport
+        });
+        await modalRenderTask.promise;
+        modalRenderTask = null;
+      } catch (err) {
+        if (err && err.name !== 'RenderingCancelledException') {
+          console.error('Modal render error:', err);
+        }
+      }
+    }
+
+    modalPrevBtn.addEventListener('click', function () {
+      const activeIndices = getActivePageIndices();
+      const activePos = activeIndices.indexOf(modalCurrentIndex);
+      if (activePos > 0) {
+        modalCurrentIndex = activeIndices[activePos - 1];
+        renderModalPage();
+      }
+    });
+
+    modalNextBtn.addEventListener('click', function () {
+      const activeIndices = getActivePageIndices();
+      const activePos = activeIndices.indexOf(modalCurrentIndex);
+      if (activePos !== -1 && activePos < activeIndices.length - 1) {
+        modalCurrentIndex = activeIndices[activePos + 1];
+        renderModalPage();
+      }
+    });
+
+    modalRotateBtn.addEventListener('click', function () {
+      rotations[modalCurrentIndex] = ((rotations[modalCurrentIndex] || 0) + 90) % 360;
+      const cards = pageGrid.querySelectorAll('.page-card');
+      const card = cards[modalCurrentIndex];
+      if (card) {
+        updateCardRotation(card, rotations[modalCurrentIndex]);
+      }
+      modalCanvas.style.transform = `rotate(${rotations[modalCurrentIndex]}deg)`;
+    });
+
+    modalCloseBtn.addEventListener('click', closePreviewModal);
+
+    previewModal.addEventListener('click', function (e) {
+      if (e.target === previewModal) closePreviewModal();
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (previewModal.style.display !== 'flex') return;
+      if (e.key === 'Escape') {
+        closePreviewModal();
+      } else if (e.key === 'ArrowLeft') {
+        modalPrevBtn.click();
+      } else if (e.key === 'ArrowRight') {
+        modalNextBtn.click();
+      }
+    });
+
     async function loadFile(file) {
       currentFile = file;
+      closePreviewModal();
       dropzoneEl.style.display = 'none';
       controlsPanel.style.display = 'block';
       pageGrid.style.display = 'grid';
@@ -99,18 +233,28 @@
       rotations = {};
       deletedPages.clear();
 
-      const res = await PDFTools.Preview.renderAllPages(currentFile, pageGrid, {
+      let arrayBuffer;
+      try {
+        arrayBuffer = await PDFTools.FileUtils.readAsArrayBuffer(file);
+        pdfjsDoc = await pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer.slice(0)) }).promise;
+      } catch (e) {
+        console.warn('PDF.js document load for preview failed:', e);
+        pdfjsDoc = null;
+      }
+
+      const res = await PDFTools.Preview.renderAllPages(arrayBuffer || file, pageGrid, {
         selectable: false
       });
 
       const tLeft = (PDFTools.i18n && PDFTools.i18n.t('rotate.page_left')) || 'Rotate left';
       const tRight = (PDFTools.i18n && PDFTools.i18n.t('rotate.page_right')) || 'Rotate right';
+      const tView = (PDFTools.i18n && PDFTools.i18n.t('rotate.view_page')) || 'Enlarge page preview';
       const tDelete = (PDFTools.i18n && PDFTools.i18n.t('rotate.delete_page')) || 'Delete page';
 
       res.pageCards.forEach((card, idx) => {
         rotations[idx] = 0;
 
-        // Top Actions Toolbar (Rotate Left, Rotate Right, Delete Page)
+        // Top Actions Toolbar (Rotate Left, Rotate Right, Enlarge View, Delete Page)
         const actionsBar = document.createElement('div');
         actionsBar.className = 'page-card-actions';
 
@@ -128,6 +272,13 @@
         rotRightBtn.setAttribute('aria-label', `${tRight} (${idx + 1})`);
         rotRightBtn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><polyline points="21 3 21 8 16 8"/></svg>';
 
+        const viewBtn = document.createElement('button');
+        viewBtn.type = 'button';
+        viewBtn.className = 'page-action-btn page-action-view';
+        viewBtn.title = tView;
+        viewBtn.setAttribute('aria-label', `${tView} (${idx + 1})`);
+        viewBtn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+
         const deleteBtn = document.createElement('button');
         deleteBtn.type = 'button';
         deleteBtn.className = 'page-action-btn page-action-delete';
@@ -137,6 +288,7 @@
 
         actionsBar.appendChild(rotLeftBtn);
         actionsBar.appendChild(rotRightBtn);
+        actionsBar.appendChild(viewBtn);
         actionsBar.appendChild(deleteBtn);
 
         card.insertBefore(actionsBar, card.firstChild);
@@ -150,12 +302,23 @@
           e.stopPropagation();
           rotations[idx] = ((rotations[idx] || 0) - 90 + 360) % 360;
           updateCardRotation(card, rotations[idx]);
+          if (previewModal.style.display === 'flex' && modalCurrentIndex === idx) {
+            modalCanvas.style.transform = `rotate(${rotations[idx]}deg)`;
+          }
         });
 
         rotRightBtn.addEventListener('click', function (e) {
           e.stopPropagation();
           rotations[idx] = ((rotations[idx] || 0) + 90) % 360;
           updateCardRotation(card, rotations[idx]);
+          if (previewModal.style.display === 'flex' && modalCurrentIndex === idx) {
+            modalCanvas.style.transform = `rotate(${rotations[idx]}deg)`;
+          }
+        });
+
+        viewBtn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          openPreviewModal(idx);
         });
 
         deleteBtn.addEventListener('click', function (e) {
@@ -260,6 +423,8 @@
     }
 
     resetBtn.addEventListener('click', function () {
+      closePreviewModal();
+      pdfjsDoc = null;
       currentFile = null;
       rotatedPdfBytes = null;
       rotations = {};

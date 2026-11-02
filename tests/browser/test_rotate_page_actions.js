@@ -54,11 +54,13 @@ async function runRotatePageActionsSuite(browser, baseUrl) {
       const allActionBars = document.querySelectorAll('.page-card-actions');
       const allLeft = document.querySelectorAll('.page-action-rotate-left');
       const allRight = document.querySelectorAll('.page-action-rotate-right');
+      const allView = document.querySelectorAll('.page-action-view');
       const allDel = document.querySelectorAll('.page-action-delete');
       return {
         bars: allActionBars.length,
         left: allLeft.length,
         right: allRight.length,
+        view: allView.length,
         del: allDel.length
       };
     });
@@ -66,17 +68,56 @@ async function runRotatePageActionsSuite(browser, baseUrl) {
     assert.strictEqual(actionBtnsCount.bars, 3, 'Setiap kartu harus memiliki action bar');
     assert.strictEqual(actionBtnsCount.left, 3, 'Setiap kartu harus memiliki tombol rotate left');
     assert.strictEqual(actionBtnsCount.right, 3, 'Setiap kartu harus memiliki tombol rotate right');
+    assert.strictEqual(actionBtnsCount.view, 3, 'Setiap kartu harus memiliki tombol view / perbesar pratinjau');
     assert.strictEqual(actionBtnsCount.del, 3, 'Setiap kartu harus memiliki tombol delete');
-    console.log('  ✓ Tombol aksi (rotate left, rotate right, delete) tersedia pada setiap kartu pratinjau.');
+    console.log('  ✓ Tombol aksi (rotate left, rotate right, view/perbesar, delete) tersedia pada setiap kartu pratinjau.');
 
-    // 3. Test rotate right (+90°) on card 1
-    await page.click('.page-card:nth-child(1) .page-action-rotate-right');
-    const card1HasRot90 = await page.evaluate(() => {
-      const card = document.querySelector('.page-card:nth-child(1)');
-      return card && card.classList.contains('rotated-90');
+    // 2b. Test View / Enlarge preview modal
+    await page.click('.page-card:nth-child(1) .page-action-view');
+    await page.waitForSelector('#previewModal', { state: 'visible', timeout: 3000 });
+    const modalVisible = await page.evaluate(() => {
+      const modal = document.getElementById('previewModal');
+      const canvas = document.getElementById('modalCanvas');
+      return modal && window.getComputedStyle(modal).display === 'flex' && canvas && canvas.width > 0;
     });
-    assert.strictEqual(card1HasRot90, true, 'Card 1 harus memiliki kelas rotated-90 setelah klik rotate right');
-    console.log('  ✓ Tombol rotate right berhasil memutar halaman 90 derajat searah jarum jam.');
+    assert.strictEqual(modalVisible, true, 'Modal pratinjau harus tampil dengan display: flex dan canvas terisi');
+
+    // Test rotate inside modal
+    await page.click('#modalRotateBtn');
+    const modalRotated = await page.evaluate(() => {
+      const canvas = document.getElementById('modalCanvas');
+      const card = document.querySelector('.page-card:nth-child(1)');
+      return canvas && canvas.style.transform === 'rotate(90deg)' && card && card.classList.contains('rotated-90');
+    });
+    assert.strictEqual(modalRotated, true, 'Tombol rotate di dalam modal harus memutar canvas modal dan sinkron ke kartu');
+    console.log('  ✓ Tombol putar di dalam modal berhasil memutar halaman dan menyinkronkan kartu.');
+
+    // Close modal via close button
+    await page.click('#modalCloseBtn');
+    await page.waitForFunction(() => {
+      const modal = document.getElementById('previewModal');
+      return modal && window.getComputedStyle(modal).display === 'none';
+    }, { timeout: 3000 });
+    console.log('  ✓ Tombol tutup modal berhasil menutup modal pratinjau.');
+
+    // Also test Escape key closes the modal
+    await page.click('.page-card:nth-child(3) .page-action-view');
+    await page.waitForSelector('#previewModal', { state: 'visible', timeout: 3000 });
+    await page.keyboard.press('Escape');
+    await page.waitForFunction(() => {
+      const modal = document.getElementById('previewModal');
+      return modal && window.getComputedStyle(modal).display === 'none';
+    }, { timeout: 3000 });
+    console.log('  ✓ Tombol Escape berhasil menutup modal pratinjau.');
+
+    // 3. Test rotate right (+90°) on card 1 (90° -> 180°)
+    await page.click('.page-card:nth-child(1) .page-action-rotate-right');
+    const card1HasRot180 = await page.evaluate(() => {
+      const card = document.querySelector('.page-card:nth-child(1)');
+      return card && card.classList.contains('rotated-180');
+    });
+    assert.strictEqual(card1HasRot180, true, 'Card 1 harus memiliki kelas rotated-180 setelah klik rotate right');
+    console.log('  ✓ Tombol rotate right berhasil memutar halaman menjadi 180 derajat.');
 
     // 4. Test rotate left (-90°) on card 2 (0 - 90 = 270)
     await page.click('.page-card:nth-child(2) .page-action-rotate-left');

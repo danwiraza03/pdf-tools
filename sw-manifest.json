@@ -1,10 +1,10 @@
 {
-  "version": "pdf-tools-v618752b5e6",
-  "compositeHash": "618752b5e6eec90d76280fa6d0e692b6deca7c47087d8ad9aea6c066b52b7782",
-  "builtAt": "2026-11-02T03:24:03.268Z",
+  "version": "pdf-tools-vea013565f4",
+  "compositeHash": "ea013565f4a21cee82aa547518c6ce5995f1f2c3f3f1ed3088f69d7bdda37b33",
+  "builtAt": "2026-11-02T03:42:26.902Z",
   "totalFiles": 92,
-  "totalBytes": 3754028,
-  "totalMB": "3.58",
+  "totalBytes": 3762908,
+  "totalMB": "3.59",
   "files": [
     {
       "url": "./css/home.css",
@@ -313,8 +313,8 @@
     },
     {
       "url": "./js/pages/rotate.js",
-      "size": 10870,
-      "hash": "5fd3451f5379"
+      "size": 17230,
+      "hash": "6f7412e9c7e8"
     },
     {
       "url": "./js/pages/sign.js",
@@ -348,8 +348,8 @@
     },
     {
       "url": "./js/utils/i18n.js",
-      "size": 84708,
-      "hash": "ac84a03b553d"
+      "size": 84814,
+      "hash": "6cebd40cb854"
     },
     {
       "url": "./manifest.json",
@@ -443,8 +443,8 @@
     },
     {
       "url": "./pages/rotate.html",
-      "size": 10122,
-      "hash": "4103faeedf22"
+      "size": 12536,
+      "hash": "72462488f519"
     },
     {
       "url": "./pages/sign.html",
