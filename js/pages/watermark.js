@@ -365,19 +365,172 @@
         scheduleDebouncedPreview(100);
       });
 
-      // Color Swatches
-      document.querySelectorAll('#colorSwatches .color-swatch').forEach(swatch => {
-        swatch.addEventListener('click', function () {
-          document.querySelectorAll('#colorSwatches .color-swatch').forEach(s => s.classList.remove('active'));
-          swatch.classList.add('active');
-          selectedColor = swatch.getAttribute('data-color');
+      // Font Size Controls (Dynamic Custom Input + Stepper + Word Presets)
+      const wmCustomFontSize = document.getElementById('wmCustomFontSize');
+      const wmFontSize = document.getElementById('wmFontSize');
+      const wmFontSizeBadge = document.getElementById('wmFontSizeBadge');
+      const wmFontSizeDec = document.getElementById('wmFontSizeDec');
+      const wmFontSizeInc = document.getElementById('wmFontSizeInc');
+      const wmCustomOpt = document.getElementById('wmCustomOpt');
+
+      function getSelectedFontSize() {
+        if (wmCustomFontSize && wmCustomFontSize.value) {
+          const val = parseInt(wmCustomFontSize.value, 10);
+          if (!isNaN(val) && val > 0) return val;
+        }
+        if (wmFontSize && wmFontSize.value) {
+          const val = parseInt(wmFontSize.value, 10);
+          if (!isNaN(val) && val > 0) return val;
+        }
+        return 56;
+      }
+
+      function updateFontSizeUI(val, updateInput = true) {
+        val = parseInt(val, 10);
+        if (isNaN(val) || val < 1) val = 56;
+        if (val > 500) val = 500;
+
+        if (updateInput && wmCustomFontSize) {
+          wmCustomFontSize.value = val;
+        }
+        if (wmFontSizeBadge) {
+          wmFontSizeBadge.textContent = `${val} pt`;
+        }
+
+        // Update chips active state
+        document.querySelectorAll('.size-preset-chip').forEach(chip => {
+          if (parseInt(chip.getAttribute('data-size'), 10) === val) {
+            chip.classList.add('active');
+          } else {
+            chip.classList.remove('active');
+          }
+        });
+
+        // Sync dropdown
+        if (wmFontSize) {
+          let found = false;
+          for (let i = 0; i < wmFontSize.options.length; i++) {
+            if (wmFontSize.options[i].value === String(val)) {
+              wmFontSize.selectedIndex = i;
+              found = true;
+              break;
+            }
+          }
+          if (!found) {
+            if (wmCustomOpt) {
+              wmCustomOpt.value = String(val);
+              wmCustomOpt.textContent = `${val} pt`;
+              wmFontSize.value = String(val);
+            }
+          }
+        }
+      }
+
+      if (wmFontSize) {
+        wmFontSize.addEventListener('change', function () {
+          if (wmFontSize.value === 'custom') {
+            if (wmCustomFontSize) {
+              wmCustomFontSize.focus();
+              wmCustomFontSize.select();
+            }
+          } else {
+            const val = parseInt(wmFontSize.value, 10);
+            updateFontSizeUI(val, true);
+            scheduleDebouncedPreview(100);
+          }
+        });
+      }
+
+      if (wmCustomFontSize) {
+        wmCustomFontSize.addEventListener('input', function () {
+          const val = parseInt(wmCustomFontSize.value, 10);
+          if (!isNaN(val) && val > 0) {
+            updateFontSizeUI(val, false);
+            scheduleDebouncedPreview(200);
+          }
+        });
+        wmCustomFontSize.addEventListener('change', function () {
+          const val = parseInt(wmCustomFontSize.value, 10);
+          updateFontSizeUI(val, true);
           scheduleDebouncedPreview(100);
+        });
+      }
+
+      if (wmFontSizeDec) {
+        wmFontSizeDec.addEventListener('click', function () {
+          let current = getSelectedFontSize();
+          current = Math.max(6, current - 2);
+          updateFontSizeUI(current, true);
+          scheduleDebouncedPreview(100);
+        });
+      }
+
+      if (wmFontSizeInc) {
+        wmFontSizeInc.addEventListener('click', function () {
+          let current = getSelectedFontSize();
+          current = Math.min(300, current + 2);
+          updateFontSizeUI(current, true);
+          scheduleDebouncedPreview(100);
+        });
+      }
+
+      // Preset Chips
+      document.querySelectorAll('.size-preset-chip').forEach(chip => {
+        chip.addEventListener('click', function () {
+          const size = parseInt(chip.getAttribute('data-size'), 10);
+          if (size) {
+            updateFontSizeUI(size, true);
+            scheduleDebouncedPreview(100);
+          }
         });
       });
 
-      // Live Text & Font Size listeners
+      // Color Palette & Custom Picker
+      const wmCustomColorInput = document.getElementById('wmCustomColorInput');
+      const customColorSwatch = document.getElementById('customColorSwatch');
+      const wmColorHexLabel = document.getElementById('wmColorHexLabel');
+      const wmColorIndicator = document.getElementById('wmColorIndicator');
+
+      function setSelectedColor(hex) {
+        if (!hex) return;
+        selectedColor = hex;
+        if (wmColorHexLabel) wmColorHexLabel.textContent = hex.toUpperCase();
+        if (wmColorIndicator) wmColorIndicator.style.background = hex;
+        if (wmCustomColorInput) wmCustomColorInput.value = hex;
+
+        document.querySelectorAll('#colorSwatches .color-swatch').forEach(s => s.classList.remove('active'));
+
+        const matchingSwatch = Array.from(document.querySelectorAll('#colorSwatches .color-swatch')).find(
+          s => s.getAttribute('data-color') && s.getAttribute('data-color').toLowerCase() === hex.toLowerCase()
+        );
+
+        if (matchingSwatch) {
+          matchingSwatch.classList.add('active');
+        } else if (customColorSwatch) {
+          customColorSwatch.classList.add('active');
+        }
+
+        scheduleDebouncedPreview(100);
+      }
+
+      document.querySelectorAll('#colorSwatches .color-swatch[data-color]').forEach(swatch => {
+        swatch.addEventListener('click', function () {
+          const col = swatch.getAttribute('data-color');
+          if (col) setSelectedColor(col);
+        });
+      });
+
+      if (wmCustomColorInput) {
+        wmCustomColorInput.addEventListener('input', function (e) {
+          setSelectedColor(e.target.value);
+        });
+        wmCustomColorInput.addEventListener('change', function (e) {
+          setSelectedColor(e.target.value);
+        });
+      }
+
+      // Live Text listener
       document.getElementById('wmText').addEventListener('input', () => scheduleDebouncedPreview(300));
-      document.getElementById('wmFontSize').addEventListener('change', () => scheduleDebouncedPreview(100));
 
       // Preview handler (Requirement 1 & 3: page 1 of first file only with options.pages = [0], cancellable & debounced)
       async function generatePreview(opts = {}) {
@@ -402,7 +555,7 @@
 
         const text = document.getElementById('wmText').value.trim() || 'CONFIDENTIAL';
         const rotation = parseInt(wmRotationNum.value, 10) || 0;
-        const fontSize = parseInt(document.getElementById('wmFontSize').value, 10);
+        const fontSize = getSelectedFontSize();
         const opacity = (parseInt(wmOpacityNum.value, 10) || 30) / 100;
         const scale = (parseInt(wmScaleNum ? wmScaleNum.value : wmScaleRange.value, 10) || 30) / 100;
 
@@ -472,7 +625,7 @@
 
         const text = document.getElementById('wmText').value.trim() || 'CONFIDENTIAL';
         const rotation = parseInt(wmRotationNum.value, 10) || 0;
-        const fontSize = parseInt(document.getElementById('wmFontSize').value, 10);
+        const fontSize = getSelectedFontSize();
         const opacity = (parseInt(wmOpacityNum.value, 10) || 30) / 100;
         const scale = (parseInt(wmScaleNum ? wmScaleNum.value : wmScaleRange.value, 10) || 30) / 100;
 
@@ -731,6 +884,8 @@
         setOpacityValue(30);
         setRotationValue(0);
         setApplyTo('all');
+        updateFontSizeUI(56, true);
+        setSelectedColor('#e74c3c');
         wmCustomRangeInput.value = '';
         posButtons.forEach(b => b.classList.toggle('active', b.getAttribute('data-pos') === 'center'));
         wmPosTile.classList.remove('active');

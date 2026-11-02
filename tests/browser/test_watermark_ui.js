@@ -298,6 +298,59 @@ async function runWatermarkUiSuite(browser, baseUrl, engineName = 'Chromium') {
     assert(signedHasPixels, 'Signed PDF preview canvas must have rendered watermark pixels');
     console.log('  ✓ Digitally signed PDF successfully watermarked and pixels verified on canvas without warning dialog or error.');
 
+    // 8b. Test Custom Font Size & Word Color Palette Controls
+    console.log('  --- Testing Custom Font Size & Word Color Palette Controls ---');
+    await page.locator('#resetBtn').click();
+    await page.waitForSelector('#dropzone', { state: 'visible', timeout: 5000 });
+    await pdfDropInput.setInputFiles(pdfPath1);
+    await page.waitForSelector('#optionsPanel', { state: 'visible', timeout: 5000 });
+    const modeTextBtn = page.locator('#wmModeText, [data-mode="text"]');
+    await modeTextBtn.click();
+
+    // Test direct typing of custom font size
+    await page.locator('#wmCustomFontSize').fill('64');
+    await page.locator('#wmCustomFontSize').dispatchEvent('input');
+    assert.strictEqual(await page.locator('#wmFontSizeBadge').textContent(), '64 pt', 'Badge must show 64 pt');
+    assert.strictEqual(await page.locator('#wmFontSize').inputValue(), '64', 'Dropdown must sync to 64');
+
+    // Test increment and decrement stepper
+    await page.locator('#wmFontSizeInc').click();
+    assert.strictEqual(await page.locator('#wmCustomFontSize').inputValue(), '66', 'Increment should increase to 66');
+    await page.locator('#wmFontSizeDec').click();
+    assert.strictEqual(await page.locator('#wmCustomFontSize').inputValue(), '64', 'Decrement should decrease to 64');
+
+    // Test preset chip
+    await page.locator('.size-preset-chip[data-size="72"]').click();
+    assert.strictEqual(await page.locator('#wmCustomFontSize').inputValue(), '72', 'Preset chip should set 72 pt');
+
+    // Test Word palette swatches
+    await page.locator('#colorSwatches .color-swatch[data-color="#2563eb"]').click();
+    assert.strictEqual((await page.locator('#wmColorHexLabel').textContent()).trim(), '#2563EB', 'Hex label must show #2563EB');
+    const isBlueActive = await page.evaluate(() => {
+      const sw = document.querySelector('#colorSwatches .color-swatch[data-color="#2563eb"]');
+      return sw && sw.classList.contains('active');
+    });
+    assert(isBlueActive, 'Blue swatch must be marked active');
+
+    // Test custom color picker
+    await page.evaluate(() => {
+      const input = document.getElementById('wmCustomColorInput');
+      input.value = '#10b981';
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    assert.strictEqual((await page.locator('#wmColorHexLabel').textContent()).trim(), '#10B981', 'Hex label must show #10B981');
+    const isCustomActive = await page.evaluate(() => {
+      const sw = document.getElementById('customColorSwatch');
+      return sw && sw.classList.contains('active');
+    });
+    assert(isCustomActive, 'Custom color swatch must be marked active');
+    console.log('  ✓ Custom font size input, stepper, preset chips, Word color swatches, and custom color picker verified.');
+
+    // Apply text watermark to verify resultArea and proceed to batch
+    await applyBtn.click();
+    await page.waitForSelector('#resultArea.active', { state: 'visible', timeout: 15000 });
+
     // 9. Batch Mode with 2 PDFs
     console.log('  --- Testing Batch Mode with 2 PDFs ---');
     await page.locator('#resetBtn').click();

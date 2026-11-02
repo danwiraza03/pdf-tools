@@ -1,10 +1,10 @@
 {
-  "version": "pdf-tools-vea013565f4",
-  "compositeHash": "ea013565f4a21cee82aa547518c6ce5995f1f2c3f3f1ed3088f69d7bdda37b33",
-  "builtAt": "2026-11-02T03:42:26.902Z",
+  "version": "pdf-tools-vf55f8f697b",
+  "compositeHash": "f55f8f697b8a5bdd85adbc11cff0c021df677be3def8d7b570d718b3439f4e16",
+  "builtAt": "2026-11-02T04:12:52.713Z",
   "totalFiles": 92,
-  "totalBytes": 3762908,
-  "totalMB": "3.59",
+  "totalBytes": 3777770,
+  "totalMB": "3.60",
   "files": [
     {
       "url": "./css/home.css",
@@ -328,8 +328,8 @@
     },
     {
       "url": "./js/pages/watermark.js",
-      "size": 29251,
-      "hash": "e9920e7d53bd"
+      "size": 34548,
+      "hash": "064a58236cfa"
     },
     {
       "url": "./js/pages/xlsx-to-pdf.js",
@@ -348,8 +348,8 @@
     },
     {
       "url": "./js/utils/i18n.js",
-      "size": 84814,
-      "hash": "6cebd40cb854"
+      "size": 85020,
+      "hash": "cee109132c8b"
     },
     {
       "url": "./manifest.json",
@@ -458,8 +458,8 @@
     },
     {
       "url": "./pages/watermark.html",
-      "size": 34136,
-      "hash": "ff72fb3b0938"
+      "size": 43495,
+      "hash": "4b556241cb16"
     },
     {
       "url": "./pages/xlsx-to-pdf.html",

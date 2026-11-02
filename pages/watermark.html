@@ -37,6 +37,7 @@
       color: var(--text-secondary);
     }
     .form-field input[type="text"],
+    .form-field input[type="number"],
     .form-field select {
       width: 100%;
       padding: 10px 14px;
@@ -49,25 +50,64 @@
       outline: none;
     }
     .form-field input[type="text"]:focus,
+    .form-field input[type="number"]:focus,
     .form-field select:focus {
       border-color: var(--tool-color);
     }
+    .wm-font-size-row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      max-width: 100%;
+    }
+    .size-step-btn {
+      transition: all 0.15s ease;
+    }
+    .size-step-btn:hover {
+      color: var(--tool-color, #EC4899);
+      border-color: var(--tool-color, #EC4899);
+      background: color-mix(in srgb, var(--tool-color, #EC4899), transparent 90%);
+    }
+    .size-preset-chip {
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+    .size-preset-chip.active,
+    .size-preset-chip:hover {
+      background: color-mix(in srgb, var(--tool-color, #EC4899), transparent 85%);
+      color: var(--tool-color, #EC4899);
+      border-color: var(--tool-color, #EC4899);
+    }
     .color-swatches {
       display: flex;
+      flex-wrap: wrap;
       gap: 8px;
       align-items: center;
     }
     .color-swatch {
-      width: 32px;
-      height: 32px;
+      width: 28px;
+      height: 28px;
       border-radius: 50%;
       cursor: pointer;
-      border: 2px solid transparent;
-      transition: transform 0.2s, border-color 0.2s;
+      border: 2px solid var(--border-color, #e2e8f0);
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+      box-sizing: border-box;
+      flex-shrink: 0;
+    }
+    .color-swatch:hover {
+      transform: scale(1.15);
+      border-color: var(--text-primary);
     }
     .color-swatch.active {
       box-shadow: 0 0 0 2px var(--bg-card), 0 0 0 4px var(--tool-color, #EC4899);
-      transform: scale(1.15);
+      transform: scale(1.18);
+      border-color: transparent;
+    }
+    .custom-color-swatch {
+      border: 2px solid var(--border-color);
+    }
+    .custom-color-swatch.active {
+      box-shadow: 0 0 0 2px var(--bg-card), 0 0 0 4px var(--tool-color, #EC4899);
     }
 
     /* Watermark Result Preview */
@@ -499,25 +539,93 @@
               </div>
 
               <!-- Font Size -->
-              <div class="form-field">
-                <label data-i18n="watermark.size">Font Size</label>
-                <select id="wmFontSize">
-                  <option value="28">Small (28 pt)</option>
-                  <option value="42">Medium (42 pt)</option>
-                  <option value="56" selected>Large (56 pt)</option>
-                  <option value="72">Extra Large (72 pt)</option>
-                </select>
+              <div class="form-field" style="grid-column: 1 / -1;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <label for="wmCustomFontSize" data-i18n="watermark.size">Font Size</label>
+                  <span id="wmFontSizeBadge" style="font-size: 0.82rem; font-weight: 700; color: var(--tool-color, #EC4899);">56 pt</span>
+                </div>
+                <div class="wm-font-size-row">
+                  <button type="button" id="wmFontSizeDec" class="btn btn-secondary size-step-btn" title="Decrease font size" aria-label="Decrease font size" style="width: 38px; height: 42px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--radius-md); flex-shrink: 0;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  </button>
+                  <div style="position: relative; flex: 1; max-width: 130px;">
+                    <input type="number" id="wmCustomFontSize" min="6" max="300" value="56" step="1" class="form-input" placeholder="56" title="Enter custom font size" style="width: 100%; height: 42px; text-align: center; font-weight: 600; padding: 0 30px 0 10px; box-sizing: border-box; border-radius: var(--radius-md);">
+                    <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 0.8rem; color: var(--text-muted); pointer-events: none;">pt</span>
+                  </div>
+                  <button type="button" id="wmFontSizeInc" class="btn btn-secondary size-step-btn" title="Increase font size" aria-label="Increase font size" style="width: 38px; height: 42px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--radius-md); flex-shrink: 0;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  </button>
+                  <div style="flex: 1; min-width: 120px; max-width: 150px;">
+                    <select id="wmFontSize" class="form-input" title="Standard size presets" style="width: 100%; height: 42px; padding: 0 10px; border-radius: var(--radius-md);">
+                      <option value="12">12 pt</option>
+                      <option value="16">16 pt</option>
+                      <option value="20">20 pt</option>
+                      <option value="24">24 pt</option>
+                      <option value="28">28 pt</option>
+                      <option value="36">36 pt</option>
+                      <option value="42">42 pt</option>
+                      <option value="48">48 pt</option>
+                      <option value="56" selected>56 pt</option>
+                      <option value="64">64 pt</option>
+                      <option value="72">72 pt</option>
+                      <option value="84">84 pt</option>
+                      <option value="96">96 pt</option>
+                      <option value="120">120 pt</option>
+                      <option value="150">150 pt</option>
+                      <option value="200">200 pt</option>
+                      <option id="wmCustomOpt" value="custom" data-i18n="watermark.size_custom">Custom...</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="font-size-presets" style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px;">
+                  <button type="button" class="btn btn-secondary size-preset-chip" data-size="28" style="padding: 2px 10px; font-size: 0.78rem; border-radius: 12px; min-height: 24px;">28 pt</button>
+                  <button type="button" class="btn btn-secondary size-preset-chip" data-size="42" style="padding: 2px 10px; font-size: 0.78rem; border-radius: 12px; min-height: 24px;">42 pt</button>
+                  <button type="button" class="btn btn-secondary size-preset-chip active" data-size="56" style="padding: 2px 10px; font-size: 0.78rem; border-radius: 12px; min-height: 24px;">56 pt</button>
+                  <button type="button" class="btn btn-secondary size-preset-chip" data-size="72" style="padding: 2px 10px; font-size: 0.78rem; border-radius: 12px; min-height: 24px;">72 pt</button>
+                  <button type="button" class="btn btn-secondary size-preset-chip" data-size="96" style="padding: 2px 10px; font-size: 0.78rem; border-radius: 12px; min-height: 24px;">96 pt</button>
+                  <button type="button" class="btn btn-secondary size-preset-chip" data-size="120" style="padding: 2px 10px; font-size: 0.78rem; border-radius: 12px; min-height: 24px;">120 pt</button>
+                </div>
               </div>
 
               <!-- Color Palette -->
-              <div class="form-field">
-                <label data-i18n="watermark.color">Color</label>
+              <div class="form-field" style="grid-column: 1 / -1;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+                  <label data-i18n="watermark.color">Color</label>
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span id="wmColorHexLabel" style="font-size: 0.8rem; font-weight: 600; font-family: monospace; color: var(--text-secondary); text-transform: uppercase;">#E74C3C</span>
+                    <div id="wmColorIndicator" style="width: 16px; height: 16px; border-radius: 50%; background: #e74c3c; border: 1.5px solid var(--border-color); box-shadow: 0 1px 3px rgba(0,0,0,0.15);"></div>
+                  </div>
+                </div>
                 <div class="color-swatches" id="colorSwatches">
+                  <!-- Neutrals (Word theme grays) -->
+                  <div class="color-swatch" data-color="#000000" style="background: #000000;" title="Black"></div>
+                  <div class="color-swatch" data-color="#2c3e50" style="background: #2c3e50;" title="Dark Navy"></div>
+                  <div class="color-swatch" data-color="#4b5563" style="background: #4b5563;" title="Charcoal"></div>
+                  <div class="color-swatch" data-color="#7f8c8d" style="background: #7f8c8d;" title="Medium Gray"></div>
+                  <div class="color-swatch" data-color="#9ca3af" style="background: #9ca3af;" title="Light Gray"></div>
+
+                  <!-- Word Standard Color Spectrum -->
+                  <div class="color-swatch" data-color="#991b1b" style="background: #991b1b;" title="Dark Red"></div>
                   <div class="color-swatch active" data-color="#e74c3c" style="background: #e74c3c;" title="Red"></div>
-                  <div class="color-swatch" data-color="#7f8c8d" style="background: #7f8c8d;" title="Grey"></div>
-                  <div class="color-swatch" data-color="#2980b9" style="background: #2980b9;" title="Blue"></div>
-                  <div class="color-swatch" data-color="#27ae60" style="background: #27ae60;" title="Green"></div>
-                  <div class="color-swatch" data-color="#2c3e50" style="background: #2c3e50;" title="Dark"></div>
+                  <div class="color-swatch" data-color="#ea580c" style="background: #ea580c;" title="Orange"></div>
+                  <div class="color-swatch" data-color="#d97706" style="background: #d97706;" title="Gold / Amber"></div>
+                  <div class="color-swatch" data-color="#eab308" style="background: #eab308;" title="Yellow"></div>
+                  <div class="color-swatch" data-color="#16a34a" style="background: #16a34a;" title="Green"></div>
+                  <div class="color-swatch" data-color="#27ae60" style="background: #27ae60;" title="Emerald"></div>
+                  <div class="color-swatch" data-color="#0d9488" style="background: #0d9488;" title="Teal"></div>
+                  <div class="color-swatch" data-color="#0284c7" style="background: #0284c7;" title="Sky Blue"></div>
+                  <div class="color-swatch" data-color="#2980b9" style="background: #2980b9;" title="Ocean Blue"></div>
+                  <div class="color-swatch" data-color="#2563eb" style="background: #2563eb;" title="Royal Blue"></div>
+                  <div class="color-swatch" data-color="#3730a3" style="background: #3730a3;" title="Navy"></div>
+                  <div class="color-swatch" data-color="#7c3aed" style="background: #7c3aed;" title="Purple"></div>
+                  <div class="color-swatch" data-color="#db2777" style="background: #db2777;" title="Magenta"></div>
+                  <div class="color-swatch" data-color="#ec4899" style="background: #ec4899;" title="Pink"></div>
+
+                  <!-- Word "More Colors..." Custom Picker -->
+                  <label class="color-swatch custom-color-swatch" id="customColorSwatch" title="More Colors (Custom)..." data-i18n-title="watermark.more_colors" style="display: inline-flex; align-items: center; justify-content: center; position: relative; cursor: pointer; background: conic-gradient(from 180deg at 50% 50%, #ff0000 0deg, #ffa500 50deg, #ffff00 100deg, #008000 160deg, #00ffff 220deg, #0000ff 270deg, #ee82ee 320deg, #ff0000 360deg);">
+                    <input type="color" id="wmCustomColorInput" value="#e74c3c" style="position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 1px 2px rgba(0,0,0,0.8)); pointer-events: none;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  </label>
                 </div>
               </div>
             </div>
