@@ -35,7 +35,7 @@ if (!fs.existsSync(SW_PATH)) {
 const existingManifest = JSON.parse(fs.readFileSync(MANIFEST_PATH, 'utf8'));
 const currentManifest = buildManifest();
 
-// 1. Verify Hash & Version parity
+// 1. Verify Hash & Version parity (App & Vendor)
 if (existingManifest.compositeHash !== currentManifest.compositeHash) {
   console.error('❌ [FAIL] sw-manifest.json kedaluwarsa! Berkas app shell telah dimodifikasi.');
   console.error(`  Manifest saat ini : ${existingManifest.compositeHash.slice(0, 10)}`);
@@ -43,15 +43,26 @@ if (existingManifest.compositeHash !== currentManifest.compositeHash) {
   console.error('\nJalankan `node scripts/build_sw_manifest.js` untuk memperbarui sw-manifest.json dan sw.js.');
   process.exit(1);
 }
-console.log(`✓ Hash manifest cocok: ${existingManifest.version}`);
+if (existingManifest.vendorHash !== currentManifest.vendorHash) {
+  console.error('❌ [FAIL] sw-manifest.json vendor kedaluwarsa! Berkas js/lib telah dimodifikasi.');
+  console.error(`  Manifest saat ini : ${existingManifest.vendorHash ? existingManifest.vendorHash.slice(0, 10) : 'none'}`);
+  console.error(`  Kalkulasi aktual  : ${currentManifest.vendorHash.slice(0, 10)}`);
+  console.error('\nJalankan `node scripts/build_sw_manifest.js` untuk memperbarui sw-manifest.json dan sw.js.');
+  process.exit(1);
+}
+console.log(`✓ Hash manifest cocok: App=${existingManifest.version}, Vendor=${existingManifest.vendorVersion}`);
 
-// 2. Verify sw.js embeds the exact version
+// 2. Verify sw.js embeds both exact versions
 const swContent = fs.readFileSync(SW_PATH, 'utf8');
 if (!swContent.includes(`CACHE_VERSION = '${existingManifest.version}'`)) {
   console.error(`❌ [FAIL] sw.js tidak memuat CACHE_VERSION yang sesuai (${existingManifest.version})`);
   process.exit(1);
 }
-console.log(`✓ sw.js memuat CACHE_VERSION yang sesuai: ${existingManifest.version}`);
+if (!swContent.includes(`VENDOR_VERSION = '${existingManifest.vendorVersion}'`)) {
+  console.error(`❌ [FAIL] sw.js tidak memuat VENDOR_VERSION yang sesuai (${existingManifest.vendorVersion})`);
+  process.exit(1);
+}
+console.log(`✓ sw.js memuat CACHE_VERSION (${existingManifest.version}) dan VENDOR_VERSION (${existingManifest.vendorVersion})`);
 
 // 3. Verify Precache Size Limit (< 5 MB)
 const MAX_PRECACHE_BYTES = 5 * 1024 * 1024;
