@@ -832,7 +832,7 @@ PDFTools.OCR = (function () {
       const pdfJsData = (arrayBuffer instanceof ArrayBuffer)
         ? new Uint8Array(arrayBuffer.slice(0))
         : (arrayBuffer instanceof Uint8Array ? arrayBuffer.slice(0) : new Uint8Array(arrayBuffer));
-      const loadingTask = pdfjsLib.getDocument({ data: pdfJsData });
+      const loadingTask = pdfjsLib.getDocument({ isEvalSupported: false, data: pdfJsData });
       const pdfJsDoc = await loadingTask.promise;
       const totalPages = pdfJsDoc.numPages;
 

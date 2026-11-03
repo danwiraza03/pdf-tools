@@ -33,7 +33,7 @@ PDFTools.PdfToJpg = {
     }
     let pdf;
     try {
-      const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer).slice(0) });
+      const loadingTask = pdfjsLib.getDocument({ isEvalSupported: false, data: new Uint8Array(arrayBuffer).slice(0) });
       pdf = await loadingTask.promise;
     } catch (err) {
       if (err.name === 'PasswordException' || (err.message && err.message.toLowerCase().includes('password'))) {

@@ -66,7 +66,7 @@ PDFTools.Flatten = {
 
     const decryptedDoc = await PDFTools.FileUtils.loadPdfDecrypted(file, options);
     const decryptedBytes = await decryptedDoc.save();
-    const loadingTask = pdfjsLib.getDocument({ data: decryptedBytes });
+    const loadingTask = pdfjsLib.getDocument({ isEvalSupported: false, data: decryptedBytes });
     const pdfJsDoc = await loadingTask.promise;
     const totalPages = pdfJsDoc.numPages;
 

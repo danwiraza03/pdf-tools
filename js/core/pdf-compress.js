@@ -425,7 +425,7 @@ PDFTools.Compress = {
 
       // IMPORTANT: Do NOT copy arrayBuffer — use a typed array view to save memory
       const dataForPdfJs = new Uint8Array(arrayBuffer);
-      const loadingTask = pdfjsLib.getDocument({ data: dataForPdfJs });
+      const loadingTask = pdfjsLib.getDocument({ isEvalSupported: false, data: dataForPdfJs });
       const pdfJsDoc = await loadingTask.promise;
       pdfJsLoadSuccess = true;
 

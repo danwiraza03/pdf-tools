@@ -30,7 +30,7 @@ PDFTools.Preview = (function () {
         arrayBuffer = fileOrBuffer;
       }
 
-      const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer).slice(0) });
+      const loadingTask = pdfjsLib.getDocument({ isEvalSupported: false, data: new Uint8Array(arrayBuffer).slice(0) });
       const pdf = await loadingTask.promise;
       const page = await pdf.getPage(1);
 
@@ -89,7 +89,7 @@ PDFTools.Preview = (function () {
         arrayBuffer = fileOrBuffer;
       }
 
-      const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer).slice(0) });
+      const loadingTask = pdfjsLib.getDocument({ isEvalSupported: false, data: new Uint8Array(arrayBuffer).slice(0) });
       const pdf = await loadingTask.promise;
       containerEl.innerHTML = '';
 
