@@ -1,12 +1,12 @@
 {
-  "version": "pdf-tools-ve1e4d663ad",
+  "version": "pdf-tools-v043be01763",
   "vendorVersion": "pdf-tools-vendor-v4461a35c2a",
-  "compositeHash": "e1e4d663adeb212b3e291e24d147df162e793610fd7cc6b8f2e41332bbdbf147",
+  "compositeHash": "043be01763c29ac1ad3d7d78b918ff98aa7af577284767028a72d638f4b894da",
   "vendorHash": "4461a35c2a4ca00c66db6cf2a6300d46859944c7317337fc75f3ad1326f8fd28",
-  "builtAt": "2026-11-03T10:47:43.112Z",
+  "builtAt": "2026-11-03T10:56:52.559Z",
   "totalFiles": 96,
-  "totalBytes": 3904103,
-  "totalMB": "3.72",
+  "totalBytes": 3849685,
+  "totalMB": "3.67",
   "files": [
     {
       "url": "./css/home.css",
@@ -50,18 +50,18 @@
     },
     {
       "url": "./icon.svg",
-      "size": 1843,
-      "hash": "97da2f30f85b"
+      "size": 594,
+      "hash": "e5e8b897cecc"
     },
     {
       "url": "./icons/icon-192.png",
-      "size": 20832,
-      "hash": "2b55260ee81e"
+      "size": 10209,
+      "hash": "9bb69881598e"
     },
     {
       "url": "./icons/icon-512.png",
-      "size": 123460,
-      "hash": "8b300426f591"
+      "size": 80914,
+      "hash": "60c80a6f8ad1"
     },
     {
       "url": "./index.html",
