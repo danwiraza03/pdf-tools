@@ -35,6 +35,7 @@ const tests = [
   { name: 'Static Guard: Unified Footer Presence & Structure', file: 'check_footer_presence.js' },
   { name: 'Static Guard: SEO Metadata, Open Graph & Sitemap Audit', file: 'check_seo_meta.js' },
   { name: 'Static Guard: Service Worker Manifest & Precache Integrity', file: 'check_sw_manifest.js' },
+  { name: 'Static Guard: PWA Manifest Compliance & Integrity', file: 'check_manifest_pwa.js' },
   { name: 'Static Guard: Content Security Policy (CSP) Audit', file: 'check_csp_presence.js' }
 ];
 
