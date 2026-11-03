@@ -4,6 +4,16 @@ Format mengacu pada [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) 
 
 ## [Unreleased]
 
+### Ditambahkan
+
+- **Peringatan Layar Sentuh untuk Edit PDF (PDF Studio)**: Modal kustom ramah sentuh (`#studioTouchModalBackdrop`) yang memperingatkan pengguna perangkat layar sentuh bahwa "Edit PDF paling nyaman dipakai di komputer" dengan tombol Lanjutkan dan Batal, mencegah navigasi tidak sengaja di layar kecil tanpa menggunakan dialog bawaan browser.
+- **Rangkaian Pengujian Browser Navigasi Edit PDF**: Menambahkan pengujian otomatis Playwright `test_edit_pdf_nav.js` yang memverifikasi keseragaman label dwibahasa (EN & ID), navigasi langsung di desktop tanpa modal, dan pemunculan modal peringatan pada emulasi layar sentuh.
+
+### Diubah
+
+- **Penyelarasan PDF Studio sebagai Alat "Edit PDF"**: Menyeragamkan label alat pada kartu beranda kategori Edit, mega menu, laci menu seluler, dan tombol header menjadi "Edit PDF" (dwibahasa EN/ID) agar konsisten dengan kata kerja aksi navigasi utama lainnya (MERGE PDF, SPLIT PDF, COMPRESS PDF, CONVERT PDF). Logika internal Studio tetap utuh tanpa modifikasi.
+- **Metadata Dokumen Edit PDF**: Memperbarui judul dan deskripsi halaman `<head>` pada `pages/viewer.html` menjadi "Edit PDF — Professional PDF Editor Workspace" agar selaras dengan identitas alat baru.
+
 ## [1.1.0] - 2026-11-03
 
 ### Keamanan
