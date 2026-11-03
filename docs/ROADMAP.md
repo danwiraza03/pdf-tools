@@ -99,53 +99,70 @@
 
 ---
 
+## 🏛️ Keputusan Resmi Pemilik Proyek (Architectural Decisions)
+
+Berdasarkan tinjauan arsitektur dan prinsip privasi client-side, pemilik proyek telah menetapkan keputusan strategis berikut:
+
+1. **PDF Studio sebagai "Edit PDF"**:
+   - PDF Studio (`pages/viewer.html`) tetap dipertahankan sebagai alat unggulan dan ditampilkan sebagai **"Edit PDF"** di seluruh navigasi publik.
+   - Mengingat kepadatan fungsionalitasnya (teks edit, anotasi, live canvas), antarmuka ini dirancang paling optimal digunakan pada layar komputer/desktop. Untuk pengguna layar sentuh/ponsel, sistem menampilkan dialog edukasi pemakaian.
+2. **Dwibahasa (EN & ID)**:
+   - Mendukung penuh dua bahasa: Bahasa Inggris (`en`) sebagai bahasa bawaan internasional dan Bahasa Indonesia (`id`) untuk pengguna lokal, dengan penyimpanan preferensi di localStorage.
+3. **Gelombang 1 (Milestone v1.2.0)**:
+   - **Redaksi Mandiri (`pages/redact.html`)**: Membawa mesin redaksi permanen yang sudah teruji (`js/editor/redaction-engine.js`) ke halaman mandiri 6 bagian.
+   - **Kompresi Seimbang**: Kompresi berbasis downsampling gambar internal tanpa merusak ketajaman teks vektor yang dapat dicari/diseleksi.
+   - **Scan to PDF**: Konversi tangkapan kamera perangkat lokal menjadi dokumen PDF bersih tanpa server.
+4. **Fitur yang Ditunda (Deferred)**:
+   - **Bandingkan PDF Mandiri (`pages/compare.html`)**: Ditunda ke milestone berikutnya.
+   - **Ekstrak Gambar (`pages/extract-images.html`)**: Ditunda ke milestone berikutnya.
+   - **PDF to Markdown**: Ditunda.
+   - **PDF to PowerPoint (Slide Gambar)**: Ditunda.
+   - **Web Worker untuk Operasi pdf-lib**: Ditunda hingga ada bukti pengukuran empiris pada berkas besar di gawai seluler.
+5. **Fitur yang Ditolak (Rejected) & Alasan Penolakan**:
+   - ❌ **Semua Fitur AI (Ringkasan AI, Chat Dokumen AI, Terjemahan AI)**: Ditolak mutlak karena bertentangan dengan prinsip privasi 100% offline di perangkat pengguna dan mengharuskan transmisi data ke API cloud pihak ketiga.
+   - ❌ **Integrasi Cloud Eksternal (Google Drive, Dropbox, OneDrive)**: Ditolak karena melanggar garansi zero-external-URL dan memerlukan server backend untuk alur OAuth.
+   - ❌ **HTML to PDF dari URL Web**: Ditolak karena mengambil konten web luar melanggar kebijakan sandbox offline dan batasan CORS.
+   - ❌ **PowerPoint to PDF**: Ditolak karena merender dokumen presentasi kompleks dengan akurat di browser tanpa engine Office asli tidak layak secara teknis.
+   - ❌ **Konversi PDF/A Tanpa Validator**: Ditolak karena kepatuhan standar arsip PDF/A memerlukan validator spesifikasi ketat; mengklaim format tanpa pembuktian melanggar integritas klaim.
+
+---
+
 ## 🚀 Peta Jalan Fitur Mendatang (Next Milestone: v1.2.0+)
 
 ```mermaid
 flowchart TD
-    subgraph V12["Milestone v1.2.0 (Ekspansi Alat & Kualitas)"]
+    subgraph V12["Milestone v1.2.0 (Gelombang 1)"]
         M1["Halaman Mandiri Redact PDF<br/>(pages/redact.html)"]
-        M2["Halaman Mandiri Bandingkan PDF<br/>(pages/compare.html)"]
-        M3["Halaman Mandiri Ekstrak Gambar<br/>(pages/extract-images.html)"]
-        M4["Kompresi Mode Seimbang<br/>(Downsample Image Stream)"]
+        M2["Kompresi Mode Seimbang<br/>(Preserve Text Vector)"]
+        M3["Scan to PDF Lokal<br/>(Camera Capture to PDF)"]
     end
-    subgraph V13["Milestone v1.3.0 (Performa & Format Baru)"]
-        M5["Web Worker untuk Operasi pdf-lib"]
-        M6["Konversi PDF ke Slide Presentasi PPTX"]
-        M7["Ekspansi Bahasa OCR (SEA)"]
+    subgraph V13["Milestone v1.3.0+ (Ditunda)"]
+        M4["Bandingkan PDF Mandiri<br/>(pages/compare.html)"]
+        M5["Ekstrak Gambar Mandiri<br/>(pages/extract-images.html)"]
+        M6["PDF to Markdown & Slide PPTX"]
+        M7["Web Worker pdf-lib<br/>(setelah pengukuran)"]
     end
     V12 --> V13
 ```
 
-### Prioritas Tinggi (Target v1.2.0)
+### Gelombang 1 (Target v1.2.0)
 
-1. **Halaman Mandiri untuk Mesin Editor yang Sudah Ada**:
-   - `pages/redact.html`: Menggunakan `js/editor/redaction-engine.js` untuk redaksi permanen mandiri tanpa harus membuka PDF Studio.
-   - `pages/compare.html`: Menggunakan `js/editor/compare-engine.js` untuk membandingkan dua dokumen PDF secara visual.
-   - `pages/extract-images.html`: Menggunakan `js/editor/image-extractor.js` untuk mengekstrak seluruh gambar tertanam dalam PDF ke format ZIP/gambar tunggal.
-   - *Status*: **Belum**. Memerlukan pembuatan antarmuka 6 bagian sesuai standar proyek dan audit kemandirian mesin dari state Studio.
-
+1. **Halaman Mandiri Redact PDF (`pages/redact.html`)**:
+   - Memanfaatkan `js/editor/redaction-engine.js` untuk redaksi permanen mandiri dengan verifikasi anti-bocor piksel (`test_redaction_rasterize.js`).
+   - *Status*: **Belum**.
 2. **Kompresi yang Mempertahankan Teks (Mode Seimbang)**:
-   - Menambahkan opsi kompresi yang mengompresi stream gambar internal (DCTDecode/Flate) tanpa merasterisasi teks atau vektor dokumen.
+   - Kompresi stream gambar internal dokumen tanpa merasterisasi teks vektor atau menghapus text-layer.
+   - *Status*: **Belum**.
+3. **Scan to PDF**:
+   - Mengambil tangkapan kamera perangkat pengguna atau gambar dokumen lokal untuk dikompilasi menjadi PDF multi-halaman.
    - *Status*: **Belum**.
 
-### Prioritas Sedang (Target v1.3.0)
+### Fitur Ditunda (Target v1.3.0+)
 
-3. **Web Worker untuk Operasi Berat pdf-lib**:
-   - Memindahkan proses penggabungan ratusan halaman atau enkripsi ke Web Worker di latar belakang untuk mencegah blocking antarmuka.
-   - *Status*: **Belum**.
-
-4. **Konversi Baru Berbasis Client-Side**:
-   - PDF ke PPTX (slide gambar per halaman).
-   - Perbaikan PDF ringan (re-saving corrupted header/xref).
-   - *Status*: **Belum**.
-
-### Prioritas Rendah / Aspiratif
-
-5. **PDF Studio untuk Layar Sentuh Mobile**:
-   - Menyesuaikan kanvas anotasi Studio untuk gesture pinch-to-zoom dan pointer events di perangkat smartphone.
-   - *Status*: **Belum**. Memerlukan izin pencabutan freeze `pages/viewer.html`.
-
-6. **Dukungan Bahasa OCR Tambahan**:
-   - Evaluasi penambahan model bahasa Asia Tenggara terkompresi (Thai, Vietnam).
+4. **Bandingkan PDF & Ekstrak Gambar**:
+   - Membangun antarmuka mandiri untuk `compare-engine.js` dan `image-extractor.js`.
+5. **Konversi Format Ringan**:
+   - PDF ke Markdown (ekstraksi teks berstruktur) dan PDF ke slide PowerPoint gambar.
+6. **Web Worker untuk Operasi Berat pdf-lib**:
+   - Pemindahan kalkulasi pdf-lib ke worker latar belakang setelah profil performa menunjukkan kebutuhan mendesak.
    - *Status*: **Belum**.
