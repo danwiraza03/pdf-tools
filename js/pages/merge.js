@@ -13,6 +13,8 @@
       const organizerCount = document.getElementById('organizerCount');
       const addMoreFilesBtn = document.getElementById('addMoreFilesBtn');
       const extraFileInput = document.getElementById('extraFileInput');
+      const insertFileInput = document.getElementById('insertFileInput');
+      let pendingInsertTarget = null;
       const expandAllBtn = document.getElementById('expandAllBtn');
       const collapseAllBtn = document.getElementById('collapseAllBtn');
       const rotateAllBtn = document.getElementById('rotateAllBtn');
@@ -141,6 +143,9 @@
         if (historyIndex > 0) {
           historyIndex--;
           restoreHistoryState(historyStack[historyIndex].state);
+          resultArea.classList.remove('active');
+          actionBar.classList.add('active');
+          organizerArea.style.display = 'block';
           const isId = (PDFTools.i18n && PDFTools.i18n.getCurrentLang && PDFTools.i18n.getCurrentLang() === 'id');
           PDFTools.Toast.info(isId ? 'Aksi dibatalkan (Undo)' : 'Action undone');
         }
@@ -150,6 +155,9 @@
         if (historyIndex < historyStack.length - 1) {
           historyIndex++;
           restoreHistoryState(historyStack[historyIndex].state);
+          resultArea.classList.remove('active');
+          actionBar.classList.add('active');
+          organizerArea.style.display = 'block';
           const isId = (PDFTools.i18n && PDFTools.i18n.getCurrentLang && PDFTools.i18n.getCurrentLang() === 'id');
           PDFTools.Toast.info(isId ? 'Aksi diulang (Redo)' : 'Action redone');
         }
@@ -251,6 +259,26 @@
         }
       });
 
+      function triggerInsertFiles(target) {
+        pendingInsertTarget = target;
+        if (insertFileInput) {
+          insertFileInput.value = '';
+          insertFileInput.click();
+        }
+      }
+
+      if (insertFileInput) {
+        insertFileInput.addEventListener('change', async function () {
+          if (insertFileInput.files && insertFileInput.files.length > 0 && pendingInsertTarget) {
+            const files = Array.from(insertFileInput.files);
+            const target = pendingInsertTarget;
+            pendingInsertTarget = null;
+            await handleInsertFiles(files, target);
+          }
+          insertFileInput.value = '';
+        });
+      }
+
       // ============================================================
       // DRAG & DROP PDF FILES ANYWHERE ON THE PAGE (SHARED COMPONENT)
       // ============================================================
@@ -275,6 +303,47 @@
       // FILE LOADING
       // ============================================================
 
+      async function loadPdfFileToGroup(file, fileIndex, isExpanded = false) {
+        const colorTheme = docColorThemes[fileIndex % docColorThemes.length];
+        const groupId = 'group_' + fileIndex + '_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
+
+        const group = {
+          id: groupId,
+          fileIndex: fileIndex,
+          fileName: file.name,
+          colorTheme: colorTheme,
+          isExpanded: Boolean(isExpanded),
+          pageIds: []
+        };
+
+        const decryptedDoc = await PDFTools.FileUtils.loadPdfDecrypted(file);
+        const decryptedBytes = await decryptedDoc.save();
+        const loadingTask = pdfjsLib.getDocument({ data: decryptedBytes });
+        const pdfDoc = await loadingTask.promise;
+        const totalPages = pdfDoc.numPages;
+
+        for (let p = 1; p <= totalPages; p++) {
+          const pageId = 'page_' + fileIndex + '_' + p + '_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
+          const item = {
+            id: pageId,
+            file: file,
+            fileName: file.name,
+            originalFileIndex: fileIndex,
+            originalPage: p,
+            pageIndex: p - 1,
+            rotation: 0,
+            colorTheme: colorTheme,
+            pdfDocRef: pdfDoc,
+            decryptedDoc: decryptedDoc
+          };
+          pdfDocRefs.add(pdfDoc);
+          pageItemsMap.set(pageId, item);
+          group.pageIds.push(pageId);
+        }
+
+        return group;
+      }
+
       async function handleNewFilesAdded(newFiles) {
         if (!newFiles || newFiles.length === 0) return;
         if (PDFTools.FileUtils && PDFTools.FileUtils.initPdfJsWorker) PDFTools.FileUtils.initPdfJsWorker();
@@ -286,50 +355,14 @@
         progress.show(PDFTools.i18n.t('action.processing', 'Loading and extracting PDF pages...'));
 
         const startFileIndex = allUploadedFiles.length;
-
         const skippedFiles = [];
         for (let f = 0; f < newFiles.length; f++) {
           const file = newFiles[f];
           allUploadedFiles.push(file);
           const currentFileIndex = startFileIndex + f;
-          const colorTheme = docColorThemes[currentFileIndex % docColorThemes.length];
-          const groupId = 'group_' + currentFileIndex + '_' + Date.now();
-
-          const group = {
-            id: groupId,
-            fileIndex: currentFileIndex,
-            fileName: file.name,
-            colorTheme: colorTheme,
-            isExpanded: false, // Collapsed by default matching reference design
-            pageIds: []
-          };
 
           try {
-            const decryptedDoc = await PDFTools.FileUtils.loadPdfDecrypted(file);
-            const decryptedBytes = await decryptedDoc.save();
-            const loadingTask = pdfjsLib.getDocument({ data: decryptedBytes });
-            const pdfDoc = await loadingTask.promise;
-            const totalPages = pdfDoc.numPages;
-
-            for (let p = 1; p <= totalPages; p++) {
-              const pageId = 'page_' + currentFileIndex + '_' + p + '_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
-              const item = {
-                id: pageId,
-                file: file,
-                fileName: file.name,
-                originalFileIndex: currentFileIndex,
-                originalPage: p, // Original page number in source file
-                pageIndex: p - 1, // 0-indexed for pdf-lib
-                rotation: 0,
-                colorTheme: colorTheme,
-                pdfDocRef: pdfDoc,
-                decryptedDoc: decryptedDoc
-              };
-              pdfDocRefs.add(pdfDoc);
-              pageItemsMap.set(pageId, item);
-              group.pageIds.push(pageId);
-            }
-
+            const group = await loadPdfFileToGroup(file, currentFileIndex, false);
             fileGroups.push(group);
           } catch (err) {
             console.error('Error loading PDF file:', file.name, err);
@@ -344,8 +377,12 @@
           }
         }
 
-        // Save initial snapshot for "Reset Order"
         saveInitialSnapshot();
+        if (historyStack.length === 0) {
+          pushHistoryState('Initial Load');
+        } else {
+          pushHistoryState('Add Files');
+        }
 
         progress.hide();
         clearSelection();
@@ -354,6 +391,102 @@
           PDFTools.Toast.info(`${skippedFiles.length} file(s) skipped: ${skippedFiles.join(', ')}`);
         } else if (newFiles.length > 0 && fileGroups.length > 0) {
           PDFTools.Toast.success(`${newFiles.length} file(s) loaded!`);
+        }
+      }
+
+      async function handleInsertFiles(newFiles, target) {
+        if (!newFiles || newFiles.length === 0 || !target) return;
+        if (PDFTools.FileUtils && PDFTools.FileUtils.initPdfJsWorker) PDFTools.FileUtils.initPdfJsWorker();
+
+        syncAllGroupsFromDom();
+
+        progress.show(PDFTools.i18n.t('action.processing', 'Loading and inserting PDF pages...'));
+
+        let targetGroup = null;
+        if (target.type === 'page') {
+          targetGroup = fileGroups.find(g => g.id === target.groupId || g.pageIds.includes(target.pageId));
+        } else if (target.type === 'doc') {
+          targetGroup = fileGroups.find(g => g.id === target.groupId);
+        }
+        const expandInserted = targetGroup ? targetGroup.isExpanded : true;
+
+        const startFileIndex = allUploadedFiles.length;
+        const newGroups = [];
+        const skippedFiles = [];
+
+        for (let f = 0; f < newFiles.length; f++) {
+          const file = newFiles[f];
+          allUploadedFiles.push(file);
+          const currentFileIndex = startFileIndex + f;
+
+          try {
+            const group = await loadPdfFileToGroup(file, currentFileIndex, expandInserted);
+            newGroups.push(group);
+          } catch (err) {
+            console.error('Error inserting PDF file:', file.name, err);
+            const idx = allUploadedFiles.indexOf(file);
+            if (idx !== -1) allUploadedFiles.splice(idx, 1);
+
+            if (err && err.code === 'PASSWORD_CANCELLED') {
+              skippedFiles.push(file.name);
+            } else {
+              PDFTools.Toast.error(`Failed to load ${file.name}`);
+            }
+          }
+        }
+
+        if (newGroups.length > 0) {
+          if (target.type === 'doc') {
+            const tIdx = fileGroups.findIndex(g => g.id === target.groupId);
+            if (tIdx !== -1) {
+              fileGroups.splice(tIdx + 1, 0, ...newGroups);
+            } else {
+              fileGroups.push(...newGroups);
+            }
+          } else if (target.type === 'page') {
+            const tGroupIdx = fileGroups.findIndex(g => g.id === target.groupId || g.pageIds.includes(target.pageId));
+            if (tGroupIdx !== -1) {
+              const grp = fileGroups[tGroupIdx];
+              const pIdx = grp.pageIds.indexOf(target.pageId);
+              if (pIdx !== -1 && pIdx < grp.pageIds.length - 1) {
+                // Split document into two parts at insertion point
+                const firstPartPages = grp.pageIds.slice(0, pIdx + 1);
+                const remainderPages = grp.pageIds.slice(pIdx + 1);
+                grp.pageIds = firstPartPages;
+
+                const remainderGroup = {
+                  id: 'group_' + grp.fileIndex + '_part2_' + Date.now(),
+                  fileIndex: grp.fileIndex,
+                  fileName: grp.fileName,
+                  colorTheme: grp.colorTheme,
+                  isExpanded: grp.isExpanded,
+                  pageIds: remainderPages
+                };
+
+                fileGroups.splice(tGroupIdx + 1, 0, ...newGroups, remainderGroup);
+              } else {
+                // Page is the last page in this group; simply insert after this group
+                fileGroups.splice(tGroupIdx + 1, 0, ...newGroups);
+              }
+            } else {
+              fileGroups.push(...newGroups);
+            }
+          }
+
+          saveInitialSnapshot();
+          pushHistoryState('Insert Files');
+        }
+
+        progress.hide();
+        clearSelection();
+        buildGrid();
+        updateGlobalSequenceUI();
+
+        if (skippedFiles.length > 0) {
+          PDFTools.Toast.info(`${skippedFiles.length} file(s) skipped: ${skippedFiles.join(', ')}`);
+        } else if (newGroups.length > 0) {
+          const isId = (PDFTools.i18n && PDFTools.i18n.getCurrentLang && PDFTools.i18n.getCurrentLang() === 'id');
+          PDFTools.Toast.success(isId ? `${newGroups.length} berkas berhasil disisipkan!` : `${newGroups.length} file(s) inserted!`);
         }
       }
 
@@ -443,7 +576,14 @@
           }
         });
 
-        organizerCount.textContent = `${total} Pages from ${fileGroups.length} Files`;
+        const uniqueFiles = new Set();
+        fileGroups.forEach(g => {
+          g.pageIds.forEach(id => {
+            const it = pageItemsMap.get(id);
+            if (it && it.file) uniqueFiles.add(it.file);
+          });
+        });
+        organizerCount.textContent = `${total} Pages from ${uniqueFiles.size} Files`;
         mergeBtn.disabled = (total === 0);
       }
 
@@ -759,9 +899,54 @@
           openPreviewModal(items, 0);
         });
 
+        // Insert files after doc button in floating pill
+        const insertPillBtn = document.createElement('button');
+        insertPillBtn.type = 'button';
+        insertPillBtn.className = 'merge-pill-btn merge-group-insert-btn';
+        insertPillBtn.setAttribute('data-action', 'insert-after-doc');
+        insertPillBtn.title = PDFTools.i18n.t('merge.insert_after_doc', 'Insert files after this document');
+        insertPillBtn.setAttribute('aria-label', PDFTools.i18n.t('merge.insert_after_doc', 'Insert files after this document'));
+        insertPillBtn.innerHTML = `
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="12" y1="18" x2="12" y2="12"/>
+            <line x1="9" y1="15" x2="15" y2="15"/>
+          </svg>
+          <span class="merge-pill-tooltip">${PDFTools.i18n.t('merge.insert_after_doc', 'Insert files after this document')}</span>
+        `;
+        insertPillBtn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          triggerInsertFiles({ type: 'doc', groupId: group.id });
+        });
+
         floatingPill.appendChild(expandBtn);
+        floatingPill.appendChild(insertPillBtn);
         floatingPill.appendChild(deleteBtn);
         floatingPill.appendChild(zoomBtn);
+
+        // Header for stacked card with badge and insert doc button
+        const stackedHeader = document.createElement('div');
+        stackedHeader.className = 'merge-stacked-header';
+        const leftWrap = document.createElement('div');
+        leftWrap.appendChild(badge);
+        stackedHeader.appendChild(leftWrap);
+
+        const actionsWrap = document.createElement('div');
+        actionsWrap.className = 'merge-stacked-header-actions';
+        const insertStackedBtn = document.createElement('button');
+        insertStackedBtn.type = 'button';
+        insertStackedBtn.className = 'merge-group-insert-btn';
+        insertStackedBtn.setAttribute('data-action', 'insert-after-doc');
+        insertStackedBtn.title = PDFTools.i18n.t('merge.insert_after_doc', 'Insert files after this document');
+        insertStackedBtn.setAttribute('aria-label', PDFTools.i18n.t('merge.insert_after_doc', 'Insert files after this document'));
+        insertStackedBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>';
+        insertStackedBtn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          triggerInsertFiles({ type: 'doc', groupId: group.id });
+        });
+        actionsWrap.appendChild(insertStackedBtn);
+        stackedHeader.appendChild(actionsWrap);
 
         // Drag handle for touch & visual dragging
         const dragHandle = document.createElement('div');
@@ -771,7 +956,7 @@
         dragHandle.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="19" r="1.5"/><circle cx="15" cy="19" r="1.5"/></svg>';
 
         card.appendChild(colorBar);
-        card.appendChild(badge);
+        card.appendChild(stackedHeader);
         card.appendChild(preview);
         card.appendChild(check);
         card.appendChild(dragHandle);
@@ -935,7 +1120,21 @@
           deleteGroup(group.id);
         });
 
+        // Insert files after this document
+        const insertDocBtn = document.createElement('button');
+        insertDocBtn.type = 'button';
+        insertDocBtn.className = 'merge-group-header-btn merge-group-insert-btn';
+        insertDocBtn.setAttribute('data-action', 'insert-after-doc');
+        insertDocBtn.title = PDFTools.i18n.t('merge.insert_after_doc', 'Insert files after this document');
+        insertDocBtn.setAttribute('aria-label', PDFTools.i18n.t('merge.insert_after_doc', 'Insert files after this document'));
+        insertDocBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>';
+        insertDocBtn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          triggerInsertFiles({ type: 'doc', groupId: group.id });
+        });
+
         actions.appendChild(collapseBtn);
+        actions.appendChild(insertDocBtn);
         actions.appendChild(rotateBtn);
         actions.appendChild(delBtn);
 
@@ -1056,7 +1255,7 @@
         check.className = 'merge-card-select-check';
         check.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
 
-        // Footer: Source document name chip
+        // Footer: Source document name chip and Insert button
         const footer = document.createElement('div');
         footer.className = 'merge-card-title-footer';
         const titleText = document.createElement('div');
@@ -1064,6 +1263,19 @@
         titleText.textContent = item.fileName.length > 18 ? item.fileName.substring(0, 16) + '…' : item.fileName;
         titleText.title = `Source: ${item.fileName} (Original Page ${item.originalPage})`;
         footer.appendChild(titleText);
+
+        const insertBtn = document.createElement('button');
+        insertBtn.type = 'button';
+        insertBtn.className = 'merge-card-insert-btn';
+        insertBtn.setAttribute('data-action', 'insert-after-page');
+        insertBtn.setAttribute('aria-label', PDFTools.i18n.t('merge.insert_after_page', 'Insert files after this page'));
+        insertBtn.title = PDFTools.i18n.t('merge.insert_after_page', 'Insert files after this page');
+        insertBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>';
+        insertBtn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          triggerInsertFiles({ type: 'page', pageId: item.id, groupId: currentGroup.id });
+        });
+        footer.appendChild(insertBtn);
 
         // Drag handle for touch & visual dragging
         const dragHandle = document.createElement('div');
@@ -1447,7 +1659,7 @@
           handle: '.merge-group-drag-handle, .stacked-doc',
           draggable: '.merge-file-group-wrap, .merge-page-card.stacked-doc',
           ghostClass: 'sortable-ghost',
-          filter: '.merge-file-group-body, .merge-floating-pill, .merge-group-header-btn, .merge-pill-btn, .merge-add-drop-card',
+          filter: '.merge-file-group-body, .merge-floating-pill, .merge-group-header-btn, .merge-pill-btn, .merge-add-drop-card, .merge-group-insert-btn',
           preventOnFilter: false,
           delay: 200,
           delayOnTouchOnly: true,
@@ -1575,7 +1787,7 @@
             ghostClass: 'sortable-ghost',
             chosenClass: 'sortable-chosen',
             dragClass: 'sortable-drag',
-            filter: '.merge-card-header-actions, .merge-card-mini-btn',
+            filter: '.merge-card-header-actions, .merge-card-mini-btn, .merge-card-insert-btn',
             preventOnFilter: true,
             delay: 200,
             delayOnTouchOnly: true,
@@ -1711,6 +1923,7 @@
 
       expandAllBtn.addEventListener('click', function () {
         fileGroups.forEach(g => { g.isExpanded = true; });
+        pushHistoryState('Expand All');
         buildGrid();
       });
 
@@ -1718,6 +1931,7 @@
         // Save current DOM state before collapsing
         syncAllGroupsFromDom();
         fileGroups.forEach(g => { g.isExpanded = false; });
+        pushHistoryState('Collapse All');
         buildGrid();
       });
 
@@ -1846,12 +2060,18 @@
           window._lastMergedData = mergedData;
           progress.hide();
 
-          organizerArea.style.display = 'none';
           actionBar.classList.remove('active');
           resultArea.classList.add('active');
 
+          const uniqueFiles = new Set();
+          fileGroups.forEach(g => {
+            g.pageIds.forEach(id => {
+              const it = pageItemsMap.get(id);
+              if (it && it.file) uniqueFiles.add(it.file);
+            });
+          });
           document.getElementById('resPages').textContent = ordered.length;
-          document.getElementById('resFiles').textContent = fileGroups.length;
+          document.getElementById('resFiles').textContent = uniqueFiles.size;
           document.getElementById('resSize').textContent = PDFTools.FileUtils.formatSize(mergedData.byteLength);
 
 

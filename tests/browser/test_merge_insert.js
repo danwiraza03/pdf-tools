@@ -17,6 +17,7 @@ const helpers = require('./helpers');
 const ROOT_DIR = path.resolve(__dirname, '../..');
 const PDFLib = require(path.join(ROOT_DIR, 'js/lib/pdf-lib.min.js'));
 const pdfjsLib = require(path.join(ROOT_DIR, 'js/lib/pdf.min.js'));
+pdfjsLib.GlobalWorkerOptions.workerSrc = path.join(ROOT_DIR, 'js/lib/pdf.worker.min.js');
 
 async function createDocumentWithPages(prefix, pageCount) {
   const doc = await PDFLib.PDFDocument.create();
@@ -140,13 +141,10 @@ async function runMergeInsertSuite(browser, baseUrl) {
     await page.waitForSelector('#resultArea.active', { timeout: 15000 });
 
     // Extract the merged PDF bytes
-    const mergedPdfBase64 = await page.evaluate(async () => {
-      const dlBtn = document.getElementById('downloadBtn');
-      if (!dlBtn || !dlBtn.href) throw new Error('Download button has no href');
-      const resp = await fetch(dlBtn.href);
-      const buf = await resp.arrayBuffer();
+    const mergedPdfBase64 = await page.evaluate(() => {
+      const bytes = window._lastMergedData;
+      if (!bytes) throw new Error('window._lastMergedData not found');
       let binary = '';
-      const bytes = new Uint8Array(buf);
       for (let i = 0; i < bytes.byteLength; i++) {
         binary += String.fromCharCode(bytes[i]);
       }
@@ -251,6 +249,7 @@ async function runMergeInsertSuite(browser, baseUrl) {
     const centerClickable = await mobilePage.evaluate(() => {
       const btn = document.querySelector('.merge-page-card.expanded-page .merge-card-insert-btn');
       if (!btn) return false;
+      btn.scrollIntoView({ behavior: 'instant', block: 'center' });
       const r = btn.getBoundingClientRect();
       const el = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
       return Boolean(el && (btn.contains(el) || el === btn));

@@ -745,6 +745,8 @@ PDFTools.i18n = (function () {
       'merge.add_card_title': 'Add More Files',
       'merge.add_card_hint': 'Drop PDF here or click to browse',
       'merge.drag_to_reorder': 'Drag to reorder',
+      'merge.insert_after_page': 'Insert files after this page',
+      'merge.insert_after_doc': 'Insert files after this document',
 
       // Page Drop Component
       'page_drop.drop_add_title': 'Drop files here to add',
@@ -1532,6 +1534,8 @@ PDFTools.i18n = (function () {
       'merge.add_card_title': 'Tambah Berkas Lain',
       'merge.add_card_hint': 'Tarik berkas PDF ke sini atau klik untuk memilih',
       'merge.drag_to_reorder': 'Tarik untuk mengatur urutan',
+      'merge.insert_after_page': 'Sisipkan berkas setelah halaman ini',
+      'merge.insert_after_doc': 'Sisipkan berkas setelah dokumen ini',
 
       // Page Drop Component
       'page_drop.drop_add_title': 'Lepaskan berkas di sini untuk menambahkan',

@@ -8,6 +8,11 @@ Format mengacu pada [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) 
 
 - Tombol aksi per halaman pada alat Putar PDF: tombol putar kiri (-90°), putar kanan (+90°), dan hapus halaman individual dengan notifikasi pemulihan (undo).
 - Seret dan lepas berkas ke mana saja di semua alat: alat banyak berkas menambahkan berkas, alat satu berkas mengganti berkas yang sedang dibuka (dengan konfirmasi bila ada pekerjaan yang belum diunduh).
+- Sisipkan berkas di tengah daftar halaman pada Gabung PDF (setelah halaman atau dokumen tertentu).
+
+### Diperbaiki
+
+- Ikon pindah tidak lagi menutupi tombol hapus, putar, dan perbesar pada kartu halaman di layar sentuh.
 
 ### Diubah
 

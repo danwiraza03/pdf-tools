@@ -1,10 +1,10 @@
 {
-  "version": "pdf-tools-v42bb990107",
-  "compositeHash": "42bb99010741b36e07b24d10b0a5d366562e082cd6ad7ed7c39ab25db3e2c18d",
-  "builtAt": "2026-11-03T03:04:31.999Z",
+  "version": "pdf-tools-v97930c9d55",
+  "compositeHash": "97930c9d551ced7d5a34a699c77ea421336cbe392cfb200050206c68514d9f2d",
+  "builtAt": "2026-11-03T03:29:23.615Z",
   "totalFiles": 92,
-  "totalBytes": 3788155,
-  "totalMB": "3.61",
+  "totalBytes": 3801278,
+  "totalMB": "3.63",
   "files": [
     {
       "url": "./css/home.css",
@@ -18,8 +18,8 @@
     },
     {
       "url": "./css/tool.css",
-      "size": 53039,
-      "hash": "26ad213f83f6"
+      "size": 54874,
+      "hash": "acf1d2534484"
     },
     {
       "url": "./fonts/inter-latin-400-normal.woff2",
@@ -268,8 +268,8 @@
     },
     {
       "url": "./js/pages/merge.js",
-      "size": 78927,
-      "hash": "54b6b0a189b6"
+      "size": 89768,
+      "hash": "13da40642f00"
     },
     {
       "url": "./js/pages/ocr.js",
@@ -348,8 +348,8 @@
     },
     {
       "url": "./js/utils/i18n.js",
-      "size": 85145,
-      "hash": "2507cb588d18"
+      "size": 85421,
+      "hash": "e1526d8a8e8c"
     },
     {
       "url": "./manifest.json",
@@ -398,8 +398,8 @@
     },
     {
       "url": "./pages/merge.html",
-      "size": 16850,
-      "hash": "86de54c8ea2a"
+      "size": 17021,
+      "hash": "944d36916625"
     },
     {
       "url": "./pages/ocr.html",
