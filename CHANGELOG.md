@@ -6,6 +6,7 @@ Format mengacu pada [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) 
 
 ### Ditambahkan
 
+- **Redaksi PDF Mandiri**: Redaksi PDF sebagai alat mandiri (`pages/redact.html`), memakai mesin redaksi permanen yang sama dengan Edit PDF.
 - **Peringatan Layar Sentuh untuk Edit PDF (PDF Studio)**: Modal kustom ramah sentuh (`#studioTouchModalBackdrop`) yang memperingatkan pengguna perangkat layar sentuh bahwa "Edit PDF paling nyaman dipakai di komputer" dengan tombol Lanjutkan dan Batal, mencegah navigasi tidak sengaja di layar kecil tanpa menggunakan dialog bawaan browser.
 - **Rangkaian Pengujian Browser Navigasi Edit PDF**: Menambahkan pengujian otomatis Playwright `test_edit_pdf_nav.js` yang memverifikasi keseragaman label dwibahasa (EN & ID), navigasi langsung di desktop tanpa modal, dan pemunculan modal peringatan pada emulasi layar sentuh.
 
