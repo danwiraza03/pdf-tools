@@ -201,7 +201,7 @@ pdf/
 │   ├── dev-server.js           # Local dev static server (127.0.0.1, proteksi path traversal)
 │   ├── build_ocr_bundle.js     # Bundler OCR Tesseract lokal
 │   └── clean.js                # Skrip pembersih berkas sementara
-├── tests/                      # Automated Quality Gates & Security Tests (13 test suites)
+├── tests/                      # Automated Quality Gates & Security Tests (34 Node + 27 Browser = 61 test suites)
 ├── LICENSE                     # Lisensi Perangkat Lunak MIT
 ├── THIRD_PARTY_NOTICES.md      # Pemberitahuan Lisensi Pihak Ketiga & Font
 ├── PROJECT_RULES.md            # Standar Arsitektur & Kepatuhan Proyek
@@ -219,7 +219,7 @@ Untuk memvalidasi bahwa seluruh 23 modul, kepatuhan offline, dan keamanan server
 node tests/run_all.js
 ```
 
-Rangkaian tes ini mencakup 13 suite pengujian otomatis: validasi sintaks JavaScript, konsistensi SVG, integritas model OCR offline, verifikasi fungsionalitas end-to-end, keamanan enkripsi PDF, pemusnahan kebocoran data pada redaksi permanen, keamanan host server `127.0.0.1`, pencegahan path traversal, dan kepatuhan zero external HTTP(S) URLs.
+Rangkaian tes ini mencakup 34 suite pengujian Node.js dan 27 suite pengujian browser Playwright (total 61 suite pengujian otomatis): validasi sintaks JavaScript dan skrip inline HTML, konsistensi ikon SVG, audit aksesibilitas Axe-core di seluruh halaman, pengetatan Content Security Policy (CSP tanpa 'unsafe-eval'), PWA manifest, service worker anti-skew, pemisahan cache vendor, integritas model OCR offline, verifikasi fungsionalitas end-to-end, keamanan enkripsi PDF, pemusnahan kebocoran data pada redaksi permanen, keamanan host server `127.0.0.1`, pencegahan path traversal, dan kepatuhan zero external HTTP(S) URLs.
 
 ### Lingkungan Pengujian
 - **Versi Node.js Lokal**: `v24.20.0` (Node 24 LTS)
@@ -272,13 +272,13 @@ git archive --format=zip -o ..\pdf-ringan.zip HEAD -- . ':(exclude)js/lib/tesser
 
 ## ⚡ Dukungan Offline PWA & Service Worker
 
-PDF Tools dilengkapi Service Worker (`sw.js`) standar PWA yang memungkinkan aplikasi dibuka dan dioperasikan 100% tanpa koneksi internet setelah kunjungan pertama:
+PDF Tools adalah Progressive Web App (PWA) yang dapat dipasang (*installable*) langsung dari peramban ke desktop maupun seluler, dan berfungsi penuh 100% offline setelah kunjungan pertama:
 
-- **App Shell Precache**: Memuat 69 berkas inti (HTML, CSS, JS pustaka lokal, ikon, font Inter) dengan total ukuran ~3.55 MB (di bawah anggaran 5.0 MB).
-- **Strategi Caching**:
-  - *Network-First* untuk dokumen HTML (memastikan konten terbaru selalu diutamakan bila terhubung).
-  - *Cache-First* untuk aset statis berkode versi hash (`css/`, `js/`, `fonts/`, `icons/`).
-  - *Runtime On-Demand* untuk modul besar PDF Studio dan model OCR.
+- **PWA Manifest Lengkap**: Dilengkapi pintasan cepat (*shortcuts*) langsung ke Merge, Compress, dan Sign PDF, screenshot pratinjau desktop & mobile, deskripsi bahasa Inggris, serta ikon vektor adaptif.
+- **App Shell Precache**: Memuat 92 berkas inti (HTML, CSS, JS pustaka lokal, ikon, font Inter) dengan total ukuran ~3.63 MB (di bawah anggaran 5.0 MB).
+- **Strategi Caching Pintar (Anti-Version Skew)**:
+  - *Network-First* dengan batas waktu jaringan 5 detik untuk seluruh berkas aplikasi milik situs sendiri (HTML, JS, CSS, font, ikon). Mengutamakan versi rilis terbaru saat online, dengan cache lokal sebagai cadangan saat offline atau koneksi lambat.
+  - *Dedicated Vendor Cache* (`pdf-tools-vendor-v<hash>`) untuk pustaka `js/lib/**` dan aset model OCR lokal, sehingga aset berat tidak diunduh ulang setiap ada deploy perbaikan kode aplikasi.
 - **Deteksi Pembaruan Versi**: Setiap perubahan berkas inti memicu hash komposit baru (`CACHE_VERSION`). Notifikasi Toast interaktif akan muncul secara otomatis (*"Versi baru PDF Tools telah tersedia"* / *"A new version of PDF Tools is available"*) dengan tombol **Perbarui Sekarang** (`SKIP_WAITING`).
 - **Membangun Ulang Manifest**:
   ```bash
@@ -307,7 +307,7 @@ self.addEventListener('activate', (event) => {
 
 ## ⚠️ Masalah yang Diketahui (Known Issues)
 
-Keterbatasan berikut sudah diketahui pada versi 1.0.0:
+Keterbatasan berikut tercatat pada versi rilis saat ini:
 
 - **Redaksi permanen:** halaman yang diredaksi menjadi gambar, sehingga teksnya tidak bisa dipilih atau dicari lagi, dan struktur tag aksesibilitas halaman itu dihapus.
 - **Tanda tangan digital:** alat yang menulis ulang berkas (Watermark, Gabung, Tanda Tangan, Kompres, dan lainnya) mengubah tanda tangan digital menjadi stempel visual. Tanda tangan itu tidak lagi sah secara kriptografi, karena setiap perubahan pada berkas membatalkannya. Tambahkan tanda tangan atau paraf sebelum dokumen ditandatangani secara elektronik.
@@ -315,10 +315,8 @@ Keterbatasan berikut sudah diketahui pada versi 1.0.0:
 - **Menyalin halaman antar dokumen** (Gabung, Pisah, Hapus Halaman, Urutkan): struktur tag aksesibilitas dan kolom formulir tidak ikut terbawa, dan bookmark tanpa tujuan serta tanpa anak tidak dibawa.
 - **Buka Kunci (Unlock)** pada PDF terenkripsi buatan alat lain tidak membawa Title dan Author.
 - **Kompres:** preset Extreme dan Recommended mengubah halaman menjadi gambar (teks tidak bisa dipilih atau dicari); pada uji PDF foto besar pengurangannya sekitar 95% dan 88%. Preset Less mempertahankan teks vektor tetapi bisa tidak mengecilkan ukuran (0% pada uji yang sama).
-- **OCR:** pemakaian pertama mengunduh model bahasa (sekitar 5 MB untuk Indonesia dan 14,6 MB untuk Inggris; terkompres sekitar 4 MB dan 11 MB). Versi web membutuhkan internet saat pertama kali memuat model bahasa.
-- **Tampilan:** font Inter belum disertakan di proyek, sehingga tampilan memakai font sistem dan lebar teks sedikit berbeda antar perangkat.
-- **Belum diuji** pada dokumen sangat besar (ratusan halaman atau puluhan MB); di HP, memori browser terbatas.
-- **Belum diuji pada perangkat fisik iOS dan Android.** Pengujian memakai emulasi (Chromium dan WebKit). <!-- hapus baris ini setelah diuji di HP fisik -->
+- **OCR:** pemakaian pertama mengunduh model bahasa (sekitar 5 MB untuk Indonesia dan 14,6 MB untuk Inggris; terkompres sekitar 4 MB dan 11 MB). Model tersimpan di cache vendor persisten setelah pengunduhan pertama.
+- **Belum diuji pada perangkat fisik iOS dan Android.** Pengujian memakai emulasi otomatis Playwright (Chromium dan WebKit). <!-- hapus baris ini setelah diuji di HP fisik -->
 
 ---
 
