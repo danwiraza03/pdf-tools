@@ -4,25 +4,45 @@ Format mengacu pada [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) 
 
 ## [Unreleased]
 
+### Keamanan
+
+- **Content Security Policy (CSP) ketat tanpa 'unsafe-eval'**: Seluruh 23 halaman HTML menerapkan kebijakan keamanan konten yang memblokir injeksi skrip eksternal, gambar pelacak, dan permintaan jaringan luar. Opsi `'unsafe-eval'` berhasil dihilangkan dengan menyetel `isEvalSupported: false` pada PDF.js di seluruh modul di luar PDF Studio.
+
 ### Ditambahkan
 
-- Tombol aksi per halaman pada alat Putar PDF: tombol putar kiri (-90°), putar kanan (+90°), dan hapus halaman individual dengan notifikasi pemulihan (undo).
-- Seret dan lepas berkas ke mana saja di semua alat: alat banyak berkas menambahkan berkas, alat satu berkas mengganti berkas yang sedang dibuka (dengan konfirmasi bila ada pekerjaan yang belum diunduh).
-- Sisipkan berkas di tengah daftar halaman pada Gabung PDF (setelah halaman atau dokumen tertentu).
-
-### Diperbaiki
-
-- Ikon pindah tidak lagi menutupi tombol hapus, putar, dan perbesar pada kartu halaman di layar sentuh.
+- **Progressive Web App (PWA) & Service Worker**: Aplikasi dapat dipasang langsung ke layar utama desktop maupun seluler dan beroperasi 100% offline setelah kunjungan pertama dengan app shell precache (~3,63 MB) dan pemberitahuan pembaruan versi baru secara interaktif.
+- **Pintasan PWA & Tangkapan Layar**: Menambahkan pintasan langsung (*shortcuts*) ke Gabung PDF, Kompres PDF, dan Tanda Tangan PDF dari ikon aplikasi di OS, serta tangkapan layar pratinjau desktop dan seluler pada dialog pemasangan.
+- **Tipografi Font Inter Lokal**: Menyertakan font Inter WOFF2 (`Inter-Regular`, `Inter-Medium`, `Inter-SemiBold`) secara lokal di folder `fonts/` tanpa ketergantungan pada Google Fonts eksternal.
+- **Komponen Seret & Lepas (PageDrop) di Seluruh Halaman**: Berkas dapat diseret dan dilepas ke bagian layar mana pun pada semua alat. Alat banyak berkas menambahkan berkas ke antrean, sedangkan alat satu berkas mengganti berkas yang sedang dibuka dengan konfirmasi modal yang aman.
+- **Penyisipan Berkas di Tengah Antrean Gabung PDF**: Menambahkan tombol untuk menyisipkan dokumen baru setelah halaman atau dokumen tertentu tanpa membongkar urutan yang sudah ada.
+- **Peningkatan Putar PDF (Rotate)**: Tombol putar kiri (-90°), putar kanan (+90°), dan hapus halaman individual pada kartu pratinjau dengan notifikasi pemulihan (undo), serta modal perbesar pratinjau interaktif.
+- **Peningkatan Penomoran Halaman (Page Number)**: Pratinjau penempatan nomor langsung pada kanvas PDF asli, navigasi pratinjau halaman, dan dukungan opsi font Arial.
+- **Peningkatan Watermark**: Palet warna preset ala Microsoft Word, pemilih warna kustom (color picker), dan ukuran font bebas.
+- **Optimasi Mesin Pencari (SEO) & Berbagi Sosial**: Tag meta deskripsi, Open Graph, Twitter Cards, canonical URL, gambar pratinjau `assets/og-image.png`, serta `sitemap.xml` otomatis di seluruh halaman publik.
+- **Aksesibilitas Penuh (A11y)**: Tautan lewati ke konten (*skip-to-content*), penanda semantik (landmark), pengelolaan fokus keyboard pada dialog modal, dan rasio kontras warna standar WCAG AA diuji dengan Axe-core (0 pelanggaran).
+- **Ekspansi Rangkaian Pengujian Otomatis**: Pengujian bertambah dari 13 suite menjadi 61 suite (34 suite pengujian Node.js dan 27 suite browser Playwright).
 
 ### Diubah
 
-- Area kerja pengatur halaman pada Gabung PDF disembunyikan saat proses penggabungan selesai, menyisakan menu hasil unduhan yang bersih disertai tombol untuk kembali mengatur halaman jika diperlukan.
-- Aplikasi difokuskan sebagai aplikasi web; server pengembangan dipindahkan ke `scripts/dev-server.js`.
-- Bahasa tampilan bawaan kini bahasa Inggris; bahasa Indonesia tetap tersedia lewat tombol bahasa di header, dan pilihan Anda diingat.
+- **Alur Caching Service Worker Anti-Version Skew**: Berkas aplikasi milik situs sendiri (HTML, JS, CSS, font, ikon) menggunakan strategi *Network-First* dengan batas waktu jaringan 5 detik agar pengguna yang online selalu menerima versi rilis terbaru yang serasi dengan berkas HTML.
+- **Pemisahan Cache Vendor OCR**: Pustaka lokal di `js/lib/**` dan aset model bahasa OCR disimpan di cache vendor persisten terpisah (`pdf-tools-vendor-v<hash>`) sehingga tidak diunduh ulang setiap ada rilis perbaikan aplikasi.
+- **Lokalisasi Homepage & Navigasi 100% Dwibahasa**: Seluruh 23 deskripsi alat, tombol filter kategori, judul mega menu, tombol cancel dan batch modal, serta tautan footer diterjemahkan lengkap ke dalam bahasa Inggris dan Indonesia.
+- **Area Kerja Gabung PDF Lebih Bersih**: Area pengerjaan kartu disembunyikan otomatis begitu proses penggabungan selesai, menyajikan menu unduhan yang ringkas dan tombol atur ulang untuk kembali ke tata letak sebelumnya.
+- **Penyatuan Header Dokumen pada Gabung PDF**: Menyisipkan berkas baru mempertahankan satu kesatuan header dokumen agar tidak terpecah menjadi kartu terpisah.
+- **Pembersihan Arsitektur Berfokus Aplikasi Web**: Menghapus dukungan lingkungan lokal `file://` dan memindahkan server pengembangan statis ke `scripts/dev-server.js`.
+- **Konsolidasi Peta Jalan (Roadmap)**: Menggabungkan rencana pengembangan menjadi satu dokumen rujukan terpadu di `docs/ROADMAP.md`.
+
+### Diperbaiki
+
+- **Tumpang Tindih Ikon Pindah di Layar Sentuh**: Ikon drag handle pada kartu Gabung PDF di layar sentuh dipindahkan ke tepi kiri bawah pratinjau sehingga tidak lagi menutupi tombol putar, perbesar, dan hapus.
+- **Rasio Kontras Judul Tanda Tangan**: Memperbaiki kontras warna teks judul pada `pages/sign.html` agar memenuhi standar aksesibilitas WCAG AA.
+- **Mencegah Reload Berulang pada Service Worker**: Memperbaiki alur inisialisasi agar halaman tidak memuat ulang tanpa interaksi pengguna.
 
 ### Dihapus
 
-- Peluncur Windows (.bat), dukungan membuka aplikasi langsung dari berkas (file://), dokumen arsip lama (`docs/archive/`), dan berkas tidak terpakai (`scripts/validate_workflow_yaml.js`).
+- Peluncur desktop Windows (`Jalankan_PDF_Tools.bat` dan `Buka_Aplikasi.bat`).
+- Penanganan khusus protokol `file://` pada modul OCR dan worker PDF.js.
+- Berkas lama tidak terpakai: folder `docs/archive/`, `scripts/validate_workflow_yaml.js`, serta berkas rencana lama `docs/IMPROVEMENT_PLAN.md` dan `docs/IMPROVEMENT_ROADMAP.md`.
 
 ## [1.0.0] - 2026-10-27
 
