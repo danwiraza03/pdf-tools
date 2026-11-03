@@ -27,6 +27,7 @@ const { runPageDropSuite } = require('./test_page_drop');
 const { runMergeDropzoneSuite } = require('./test_merge_dropzone');
 const { runRotatePageActionsSuite } = require('./test_rotate_page_actions');
 const { runPageNumberPreviewSuite } = require('./test_page_number_preview');
+const { runMergeCardControlsSuite } = require('./test_merge_card_controls');
 
 const TEST_PORT = 8765;
 const BASE_URL = `http://127.0.0.1:${TEST_PORT}`;
@@ -315,6 +316,13 @@ async function main() {
         name: 'Page Number Live Placement Preview Suite',
         run: async () => {
           await runPageNumberPreviewSuite(browser, BASE_URL);
+        }
+      },
+      {
+        id: 'mergecontrols',
+        name: 'Merge Page Card Controls & Drag Handle Non-Overlap Suite',
+        run: async () => {
+          await runMergeCardControlsSuite(browser, BASE_URL);
         }
       }
     ];
