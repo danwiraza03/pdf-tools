@@ -1,9 +1,9 @@
 {
-  "version": "pdf-tools-v5fce1ff21a",
-  "compositeHash": "5fce1ff21a8f0fd59d20ebeaf3029a23ac37c4648af3e0baa4f1e86e001a8d4a",
-  "builtAt": "2026-11-02T08:01:00.029Z",
+  "version": "pdf-tools-v42bb990107",
+  "compositeHash": "42bb99010741b36e07b24d10b0a5d366562e082cd6ad7ed7c39ab25db3e2c18d",
+  "builtAt": "2026-11-03T03:04:31.999Z",
   "totalFiles": 92,
-  "totalBytes": 3787964,
+  "totalBytes": 3788155,
   "totalMB": "3.61",
   "files": [
     {
@@ -18,8 +18,8 @@
     },
     {
       "url": "./css/tool.css",
-      "size": 52848,
-      "hash": "0189fc167083"
+      "size": 53039,
+      "hash": "26ad213f83f6"
     },
     {
       "url": "./fonts/inter-latin-400-normal.woff2",

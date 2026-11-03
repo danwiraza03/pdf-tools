@@ -1565,6 +1565,11 @@
   display: flex;
 }
 
+.merge-page-card.expanded-page .merge-card-select-check {
+  top: 42px;
+  right: 8px;
+}
+
 @keyframes selectPop {
   0% { transform: scale(0); }
   100% { transform: scale(1); }
@@ -1890,8 +1895,8 @@
   align-items: center;
   justify-content: center;
   position: absolute;
-  top: 8px;
-  right: 8px;
+  bottom: 44px;
+  left: 8px;
   width: 28px;
   height: 28px;
   border-radius: 6px;
@@ -1902,7 +1907,7 @@
   border: 1px solid rgba(255, 255, 255, 0.18);
   opacity: 0;
   transition: opacity 0.18s ease, transform 0.18s ease;
-  z-index: 8;
+  z-index: 5;
   cursor: grab;
   cursor: -webkit-grab;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
@@ -1920,6 +1925,7 @@
 .merge-page-card:hover .stacked-doc-handle,
 .merge-page-card:hover .expanded-page-handle {
   opacity: 1;
+  pointer-events: auto;
 }
 
 .merge-page-card.stacked-doc,
@@ -2211,8 +2217,10 @@
     align-items: center;
     justify-content: center;
     position: absolute;
-    top: 8px;
-    right: 8px;
+    bottom: 44px;
+    left: 8px;
+    top: auto;
+    right: auto;
     width: 44px;
     height: 44px;
     min-width: 44px;
@@ -2224,14 +2232,16 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
-    z-index: 10;
+    opacity: 1;
+    pointer-events: auto;
+    z-index: 5;
     box-sizing: border-box;
   }
 
   .stacked-doc-handle svg,
   .expanded-page-handle svg {
-    width: 44px;
-    height: 44px;
+    width: 22px;
+    height: 22px;
     stroke: #ffffff;
     display: block;
   }
