@@ -473,9 +473,9 @@ PDFTools.i18n = (function () {
       // Compress Tool
       'compress.level_label': 'Compression Profile / Level',
       'compress.high': 'Maximum Compression (100 DPI)',
-      'compress.high.desc': 'Smallest file size for email, WhatsApp, or low storage',
+      'compress.high.desc': 'Smallest file size; pages converted to images',
       'compress.medium': 'Balanced (150 DPI)',
-      'compress.medium.desc': 'Sharp text & visual clarity, ideal for everyday use',
+      'compress.medium.desc': 'Preserves selectable text; optimizes embedded images',
       'compress.efiling': 'E-Filing / SIPP (200 DPI)',
       'compress.efiling.desc': 'Official court & government portal standard (< 10 MB)',
       'compress.low': 'Lossless Vector (Original)',
@@ -1309,9 +1309,9 @@ PDFTools.i18n = (function () {
       // Compress Tool
       'compress.level_label': 'Profil / Level Kompresi',
       'compress.high': 'Kompresi Maksimal (100 DPI)',
-      'compress.high.desc': 'Ukuran terkecil untuk kirim email, WhatsApp & web',
+      'compress.high.desc': 'Ukuran terkecil; halaman diubah menjadi gambar',
       'compress.medium': 'Kualitas Seimbang (150 DPI)',
-      'compress.medium.desc': 'Teks tajam & visual jernih, ideal untuk dokumen harian',
+      'compress.medium.desc': 'Teks tetap bisa dipilih; memperkecil gambar di dalam PDF',
       'compress.efiling': 'E-Filing / SIPP (200 DPI)',
       'compress.efiling.desc': 'Standar resmi portal instansi pemerintah & pengadilan (< 10 MB)',
       'compress.low': 'Dokumen Asli (Lossless Vektor)',

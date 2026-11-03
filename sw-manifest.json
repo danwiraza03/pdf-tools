@@ -1,12 +1,12 @@
 {
-  "version": "pdf-tools-v38b0be9673",
+  "version": "pdf-tools-vfb827613c3",
   "vendorVersion": "pdf-tools-vendor-v4461a35c2a",
-  "compositeHash": "38b0be96730d2e0afce9a2c139421a57af7a382ec4ccf01678bd4fcdfcf1836c",
+  "compositeHash": "fb827613c3e85a2fb5b9d26639473cb90b9b49966dca44c94ed44816de02c42c",
   "vendorHash": "4461a35c2a4ca00c66db6cf2a6300d46859944c7317337fc75f3ad1326f8fd28",
-  "builtAt": "2026-11-03T10:20:02.351Z",
+  "builtAt": "2026-11-03T10:34:50.977Z",
   "totalFiles": 96,
-  "totalBytes": 3885729,
-  "totalMB": "3.71",
+  "totalBytes": 3904104,
+  "totalMB": "3.72",
   "files": [
     {
       "url": "./css/home.css",
@@ -110,8 +110,8 @@
     },
     {
       "url": "./js/core/pdf-compress.js",
-      "size": 24882,
-      "hash": "acf556d3c42b"
+      "size": 43274,
+      "hash": "e7c4f4a5bce1"
     },
     {
       "url": "./js/core/pdf-copy.js",
@@ -365,8 +365,8 @@
     },
     {
       "url": "./js/utils/i18n.js",
-      "size": 90902,
-      "hash": "b061a3ba1a3a"
+      "size": 90893,
+      "hash": "494d46095c7c"
     },
     {
       "url": "./manifest.json",
@@ -380,8 +380,8 @@
     },
     {
       "url": "./pages/compress.html",
-      "size": 12965,
-      "hash": "8dcf5fdeb2e1"
+      "size": 12957,
+      "hash": "57a882635f55"
     },
     {
       "url": "./pages/crop.html",
