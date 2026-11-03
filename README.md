@@ -314,7 +314,7 @@ Keterbatasan berikut tercatat pada versi rilis saat ini:
 - **PDF Studio:** belum dioptimalkan untuk layar sentuh dan HP (memakai event mouse), belum menangani PDF berproteksi seperti alat lainnya, dan OCR bawaannya (ID + EN) mengunduh dua model bahasa sekaligus. Disarankan memakai komputer.
 - **Menyalin halaman antar dokumen** (Gabung, Pisah, Hapus Halaman, Urutkan): struktur tag aksesibilitas dan kolom formulir tidak ikut terbawa, dan bookmark tanpa tujuan serta tanpa anak tidak dibawa.
 - **Buka Kunci (Unlock)** pada PDF terenkripsi buatan alat lain tidak membawa Title dan Author.
-- **Kompres:** preset Extreme dan Recommended mengubah halaman menjadi gambar (teks tidak bisa dipilih atau dicari); pada uji PDF foto besar pengurangannya sekitar 95% dan 88%. Preset Less mempertahankan teks vektor tetapi bisa tidak mengecilkan ukuran (0% pada uji yang sama).
+- **Kompres:** mode Seimbang (bawaan) memperkecil gambar di dalam PDF tanpa merasterisasi halaman sehingga teks tetap bisa dipilih dan dicari (pengurangan sekitar 71%–79% pada uji PDF foto besar). Mode Extreme mengubah halaman menjadi gambar demi ukuran terkecil (pengurangan ~95%, teks tidak bisa dipilih). Preset Less mempertahankan seluruh teks dan grafis vektor tanpa rasterisasi (pengurangan minimal pada dokumen foto murni).
 - **OCR:** pemakaian pertama mengunduh model bahasa (sekitar 5 MB untuk Indonesia dan 14,6 MB untuk Inggris; terkompres sekitar 4 MB dan 11 MB). Model tersimpan di cache vendor persisten setelah pengunduhan pertama.
 - **Belum diuji pada perangkat fisik iOS dan Android.** Pengujian memakai emulasi otomatis Playwright (Chromium dan WebKit). <!-- hapus baris ini setelah diuji di HP fisik -->
 
