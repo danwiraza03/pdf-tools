@@ -11,7 +11,11 @@
 'use strict';
 
 const assert = require('assert');
-const { startTestServer, launchChromium } = require('./helpers');
+const http = require('http');
+const fs = require('fs');
+const path = require('path');
+const { handleRequest } = require('../../scripts/dev-server.js');
+const { launchChromium } = require('./helpers');
 
 const TEST_PORT = 8769;
 
@@ -24,7 +28,37 @@ async function runServiceWorkerSuite() {
   let browser;
 
   try {
-    server = await startTestServer(TEST_PORT);
+    let simulatedDeploy = false;
+    let simulatedSwContent = null;
+
+    server = await new Promise((resolve) => {
+      const s = http.createServer((req, res) => {
+        const urlPath = req.url.split('?')[0];
+        if (simulatedDeploy) {
+          if (urlPath === '/pages/merge.html') {
+            const original = fs.readFileSync(path.join(__dirname, '../../pages/merge.html'), 'utf8');
+            const modified = original.replace('</head>', '<script>window.__HTML_VERSION = "v2-new";</script></head>');
+            res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+            res.end(modified);
+            return;
+          }
+          if (urlPath === '/js/pages/merge.js') {
+            const original = fs.readFileSync(path.join(__dirname, '../../js/pages/merge.js'), 'utf8');
+            const modified = 'window.__JS_VERSION = "v2-new";\n' + original;
+            res.writeHead(200, { 'Content-Type': 'application/javascript; charset=utf-8' });
+            res.end(modified);
+            return;
+          }
+        }
+        if (simulatedSwContent && urlPath === '/sw.js') {
+          res.writeHead(200, { 'Content-Type': 'application/javascript; charset=utf-8' });
+          res.end(simulatedSwContent);
+          return;
+        }
+        handleRequest(req, res);
+      });
+      s.listen(TEST_PORT, '127.0.0.1', () => resolve(s));
+    });
     const baseUrl = `http://127.0.0.1:${TEST_PORT}`;
     console.log(`✓ Test server running at ${baseUrl}`);
 
@@ -64,12 +98,16 @@ async function runServiceWorkerSuite() {
     console.log('\n--- 2. Auditing Cache Storage & Precache Integrity ---');
     const cacheInfo = await page.evaluate(async () => {
       const keys = await caches.keys();
-      const swCaches = keys.filter(k => k.startsWith('pdf-tools-v'));
+      const swCaches = keys.filter(k => k.startsWith('pdf-tools-'));
       if (swCaches.length === 0) return { keys, count: 0, sampleUrls: [], invalidUrls: [] };
 
-      const cache = await caches.open(swCaches[0]);
-      const requests = await cache.keys();
-      const urls = requests.map(r => r.url);
+      let allRequests = [];
+      for (const cName of swCaches) {
+        const cache = await caches.open(cName);
+        const requests = await cache.keys();
+        allRequests = allRequests.concat(requests);
+      }
+      const urls = allRequests.map(r => r.url);
 
       const invalid = urls.filter(u => {
         // Must be on current origin and not blob/data/external
@@ -77,7 +115,7 @@ async function runServiceWorkerSuite() {
       });
 
       return {
-        cacheName: swCaches[0],
+        cacheName: swCaches.join(', '),
         count: urls.length,
         hasIndex: urls.some(u => u.endsWith('/index.html') || u === window.location.origin + '/'),
         hasStyle: urls.some(u => u.includes('css/style.css')),
@@ -149,6 +187,79 @@ async function runServiceWorkerSuite() {
     });
     assert(skipWaitingHandled, 'SKIP_WAITING message must be accepted without throwing');
     console.log('✓ Worker postMessage({ type: "SKIP_WAITING" }) received successfully.');
+
+    // 5. Version Skew Prevention Test (Network-first for app JS & HTML)
+    console.log('\n--- 5. Testing Version Skew Prevention (Network-first for App JS & HTML) ---');
+    await page.goto(`${baseUrl}/pages/merge.html`, { waitUntil: 'networkidle' });
+    const initialJsVer = await page.evaluate(() => window.__JS_VERSION);
+    assert.strictEqual(initialJsVer, undefined, 'Initial JS must be repository version');
+
+    // Simulate deploy of new version on server
+    simulatedDeploy = true;
+    await page.reload({ waitUntil: 'networkidle' });
+
+    const htmlVer = await page.evaluate(() => window.__HTML_VERSION);
+    const jsVer = await page.evaluate(() => window.__JS_VERSION);
+    console.log(`Version check after reload: HTML=${htmlVer}, JS=${jsVer}`);
+    assert.strictEqual(htmlVer, 'v2-new', 'HTML must be the new deployed version');
+    assert.strictEqual(jsVer, 'v2-new', 'JS executed must match the new deployed version (no version skew)');
+    console.log('✓ Successfully verified: new JS is loaded matching new HTML (version skew prevented).');
+
+    // 6. Vendor / OCR Model Cache Preservation Across Deploys
+    console.log('\n--- 6. Testing Vendor/OCR Cache Preservation Across Deploys ---');
+    const initialVendorFetch = await page.evaluate(async () => {
+      const res = await fetch('/js/lib/tesseract/worker.min.js');
+      return res.status;
+    });
+    assert.strictEqual(initialVendorFetch, 200, 'Vendor asset fetch must succeed');
+
+    // Simulate a new app version deploy that does NOT change js/lib
+    const currentSwCode = fs.readFileSync(path.join(__dirname, '../../sw.js'), 'utf8');
+    simulatedSwContent = currentSwCode.replace(/CACHE_VERSION = '[^']+';/, "CACHE_VERSION = 'pdf-tools-v99999999';");
+
+    // Trigger update of service worker
+    await page.evaluate(async () => {
+      const reg = await navigator.serviceWorker.getRegistration();
+      if (reg) {
+        await reg.update();
+        if (reg.waiting) {
+          reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+        }
+        reg.addEventListener('updatefound', () => {
+          const nw = reg.installing;
+          if (nw) {
+            nw.addEventListener('statechange', () => {
+              if (nw.state === 'installed') {
+                nw.postMessage({ type: 'SKIP_WAITING' });
+              }
+            });
+          }
+        });
+      }
+    });
+    await page.waitForTimeout(1500);
+
+    // Track actual server network requests to /js/lib/
+    let vendorServerHits = 0;
+    const originalServerListeners = server.listeners('request');
+    server.removeAllListeners('request');
+    server.on('request', (req, res) => {
+      if (req.url.includes('/js/lib/tesseract/worker.min.js')) {
+        console.log('[SERVER HIT]:', req.url);
+        vendorServerHits++;
+      }
+      originalServerListeners[0](req, res);
+    });
+
+    const secondVendorFetch = await page.evaluate(async () => {
+      const res = await fetch('/js/lib/tesseract/worker.min.js');
+      return res.status;
+    });
+
+    assert.strictEqual(secondVendorFetch, 200, 'Vendor asset fetch must still succeed');
+    console.log(`Vendor server network hits after app deploy: ${vendorServerHits}`);
+    assert.strictEqual(vendorServerHits, 0, 'Vendor/OCR assets must be served from cache without redownloading across app deploys');
+    console.log('✓ Successfully verified: Vendor/OCR assets preserved across app updates.');
 
     console.log('\n========================================================================');
     console.log('✅ [ALL PASSED] Service Worker & Offline Capability Verified!');

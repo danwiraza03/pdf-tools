@@ -1,7 +1,9 @@
 {
   "version": "pdf-tools-vddc4ade821",
+  "vendorVersion": "pdf-tools-vendor-v4461a35c2a",
   "compositeHash": "ddc4ade821b829ee8dd3bb4e41d21bf9550d1826df6f7eb39508fe73e873c7e0",
-  "builtAt": "2026-11-03T04:01:04.412Z",
+  "vendorHash": "4461a35c2a4ca00c66db6cf2a6300d46859944c7317337fc75f3ad1326f8fd28",
+  "builtAt": "2026-11-03T08:18:19.122Z",
   "totalFiles": 92,
   "totalBytes": 3801956,
   "totalMB": "3.63",

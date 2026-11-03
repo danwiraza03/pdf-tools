@@ -81,6 +81,27 @@ function getAppShellFileList() {
   return files.sort();
 }
 
+function getVendorFileList() {
+  const vendorDir = path.join(ROOT_DIR, 'js/lib');
+  const results = [];
+  function walk(dir) {
+    if (!fs.existsSync(dir)) return;
+    const list = fs.readdirSync(dir);
+    for (const item of list) {
+      const full = path.join(dir, item);
+      const stat = fs.statSync(full);
+      if (stat.isDirectory()) {
+        walk(full);
+      } else {
+        const rel = path.relative(ROOT_DIR, full).replace(/\\/g, '/');
+        results.push(rel);
+      }
+    }
+  }
+  walk(vendorDir);
+  return results.sort();
+}
+
 function buildManifest() {
   const files = getAppShellFileList();
   const fileEntries = [];
@@ -107,9 +128,22 @@ function buildManifest() {
   const compositeHash = hashCollector.digest('hex');
   const cacheVersion = `pdf-tools-v${compositeHash.slice(0, 10)}`;
 
+  // Compute vendor-only hash (js/lib/**)
+  const vendorFiles = getVendorFileList();
+  const vendorHashCollector = crypto.createHash('sha256');
+  for (const rel of vendorFiles) {
+    const fullPath = path.join(ROOT_DIR, rel);
+    const hash = hashFile(fullPath);
+    vendorHashCollector.update(`${rel}:${hash};`);
+  }
+  const vendorHash = vendorHashCollector.digest('hex');
+  const vendorVersion = `pdf-tools-vendor-v${vendorHash.slice(0, 10)}`;
+
   const manifest = {
     version: cacheVersion,
+    vendorVersion: vendorVersion,
     compositeHash,
+    vendorHash,
     builtAt: new Date().toISOString(),
     totalFiles: fileEntries.length,
     totalBytes,
@@ -129,14 +163,17 @@ function generateServiceWorkerCode(manifest) {
  * 100% Client-Side Offline Support & Privacy-Preserving Cache
  *
  * CACHE VERSION: ${manifest.version}
+ * VENDOR VERSION: ${manifest.vendorVersion}
  * TOTAL APP SHELL SIZE: ${manifest.totalMB} MB (${manifest.totalFiles} files)
  */
 
 'use strict';
 
 const CACHE_VERSION = '${manifest.version}';
+const VENDOR_VERSION = '${manifest.vendorVersion}';
 const APP_SHELL_CACHE = CACHE_VERSION + '-shell';
 const RUNTIME_CACHE = CACHE_VERSION + '-runtime';
+const VENDOR_CACHE = VENDOR_VERSION;
 
 // Relative App Shell URLs to precache during install
 const PRECACHE_URLS = ${precacheUrlsJson};
@@ -149,22 +186,32 @@ function resolveUrl(relativeUrl) {
 // 1. INSTALL LIFECYCLE
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(APP_SHELL_CACHE).then(async (cache) => {
-      console.log('[SW] Precaching App Shell (' + PRECACHE_URLS.length + ' files, ' + '${manifest.totalMB}' + ' MB)...');
-      const absoluteUrls = PRECACHE_URLS.map(resolveUrl);
-      
-      // Cache with allSettled to ensure resilient install even if a minor asset fails
-      const fetchPromises = absoluteUrls.map(async (url) => {
-        try {
-          const res = await fetch(url, { cache: 'no-cache' });
-          if (res && res.status === 200) {
-            await cache.put(url, res);
+    Promise.all([
+      caches.open(APP_SHELL_CACHE).then(async (appCache) => {
+        console.log('[SW] Precaching App Shell...');
+        const appUrls = PRECACHE_URLS.filter((u) => !u.includes('/js/lib/')).map(resolveUrl);
+        await Promise.all(appUrls.map(async (url) => {
+          try {
+            const res = await fetch(url, { cache: 'no-cache' });
+            if (res && res.status === 200) await appCache.put(url, res);
+          } catch (err) {
+            console.warn('[SW] App precache item failed:', url, err.message);
           }
-        } catch (err) {
-          console.warn('[SW] Precache item failed:', url, err.message);
-        }
-      });
-      await Promise.all(fetchPromises);
+        }));
+      }),
+      caches.open(VENDOR_CACHE).then(async (vendorCache) => {
+        console.log('[SW] Precaching Vendor Libraries...');
+        const vendorUrls = PRECACHE_URLS.filter((u) => u.includes('/js/lib/')).map(resolveUrl);
+        await Promise.all(vendorUrls.map(async (url) => {
+          try {
+            const res = await fetch(url, { cache: 'no-cache' });
+            if (res && res.status === 200) await vendorCache.put(url, res);
+          } catch (err) {
+            console.warn('[SW] Vendor precache item failed:', url, err.message);
+          }
+        }));
+      })
+    ]).then(() => {
       console.log('[SW] Precache completed successfully.');
     })
   );
@@ -172,7 +219,7 @@ self.addEventListener('install', (event) => {
 
 // 2. ACTIVATE LIFECYCLE
 self.addEventListener('activate', (event) => {
-  const allowedCaches = new Set([APP_SHELL_CACHE, RUNTIME_CACHE]);
+  const allowedCaches = new Set([APP_SHELL_CACHE, RUNTIME_CACHE, VENDOR_CACHE]);
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
@@ -191,6 +238,25 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+// Helper for Network-first timeout (5 seconds before cache fallback)
+function fetchWithTimeout(request, timeoutMs = 5000) {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      reject(new Error('Network timeout'));
+    }, timeoutMs);
+    fetch(request).then(
+      (res) => {
+        clearTimeout(timer);
+        resolve(res);
+      },
+      (err) => {
+        clearTimeout(timer);
+        reject(err);
+      }
+    );
+  });
+}
+
 // 3. FETCH STRATEGY
 self.addEventListener('fetch', (event) => {
   const request = event.request;
@@ -206,10 +272,38 @@ self.addEventListener('fetch', (event) => {
   if (!url.protocol.startsWith('http')) return;
   if (!url.pathname.startsWith(new URL(self.registration.scope).pathname)) return;
 
-  // A. NAVIGATION REQUESTS (HTML Pages): Network-first with Cache fallback
-  if (request.mode === 'navigate') {
+  const isVendor = url.pathname.includes('/js/lib/');
+
+  // A. VENDOR ASSETS (js/lib/**): Cache-First with Network fallback into VENDOR_CACHE
+  if (isVendor) {
     event.respondWith(
-      fetch(request).then((networkResponse) => {
+      caches.open(VENDOR_CACHE).then(async (vendorCache) => {
+        const cached = await vendorCache.match(request);
+        if (cached) return cached;
+
+        const anyCached = await caches.match(request);
+        if (anyCached) return anyCached;
+
+        try {
+          const networkResponse = await fetch(request);
+          if (networkResponse && networkResponse.status === 200) {
+            vendorCache.put(request, networkResponse.clone());
+          }
+          return networkResponse;
+        } catch (err) {
+          const fallback = await caches.match(request);
+          if (fallback) return fallback;
+          throw err;
+        }
+      })
+    );
+    return;
+  }
+
+  // B. APP ASSETS (HTML, JS, CSS, Fonts, Icons): Network-First (5s timeout) with Cache fallback
+  event.respondWith(
+    fetchWithTimeout(request, 5000)
+      .then((networkResponse) => {
         if (networkResponse && networkResponse.status === 200) {
           const responseToCache = networkResponse.clone();
           caches.open(APP_SHELL_CACHE).then((cache) => {
@@ -217,37 +311,21 @@ self.addEventListener('fetch', (event) => {
           });
         }
         return networkResponse;
-      }).catch(async () => {
-        // Fallback to cache for the specific page
+      })
+      .catch(async () => {
         const cachedResponse = await caches.match(request);
         if (cachedResponse) return cachedResponse;
-        
-        // Final fallback to cached index.html
-        return caches.match(resolveUrl('./index.html'));
-      })
-    );
-    return;
-  }
 
-  // B. STATIC ASSETS (CSS, JS, Fonts, Images): Cache-first with Network fallback
-  event.respondWith(
-    caches.match(request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-
-      // Not in cache: fetch from network and dynamically cache runtime assets (e.g. OCR / viewer)
-      return fetch(request).then((networkResponse) => {
-        if (networkResponse && networkResponse.status === 200) {
-          const responseToCache = networkResponse.clone();
-          // Store runtime on-demand assets in RUNTIME_CACHE
-          caches.open(RUNTIME_CACHE).then((cache) => {
-            cache.put(request, responseToCache);
-          });
+        if (request.mode === 'navigate') {
+          return caches.match(resolveUrl('./index.html'));
         }
-        return networkResponse;
-      });
-    })
+
+        return new Response('Network error and asset not found in cache', {
+          status: 503,
+          statusText: 'Service Unavailable',
+          headers: { 'Content-Type': 'text/plain' }
+        });
+      })
   );
 });
 
