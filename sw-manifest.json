@@ -1,12 +1,12 @@
 {
-  "version": "pdf-tools-v11cd6a63a2",
+  "version": "pdf-tools-v673a1fb4b9",
   "vendorVersion": "pdf-tools-vendor-v4461a35c2a",
-  "compositeHash": "11cd6a63a29be9e73705056592aee10fc5649ad7029c0334fbe814f5be51f21f",
+  "compositeHash": "673a1fb4b9ae799d06a6a8b251421a72cb4d3738fc9ad6abca4cab3c4fb8fe2a",
   "vendorHash": "4461a35c2a4ca00c66db6cf2a6300d46859944c7317337fc75f3ad1326f8fd28",
-  "builtAt": "2026-11-03T08:52:37.745Z",
+  "builtAt": "2026-11-03T09:23:04.337Z",
   "totalFiles": 92,
-  "totalBytes": 3805561,
-  "totalMB": "3.63",
+  "totalBytes": 3811651,
+  "totalMB": "3.64",
   "files": [
     {
       "url": "./css/home.css",
@@ -65,13 +65,13 @@
     },
     {
       "url": "./index.html",
-      "size": 46498,
-      "hash": "dd471c1b4de9"
+      "size": 46514,
+      "hash": "0b7d412014e4"
     },
     {
       "url": "./js/app.js",
-      "size": 63481,
-      "hash": "8221275cce87"
+      "size": 63487,
+      "hash": "d55e4b7ae6e7"
     },
     {
       "url": "./js/components/dropzone.js",
@@ -80,8 +80,8 @@
     },
     {
       "url": "./js/components/header.js",
-      "size": 42851,
-      "hash": "0eca755bab21"
+      "size": 48444,
+      "hash": "6ac300227d29"
     },
     {
       "url": "./js/components/modal.js",
@@ -350,8 +350,8 @@
     },
     {
       "url": "./js/utils/i18n.js",
-      "size": 86893,
-      "hash": "2c7488cc7f7a"
+      "size": 87368,
+      "hash": "f2f37325ea2c"
     },
     {
       "url": "./manifest.json",

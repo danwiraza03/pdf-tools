@@ -102,7 +102,7 @@ document.addEventListener('DOMContentLoaded', function () {
         <div class="header-controls">
           <button class="theme-toggle" id="themeToggle" title="Toggle Light/Dark Theme" aria-label="Toggle Light/Dark Theme">Light</button>
           <button class="lang-toggle" id="langToggle" aria-label="ID - Toggle Language">ID</button>
-          <a href="${pagesUrl}viewer.html" class="btn-header-studio" data-i18n="nav.studio" aria-label="Open PDF Studio"><svg class="btn-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> PDF Studio</a>
+          <a href="${pagesUrl}viewer.html" class="btn-header-studio" data-i18n="nav.studio" aria-label="Open Edit PDF"><svg class="btn-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Edit PDF</a>
           <button type="button" class="nine-dots-btn" id="nineDotsBtn" title="All Quick Actions" aria-label="Quick Actions Menu">⠿</button>
           <button type="button" class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open Navigation Menu" aria-expanded="false">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
@@ -191,7 +191,7 @@ document.addEventListener('DOMContentLoaded', function () {
           <div class="mega-col">
             <div class="mega-col-title" data-i18n="mega.edit">EDIT PDF</div>
             <a href="${pagesUrl}viewer.html" class="mega-item-link">
-              <span class="mega-item-icon icon-studio"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span> <span data-i18n="tool.studio">Edit in PDF Studio</span>
+              <span class="mega-item-icon icon-studio"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span> <span data-i18n="tool.studio">Edit PDF</span>
             </a>
             <a href="${pagesUrl}rotate.html" class="mega-item-link">
               <span class="mega-item-icon icon-rotate">
@@ -259,7 +259,7 @@ document.addEventListener('DOMContentLoaded', function () {
               <span class="quick-action-btn-icon" style="background: rgba(147, 51, 234, 0.12); color: #9333EA;">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
               </span>
-              <span class="quick-action-btn-label">PDF Studio</span>
+              <span class="quick-action-btn-label" data-i18n="tool.studio">Edit PDF</span>
             </button>
             <button type="button" class="quick-action-btn" data-target="${pagesUrl}merge.html">
               <span class="quick-action-btn-icon" style="background: rgba(225, 29, 72, 0.12); color: #E11D48;">
@@ -601,7 +601,7 @@ document.addEventListener('DOMContentLoaded', function () {
             <a href="${pagesUrl}form-fill.html" class="mobile-nav-link" data-i18n="mobile_nav.form_fill">Fill Forms</a>
             <a href="${pagesUrl}batch.html" class="mobile-nav-link" data-i18n="mobile_nav.batch">Batch Processing</a>
             <div class="mobile-nav-divider"></div>
-            <a href="${pagesUrl}viewer.html" class="mobile-nav-link mobile-nav-studio" data-i18n="mobile_nav.studio">PDF Studio</a>
+            <a href="${pagesUrl}viewer.html" class="mobile-nav-link mobile-nav-studio" data-i18n="mobile_nav.studio">Edit PDF</a>
           </nav>
         </div>
       `;

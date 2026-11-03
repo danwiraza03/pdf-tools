@@ -29,6 +29,7 @@ const { runRotatePageActionsSuite } = require('./test_rotate_page_actions');
 const { runPageNumberPreviewSuite } = require('./test_page_number_preview');
 const { runMergeCardControlsSuite } = require('./test_merge_card_controls');
 const { runMergeInsertSuite } = require('./test_merge_insert');
+const { runEditPdfNavSuite } = require('./test_edit_pdf_nav');
 
 const TEST_PORT = 8765;
 const BASE_URL = `http://127.0.0.1:${TEST_PORT}`;
@@ -331,6 +332,13 @@ async function main() {
         name: 'Merge Page Insert Files In-Between Suite',
         run: async () => {
           await runMergeInsertSuite(browser, BASE_URL);
+        }
+      },
+      {
+        id: 'editpdfnav',
+        name: 'Edit PDF Presentation & Touch Modal Suite',
+        run: async () => {
+          await runEditPdfNavSuite(browser, BASE_URL);
         }
       }
     ];

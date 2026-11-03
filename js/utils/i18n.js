@@ -16,7 +16,7 @@ PDFTools.i18n = (function () {
       'nav.convert': 'CONVERT PDF',
       'nav.all_tools': 'ALL PDF TOOLS',
       'nav.quick_actions': 'All Quick Actions',
-      'nav.studio': 'PDF Studio',
+      'nav.studio': 'Edit PDF',
       'nav.offline_status': 'Offline Mode',
       'home.quick_action_title': 'Choose a PDF Tool',
       'home.quick_action_desc': 'Select an action for your document:',
@@ -56,7 +56,7 @@ PDFTools.i18n = (function () {
       'mobile_nav.ocr': 'OCR PDF',
       'mobile_nav.form_fill': 'Fill Forms',
       'mobile_nav.batch': 'Batch Processing',
-      'mobile_nav.studio': 'PDF Studio',
+      'mobile_nav.studio': 'Edit PDF',
       'theme.dark': 'Dark',
       'theme.light': 'Light',
       'theme.toggle_title': 'Toggle Theme (Ctrl+D)',
@@ -67,7 +67,7 @@ PDFTools.i18n = (function () {
       'hero.subtitle': 'Merge, compress, split, convert and more — all processed locally in your browser. Your files never leave your device.',
 
       // Tools Definitions
-      'tool.studio': 'PDF Studio',
+      'tool.studio': 'Edit PDF',
       'tool.studio.desc': 'All-in-one workspace: View, search & find text, annotate, add text/signatures, and run inline OCR 100% offline.',
       'tool.merge': 'Merge PDF',
       'tool.merge.desc': 'Combine multiple PDF files into one single document.',
@@ -662,6 +662,10 @@ PDFTools.i18n = (function () {
       'mega.col_edit': 'EDIT PDF',
       'mega.col_security': 'PDF SECURITY',
       'mega.col_workflows': 'WORKFLOWS',
+      'studio.touch_modal_title': 'Edit PDF',
+      'studio.touch_modal_desc': 'Edit PDF is best experienced on a desktop computer',
+      'studio.touch_modal_continue': 'Continue',
+      'studio.touch_modal_cancel': 'Cancel',
       'home.quick_action_title': 'Quick PDF Actions',
       'home.quick_action_desc': 'Instantly process your document with our most popular offline tools.',
 
@@ -822,7 +826,7 @@ PDFTools.i18n = (function () {
       'nav.convert': 'KONVERSI PDF',
       'nav.all_tools': 'SEMUA TOOLS',
       'nav.quick_actions': 'Semua Aksi Cepat',
-      'nav.studio': 'PDF Studio',
+      'nav.studio': 'Edit PDF',
       'nav.offline_status': 'Mode Offline',
       'home.quick_action_title': 'Pilih Alat PDF',
       'home.quick_action_desc': 'Pilih tindakan untuk dokumen Anda:',
@@ -862,7 +866,7 @@ PDFTools.i18n = (function () {
       'mobile_nav.ocr': 'OCR PDF',
       'mobile_nav.form_fill': 'Isi Formulir',
       'mobile_nav.batch': 'Proses Batch',
-      'mobile_nav.studio': 'PDF Studio',
+      'mobile_nav.studio': 'Edit PDF',
       'theme.dark': 'Gelap',
       'theme.light': 'Terang',
       'theme.toggle_title': 'Ganti Tema (Ctrl+D)',
@@ -873,7 +877,7 @@ PDFTools.i18n = (function () {
       'hero.subtitle': 'Gabungkan, kompres, pisahkan, konversi dan lainnya — semua diproses lokal di browsermu. File tidak pernah meninggalkan perangkatmu.',
 
       // Tools Definitions
-      'tool.studio': 'PDF Studio',
+      'tool.studio': 'Edit PDF',
       'tool.studio.desc': 'Studio lengkap: Baca, cari teks (search & find), anotasi, edit teks, tanda tangan, dan scan OCR 100% offline.',
       'tool.merge': 'Gabungkan PDF',
       'tool.merge.desc': 'Satukan beberapa file PDF menjadi satu dokumen utuh.',
@@ -1468,6 +1472,10 @@ PDFTools.i18n = (function () {
       'mega.col_edit': 'EDIT PDF',
       'mega.col_security': 'KEAMANAN PDF',
       'mega.col_workflows': 'ALUR KERJA',
+      'studio.touch_modal_title': 'Edit PDF',
+      'studio.touch_modal_desc': 'Edit PDF paling nyaman dipakai di komputer',
+      'studio.touch_modal_continue': 'Lanjutkan',
+      'studio.touch_modal_cancel': 'Batal',
       'home.quick_action_title': 'Aksi Cepat PDF',
       'home.quick_action_desc': 'Proses dokumen Anda secara instan dengan alat offline terpopuler kami.',
 
@@ -1623,7 +1631,7 @@ PDFTools.i18n = (function () {
   function resolveInitialLang() {
     try {
       if (typeof localStorage !== 'undefined') {
-        const saved = localStorage.getItem('pdftools-lang');
+        const saved = localStorage.getItem('pdftools-lang') || localStorage.getItem('pdftools_lang');
         if (saved === 'id' || saved === 'en') {
           return saved;
         }
