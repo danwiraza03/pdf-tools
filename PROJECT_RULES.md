@@ -8,7 +8,7 @@
 
 ## ⚡ Ringkasan 10 Aturan Wajib (Quick Reference)
 
-1. **100% Client-Side Offline**: Seluruh pemrosesan berkas wajib berjalan lokal di browser tanpa server, cloud, atau telemetri.
+1. **100% Client-Side Offline**: Seluruh pemrosesan berkas wajib berjalan lokal di browser tanpa server, cloud, atau telemetri. Tidak ada fitur AI, API atau layanan luar, maupun integrasi cloud; semua berkas diproses di perangkat pengguna.
 2. **Zero External URLs**: Dilarang memuat resource http(s):// eksternal pada kode produksi (wajib lokal offline).
 3. **Larangan Mutlak Emoji**: Tombol, dropzone, toast, header, dan modal wajib menggunakan inline SVG vektor, bukan emoji.
 4. **Konsistensi Tema & Token**: Pertahankan token `--tool-color` resmi serta kompatibilitas penuh Light & Dark theme.
@@ -45,6 +45,9 @@
 4. **Desain Kelas Dunia & Estetika SaaS Modern**:
    - Tampilan visual harus terlihat seperti aplikasi SaaS profesional kelas atas (setara Adobe Acrobat Pro / Figma / Apple Web).
    - Jangan pernah menggunakan gaya antarmuka HTML kasar atau tabel polos. Gunakan glassmorphism, rounded card (`border-radius: 14px–24px`), border halus transparan, bayangan bertingkat (*multi-layer elevation*), dan mikro-animasi (*hover transition & spring*).
+
+5. **Larangan Fitur AI, Layanan Luar, & Integrasi Cloud**:
+   - Tidak ada fitur AI, API atau layanan luar, maupun integrasi cloud; semua berkas diproses di perangkat pengguna. Pustaka baru hanya boleh jika disertakan di `js/lib/` dan dicatat lisensinya; utamakan kode sendiri.
 
 ---
 

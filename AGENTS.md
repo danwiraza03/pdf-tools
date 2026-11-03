@@ -14,5 +14,6 @@
 > 6. **Consistent Standalone Page Structure**: Header -> Tool Hero with SVG badge -> Dropzone with SVG Cloud -> Workspace State -> Action Bar -> Result with SVG checkmark -> "Open in PDF Studio" secondary action.
 > 7. **Clean Lint Mandate**: Lint wajib bersih (`npm run lint` lulus 0 error) sebelum melakukan commit.
 > 8. **Master Roadmap**: Konsultasikan 👉 **[docs/ROADMAP.md](docs/ROADMAP.md)** untuk peta jalan pengembangan dan status pencapaian fitur.
+> 9. **Zero-AI & Zero-Cloud Mandate**: Tidak ada fitur AI, API atau layanan luar, maupun integrasi cloud; semua berkas diproses di perangkat pengguna.
 
 Any agent failing to adhere to `PROJECT_RULES.md` will produce inconsistent UI that violates the project standards.
