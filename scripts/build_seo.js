@@ -33,6 +33,10 @@ const TOOL_METADATA = {
     title: 'PDF to JPG — Extract PDF Pages as Images Online & Offline',
     description: 'Convert PDF pages to high-resolution JPG or PNG images 100% offline. Extract all pages or specific page ranges with zero server uploads.'
   },
+  'redact.html': {
+    title: 'Redact PDF — Permanently Remove Sensitive Data Offline',
+    description: 'Permanently redact sensitive text, numbers, and images from PDF documents. Anti-leak rasterization and document sanitization 100% offline in your browser.'
+  },
   'remove-pages.html': {
     title: 'Remove Pages from PDF — Delete PDF Pages Online & Offline',
     description: 'Delete unwanted pages from your PDF document visually. Select and remove single or multiple pages securely 100% offline in your browser.'
@@ -93,7 +97,7 @@ function buildSeo() {
     if (TOOL_METADATA[fileName] && TOOL_METADATA[fileName].description) {
       pageDesc = TOOL_METADATA[fileName].description;
       if (descMatch) {
-        html = html.replace(/<meta\s+name=["']description["']\s+content=["'][^"']*["']/i, `<meta name="description" content="${pageDesc}">`);
+        html = html.replace(/<meta\s+name=["']description["']\s+content=["'][^"']*["'][^>]*>/i, `<meta name="description" content="${pageDesc}">`);
       } else {
         html = html.replace(/(<title>[^<]+<\/title>)/i, `$1\n  <meta name="description" content="${pageDesc}">`);
       }

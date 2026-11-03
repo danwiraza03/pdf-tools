@@ -30,6 +30,7 @@ const { runPageNumberPreviewSuite } = require('./test_page_number_preview');
 const { runMergeCardControlsSuite } = require('./test_merge_card_controls');
 const { runMergeInsertSuite } = require('./test_merge_insert');
 const { runEditPdfNavSuite } = require('./test_edit_pdf_nav');
+const { runRedactPageSuite } = require('./test_redact_page');
 
 const TEST_PORT = 8765;
 const BASE_URL = `http://127.0.0.1:${TEST_PORT}`;
@@ -339,6 +340,13 @@ async function main() {
         name: 'Edit PDF Presentation & Touch Modal Suite',
         run: async () => {
           await runEditPdfNavSuite(browser, BASE_URL);
+        }
+      },
+      {
+        id: 'redactpage',
+        name: 'Standalone Redact PDF Security & UI Suite',
+        run: async () => {
+          await runRedactPageSuite(browser, BASE_URL);
         }
       }
     ];

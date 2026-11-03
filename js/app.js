@@ -220,6 +220,9 @@ document.addEventListener('DOMContentLoaded', function () {
             <a href="${pagesUrl}protect.html" class="mega-item-link">
               <span class="mega-item-icon icon-protect"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span> <span data-i18n="tool.protect">Protect / Unlock PDF</span>
             </a>
+            <a href="${pagesUrl}redact.html" class="mega-item-link">
+              <span class="mega-item-icon icon-redact"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><rect x="7" y="8" width="10" height="3" fill="currentColor"/><rect x="7" y="13" width="6" height="3" fill="currentColor"/></svg></span> <span data-i18n="tool.redact">Redact PDF</span>
+            </a>
             <a href="${pagesUrl}sign.html" class="mega-item-link">
               <span class="mega-item-icon icon-sign"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 19.5c0 .8-.7 1.5-1.5 1.5H5.5c-.8 0-1.5-.7-1.5-1.5 0-.8.7-1.5 1.5-1.5h13c.8 0 1.5.7 1.5 1.5zM18.4 4.6a2 2 0 0 1 2.8 2.8L8.8 19.8l-4.2.9.9-4.2L18.4 4.6z"/></svg></span> <span data-i18n="tool.sign">Sign PDF</span>
             </a>
@@ -594,6 +597,7 @@ document.addEventListener('DOMContentLoaded', function () {
             <div class="mobile-nav-divider"></div>
             <span class="mobile-nav-section" data-i18n="mobile_nav.section_security">Security & Tools</span>
             <a href="${pagesUrl}protect.html" class="mobile-nav-link" data-i18n="mobile_nav.protect">Protect / Unlock</a>
+            <a href="${pagesUrl}redact.html" class="mobile-nav-link" data-i18n="mobile_nav.redact">Redact PDF</a>
             <a href="${pagesUrl}sign.html" class="mobile-nav-link" data-i18n="mobile_nav.sign">Sign PDF</a>
             <a href="${pagesUrl}flatten.html" class="mobile-nav-link" data-i18n="mobile_nav.flatten">Flatten PDF</a>
             <a href="${pagesUrl}grayscale.html" class="mobile-nav-link" data-i18n="mobile_nav.grayscale">Grayscale</a>

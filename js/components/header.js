@@ -204,6 +204,20 @@
       keywords: ['protect', 'lock', 'unlock', 'password', 'sandi', 'kunci', 'enkripsi', 'decrypt', 'aman']
     },
     {
+      id: 'redact',
+      name: 'Redact PDF',
+      nameKey: 'tool.redact',
+      file: 'redact.html',
+      color: '#DC2626',
+      category: 'Optimize & Protect',
+      categoryGroup: 'optimize',
+      badge: 'Permanent Anti-Leak',
+      desc: 'Hapus permanen informasi sensitif dan rahasia dengan teknologi rasterisasi anti-bocor.',
+      descKey: 'tool.redact.desc',
+      icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><rect x="7" y="8" width="10" height="3" fill="currentColor"/><rect x="7" y="13" width="6" height="3" fill="currentColor"/></svg>',
+      keywords: ['redact', 'redaksi', 'sensor', 'blackout', 'privacy', 'privasi', 'rahasia', 'sensitive', 'anti-leak', 'hapus data', 'keamanan']
+    },
+    {
       id: 'jpg-to-pdf',
       name: 'JPG to PDF',
       nameKey: 'tool.jpg_pdf',
@@ -375,7 +389,7 @@
   // Mega menu structure configuration
   const MEGA_COLUMNS = [
     { title: 'ORGANIZE PDF', titleKey: 'mega.organize', toolIds: ['merge', 'split', 'remove-pages', 'reorder', 'rotate', 'crop'] },
-    { title: 'OPTIMIZE PDF', titleKey: 'mega.optimize', toolIds: ['compress', 'ocr', 'grayscale', 'flatten', 'protect'] },
+    { title: 'OPTIMIZE PDF', titleKey: 'mega.optimize', toolIds: ['compress', 'ocr', 'grayscale', 'flatten', 'protect', 'redact'] },
     { title: 'CONVERT TO PDF', titleKey: 'mega.convert_to', toolIds: ['jpg-to-pdf', 'docx-to-pdf', 'xlsx-to-pdf'] },
     { title: 'CONVERT FROM PDF', titleKey: 'mega.convert_from', toolIds: ['pdf-to-docx', 'pdf-to-xlsx', 'pdf-to-jpg'] },
     { title: 'EDIT PDF', titleKey: 'mega.edit', toolIds: ['studio', 'page-number', 'watermark', 'sign', 'form-fill', 'batch'] }

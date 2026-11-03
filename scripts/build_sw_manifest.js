@@ -44,7 +44,9 @@ function getAppShellFileList() {
     'js/lib/pdf.worker.min.js',
     'js/lib/jszip.min.js',
     'js/lib/Sortable.min.js',
-    'js/lib/FileSaver.min.js'
+    'js/lib/FileSaver.min.js',
+    'js/editor/pdf-coordinate-engine.js',
+    'js/editor/redaction-engine.js'
   ];
 
   // Standalone pages (strictly excluding viewer.html to keep precache < 5 MB)

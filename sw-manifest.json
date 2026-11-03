@@ -1,12 +1,12 @@
 {
-  "version": "pdf-tools-v673a1fb4b9",
+  "version": "pdf-tools-v2f617fe227",
   "vendorVersion": "pdf-tools-vendor-v4461a35c2a",
-  "compositeHash": "673a1fb4b9ae799d06a6a8b251421a72cb4d3738fc9ad6abca4cab3c4fb8fe2a",
+  "compositeHash": "2f617fe227b09ad00e7cd54bc385032ea74676946f1fba9ad2bdff45633ad343",
   "vendorHash": "4461a35c2a4ca00c66db6cf2a6300d46859944c7317337fc75f3ad1326f8fd28",
-  "builtAt": "2026-11-03T09:23:04.337Z",
-  "totalFiles": 92,
-  "totalBytes": 3811651,
-  "totalMB": "3.64",
+  "builtAt": "2026-11-03T10:05:22.427Z",
+  "totalFiles": 96,
+  "totalBytes": 3885645,
+  "totalMB": "3.71",
   "files": [
     {
       "url": "./css/home.css",
@@ -65,13 +65,13 @@
     },
     {
       "url": "./index.html",
-      "size": 46514,
-      "hash": "0b7d412014e4"
+      "size": 47861,
+      "hash": "47b3421285e4"
     },
     {
       "url": "./js/app.js",
-      "size": 63487,
-      "hash": "d55e4b7ae6e7"
+      "size": 64123,
+      "hash": "4a8d95246de9"
     },
     {
       "url": "./js/components/dropzone.js",
@@ -80,8 +80,8 @@
     },
     {
       "url": "./js/components/header.js",
-      "size": 48444,
-      "hash": "6ac300227d29"
+      "size": 49324,
+      "hash": "b2ebd0aaca3c"
     },
     {
       "url": "./js/components/modal.js",
@@ -199,6 +199,16 @@
       "hash": "9bae4d6b3f80"
     },
     {
+      "url": "./js/editor/pdf-coordinate-engine.js",
+      "size": 5208,
+      "hash": "c71fdb4fc3e8"
+    },
+    {
+      "url": "./js/editor/redaction-engine.js",
+      "size": 21596,
+      "hash": "dfb7c624fe64"
+    },
+    {
       "url": "./js/lib/FileSaver.min.js",
       "size": 2749,
       "hash": "c68874cbaa2f"
@@ -304,6 +314,11 @@
       "hash": "bb3021862b86"
     },
     {
+      "url": "./js/pages/redact.js",
+      "size": 21034,
+      "hash": "c2bc2207f34c"
+    },
+    {
       "url": "./js/pages/remove-pages.js",
       "size": 5390,
       "hash": "ea95829367a3"
@@ -350,8 +365,8 @@
     },
     {
       "url": "./js/utils/i18n.js",
-      "size": 87368,
-      "hash": "f2f37325ea2c"
+      "size": 90902,
+      "hash": "b061a3ba1a3a"
     },
     {
       "url": "./manifest.json",
@@ -432,6 +447,11 @@
       "url": "./pages/protect.html",
       "size": 13120,
       "hash": "54fed3018fbd"
+    },
+    {
+      "url": "./pages/redact.html",
+      "size": 19759,
+      "hash": "129dafa11a3d"
     },
     {
       "url": "./pages/remove-pages.html",
