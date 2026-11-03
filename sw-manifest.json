@@ -1,10 +1,10 @@
 {
-  "version": "pdf-tools-v97930c9d55",
-  "compositeHash": "97930c9d551ced7d5a34a699c77ea421336cbe392cfb200050206c68514d9f2d",
-  "builtAt": "2026-11-03T03:29:23.615Z",
+  "version": "pdf-tools-vaeb892187c",
+  "compositeHash": "aeb892187c03a2d1c217ec5879fac46a8c0c050833c57bc4dddb5f8be03db5dd",
+  "builtAt": "2026-11-03T03:42:57.547Z",
   "totalFiles": 92,
-  "totalBytes": 3801278,
-  "totalMB": "3.63",
+  "totalBytes": 3800769,
+  "totalMB": "3.62",
   "files": [
     {
       "url": "./css/home.css",
@@ -268,8 +268,8 @@
     },
     {
       "url": "./js/pages/merge.js",
-      "size": 89768,
-      "hash": "13da40642f00"
+      "size": 89259,
+      "hash": "e301f7f03055"
     },
     {
       "url": "./js/pages/ocr.js",

@@ -448,25 +448,15 @@
             if (tGroupIdx !== -1) {
               const grp = fileGroups[tGroupIdx];
               const pIdx = grp.pageIds.indexOf(target.pageId);
-              if (pIdx !== -1 && pIdx < grp.pageIds.length - 1) {
-                // Split document into two parts at insertion point
-                const firstPartPages = grp.pageIds.slice(0, pIdx + 1);
-                const remainderPages = grp.pageIds.slice(pIdx + 1);
-                grp.pageIds = firstPartPages;
-
-                const remainderGroup = {
-                  id: 'group_' + grp.fileIndex + '_part2_' + Date.now(),
-                  fileIndex: grp.fileIndex,
-                  fileName: grp.fileName,
-                  colorTheme: grp.colorTheme,
-                  isExpanded: grp.isExpanded,
-                  pageIds: remainderPages
-                };
-
-                fileGroups.splice(tGroupIdx + 1, 0, ...newGroups, remainderGroup);
+              // Sisipkan langsung ke dalam grup ini agar tetap menjadi satu kesatuan header
+              const insertedPageIds = [];
+              newGroups.forEach(ng => {
+                insertedPageIds.push(...ng.pageIds);
+              });
+              if (pIdx !== -1) {
+                grp.pageIds.splice(pIdx + 1, 0, ...insertedPageIds);
               } else {
-                // Page is the last page in this group; simply insert after this group
-                fileGroups.splice(tGroupIdx + 1, 0, ...newGroups);
+                grp.pageIds.push(...insertedPageIds);
               }
             } else {
               fileGroups.push(...newGroups);

@@ -104,6 +104,10 @@ async function runMergeInsertSuite(browser, baseUrl) {
     // Wait for 7 total pages
     await page.waitForFunction(() => document.querySelectorAll('.merge-page-card.expanded-page').length === 7, { timeout: 10000 });
 
+    // Verify that all 7 pages remain in 1 unified document group header
+    const groupWrapCount = await page.evaluate(() => document.querySelectorAll('.merge-file-group-wrap').length);
+    assert.strictEqual(groupWrapCount, 1, 'All inserted pages must remain inside 1 unified document group header');
+
     // Verify order on screen: card source files & original pages
     const screenOrder = await page.evaluate(() => {
       const allCards = Array.from(document.querySelectorAll('.merge-page-card.expanded-page'));
