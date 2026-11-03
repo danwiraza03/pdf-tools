@@ -16,6 +16,7 @@ Format mengacu pada [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) 
 
 ### Diubah
 
+- Area kerja pengatur halaman pada Gabung PDF disembunyikan saat proses penggabungan selesai, menyisakan menu hasil unduhan yang bersih disertai tombol untuk kembali mengatur halaman jika diperlukan.
 - Aplikasi difokuskan sebagai aplikasi web; server pengembangan dipindahkan ke `scripts/dev-server.js`.
 - Bahasa tampilan bawaan kini bahasa Inggris; bahasa Indonesia tetap tersedia lewat tombol bahasa di header, dan pilihan Anda diingat.
 

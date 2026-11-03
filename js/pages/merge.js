@@ -33,6 +33,7 @@
       const resultArea = document.getElementById('resultArea');
       const downloadBtn = document.getElementById('downloadBtn');
       const resetBtn = document.getElementById('resetBtn');
+      const backToEditBtn = document.getElementById('backToEditBtn');
 
       // Modal Elements
       const previewModal = document.getElementById('previewModal');
@@ -2052,6 +2053,8 @@
 
           actionBar.classList.remove('active');
           resultArea.classList.add('active');
+          organizerArea.style.display = 'none';
+          mergeBtn.disabled = false;
 
           const uniqueFiles = new Set();
           fileGroups.forEach(g => {
@@ -2093,6 +2096,17 @@
             console.error('Handover to Studio error:', e);
             PDFTools.Toast.error('Could not open in PDF Studio due to storage quota. Please download instead.');
           }
+        });
+      }
+
+      if (backToEditBtn) {
+        backToEditBtn.addEventListener('click', function () {
+          resultArea.classList.remove('active');
+          organizerArea.style.display = 'block';
+          actionBar.classList.add('active');
+          mergeBtn.disabled = false;
+          buildGrid();
+          updateGlobalSequenceUI();
         });
       }
 

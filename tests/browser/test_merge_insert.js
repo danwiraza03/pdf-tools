@@ -169,8 +169,25 @@ async function runMergeInsertSuite(browser, baseUrl) {
     assert(pageTexts[6].includes('DOC_A_PAGE_5'), 'Page 7 must contain DOC_A_PAGE_5');
     console.log('    ✓ Assembled PDF order verified: A1, A2, B1, B2, A3, A4, A5');
 
+    // Verify organizer area is hidden when merge is complete (only result area shown)
+    const isOrganizerHidden = await page.evaluate(() => {
+      const el = document.getElementById('organizerArea');
+      return !el || el.style.display === 'none' || getComputedStyle(el).display === 'none';
+    });
+    assert(isOrganizerHidden, 'Organizer area must be hidden after merge completes');
+    console.log('    ✓ Organizer area is hidden when result area is active');
+
     // --- STEP 4: Undo Action ---
     console.log('  4. Testing Undo ...');
+    const backBtn = await page.$('#backToEditBtn');
+    if (backBtn && await backBtn.isVisible()) {
+      await backBtn.click();
+      await page.waitForFunction(() => {
+        const el = document.getElementById('organizerArea');
+        return el && el.style.display !== 'none' && getComputedStyle(el).display !== 'none';
+      }, { timeout: 5000 });
+      console.log('    ✓ Returned to organizer area via #backToEditBtn');
+    }
     await page.click('#undoBtn');
     await page.waitForFunction(() => document.querySelectorAll('.merge-page-card.expanded-page').length === 5, { timeout: 8000 });
 
