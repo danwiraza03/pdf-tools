@@ -335,13 +335,16 @@ class RedactionEngine {
 
     // Remove form fields that have a widget on the redacted page
     try {
-      const form = pdfDoc.getForm();
-      for (const field of form.getFields()) {
-        const onThisPage = field.acroField.getWidgets().some(w => {
-          const p = w.P ? w.P() : null;
-          return (p && p.tag === oldRef.tag) || form.findWidgetPage(w) === origPage;
-        });
-        if (onThisPage) form.removeField(field);
+      const hasAcroForm = pdfDoc.catalog && pdfDoc.catalog.has(L.PDFName.of('AcroForm'));
+      if (hasAcroForm) {
+        const form = pdfDoc.getForm();
+        for (const field of form.getFields()) {
+          const onThisPage = field.acroField.getWidgets().some(w => {
+            const p = w.P ? w.P() : null;
+            return (p && p.tag === oldRef.tag) || form.findWidgetPage(w) === origPage;
+          });
+          if (onThisPage) form.removeField(field);
+        }
       }
     } catch (e) {
       // Document has no AcroForm
