@@ -1,11 +1,11 @@
 {
-  "version": "pdf-tools-v8345d91f52",
+  "version": "pdf-tools-v44bcc25496",
   "vendorVersion": "pdf-tools-vendor-v4461a35c2a",
-  "compositeHash": "8345d91f52a64ab1c413d3fd1a117159552ce8a7eb5e8db47e7eed94ecf2961d",
+  "compositeHash": "44bcc25496c6cf140fbe1321440dc0ccfdeddcac4c36dacf69af6d8955f55d9f",
   "vendorHash": "4461a35c2a4ca00c66db6cf2a6300d46859944c7317337fc75f3ad1326f8fd28",
-  "builtAt": "2026-11-03T08:23:24.505Z",
+  "builtAt": "2026-11-03T08:32:01.497Z",
   "totalFiles": 92,
-  "totalBytes": 3803258,
+  "totalBytes": 3805739,
   "totalMB": "3.63",
   "files": [
     {
@@ -65,8 +65,8 @@
     },
     {
       "url": "./index.html",
-      "size": 45396,
-      "hash": "4486e11ba0af"
+      "size": 46512,
+      "hash": "adac8d43040e"
     },
     {
       "url": "./js/app.js",
@@ -350,8 +350,8 @@
     },
     {
       "url": "./js/utils/i18n.js",
-      "size": 85528,
-      "hash": "e02aad0798b4"
+      "size": 86893,
+      "hash": "2c7488cc7f7a"
     },
     {
       "url": "./manifest.json",
