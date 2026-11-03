@@ -1,11 +1,11 @@
 {
-  "version": "pdf-tools-vfb827613c3",
+  "version": "pdf-tools-ve1e4d663ad",
   "vendorVersion": "pdf-tools-vendor-v4461a35c2a",
-  "compositeHash": "fb827613c3e85a2fb5b9d26639473cb90b9b49966dca44c94ed44816de02c42c",
+  "compositeHash": "e1e4d663adeb212b3e291e24d147df162e793610fd7cc6b8f2e41332bbdbf147",
   "vendorHash": "4461a35c2a4ca00c66db6cf2a6300d46859944c7317337fc75f3ad1326f8fd28",
-  "builtAt": "2026-11-03T10:34:50.977Z",
+  "builtAt": "2026-11-03T10:47:43.112Z",
   "totalFiles": 96,
-  "totalBytes": 3904104,
+  "totalBytes": 3904103,
   "totalMB": "3.72",
   "files": [
     {
@@ -450,8 +450,8 @@
     },
     {
       "url": "./pages/redact.html",
-      "size": 19759,
-      "hash": "129dafa11a3d"
+      "size": 19758,
+      "hash": "2ac6669fc186"
     },
     {
       "url": "./pages/remove-pages.html",
