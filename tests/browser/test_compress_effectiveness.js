@@ -10,6 +10,7 @@ async function runCompressEffectivenessTest(browser, baseUrl) {
   console.log('====================================================');
 
   const page = await browser.newPage();
+  page.on('console', msg => console.log('  [BROWSER CONSOLE]', msg.type(), msg.text()));
 
   try {
     console.log('Generating PDF with 3 high-resolution photos (3000x2000) and text...');
@@ -286,8 +287,8 @@ async function runCompressEffectivenessTest(browser, baseUrl) {
       // Execute Balanced Compression
       const compResult = await window.PDFTools.Compress.compress(fixtureFile, 'balanced');
 
-      // Verify Output with PDF.js
-      const loadedDoc = await window.pdfjsLib.getDocument({ data: compResult.bytes }).promise;
+      // Verify Output with PDF.js (use a slice so buffer is not detached by PDF.js worker)
+      const loadedDoc = await window.pdfjsLib.getDocument({ data: compResult.bytes.slice() }).promise;
       const extractedPagesText = [];
 
       for (let i = 1; i <= loadedDoc.numPages; i++) {
