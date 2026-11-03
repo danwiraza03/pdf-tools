@@ -260,6 +260,7 @@ pdf/
 ├── icon.svg                     # Vector App Logo Icon
 ├── docs/                        # Dokumentasi Proyek
 │   ├── PRD.md                   # Product Requirements Document (Kondisi Aktual 23 Tools)
+│   ├── ROADMAP.md               # Master Roadmap & Peta Jalan Pengembangan
 │   └── svg-library.md           # Pustaka Ikon SVG Standar Terpusat
 ├── fonts/                       # Font Kaligrafi Offline (OFL-1.1) untuk E-Sign
 │   ├── fonts.css                # Definisi lokal @font-face

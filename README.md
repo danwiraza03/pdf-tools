@@ -195,6 +195,7 @@ pdf/
 │   └── utils/                  # Helper download, format ukuran, file parser, i18n
 ├── docs/                       # Dokumentasi Resmi Proyek
 │   ├── PRD.md                  # Product Requirements Document (Kondisi Aktual 23 Tools)
+│   ├── ROADMAP.md              # Master Roadmap & Peta Jalan Pengembangan
 │   └── svg-library.md          # Pustaka Ikon SVG Standar Terpusat
 ├── scripts/                    # Skrip Otomasi & Server Pengembangan
 │   ├── dev-server.js           # Local dev static server (127.0.0.1, proteksi path traversal)
