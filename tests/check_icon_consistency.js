@@ -18,7 +18,7 @@ const tools = [
   'merge', 'split', 'remove-pages', 'reorder', 'rotate', 'crop',
   'compress', 'ocr', 'grayscale', 'flatten',
   'pdf-to-docx', 'docx-to-pdf', 'pdf-to-xlsx', 'xlsx-to-pdf', 'pdf-to-jpg', 'jpg-to-pdf',
-  'viewer', 'page-number', 'watermark', 'form-fill', 'sign', 'protect', 'unlock'
+  'viewer', 'page-number', 'watermark', 'form-fill', 'sign', 'protect', 'unlock', 'redact'
 ];
 
 console.log('====================================================');
@@ -91,6 +91,45 @@ for (const tool of tools) {
   }
 }
 
+// Audit icon CSS classes in css/home.css and css/style.css
+console.log('\n--- CSS Tool Icon Classes Audit ---');
+const homeCss = fs.readFileSync(path.join(ROOT, 'css/home.css'), 'utf8');
+const styleCss = fs.readFileSync(path.join(ROOT, 'css/style.css'), 'utf8');
+
+const classMap = {
+  'page-number': 'icon-pagenum',
+  'pdf-to-docx': 'icon-pdf-word',
+  'docx-to-pdf': 'icon-word-pdf',
+  'pdf-to-xlsx': 'icon-pdf-excel',
+  'xlsx-to-pdf': 'icon-excel-pdf',
+  'pdf-to-jpg': 'icon-pdf-jpg',
+  'jpg-to-pdf': 'icon-jpg-pdf',
+  'form-fill': 'icon-form',
+  'viewer': 'icon-studio',
+  'unlock': 'icon-protect',
+  'remove-pages': 'icon-remove'
+};
+
+for (const tool of tools) {
+  if (tool === 'unlock') continue;
+  const iconClass = classMap[tool] || `icon-${tool}`;
+  const regex = new RegExp(`\\.${iconClass}\\s*\\{[^}]*background:`, 'i');
+  if (!regex.test(homeCss)) {
+    console.error(`[FAIL] .${iconClass} is missing background color rule in css/home.css!`);
+    mismatches++;
+  }
+  if (!regex.test(styleCss)) {
+    console.error(`[FAIL] .${iconClass} is missing background color rule in css/style.css!`);
+    mismatches++;
+  }
+}
+if (mismatches === 0) {
+  console.log('[PASS] All tool icon classes are properly defined in both css/home.css and css/style.css');
+}
+
 console.log('\n====================================================');
 console.log(`Audit Finished: ${mismatches} mismatches found across ${totalChecks} checks.`);
 console.log('====================================================');
+if (mismatches > 0) {
+  process.exit(1);
+}

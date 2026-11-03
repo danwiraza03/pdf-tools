@@ -1,22 +1,22 @@
 {
-  "version": "pdf-tools-v2f617fe227",
+  "version": "pdf-tools-v38b0be9673",
   "vendorVersion": "pdf-tools-vendor-v4461a35c2a",
-  "compositeHash": "2f617fe227b09ad00e7cd54bc385032ea74676946f1fba9ad2bdff45633ad343",
+  "compositeHash": "38b0be96730d2e0afce9a2c139421a57af7a382ec4ccf01678bd4fcdfcf1836c",
   "vendorHash": "4461a35c2a4ca00c66db6cf2a6300d46859944c7317337fc75f3ad1326f8fd28",
-  "builtAt": "2026-11-03T10:05:22.427Z",
+  "builtAt": "2026-11-03T10:20:02.351Z",
   "totalFiles": 96,
-  "totalBytes": 3885645,
+  "totalBytes": 3885729,
   "totalMB": "3.71",
   "files": [
     {
       "url": "./css/home.css",
-      "size": 15352,
-      "hash": "db043e5d36dd"
+      "size": 15394,
+      "hash": "ed599e0d3d4f"
     },
     {
       "url": "./css/style.css",
-      "size": 70912,
-      "hash": "6e343629c1be"
+      "size": 70954,
+      "hash": "8b8875dd08f1"
     },
     {
       "url": "./css/tool.css",
