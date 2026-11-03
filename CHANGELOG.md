@@ -4,6 +4,8 @@ Format mengacu pada [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) 
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-11-03
+
 ### Keamanan
 
 - **Content Security Policy (CSP) ketat tanpa 'unsafe-eval'**: Seluruh 23 halaman HTML menerapkan kebijakan keamanan konten yang memblokir injeksi skrip eksternal, gambar pelacak, dan permintaan jaringan luar. Opsi `'unsafe-eval'` berhasil dihilangkan dengan menyetel `isEvalSupported: false` pada PDF.js di seluruh modul di luar PDF Studio.
@@ -93,4 +95,6 @@ Rilis stabil pertama. Seluruh pemrosesan berjalan di browser Anda; berkas tidak 
 
 - Service worker (`sw.js`) yang tidak pernah aktif, font dan skrip yang dimuat dari internet (Google Fonts, jsDelivr), serta berkas sisa percobaan.
 
+[Unreleased]: https://github.com/danwiraza03/pdf-tools/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/danwiraza03/pdf-tools/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/danwiraza03/pdf-tools/releases/tag/v1.0.0

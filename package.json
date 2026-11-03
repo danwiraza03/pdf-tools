@@ -1,6 +1,6 @@
 {
   "name": "offline-pdf-tools",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "100% Offline Client-Side PDF Tools & PDF Studio Pro",
   "private": true,
   "scripts": {

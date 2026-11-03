@@ -2,7 +2,7 @@
 
 [![Tests](https://github.com/danwiraza03/pdf-tools/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/danwiraza03/pdf-tools/actions/workflows/test.yml)
 
-**Versi 1.0.0** — lihat [CHANGELOG.md](CHANGELOG.md) untuk daftar perubahan.
+**Versi 1.1.0** — lihat [CHANGELOG.md](CHANGELOG.md) untuk daftar perubahan.
 
 Aplikasi pengolah dokumen PDF serbaguna yang berjalan di peramban Anda. Semua proses penggabungan, pemotongan, kompresi, OCR, penandatanganan, dan pengeditan PDF dieksekusi secara instan di komputer Anda.
 
