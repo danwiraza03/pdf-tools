@@ -31,6 +31,7 @@ const { runMergeCardControlsSuite } = require('./test_merge_card_controls');
 const { runMergeInsertSuite } = require('./test_merge_insert');
 const { runEditPdfNavSuite } = require('./test_edit_pdf_nav');
 const { runRedactPageSuite } = require('./test_redact_page');
+const { runScanPdfSuite } = require('./test_scan_pdf');
 
 const TEST_PORT = 8765;
 const BASE_URL = `http://127.0.0.1:${TEST_PORT}`;
@@ -347,6 +348,13 @@ async function main() {
         name: 'Standalone Redact PDF Security & UI Suite',
         run: async () => {
           await runRedactPageSuite(browser, BASE_URL);
+        }
+      },
+      {
+        id: 'scanpdf',
+        name: 'Standalone Scan to PDF Browser Suite',
+        run: async () => {
+          await runScanPdfSuite(browser, BASE_URL);
         }
       }
     ];
