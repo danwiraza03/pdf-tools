@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light" class="tool-page-scan-pdf light-theme">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; frame-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self';">
+  <title>Scan to PDF — Capture Documents with Camera Online & Offline</title>
+  <meta name="description" content="Capture documents with your camera, straighten perspective, apply clean B&W filters, and save as high-quality PDF 100% offline in your browser.">
+  <link rel="canonical" href="https://danwiraza03.github.io/pdf-tools/pages/scan-pdf.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="PDF Tools">
+  <meta property="og:title" content="Scan to PDF — Capture Documents with Camera Online & Offline">
+  <meta property="og:description" content="Capture documents with your camera, straighten perspective, apply clean B&W filters, and save as high-quality PDF 100% offline in your browser.">
+  <meta property="og:url" content="https://danwiraza03.github.io/pdf-tools/pages/scan-pdf.html">
+  <meta property="og:image" content="https://danwiraza03.github.io/pdf-tools/assets/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Scan to PDF — Capture Documents with Camera Online & Offline">
+  <meta name="twitter:description" content="Capture documents with your camera, straighten perspective, apply clean B&W filters, and save as high-quality PDF 100% offline in your browser.">
+  <meta name="twitter:image" content="https://danwiraza03.github.io/pdf-tools/assets/og-image.png">
+  <link rel="icon" type="image/svg+xml" href="../icon.svg">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/tool.css">
+  <style>
+    :root { --tool-color: #0284C7; }
+  </style>
+</head>
+<body class="tool-page-scan-pdf">
+  <a href="#main-content" class="skip-link" data-i18n="a11y.skip">Skip to content</a>
+
+  <!-- 1. Global Header -->
+  <header class="header" id="appHeader"></header>
+
+  <main id="main-content" class="main-content" tabindex="-1">
+    <div class="container">
+
+      <!-- 2. Tool Hero Section -->
+      <section class="tool-hero">
+        <div class="tool-hero-icon" style="background: var(--tool-color); color: #ffffff;">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+            <circle cx="12" cy="13" r="4"/>
+          </svg>
+        </div>
+        <h1 data-i18n="scan.hero_title">Scan to PDF</h1>
+        <p data-i18n="scan.hero_desc">Photograph documents with your camera, straighten perspective, and save them as PDF—all on your device.</p>
+      </section>
+
+      <div class="tool-workspace">
+
+        <!-- 3. Dropzone & Dual Capture Area -->
+        <div class="dropzone" id="dropzone">
+          <div class="dropzone-icon" style="color: var(--tool-color);">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+              <circle cx="12" cy="13" r="4"/>
+            </svg>
+          </div>
+          <div class="dropzone-title" data-i18n="scan.dropzone_title">Capture document or choose photos</div>
+          <div class="dropzone-subtitle" data-i18n="scan.dropzone_desc">Supports camera capture and JPG, PNG, WebP images</div>
+
+          <!-- Dual Capture Action Buttons -->
+          <div class="scan-dropzone-actions">
+            <!-- Native Device Camera (Mobile Primary) -->
+            <button type="button" class="btn btn-primary btn-md" id="openCameraInputBtn" aria-label="Take Photo with Device Camera">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                <circle cx="12" cy="13" r="4"/>
+              </svg>
+              <span data-i18n="scan.take_photo">Take Photo</span>
+            </button>
+
+            <!-- Live Webcam (Desktop) -->
+            <button type="button" class="btn btn-secondary btn-md" id="startCameraBtn" aria-label="Open Live Webcam">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                <line x1="8" y1="21" x2="16" y2="21"/>
+                <line x1="12" y1="17" x2="12" y2="21"/>
+              </svg>
+              <span data-i18n="scan.live_camera">Live Camera</span>
+            </button>
+
+            <!-- Gallery / File Upload -->
+            <button type="button" class="btn btn-secondary btn-md" id="openGalleryBtn" onclick="document.getElementById('fileInput').click()" aria-label="Choose from Gallery">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              <span data-i18n="scan.from_gallery">Choose Files</span>
+            </button>
+          </div>
+
+          <!-- Hidden inputs for file choices -->
+          <input type="file" id="fileInput" accept="image/*" multiple style="display: none;" />
+          <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;" />
+        </div>
+
+        <!-- 4. Workspace State -->
+        <div id="workspaceState" style="display: none;">
+          <div class="workspace-header-actions" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+            <div style="font-weight: 600; font-size: 0.95rem; color: var(--text-muted);" data-i18n="scan.drag_corners_hint">Drag the 4 corner handles to align with document borders.</div>
+            <button type="button" id="addMoreBtn" class="btn btn-secondary btn-sm" aria-label="Add More Photos">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              <span data-i18n="action.add_more">+ Add More</span>
+            </button>
+          </div>
+
+          <!-- Scanned Pages Grid (Sortable drag & drop) -->
+          <div id="pagesGrid" class="scan-pages-grid"></div>
+        </div>
+
+        <!-- 5. Action Bar -->
+        <div id="actionBar" class="action-bar" style="display: none;">
+          <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px;">
+            <label for="pageSizeSelect" style="font-weight: 600; font-size: 0.9rem; color: var(--text-primary);" data-i18n="scan.page_size">Page Size:</label>
+            <select id="pageSizeSelect" name="pageSize" class="form-select" style="min-height: 44px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary);">
+              <option value="a4" selected data-i18n="scan.size_a4">A4 (210 × 297 mm)</option>
+              <option value="letter" data-i18n="scan.size_letter">US Letter (8.5 × 11 in)</option>
+              <option value="fit" data-i18n="scan.size_fit">Fit to Photo</option>
+            </select>
+          </div>
+
+          <!-- Document Filter Pills in Action Bar -->
+          <div class="filter-btn-group" id="globalFilterGroup">
+            <button type="button" class="btn-filter-pill active" id="filterOrigBtn" data-filter="original" data-i18n="scan.filter_orig">Original</button>
+            <button type="button" class="btn-filter-pill" id="filterGrayBtn" data-filter="grayscale" data-i18n="scan.filter_gray">Grayscale</button>
+            <button type="button" class="btn-filter-pill" id="filterBwBtn" data-filter="bw" data-i18n="scan.filter_bw">B&W (Crisp Text)</button>
+          </div>
+
+          <button id="convertBtn" class="btn btn-primary btn-lg" data-i18n="scan.generate" aria-label="Convert to PDF">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+            </svg>
+            <span>Convert to PDF</span>
+          </button>
+        </div>
+
+        <!-- 6. Result State -->
+        <div id="resultState" class="result-state" style="display: none;">
+          <div class="result-icon" style="color: #10B981;">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+          </div>
+          <h2 data-i18n="scan.success">PDF created successfully!</h2>
+          <div class="result-actions" style="margin-top: 20px; display: flex; flex-wrap: wrap; justify-content: center; gap: 12px;">
+            <button id="downloadPdfBtn" class="btn btn-primary btn-lg">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              <span data-i18n="action.download">Download PDF</span>
+            </button>
+            <button id="openStudioBtn" class="btn btn-secondary btn-lg">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+              </svg>
+              <span data-i18n="action.open_studio">Open in PDF Studio</span>
+            </button>
+            <button id="resetBtn" class="btn btn-secondary btn-lg" data-i18n="action.clear">Start Over</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Live Camera Modal -->
+  <div class="scan-modal-backdrop" id="cameraModal" role="dialog" aria-modal="true" aria-labelledby="camModalTitle">
+    <div class="scan-modal-dialog">
+      <div class="scan-modal-header">
+        <h3 class="scan-modal-title" id="camModalTitle" data-i18n="scan.live_camera">Live Camera</h3>
+        <button type="button" class="btn-card-action" id="stopCameraBtn" aria-label="Close Camera">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="scan-modal-body">
+        <div class="camera-video-wrapper">
+          <video id="cameraVideo" playsinline autoplay muted></video>
+          <div class="camera-floating-actions">
+            <button type="button" class="btn btn-secondary btn-md" id="switchCameraBtn" title="Switch Camera" aria-label="Switch Camera">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+              </svg>
+            </button>
+            <button type="button" class="btn-capture-shutter" id="capturePhotoBtn" title="Capture Photo" aria-label="Capture Photo">
+              <div class="btn-capture-inner"></div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Perspective Crop / Rectify Modal -->
+  <div class="scan-modal-backdrop" id="cropModal" role="dialog" aria-modal="true" aria-labelledby="cropModalTitle">
+    <div class="scan-modal-dialog">
+      <div class="scan-modal-header">
+        <h3 class="scan-modal-title" id="cropModalTitle" data-i18n="scan.crop_title">Adjust Corners & Perspective</h3>
+        <button type="button" class="btn-card-action" id="cancelCropBtn" aria-label="Close Crop Modal">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="scan-modal-body">
+        <div class="crop-canvas-wrapper">
+          <canvas id="cropCanvas"></canvas>
+        </div>
+      </div>
+      <div class="scan-modal-footer">
+        <!-- Filter Selector -->
+        <div class="filter-btn-group">
+          <button type="button" class="btn-filter-pill active" id="modalFilterOrigBtn" data-filter="original" data-i18n="scan.filter_orig">Original</button>
+          <button type="button" class="btn-filter-pill" id="modalFilterGrayBtn" data-filter="grayscale" data-i18n="scan.filter_gray">Grayscale</button>
+          <button type="button" class="btn-filter-pill" id="modalFilterBwBtn" data-filter="bw" data-i18n="scan.filter_bw">B&W (Crisp Text)</button>
+        </div>
+
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="btn btn-secondary btn-md" id="resetCropBtn" data-i18n="scan.reset_corners">Reset Corners</button>
+          <button type="button" class="btn btn-primary btn-md" id="applyCropBtn" data-i18n="scan.apply_crop">Apply & Straighten</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Unified Footer -->
+  <footer class="footer">
+    <div class="container">
+      <p data-i18n="footer.text">PDF Tools — All processing is done locally in your browser.</p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="../js/lib/pdf-lib.min.js"></script>
+  <script src="../js/lib/Sortable.min.js"></script>
+  <script src="../js/lib/FileSaver.min.js"></script>
+
+  <!-- App Core & Utils -->
+  <script src="../js/utils/i18n.js"></script>
+  <script src="../js/utils/file-utils.js"></script>
+  <script src="../js/utils/download.js"></script>
+  <script src="../js/components/toast.js"></script>
+  <script src="../js/components/progress.js"></script>
+  <script src="../js/components/dropzone.js"></script>
+  <script src="../js/core/scan-engine.js"></script>
+  <script src="../js/components/header.js"></script>
+  <script src="../js/components/page-drop.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="../js/pages/scan-pdf.js"></script>
+</body>
+</html>

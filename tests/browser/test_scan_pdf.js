@@ -177,7 +177,7 @@ async function runScanPdfSuite(browser, baseUrl = BASE_URL) {
 
     // Stop camera and verify stream tracks ended
     const stopCamBtn = await camPage.$('#stopCameraBtn');
-    if (stopCamBtn) {
+    if (stopCamBtn && await stopCamBtn.isVisible()) {
       await stopCamBtn.click();
       await camPage.waitForTimeout(400);
     }
@@ -213,11 +213,17 @@ async function runScanPdfSuite(browser, baseUrl = BASE_URL) {
     await fileInput.setInputFiles(tmpImgPath);
     await mainPage.waitForTimeout(1000);
 
-    // Open crop/rectify modal or editor
-    const editCropBtn = await mainPage.$('.btn-edit-crop, [data-action="crop"], #cropModalBtn, .scan-page-card');
-    assert.ok(editCropBtn, 'A button or card to edit/adjust corners must exist');
-    await editCropBtn.click();
-    await mainPage.waitForTimeout(600);
+    // Open crop/rectify modal or editor if not already open
+    const isModalOpen = await mainPage.evaluate(() => {
+      const modal = document.getElementById('cropModal');
+      return modal && modal.classList.contains('open');
+    });
+    if (!isModalOpen) {
+      const editCropBtn = await mainPage.$('.btn-edit-crop, [data-action="crop"], #cropModalBtn, .scan-page-card');
+      assert.ok(editCropBtn, 'A button or card to edit/adjust corners must exist');
+      await editCropBtn.click();
+      await mainPage.waitForTimeout(600);
+    }
 
     // Set 4 corner points programmatically to match the known quadrilateral:
     // TL=(140, 100), TR=(480, 130), BR=(450, 500), BL=(110, 450)

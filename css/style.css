@@ -2687,6 +2687,11 @@ a {
 }
 
 .footer-unified .footer-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 8px 4px;
+  box-sizing: border-box;
   transition: color var(--transition-fast);
 }
 
