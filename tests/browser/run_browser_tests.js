@@ -399,9 +399,9 @@ async function main() {
       }
     }
     if (onlyFilter) {
+      const filters = onlyFilter.split(',').map(f => f.trim().toLowerCase()).filter(Boolean);
       targetSuites = suites.filter(s =>
-        (s.id && s.id.toLowerCase() === onlyFilter) ||
-        s.name.toLowerCase().includes(onlyFilter)
+        filters.some(f => (s.id && s.id.toLowerCase() === f) || s.name.toLowerCase().includes(f))
       );
       console.log(`Menjalankan hanya suite dengan filter: "${onlyFilter}" (${targetSuites.length} suite ditemukan)\n`);
     }
