@@ -112,8 +112,9 @@ async function runMergeBrowserTestForEngine(browser, baseUrl, fixtures, engineNa
     const fileInput = page.locator('#dropzone input[type="file"]');
     await fileInput.setInputFiles([fixtures.pathA, fixtures.pathB]);
 
-    // Wait for organizer area
+    // Wait for organizer area and initial cards to be loaded
     await page.waitForSelector('#organizerArea', { state: 'visible', timeout: 15000 });
+    await page.waitForSelector('.merge-page-card', { state: 'visible', timeout: 15000 });
     console.log('  ✓ Files uploaded, organizer area displayed.');
 
     // Expand all file sections to view individual pages

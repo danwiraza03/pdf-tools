@@ -247,6 +247,7 @@ async function main() {
         }
       },
       {
+        id: 'mergesize',
         name: 'Merge Size Optimization & UI Reordering Suite',
         run: async () => {
           const mergeRes = await runMergeSizeBrowserSuite(browser, BASE_URL);
