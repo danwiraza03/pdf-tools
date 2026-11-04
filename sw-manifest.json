@@ -1,12 +1,12 @@
 {
-  "version": "pdf-tools-ve515b9fa53",
+  "version": "pdf-tools-vc07985f794",
   "vendorVersion": "pdf-tools-vendor-v4461a35c2a",
-  "compositeHash": "e515b9fa53c0e60d81e288231cb9a12f700166c2c5b8cbcdd81f4f66136d8ad6",
+  "compositeHash": "c07985f7948bd92bac9f0b270a37384892fb287d1531d61fa5eb47bda7390e46",
   "vendorHash": "4461a35c2a4ca00c66db6cf2a6300d46859944c7317337fc75f3ad1326f8fd28",
-  "builtAt": "2026-11-04T11:17:02.146Z",
+  "builtAt": "2026-11-04T11:34:47.272Z",
   "totalFiles": 99,
-  "totalBytes": 3915189,
-  "totalMB": "3.73",
+  "totalBytes": 3920422,
+  "totalMB": "3.74",
   "files": [
     {
       "url": "./css/home.css",
@@ -285,8 +285,8 @@
     },
     {
       "url": "./js/pages/merge.js",
-      "size": 89763,
-      "hash": "2605dcce8638"
+      "size": 93944,
+      "hash": "8c525e4688ce"
     },
     {
       "url": "./js/pages/ocr.js",
@@ -375,8 +375,8 @@
     },
     {
       "url": "./js/utils/i18n.js",
-      "size": 94151,
-      "hash": "cfaf4601886e"
+      "size": 94249,
+      "hash": "b5892628e754"
     },
     {
       "url": "./manifest.json",
@@ -425,8 +425,8 @@
     },
     {
       "url": "./pages/merge.html",
-      "size": 17583,
-      "hash": "7f74c1b3f571"
+      "size": 18537,
+      "hash": "d97198f7befb"
     },
     {
       "url": "./pages/ocr.html",

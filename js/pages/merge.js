@@ -46,7 +46,14 @@
       const modalCanvas = document.getElementById('modalCanvas');
 
       const progress = PDFTools.Progress('progressBar');
+      const mergeLoadingStatus = document.getElementById('mergeLoadingStatus');
+      const mergeLoadingText = document.getElementById('mergeLoadingText');
       let mergedData = null;
+
+      // Loading & View Mode State
+      let activeLoadingCount = 0;
+      let loadingQueuePromise = Promise.resolve();
+      let globalViewMode = 'collapsed'; // 'collapsed' or 'expanded'
 
       // State
       let allUploadedFiles = []; // File references
@@ -301,19 +308,91 @@
       }
 
       // ============================================================
+      // LOADING QUEUE & VIEW MODE STATE MANAGEMENT
+      // ============================================================
+
+      function updateLoadingStateUI(isLoading) {
+        if (isLoading) {
+          if (organizerArea) organizerArea.setAttribute('aria-busy', 'true');
+          if (mergeLoadingStatus) {
+            if (mergeLoadingText && PDFTools.i18n && PDFTools.i18n.t) {
+              mergeLoadingText.textContent = PDFTools.i18n.t('merge.loading_files', 'Loading files...');
+            }
+            mergeLoadingStatus.style.display = 'inline-flex';
+          }
+          const buttonsToLock = [expandAllBtn, collapseAllBtn, rotateAllBtn, resetOrderBtn, clearAllPagesBtn, mergeBtn];
+          buttonsToLock.forEach(btn => {
+            if (btn) {
+              btn.disabled = true;
+              btn.setAttribute('aria-disabled', 'true');
+            }
+          });
+        } else {
+          if (organizerArea) {
+            organizerArea.removeAttribute('aria-busy');
+          }
+          if (mergeLoadingStatus) {
+            mergeLoadingStatus.style.display = 'none';
+          }
+          const buttonsToUnlock = [expandAllBtn, collapseAllBtn, rotateAllBtn, resetOrderBtn, clearAllPagesBtn];
+          buttonsToUnlock.forEach(btn => {
+            if (btn) {
+              btn.disabled = false;
+              btn.removeAttribute('aria-disabled');
+            }
+          });
+          const total = getOrderedPages().length;
+          if (mergeBtn) {
+            mergeBtn.disabled = (total === 0);
+            if (total === 0) {
+              mergeBtn.setAttribute('aria-disabled', 'true');
+            } else {
+              mergeBtn.removeAttribute('aria-disabled');
+            }
+          }
+          updateHistoryButtonsUI();
+        }
+      }
+
+      function enqueueMergeTask(taskFn) {
+        activeLoadingCount++;
+        updateLoadingStateUI(true);
+
+        const currentPromise = loadingQueuePromise.then(async () => {
+          try {
+            await taskFn();
+          } catch (err) {
+            console.error('Error in merge loading task:', err);
+          }
+        }).finally(() => {
+          activeLoadingCount = Math.max(0, activeLoadingCount - 1);
+          if (activeLoadingCount === 0) {
+            updateLoadingStateUI(false);
+          }
+        });
+
+        loadingQueuePromise = currentPromise;
+        return currentPromise;
+      }
+
+      // ============================================================
       // FILE LOADING
       // ============================================================
 
-      async function loadPdfFileToGroup(file, fileIndex, isExpanded = false) {
+      async function loadPdfFileToGroup(file, fileIndex, isExpanded = null) {
         const colorTheme = docColorThemes[fileIndex % docColorThemes.length];
         const groupId = 'group_' + fileIndex + '_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
+
+        const expandState = (isExpanded !== null && isExpanded !== undefined)
+          ? Boolean(isExpanded)
+          : (globalViewMode === 'expanded');
 
         const group = {
           id: groupId,
           fileIndex: fileIndex,
           fileName: file.name,
           colorTheme: colorTheme,
-          isExpanded: Boolean(isExpanded),
+          isExpanded: expandState,
           pageIds: []
         };
 
@@ -353,132 +432,142 @@
         organizerArea.style.display = 'block';
         actionBar.classList.add('active');
         resultArea.classList.remove('active');
-        progress.show(PDFTools.i18n.t('action.processing', 'Loading and extracting PDF pages...'));
 
-        const startFileIndex = allUploadedFiles.length;
-        const skippedFiles = [];
-        for (let f = 0; f < newFiles.length; f++) {
-          const file = newFiles[f];
-          allUploadedFiles.push(file);
-          const currentFileIndex = startFileIndex + f;
+        return enqueueMergeTask(async () => {
+          progress.show(PDFTools.i18n.t('action.processing', 'Loading and extracting PDF pages...'));
 
-          try {
-            const group = await loadPdfFileToGroup(file, currentFileIndex, false);
-            fileGroups.push(group);
-          } catch (err) {
-            console.error('Error loading PDF file:', file.name, err);
-            const idx = allUploadedFiles.indexOf(file);
-            if (idx !== -1) allUploadedFiles.splice(idx, 1);
+          const startFileIndex = allUploadedFiles.length;
+          const skippedFiles = [];
+          for (let f = 0; f < newFiles.length; f++) {
+            const file = newFiles[f];
+            allUploadedFiles.push(file);
+            const currentFileIndex = startFileIndex + f;
 
-            if (err && err.code === 'PASSWORD_CANCELLED') {
-              skippedFiles.push(file.name);
-            } else {
-              PDFTools.Toast.error(`Failed to load ${file.name}`);
+            try {
+              const group = await loadPdfFileToGroup(file, currentFileIndex, globalViewMode === 'expanded');
+              fileGroups.push(group);
+            } catch (err) {
+              console.error('Error loading PDF file:', file.name, err);
+              const idx = allUploadedFiles.indexOf(file);
+              if (idx !== -1) allUploadedFiles.splice(idx, 1);
+
+              if (err && err.code === 'PASSWORD_CANCELLED') {
+                skippedFiles.push(file.name);
+              } else {
+                PDFTools.Toast.error(`Failed to load ${file.name}`);
+              }
             }
           }
-        }
 
-        saveInitialSnapshot();
-        if (historyStack.length === 0) {
-          pushHistoryState('Initial Load');
-        } else {
-          pushHistoryState('Add Files');
-        }
+          if (fileGroups.length === 0) {
+            organizerArea.style.display = 'none';
+            actionBar.classList.remove('active');
+            dropzoneEl.style.display = 'block';
+          } else {
+            saveInitialSnapshot();
+            if (historyStack.length === 0) {
+              pushHistoryState('Initial Load');
+            } else {
+              pushHistoryState('Add Files');
+            }
+          }
 
-        progress.hide();
-        clearSelection();
-        buildGrid();
-        if (skippedFiles.length > 0) {
-          PDFTools.Toast.info(`${skippedFiles.length} file(s) skipped: ${skippedFiles.join(', ')}`);
-        } else if (newFiles.length > 0 && fileGroups.length > 0) {
-          PDFTools.Toast.success(`${newFiles.length} file(s) loaded!`);
-        }
+          progress.hide();
+          clearSelection();
+          buildGrid();
+          if (skippedFiles.length > 0) {
+            PDFTools.Toast.info(`${skippedFiles.length} file(s) skipped: ${skippedFiles.join(', ')}`);
+          } else if (newFiles.length > 0 && fileGroups.length > 0) {
+            PDFTools.Toast.success(`${newFiles.length} file(s) loaded!`);
+          }
+        });
       }
 
       async function handleInsertFiles(newFiles, target) {
         if (!newFiles || newFiles.length === 0 || !target) return;
         if (PDFTools.FileUtils && PDFTools.FileUtils.initPdfJsWorker) PDFTools.FileUtils.initPdfJsWorker();
 
-        syncAllGroupsFromDom();
+        return enqueueMergeTask(async () => {
+          syncAllGroupsFromDom();
+          progress.show(PDFTools.i18n.t('action.processing', 'Loading and inserting PDF pages...'));
 
-        progress.show(PDFTools.i18n.t('action.processing', 'Loading and inserting PDF pages...'));
-
-        let targetGroup = null;
-        if (target.type === 'page') {
-          targetGroup = fileGroups.find(g => g.id === target.groupId || g.pageIds.includes(target.pageId));
-        } else if (target.type === 'doc') {
-          targetGroup = fileGroups.find(g => g.id === target.groupId);
-        }
-        const expandInserted = targetGroup ? targetGroup.isExpanded : true;
-
-        const startFileIndex = allUploadedFiles.length;
-        const newGroups = [];
-        const skippedFiles = [];
-
-        for (let f = 0; f < newFiles.length; f++) {
-          const file = newFiles[f];
-          allUploadedFiles.push(file);
-          const currentFileIndex = startFileIndex + f;
-
-          try {
-            const group = await loadPdfFileToGroup(file, currentFileIndex, expandInserted);
-            newGroups.push(group);
-          } catch (err) {
-            console.error('Error inserting PDF file:', file.name, err);
-            const idx = allUploadedFiles.indexOf(file);
-            if (idx !== -1) allUploadedFiles.splice(idx, 1);
-
-            if (err && err.code === 'PASSWORD_CANCELLED') {
-              skippedFiles.push(file.name);
-            } else {
-              PDFTools.Toast.error(`Failed to load ${file.name}`);
+          let expandInserted = (globalViewMode === 'expanded');
+          if (target.type === 'page') {
+            const targetGroup = fileGroups.find(g => g.id === target.groupId || g.pageIds.includes(target.pageId));
+            if (targetGroup) {
+              expandInserted = targetGroup.isExpanded;
             }
           }
-        }
 
-        if (newGroups.length > 0) {
-          if (target.type === 'doc') {
-            const tIdx = fileGroups.findIndex(g => g.id === target.groupId);
-            if (tIdx !== -1) {
-              fileGroups.splice(tIdx + 1, 0, ...newGroups);
-            } else {
-              fileGroups.push(...newGroups);
-            }
-          } else if (target.type === 'page') {
-            const tGroupIdx = fileGroups.findIndex(g => g.id === target.groupId || g.pageIds.includes(target.pageId));
-            if (tGroupIdx !== -1) {
-              const grp = fileGroups[tGroupIdx];
-              const pIdx = grp.pageIds.indexOf(target.pageId);
-              // Sisipkan langsung ke dalam grup ini agar tetap menjadi satu kesatuan header
-              const insertedPageIds = [];
-              newGroups.forEach(ng => {
-                insertedPageIds.push(...ng.pageIds);
-              });
-              if (pIdx !== -1) {
-                grp.pageIds.splice(pIdx + 1, 0, ...insertedPageIds);
+          const startFileIndex = allUploadedFiles.length;
+          const newGroups = [];
+          const skippedFiles = [];
+
+          for (let f = 0; f < newFiles.length; f++) {
+            const file = newFiles[f];
+            allUploadedFiles.push(file);
+            const currentFileIndex = startFileIndex + f;
+
+            try {
+              const group = await loadPdfFileToGroup(file, currentFileIndex, expandInserted);
+              newGroups.push(group);
+            } catch (err) {
+              console.error('Error inserting PDF file:', file.name, err);
+              const idx = allUploadedFiles.indexOf(file);
+              if (idx !== -1) allUploadedFiles.splice(idx, 1);
+
+              if (err && err.code === 'PASSWORD_CANCELLED') {
+                skippedFiles.push(file.name);
               } else {
-                grp.pageIds.push(...insertedPageIds);
+                PDFTools.Toast.error(`Failed to load ${file.name}`);
               }
-            } else {
-              fileGroups.push(...newGroups);
             }
           }
 
-          saveInitialSnapshot();
-          pushHistoryState('Insert Files');
-        }
+          if (newGroups.length > 0) {
+            if (target.type === 'doc') {
+              const tIdx = fileGroups.findIndex(g => g.id === target.groupId);
+              if (tIdx !== -1) {
+                fileGroups.splice(tIdx + 1, 0, ...newGroups);
+              } else {
+                fileGroups.push(...newGroups);
+              }
+            } else if (target.type === 'page') {
+              const tGroupIdx = fileGroups.findIndex(g => g.id === target.groupId || g.pageIds.includes(target.pageId));
+              if (tGroupIdx !== -1) {
+                const grp = fileGroups[tGroupIdx];
+                const pIdx = grp.pageIds.indexOf(target.pageId);
+                // Sisipkan langsung ke dalam grup ini agar tetap menjadi satu kesatuan header
+                const insertedPageIds = [];
+                newGroups.forEach(ng => {
+                  insertedPageIds.push(...ng.pageIds);
+                });
+                if (pIdx !== -1) {
+                  grp.pageIds.splice(pIdx + 1, 0, ...insertedPageIds);
+                } else {
+                  grp.pageIds.push(...insertedPageIds);
+                }
+              } else {
+                fileGroups.push(...newGroups);
+              }
+            }
 
-        progress.hide();
-        clearSelection();
-        buildGrid();
-        updateGlobalSequenceUI();
+            saveInitialSnapshot();
+            pushHistoryState('Insert Files');
+          }
 
-        if (skippedFiles.length > 0) {
-          PDFTools.Toast.info(`${skippedFiles.length} file(s) skipped: ${skippedFiles.join(', ')}`);
-        } else if (newGroups.length > 0) {
-          const isId = (PDFTools.i18n && PDFTools.i18n.getCurrentLang && PDFTools.i18n.getCurrentLang() === 'id');
-          PDFTools.Toast.success(isId ? `${newGroups.length} berkas berhasil disisipkan!` : `${newGroups.length} file(s) inserted!`);
-        }
+          progress.hide();
+          clearSelection();
+          buildGrid();
+          updateGlobalSequenceUI();
+
+          if (skippedFiles.length > 0) {
+            PDFTools.Toast.info(`${skippedFiles.length} file(s) skipped: ${skippedFiles.join(', ')}`);
+          } else if (newGroups.length > 0) {
+            const isId = (PDFTools.i18n && PDFTools.i18n.getCurrentLang && PDFTools.i18n.getCurrentLang() === 'id');
+            PDFTools.Toast.success(isId ? `${newGroups.length} berkas berhasil disisipkan!` : `${newGroups.length} file(s) inserted!`);
+          }
+        });
       }
 
       function saveInitialSnapshot() {
@@ -575,7 +664,17 @@
           });
         });
         organizerCount.textContent = `${total} Pages from ${uniqueFiles.size} Files`;
-        mergeBtn.disabled = (total === 0);
+        if (activeLoadingCount > 0) {
+          mergeBtn.disabled = true;
+          mergeBtn.setAttribute('aria-disabled', 'true');
+        } else {
+          mergeBtn.disabled = (total === 0);
+          if (total === 0) {
+            mergeBtn.setAttribute('aria-disabled', 'true');
+          } else {
+            mergeBtn.removeAttribute('aria-disabled');
+          }
+        }
       }
 
       // ============================================================
@@ -1913,12 +2012,16 @@
       // ============================================================
 
       expandAllBtn.addEventListener('click', function () {
+        if (activeLoadingCount > 0) return;
+        globalViewMode = 'expanded';
         fileGroups.forEach(g => { g.isExpanded = true; });
         pushHistoryState('Expand All');
         buildGrid();
       });
 
       collapseAllBtn.addEventListener('click', function () {
+        if (activeLoadingCount > 0) return;
+        globalViewMode = 'collapsed';
         // Save current DOM state before collapsing
         syncAllGroupsFromDom();
         fileGroups.forEach(g => { g.isExpanded = false; });
@@ -1927,6 +2030,7 @@
       });
 
       rotateAllBtn.addEventListener('click', function () {
+        if (activeLoadingCount > 0) return;
         pushHistoryState('Rotate All');
         pageItemsMap.forEach(item => {
           item.rotation = (item.rotation + 90) % 360;
@@ -1952,6 +2056,7 @@
 
       // Reset Order: Restores original files & original page sequences
       resetOrderBtn.addEventListener('click', function () {
+        if (activeLoadingCount > 0) return;
         if (initialSnapshot.length === 0) return;
         pushHistoryState('Reset Order');
 
@@ -1971,6 +2076,8 @@
       });
 
       clearAllPagesBtn.addEventListener('click', function () {
+        if (activeLoadingCount > 0) return;
+        globalViewMode = 'collapsed';
         destroyAllPdfDocs();
         destroySortables();
         allUploadedFiles = [];
@@ -2000,6 +2107,7 @@
       // ============================================================
 
       mergeBtn.addEventListener('click', async function () {
+        if (activeLoadingCount > 0) return;
         syncAllGroupsFromDom();
         const ordered = getOrderedPages();
 
