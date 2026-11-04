@@ -438,6 +438,12 @@ async function runSignFlowWebKit(baseUrl) {
     const dl = await dlPromise;
     assert.ok(dl, 'Unduhan harus berhasil terjadi pada iPhone 13 WebKit');
 
+    // Wait for the download to finish completely before closing page/context/browser
+    const downloadedPath = await dl.path().catch(() => null);
+    if (downloadedPath) {
+      try { if (fs.existsSync(downloadedPath)) fs.unlinkSync(downloadedPath); } catch {}
+    }
+
     await page.waitForTimeout(500);
     const btnText = await page.textContent('#downloadSignedText');
     assert.ok(!btnText.includes('Baking'), 'Tombol tidak boleh tertahan di "Baking..." pada iPhone 13 WebKit');
@@ -448,9 +454,15 @@ async function runSignFlowWebKit(baseUrl) {
     for (const f of createdFiles) {
       try { if (fs.existsSync(f)) fs.unlinkSync(f); } catch {}
     }
-    await page.close();
-    await context.close();
-    await browser.close();
+    try {
+      if (page && !page.isClosed()) await page.close().catch(() => {});
+    } catch {}
+    try {
+      if (context) await context.close().catch(() => {});
+    } catch {}
+    try {
+      if (browser) await browser.close().catch(() => {});
+    } catch {}
   }
 }
 

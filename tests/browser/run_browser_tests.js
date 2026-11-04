@@ -35,6 +35,22 @@ const { runScanPdfSuite } = require('./test_scan_pdf');
 
 const TEST_PORT = 8765;
 const BASE_URL = `http://127.0.0.1:${TEST_PORT}`;
+const SUITE_TIMEOUT_MS = 10 * 60 * 1000; // 10 menit batas waktu per suite
+
+function runWithTimeout(promiseFn, timeoutMs, timeoutMessage) {
+  let timerId;
+  const timeoutPromise = new Promise((_, reject) => {
+    timerId = setTimeout(() => {
+      reject(new Error(timeoutMessage));
+    }, timeoutMs);
+  });
+  return Promise.race([
+    promiseFn(),
+    timeoutPromise
+  ]).finally(() => {
+    clearTimeout(timerId);
+  });
+}
 
 async function runMobileOverflowAndConsoleAudit(browser, baseUrl) {
   console.log('========================================================================');
@@ -393,7 +409,7 @@ async function main() {
       let errObj = null;
 
       try {
-        await suite.run();
+        await runWithTimeout(() => suite.run(), SUITE_TIMEOUT_MS, 'batas waktu habis');
         console.log(`\n✅ [PASS] ${suite.name}`);
       } catch (err) {
         status = 'gagal';
