@@ -6,6 +6,7 @@ Format mengacu pada [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) 
 
 ### Ditambahkan
 
+- **Scan to PDF**: memotret dokumen dengan kamera, meluruskan perspektif, dan menyimpannya sebagai PDF, semuanya di perangkat Anda.
 - **Mode Kompresi Seimbang (Balanced)**: Mode kompresi Seimbang yang memperkecil gambar di dalam PDF dan membiarkan teks tetap bisa dipilih.
 - **Redaksi PDF Mandiri**: Redaksi PDF sebagai alat mandiri (`pages/redact.html`), memakai mesin redaksi permanen yang sama dengan Edit PDF.
 - **Peringatan Layar Sentuh untuk Edit PDF (PDF Studio)**: Modal kustom ramah sentuh (`#studioTouchModalBackdrop`) yang memperingatkan pengguna perangkat layar sentuh bahwa "Edit PDF paling nyaman dipakai di komputer" dengan tombol Lanjutkan dan Batal, mencegah navigasi tidak sengaja di layar kecil tanpa menggunakan dialog bawaan browser.
