@@ -2,6 +2,12 @@
 
 Format mengacu pada [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan penomoran versi mengikuti [Semantic Versioning](https://semver.org/lang/id/). Daftar keterbatasan yang sudah diketahui ada di bagian *Masalah yang Diketahui* pada [README](README.md).
 
+## [Unreleased]
+
+### Diperbaiki
+
+- Tombol di halaman Gabung kini menunggu sampai berkas selesai dimuat, dan pilihan Expand All atau Collapse All ikut diterapkan pada berkas yang ditambahkan kemudian.
+
 ## [1.2.0] - 2026-11-04
 
 ### Ditambahkan

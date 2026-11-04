@@ -118,6 +118,7 @@ Berdasarkan tinjauan arsitektur dan prinsip privasi client-side, pemilik proyek 
    - **PDF to Markdown**: Ditunda.
    - **PDF to PowerPoint (Slide Gambar)**: Ditunda.
    - **Web Worker untuk Operasi pdf-lib**: Ditunda hingga ada bukti pengukuran empiris pada berkas besar di gawai seluler.
+   - **Profil Test Cepat Browser (`npm run test:browser:quick`)**: Ditunda (test browser penuh membutuhkan ~7 menit, terlama audit header mobile ~191s).
 5. **Fitur yang Ditolak (Rejected) & Alasan Penolakan**:
    - ❌ **Semua Fitur AI (Ringkasan AI, Chat Dokumen AI, Terjemahan AI)**: Ditolak mutlak karena bertentangan dengan prinsip privasi 100% offline di perangkat pengguna dan mengharuskan transmisi data ke API cloud pihak ketiga.
    - ❌ **Integrasi Cloud Eksternal (Google Drive, Dropbox, OneDrive)**: Ditolak karena melanggar garansi zero-external-URL dan memerlukan server backend untuk alur OAuth.
@@ -165,4 +166,7 @@ flowchart TD
    - PDF ke Markdown (ekstraksi teks berstruktur) dan PDF ke slide PowerPoint gambar.
 6. **Web Worker untuk Operasi Berat pdf-lib**:
    - Pemindahan kalkulasi pdf-lib ke worker latar belakang setelah profil performa menunjukkan kebutuhan mendesak.
+   - *Status*: **Belum**.
+7. **Profil Test Cepat Browser (`npm run test:browser:quick`)**:
+   - Menambahkan profil pengujian cepat yang melewati audit visual/header berat untuk iterasi pengembangan cepat (test browser penuh membutuhkan ~7 menit, terlama audit header mobile ~191s).
    - *Status*: **Belum**.
