@@ -1,11 +1,11 @@
 {
-  "version": "pdf-tools-vcca6a17351",
+  "version": "pdf-tools-ve515b9fa53",
   "vendorVersion": "pdf-tools-vendor-v4461a35c2a",
-  "compositeHash": "cca6a173510ffb7f6076d365439ccadd1789bba531e164778e88264b1bd7c3ae",
+  "compositeHash": "e515b9fa53c0e60d81e288231cb9a12f700166c2c5b8cbcdd81f4f66136d8ad6",
   "vendorHash": "4461a35c2a4ca00c66db6cf2a6300d46859944c7317337fc75f3ad1326f8fd28",
-  "builtAt": "2026-11-04T09:58:57.446Z",
+  "builtAt": "2026-11-04T11:05:51.805Z",
   "totalFiles": 99,
-  "totalBytes": 3915295,
+  "totalBytes": 3915189,
   "totalMB": "3.73",
   "files": [
     {
@@ -480,8 +480,8 @@
     },
     {
       "url": "./pages/scan-pdf.html",
-      "size": 15664,
-      "hash": "d096dce7227b"
+      "size": 15558,
+      "hash": "310dabdd17f0"
     },
     {
       "url": "./pages/sign.html",
