@@ -2,7 +2,7 @@
 
 Format mengacu pada [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) dan penomoran versi mengikuti [Semantic Versioning](https://semver.org/lang/id/). Daftar keterbatasan yang sudah diketahui ada di bagian *Masalah yang Diketahui* pada [README](README.md).
 
-## [Unreleased]
+## [1.2.0] - 2026-11-04
 
 ### Ditambahkan
 
@@ -108,6 +108,7 @@ Rilis stabil pertama. Seluruh pemrosesan berjalan di browser Anda; berkas tidak 
 
 - Service worker (`sw.js`) yang tidak pernah aktif, font dan skrip yang dimuat dari internet (Google Fonts, jsDelivr), serta berkas sisa percobaan.
 
-[Unreleased]: https://github.com/danwiraza03/pdf-tools/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/danwiraza03/pdf-tools/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/danwiraza03/pdf-tools/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/danwiraza03/pdf-tools/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/danwiraza03/pdf-tools/releases/tag/v1.0.0

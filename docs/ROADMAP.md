@@ -31,8 +31,8 @@
 | 9. Content Security Policy (CSP Ketat & Tanpa Unsafe-Eval) | **Selesai** | `tests/check_csp_presence.js`, `tests/browser/test_csp.js`, `isEvalSupported: false` |
 | **Peta Jalan Lanjutan (Eks-Improvement Roadmap)** | | |
 | 1. Kelengkapan i18n Homepage (23 Alat, Pills, Mega Menu) | **Selesai** | `tests/check_i18n_homepage.js`, `index.html`, `js/utils/i18n.js` |
-| 2. Halaman Mandiri Mesin Editor (Redact, Compare, Extract) | **Belum** | Mesin sudah ada di `js/editor/`; perancangan UI mandiri dijadwalkan v1.2.0 |
-| 3. Kompresi yang Mempertahankan Teks (Mode Seimbang) | **Belum** | Saat ini berbasis rasterisasi; downsampling gambar dijadwalkan v1.2.0 |
+| 2. Halaman Mandiri Mesin Editor (Redact, Compare, Extract) | **Sebagian** | Redact PDF mandiri selesai di `pages/redact.html`; Compare & Extract dijadwalkan v1.3.0 |
+| 3. Kompresi yang Mempertahankan Teks (Mode Seimbang) | **Selesai** | Mode Seimbang dengan downsampling JPEG stream selesai |
 | 4. Web Worker untuk Pemrosesan pdf-lib | **Belum** | Profiling memori/UI thread menunggu pengujian performa mobile lanjutan |
 | 5. Konversi Baru yang Layak Offline | **Belum** | Prioritas menengah v1.3.0 (misal: PDF ke PPTX slide gambar) |
 | 6. PWA Manifest (Shortcuts, Screenshots, Bahasa) | **Selesai** | `manifest.json`, `tests/check_manifest_pwa.js`, screenshot desktop & mobile |
@@ -149,13 +149,13 @@ flowchart TD
 
 1. **Halaman Mandiri Redact PDF (`pages/redact.html`)**:
    - Memanfaatkan `js/editor/redaction-engine.js` untuk redaksi permanen mandiri dengan verifikasi anti-bocor piksel (`test_redaction_rasterize.js`).
-   - *Status*: **Belum**.
+   - *Status*: **Selesai**.
 2. **Kompresi yang Mempertahankan Teks (Mode Seimbang)**:
    - Kompresi stream gambar internal dokumen tanpa merasterisasi teks vektor atau menghapus text-layer.
-   - *Status*: **Belum**.
+   - *Status*: **Selesai**.
 3. **Scan to PDF**:
    - Mengambil tangkapan kamera perangkat pengguna atau gambar dokumen lokal untuk dikompilasi menjadi PDF multi-halaman.
-   - *Status*: **Belum**.
+   - *Status*: **Selesai**.
 
 ### Fitur Ditunda (Target v1.3.0+)
 
