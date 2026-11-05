@@ -61,7 +61,15 @@ const FileUtils = {
     }
 
     if (!Protect || typeof Protect.unlockPdf !== 'function') {
-      throw new Error('PDFTools.Protect.unlockPdf is required to decrypt protected PDF documents.');
+      console.error('PDFTools.Protect.unlockPdf is required to decrypt protected PDF documents.');
+      const isId = (globalObj.PDFTools && globalObj.PDFTools.i18n && globalObj.PDFTools.i18n.getCurrentLang && globalObj.PDFTools.i18n.getCurrentLang() === 'id');
+      const userMsg = isId
+        ? 'PDF terproteksi ini tidak bisa dibuka. Coba alat Unlock PDF.'
+        : 'This protected PDF cannot be opened. Try the Unlock PDF tool.';
+      const err = new Error(userMsg);
+      err.code = 'PROTECT_MODULE_MISSING';
+      err.fileName = fileName;
+      throw err;
     }
 
     // Attempt 0: Try empty password (handles permissions-only encryption / empty user password)
@@ -82,7 +90,11 @@ const FileUtils = {
     }
 
     if (typeof getPassword !== 'function') {
-      const err = new Error(`Password diperlukan untuk membuka PDF: ${fileName}`);
+      const isId = (globalObj.PDFTools && globalObj.PDFTools.i18n && globalObj.PDFTools.i18n.getCurrentLang && globalObj.PDFTools.i18n.getCurrentLang() === 'id');
+      const userMsg = isId
+        ? `Password diperlukan untuk membuka PDF: ${fileName}`
+        : `Password is required to open PDF: ${fileName}`;
+      const err = new Error(userMsg);
       err.code = 'PASSWORD_REQUIRED';
       err.fileName = fileName;
       throw err;
@@ -92,7 +104,11 @@ const FileUtils = {
     for (let attempt = 1; attempt <= 3; attempt++) {
       let pass = await getPassword(fileName, attempt);
       if (pass === null || pass === undefined) {
-        const err = new Error(`Pembukaan PDF dibatalkan oleh pengguna: ${fileName}`);
+        const isId = (globalObj.PDFTools && globalObj.PDFTools.i18n && globalObj.PDFTools.i18n.getCurrentLang && globalObj.PDFTools.i18n.getCurrentLang() === 'id');
+        const userMsg = isId
+          ? `Pembukaan PDF dibatalkan oleh pengguna: ${fileName}`
+          : `Opening PDF cancelled by user: ${fileName}`;
+        const err = new Error(userMsg);
         err.code = 'PASSWORD_CANCELLED';
         err.fileName = fileName;
         throw err;
@@ -107,7 +123,11 @@ const FileUtils = {
       } catch (decryptErr) {
         pass = null; // Transient in-memory only: clear immediately
         if (attempt === 3) {
-          const err = new Error(`Password salah (3 kali percobaan terlampaui): ${fileName}`);
+          const isId = (globalObj.PDFTools && globalObj.PDFTools.i18n && globalObj.PDFTools.i18n.getCurrentLang && globalObj.PDFTools.i18n.getCurrentLang() === 'id');
+          const userMsg = isId
+            ? `Password salah (3 kali percobaan terlampaui): ${fileName}`
+            : `Incorrect password (3 attempts exceeded): ${fileName}`;
+          const err = new Error(userMsg);
           err.code = 'PASSWORD_INCORRECT';
           err.fileName = fileName;
           err.originalError = decryptErr;
@@ -117,7 +137,12 @@ const FileUtils = {
     }
 
     if (!unlockedBytes) {
-      const err = new Error(`Password salah untuk membuka PDF: ${fileName}`);
+      console.error(`Failed to unlock protected PDF: ${fileName}`);
+      const isId = (globalObj.PDFTools && globalObj.PDFTools.i18n && globalObj.PDFTools.i18n.getCurrentLang && globalObj.PDFTools.i18n.getCurrentLang() === 'id');
+      const userMsg = isId
+        ? 'PDF terproteksi ini tidak bisa dibuka. Coba alat Unlock PDF.'
+        : 'This protected PDF cannot be opened. Try the Unlock PDF tool.';
+      const err = new Error(userMsg);
       err.code = 'PASSWORD_INCORRECT';
       err.fileName = fileName;
       throw err;

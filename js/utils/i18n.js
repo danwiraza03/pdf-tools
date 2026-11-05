@@ -869,6 +869,7 @@ PDFTools.i18n = (function () {
       'modal.password_unlock': 'Open',
       'modal.password_skip': 'Skip',
       'modal.password_placeholder': 'Enter document password',
+      'error.protected_pdf_cannot_open': 'This protected PDF cannot be opened. Try the Unlock PDF tool.',
       'sw.update_available': 'A new version of PDF Tools is available.',
       'sw.reload': 'Update Now'
     },
@@ -1737,6 +1738,7 @@ PDFTools.i18n = (function () {
       'modal.password_unlock': 'Buka',
       'modal.password_skip': 'Lewati',
       'modal.password_placeholder': 'Masukkan kata sandi dokumen',
+      'error.protected_pdf_cannot_open': 'PDF terproteksi ini tidak bisa dibuka. Coba alat Unlock PDF.',
       'sw.update_available': 'Versi baru PDF Tools telah tersedia.',
       'sw.reload': 'Perbarui Sekarang'
     }
