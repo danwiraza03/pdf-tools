@@ -6,6 +6,7 @@ Format mengacu pada [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) 
 
 ### Diperbaiki
 
+- PDF yang hanya dibatasi izinnya (misalnya dilarang mencetak atau menyalin) kini langsung diproses di semua alat; sebelumnya beberapa alat, seperti Kompres, menampilkan galat.
 - Tombol di halaman Gabung kini menunggu sampai berkas selesai dimuat, dan pilihan Expand All atau Collapse All ikut diterapkan pada berkas yang ditambahkan kemudian.
 
 ## [1.2.0] - 2026-11-04
