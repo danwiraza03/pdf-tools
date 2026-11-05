@@ -37,7 +37,8 @@ const tests = [
   { name: 'Static Guard: Service Worker Manifest & Precache Integrity', file: 'check_sw_manifest.js' },
   { name: 'Static Guard: PWA Manifest Compliance & Integrity', file: 'check_manifest_pwa.js' },
   { name: 'Static Guard: Content Security Policy (CSP) Audit', file: 'check_csp_presence.js' },
-  { name: 'Static Guard: Homepage & Header i18n Completeness Audit', file: 'check_i18n_homepage.js' }
+  { name: 'Static Guard: Homepage & Header i18n Completeness Audit', file: 'check_i18n_homepage.js' },
+  { name: 'Static Guard: Protected PDF (pdf-protect.js & modal.js) Presence Audit', file: 'check_protected_guard.js' }
 ];
 
 console.log('========================================================================');
