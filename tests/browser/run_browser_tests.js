@@ -33,6 +33,7 @@ const { runEditPdfNavSuite } = require('./test_edit_pdf_nav');
 const { runRedactPageSuite } = require('./test_redact_page');
 const { runScanPdfSuite } = require('./test_scan_pdf');
 const { runMergeLoadingStateSuite } = require('./test_merge_loading_state');
+const { runProtectedInputsAllPagesSuite } = require('./test_protected_inputs_all_pages');
 
 const TEST_PORT = 8765;
 const BASE_URL = `http://127.0.0.1:${TEST_PORT}`;
@@ -256,10 +257,18 @@ async function main() {
         }
       },
       {
+        id: 'passwordmodal',
         name: 'Password Modal & Protected PDF Suite',
         run: async () => {
           const passRes = await runPasswordModalSuite(browser, BASE_URL);
           if (passRes?.skippedWebKit > 0) totalSkippedWebKit += passRes.skippedWebKit;
+        }
+      },
+      {
+        id: 'protectedinputs',
+        name: 'Protected PDF Inputs Verification Across All Relevant Pages',
+        run: async () => {
+          await runProtectedInputsAllPagesSuite(browser, BASE_URL);
         }
       },
       {
