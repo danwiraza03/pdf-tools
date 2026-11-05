@@ -101,11 +101,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://danwiraza03.github.io/pdf-tools/pages/scan-pdf.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://danwiraza03.github.io/pdf-tools/pages/sign.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>

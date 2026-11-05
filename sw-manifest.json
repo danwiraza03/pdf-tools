@@ -1,12 +1,12 @@
 {
-  "version": "pdf-tools-vccd2ab9e81",
+  "version": "pdf-tools-v358f220389",
   "vendorVersion": "pdf-tools-vendor-v4461a35c2a",
-  "compositeHash": "ccd2ab9e81288740e1dd71f5c6b92a7df6bb0adcffa09150c99f4f57af7582d7",
+  "compositeHash": "358f220389254911fb19ace7d7f35aa0dacd26652ea4da8df63b47ab49e62c6c",
   "vendorHash": "4461a35c2a4ca00c66db6cf2a6300d46859944c7317337fc75f3ad1326f8fd28",
-  "builtAt": "2026-11-05T04:38:07.658Z",
-  "totalFiles": 99,
-  "totalBytes": 3924573,
-  "totalMB": "3.74",
+  "builtAt": "2026-11-05T04:58:52.104Z",
+  "totalFiles": 96,
+  "totalBytes": 3860810,
+  "totalMB": "3.68",
   "files": [
     {
       "url": "./css/home.css",
@@ -20,8 +20,8 @@
     },
     {
       "url": "./css/tool.css",
-      "size": 60390,
-      "hash": "74a822973e7c"
+      "size": 55924,
+      "hash": "c8ef219e6d58"
     },
     {
       "url": "./fonts/inter-latin-400-normal.woff2",
@@ -65,13 +65,13 @@
     },
     {
       "url": "./index.html",
-      "size": 49285,
-      "hash": "a15673a30631"
+      "size": 47959,
+      "hash": "362b5457c450"
     },
     {
       "url": "./js/app.js",
-      "size": 65950,
-      "hash": "207bd9ddf665"
+      "size": 64123,
+      "hash": "4a8d95246de9"
     },
     {
       "url": "./js/components/dropzone.js",
@@ -80,8 +80,8 @@
     },
     {
       "url": "./js/components/header.js",
-      "size": 50153,
-      "hash": "b9b6786e0953"
+      "size": 49324,
+      "hash": "b2ebd0aaca3c"
     },
     {
       "url": "./js/components/modal.js",
@@ -192,11 +192,6 @@
       "url": "./js/core/pdf-watermark.js",
       "size": 21590,
       "hash": "817f1fd2ff66"
-    },
-    {
-      "url": "./js/core/scan-engine.js",
-      "size": 12914,
-      "hash": "135b065ed23d"
     },
     {
       "url": "./js/core/xlsx-to-pdf.js",
@@ -339,11 +334,6 @@
       "hash": "6f7412e9c7e8"
     },
     {
-      "url": "./js/pages/scan-pdf.js",
-      "size": 24163,
-      "hash": "7f1a2f821ad5"
-    },
-    {
       "url": "./js/pages/sign.js",
       "size": 38816,
       "hash": "2f0822079039"
@@ -375,8 +365,8 @@
     },
     {
       "url": "./js/utils/i18n.js",
-      "size": 94460,
-      "hash": "59f09f0021ad"
+      "size": 91884,
+      "hash": "1e34da8f1a36"
     },
     {
       "url": "./manifest.json",
@@ -477,11 +467,6 @@
       "url": "./pages/rotate.html",
       "size": 12626,
       "hash": "c7a7eecfcb11"
-    },
-    {
-      "url": "./pages/scan-pdf.html",
-      "size": 15662,
-      "hash": "5e099b24ea9b"
     },
     {
       "url": "./pages/sign.html",

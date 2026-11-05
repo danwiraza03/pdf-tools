@@ -30,7 +30,13 @@ console.log(`✓ assets/og-image.png verified (${(ogImageStat.size / 1024).toFix
 
 // 3. Inspect public standalone HTML files (excluding viewer.html per scope rules)
 const htmlFiles = [path.join(ROOT_DIR, 'index.html')];
-fs.readdirSync(PAGES_DIR).filter(f => f.endsWith('.html') && f !== 'viewer.html').forEach(f => {
+fs.readdirSync(PAGES_DIR)
+  .filter(f => {
+    if (!f.endsWith('.html') || f === 'viewer.html') return false;
+    const c = fs.readFileSync(path.join(PAGES_DIR, f), 'utf8');
+    return !c.includes('content="noindex');
+  })
+  .forEach(f => {
   htmlFiles.push(path.join(PAGES_DIR, f));
 });
 

@@ -49,11 +49,14 @@ function getAppShellFileList() {
     'js/editor/redaction-engine.js'
   ];
 
-  // Standalone pages (strictly excluding viewer.html to keep precache < 5 MB)
+  // Standalone pages (strictly excluding viewer.html and noindex pages to keep precache < 5 MB)
   const pagesDir = path.join(ROOT_DIR, 'pages');
   fs.readdirSync(pagesDir).forEach(f => {
     if (f.endsWith('.html') && f !== 'viewer.html') {
-      files.push(`pages/${f}`);
+      const pageHtml = fs.readFileSync(path.join(pagesDir, f), 'utf8');
+      if (!pageHtml.includes('content="noindex')) {
+        files.push(`pages/${f}`);
+      }
     }
   });
 

@@ -37,10 +37,6 @@ const TOOL_METADATA = {
     title: 'Redact PDF — Permanently Remove Sensitive Data Offline',
     description: 'Permanently redact sensitive text, numbers, and images from PDF documents. Anti-leak rasterization and document sanitization 100% offline in your browser.'
   },
-  'scan-pdf.html': {
-    title: 'Scan to PDF — Capture Documents with Camera Online & Offline',
-    description: 'Capture documents with your camera, straighten perspective, apply clean B&W filters, and save as high-quality PDF 100% offline in your browser.'
-  },
   'remove-pages.html': {
     title: 'Remove Pages from PDF — Delete PDF Pages Online & Offline',
     description: 'Delete unwanted pages from your PDF document visually. Select and remove single or multiple pages securely 100% offline in your browser.'
@@ -70,7 +66,11 @@ function buildSeo() {
 
   const filesToProcess = ['index.html'];
   const pageFiles = fs.readdirSync(PAGES_DIR)
-    .filter(f => f.endsWith('.html') && f !== 'viewer.html')
+    .filter(f => {
+      if (!f.endsWith('.html') || f === 'viewer.html') return false;
+      const content = fs.readFileSync(path.join(PAGES_DIR, f), 'utf8');
+      return !content.includes('content="noindex');
+    })
     .sort();
 
   pageFiles.forEach(f => filesToProcess.push(`pages/${f}`));
