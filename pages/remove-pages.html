@@ -113,6 +113,25 @@
         <div id="actionBar" class="action-bar">
           <button id="removeBtn" class="btn btn-primary btn-lg" style="--tool-color: #E74C3C;" data-i18n="action.remove">Remove Selected Pages</button>
         </div>
+
+        <div class="tool-crosslink-tip" style="margin-top: 28px; padding: 14px 18px; border-radius: var(--radius-md, 12px); background: var(--bg-card); border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; gap: 14px; font-size: 0.85rem; color: var(--text-secondary); flex-wrap: wrap;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 28px; height: 28px; border-radius: 6px; background: color-mix(in srgb, var(--tool-color, #E74C3C), transparent 88%); display: flex; align-items: center; justify-content: center; color: var(--tool-color, #E74C3C); flex-shrink: 0;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+            </div>
+            <span data-i18n="tip.page_organizer_hint">Need to organize, rotate, and combine pages across multiple files at once?</span>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <a href="merge.html" class="btn btn-sm btn-secondary" style="text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7v10M16 7v10M12 3v18"/></svg>
+              <span data-i18n="tip.try_merge">Try Merge PDF</span>
+            </a>
+            <a href="viewer.html" class="btn btn-sm btn-secondary" style="text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              <span data-i18n="action.open_studio">Open in PDF Studio</span>
+            </a>
+          </div>
+        </div>
       </div>
     </div>
   </main>

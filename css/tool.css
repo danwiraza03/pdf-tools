@@ -2375,3 +2375,68 @@
   gap: 12px;
   justify-content: center;
 }
+
+/* ==========================================================================
+   Two-Column Compact Form & Preview Polish (Modern Responsive Workspace)
+   ========================================================================== */
+.two-col-workspace {
+  display: grid;
+  grid-template-columns: minmax(300px, 1fr) minmax(320px, 420px);
+  gap: 24px;
+  align-items: start;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+@media (max-width: 860px) {
+  .two-col-workspace {
+    grid-template-columns: 1fr;
+  }
+}
+
+.workspace-preview-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg, 16px);
+  padding: 24px;
+  box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.04));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 380px;
+}
+
+.workspace-options-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg, 16px);
+  padding: 24px;
+  box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.04));
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.tool-crosslink-tip {
+  margin-top: 28px;
+  padding: 14px 18px;
+  border-radius: var(--radius-md, 12px);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  flex-wrap: wrap;
+}
+
+@media (max-width: 600px) {
+  .tool-crosslink-tip {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

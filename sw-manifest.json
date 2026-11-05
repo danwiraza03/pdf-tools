@@ -1,12 +1,12 @@
 {
-  "version": "pdf-tools-v978c13147e",
+  "version": "pdf-tools-v8b1e5dedb2",
   "vendorVersion": "pdf-tools-vendor-v4461a35c2a",
-  "compositeHash": "978c13147ea636870c41205871903d865edacb47bcaa83425f7a2b336b02cd62",
+  "compositeHash": "8b1e5dedb238def4f8e55b9e52c32bd20a9521174f9872a8fd1c5d3873233fc2",
   "vendorHash": "4461a35c2a4ca00c66db6cf2a6300d46859944c7317337fc75f3ad1326f8fd28",
-  "builtAt": "2026-11-05T05:30:53.603Z",
+  "builtAt": "2026-11-05T05:48:16.211Z",
   "totalFiles": 84,
-  "totalBytes": 3716193,
-  "totalMB": "3.54",
+  "totalBytes": 3731123,
+  "totalMB": "3.56",
   "files": [
     {
       "url": "./css/home.css",
@@ -20,8 +20,8 @@
     },
     {
       "url": "./css/tool.css",
-      "size": 55924,
-      "hash": "c8ef219e6d58"
+      "size": 57506,
+      "hash": "48b02378ca8b"
     },
     {
       "url": "./fonts/inter-latin-400-normal.woff2",
@@ -235,8 +235,8 @@
     },
     {
       "url": "./js/pages/flatten.js",
-      "size": 5845,
-      "hash": "fe1b8e3366ca"
+      "size": 10469,
+      "hash": "debe6cbe689e"
     },
     {
       "url": "./js/pages/form-fill.js",
@@ -325,8 +325,8 @@
     },
     {
       "url": "./js/utils/i18n.js",
-      "size": 91967,
-      "hash": "92d3f1d1f727"
+      "size": 92528,
+      "hash": "75681e696bc4"
     },
     {
       "url": "./manifest.json",
@@ -350,8 +350,8 @@
     },
     {
       "url": "./pages/flatten.html",
-      "size": 11013,
-      "hash": "a65cab928e17"
+      "size": 14918,
+      "hash": "f574b92a1e57"
     },
     {
       "url": "./pages/form-fill.html",
@@ -400,13 +400,13 @@
     },
     {
       "url": "./pages/remove-pages.html",
-      "size": 8630,
-      "hash": "eac0ab5e6ca8"
+      "size": 10759,
+      "hash": "e03217241007"
     },
     {
       "url": "./pages/reorder.html",
-      "size": 7415,
-      "hash": "9e180a8df686"
+      "size": 9544,
+      "hash": "bee229b96fa7"
     },
     {
       "url": "./pages/rotate.html",

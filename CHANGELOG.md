@@ -9,6 +9,11 @@ Format mengacu pada [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) 
 - Fitur Scan to PDF.
 - Fitur konversi Microsoft Office client-side (Word ke PDF, PDF ke Word, Excel ke PDF, dan PDF ke Excel) demi menjaga standar akurasi dan kualitas dokumen murni tanpa server.
 
+### Diubah
+
+- **Tata Letak & Pratinjau Flatten PDF**: Pembaruan antarmuka Flatten PDF menggunakan struktur dua kolom responsif (`.two-col-workspace`) yang dilengkapi kanvas pratinjau langsung tiap halaman berbasis PDF.js, kontrol navigasi dokumen, dan pengaturan metode perataan yang intuitif.
+- **Konsolidasi Panduan Alat Halaman**: Penambahan banner panduan dwibahasa pada halaman Hapus Halaman (`remove-pages.html`) dan Susun Ulang Halaman (`reorder.html`) dengan tautan cepat ke Gabung PDF untuk pengaturan multi-dokumen serta PDF Studio untuk penyuntingan visual lengkap.
+
 ### Diperbaiki
 
 - PDF yang hanya dibatasi izinnya (misalnya dilarang mencetak atau menyalin) kini langsung diproses di semua alat; sebelumnya beberapa alat, seperti Kompres, menampilkan galat.

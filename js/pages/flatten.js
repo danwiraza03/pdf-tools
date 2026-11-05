@@ -8,6 +8,11 @@
 
   document.addEventListener('DOMContentLoaded', function () {
     let selectedFile = null;
+    let currentPdfDoc = null;
+    let currentPdfjsDoc = null;
+    let currentPreviewPage = 1;
+    let totalPages = 1;
+    let activeRenderTask = null;
 
     const uploadState = document.getElementById('uploadState');
     const workspaceState = document.getElementById('workspaceState');
@@ -24,6 +29,58 @@
     const progressBar = document.getElementById('progressBar');
     const btnFlattenPdf = document.getElementById('btnFlattenPdf');
 
+    const flattenPreviewCanvas = document.getElementById('flattenPreviewCanvas');
+    const previewSkeleton = document.getElementById('previewSkeleton');
+    const previewPageBadge = document.getElementById('previewPageBadge');
+    const previewNav = document.getElementById('previewNav');
+    const prevPreviewBtn = document.getElementById('prevPreviewBtn');
+    const nextPreviewBtn = document.getElementById('nextPreviewBtn');
+    const previewPageIndicator = document.getElementById('previewPageIndicator');
+
+    async function renderPreviewPage(pageNum) {
+      if (!currentPdfjsDoc || !flattenPreviewCanvas) return;
+      if (activeRenderTask) {
+        try {
+          activeRenderTask.cancel();
+        } catch (_) {}
+      }
+
+      try {
+        const page = await currentPdfjsDoc.getPage(pageNum);
+        const unscaledViewport = page.getViewport({ scale: 1.0 });
+        const containerWidth = 360;
+        const scale = Math.min(containerWidth / unscaledViewport.width, 1.5);
+        const viewport = page.getViewport({ scale });
+
+        flattenPreviewCanvas.width = viewport.width;
+        flattenPreviewCanvas.height = viewport.height;
+        const ctx = flattenPreviewCanvas.getContext('2d');
+
+        activeRenderTask = page.render({
+          canvasContext: ctx,
+          viewport: viewport,
+          annotationMode: (typeof pdfjsLib !== 'undefined' && pdfjsLib.AnnotationMode) ? pdfjsLib.AnnotationMode.ENABLE_FORMS : 2
+        });
+        await activeRenderTask.promise;
+
+        if (previewSkeleton) previewSkeleton.style.display = 'none';
+        flattenPreviewCanvas.style.display = 'block';
+
+        if (previewPageBadge) {
+          previewPageBadge.textContent = `Page ${pageNum}`;
+        }
+        if (previewPageIndicator) {
+          previewPageIndicator.textContent = `Page ${pageNum} / ${totalPages}`;
+        }
+        if (prevPreviewBtn) prevPreviewBtn.disabled = pageNum <= 1;
+        if (nextPreviewBtn) nextPreviewBtn.disabled = pageNum >= totalPages;
+      } catch (err) {
+        if (err && err.name !== 'RenderingCancelledException') {
+          console.error('Failed to render preview page:', err);
+        }
+      }
+    }
+
     async function handleFile(file) {
       selectedFile = file;
       fileNameLabel.textContent = file.name;
@@ -31,7 +88,36 @@
 
       uploadState.style.display = 'none';
       workspaceState.style.display = 'block';
-      PDFTools.Toast.success('PDF loaded successfully!');
+      PDFTools.Toast.success(PDFTools.i18n ? PDFTools.i18n.t('toast.pdf_loaded') : 'PDF loaded successfully!');
+
+      try {
+        if (previewSkeleton) previewSkeleton.style.display = 'flex';
+        if (flattenPreviewCanvas) flattenPreviewCanvas.style.display = 'none';
+
+        const pdfDoc = await PDFTools.FileUtils.loadPdfDecrypted(file);
+        currentPdfDoc = pdfDoc;
+        totalPages = pdfDoc.getPages().length;
+        fileSizeLabel.textContent = `${PDFTools.FileUtils.formatFileSize(file.size)} • ${totalPages} ${totalPages === 1 ? 'Page' : 'Pages'}`;
+
+        const bytes = await pdfDoc.save();
+        if (typeof pdfjsLib !== 'undefined') {
+          if (!pdfjsLib.GlobalWorkerOptions.workerSrc) {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = '../js/lib/pdf.worker.min.js';
+          }
+          const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(bytes) });
+          currentPdfjsDoc = await loadingTask.promise;
+          currentPreviewPage = 1;
+
+          if (totalPages > 1 && previewNav) {
+            previewNav.style.display = 'flex';
+          } else if (previewNav) {
+            previewNav.style.display = 'none';
+          }
+          await renderPreviewPage(1);
+        }
+      } catch (err) {
+        console.error('Error loading PDF for preview:', err);
+      }
     }
 
     // Setup Dropzone
@@ -65,18 +151,47 @@
 
     changeFileBtn.addEventListener('click', () => {
       selectedFile = null;
+      currentPdfDoc = null;
+      currentPdfjsDoc = null;
+      if (activeRenderTask) {
+        try { activeRenderTask.cancel(); } catch (_) {}
+      }
+      if (flattenPreviewCanvas) {
+        flattenPreviewCanvas.style.display = 'none';
+        const ctx = flattenPreviewCanvas.getContext('2d');
+        if (ctx) ctx.clearRect(0, 0, flattenPreviewCanvas.width, flattenPreviewCanvas.height);
+      }
+      if (previewSkeleton) previewSkeleton.style.display = 'flex';
+      if (previewNav) previewNav.style.display = 'none';
       workspaceState.style.display = 'none';
       uploadState.style.display = 'block';
     });
+
+    if (prevPreviewBtn) {
+      prevPreviewBtn.addEventListener('click', () => {
+        if (currentPreviewPage > 1) {
+          currentPreviewPage--;
+          renderPreviewPage(currentPreviewPage);
+        }
+      });
+    }
+    if (nextPreviewBtn) {
+      nextPreviewBtn.addEventListener('click', () => {
+        if (currentPreviewPage < totalPages) {
+          currentPreviewPage++;
+          renderPreviewPage(currentPreviewPage);
+        }
+      });
+    }
 
     // Flatten mode radio toggle styles
     document.querySelectorAll('input[name="flattenMode"]').forEach(radio => {
       radio.addEventListener('change', () => {
         const isVector = radio.value === 'vector';
-        optVectorCard.style.borderColor = isVector ? 'var(--primary-color)' : 'var(--border-color)';
-        optVectorCard.style.background = isVector ? 'rgba(26,115,232,0.06)' : 'transparent';
-        optRasterCard.style.borderColor = !isVector ? 'var(--primary-color)' : 'var(--border-color)';
-        optRasterCard.style.background = !isVector ? 'rgba(26,115,232,0.06)' : 'transparent';
+        optVectorCard.style.borderColor = isVector ? 'var(--tool-color)' : 'var(--border-color)';
+        optVectorCard.style.background = isVector ? 'color-mix(in srgb, var(--tool-color), transparent 90%)' : 'transparent';
+        optRasterCard.style.borderColor = !isVector ? 'var(--tool-color)' : 'var(--border-color)';
+        optRasterCard.style.background = !isVector ? 'color-mix(in srgb, var(--tool-color), transparent 90%)' : 'transparent';
         rasterQualityGroup.style.display = isVector ? 'none' : 'block';
       });
     });

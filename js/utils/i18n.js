@@ -719,6 +719,10 @@ PDFTools.i18n = (function () {
       'flatten.raster_title': 'Raster Flatten (Full bitmap bake)',
       'flatten.raster_desc': 'Converts every page into high-resolution images, completely preventing any text extraction.',
       'flatten.download_btn': 'Download Flattened PDF',
+      'flatten.preview_title': 'Live Document Preview',
+      'flatten.raster_quality_label': 'Image Raster Quality',
+      'tip.page_organizer_hint': 'Need to organize, rotate, and combine pages across multiple files at once?',
+      'tip.try_merge': 'Try Merge PDF',
 
       // Grayscale Tool
       'grayscale.drop_title': 'Drag & drop your color PDF here',
@@ -1562,6 +1566,10 @@ PDFTools.i18n = (function () {
       'flatten.raster_title': 'Flatten Raster (Konversi total ke gambar)',
       'flatten.raster_desc': 'Mengubah seluruh halaman menjadi gambar beresolusi tinggi, sepenuhnya mencegah ekstraksi teks.',
       'flatten.download_btn': 'Unduh PDF Flattened',
+      'flatten.preview_title': 'Pratinjau Dokumen Langsung',
+      'flatten.raster_quality_label': 'Kualitas Gambar Raster',
+      'tip.page_organizer_hint': 'Ingin menyusun ulang, memutar, dan menggabungkan halaman dari beberapa berkas sekaligus?',
+      'tip.try_merge': 'Coba Gabung PDF',
 
       // Grayscale Tool
       'grayscale.drop_title': 'Tarik & lepas berkas PDF berwarna di sini',
