@@ -232,20 +232,6 @@
       keywords: ['jpg', 'png', 'webp', 'image', 'gambar', 'foto', 'convert', 'konversi', 'jadikan pdf']
     },
     {
-      id: 'scan-pdf',
-      name: 'Scan to PDF',
-      nameKey: 'tool.scan_pdf',
-      file: 'scan-pdf.html',
-      color: '#0284C7',
-      category: 'Convert to PDF',
-      categoryGroup: 'convert_to',
-      badge: 'Camera Scan',
-      desc: 'Potret dokumen dengan kamera, luruskan perspektif, dan simpan sebagai PDF secara offline.',
-      descKey: 'tool.scan_pdf.desc',
-      icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>',
-      keywords: ['scan', 'kamera', 'camera', 'foto', 'photo', 'document', 'capture', 'potret', 'luruskan', 'perspektif']
-    },
-    {
       id: 'docx-to-pdf',
       name: 'Word to PDF',
       nameKey: 'tool.docx_pdf',
@@ -396,7 +382,6 @@
     'pdf-to-xlsx',
     'pdf-to-jpg',
     'jpg-to-pdf',
-    'scan-pdf',
     'docx-to-pdf',
     'xlsx-to-pdf'
   ];
@@ -405,7 +390,7 @@
   const MEGA_COLUMNS = [
     { title: 'ORGANIZE PDF', titleKey: 'mega.organize', toolIds: ['merge', 'split', 'remove-pages', 'reorder', 'rotate', 'crop'] },
     { title: 'OPTIMIZE PDF', titleKey: 'mega.optimize', toolIds: ['compress', 'ocr', 'grayscale', 'flatten', 'protect', 'redact'] },
-    { title: 'CONVERT TO PDF', titleKey: 'mega.convert_to', toolIds: ['jpg-to-pdf', 'scan-pdf', 'docx-to-pdf', 'xlsx-to-pdf'] },
+    { title: 'CONVERT TO PDF', titleKey: 'mega.convert_to', toolIds: ['jpg-to-pdf', 'docx-to-pdf', 'xlsx-to-pdf'] },
     { title: 'CONVERT FROM PDF', titleKey: 'mega.convert_from', toolIds: ['pdf-to-docx', 'pdf-to-xlsx', 'pdf-to-jpg'] },
     { title: 'EDIT PDF', titleKey: 'mega.edit', toolIds: ['studio', 'page-number', 'watermark', 'sign', 'form-fill', 'batch'] }
   ];

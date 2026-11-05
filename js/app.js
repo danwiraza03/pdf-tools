@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', function () {
           
           <!-- Convert PDF Dropdown Menu -->
           <div class="dropdown-nav-wrapper" id="convertDropdownWrapper">
-            <a href="javascript:void(0)" class="nav-link-item ${['pdf-to-docx.html', 'pdf-to-xlsx.html', 'pdf-to-jpg.html', 'jpg-to-pdf.html', 'scan-pdf.html', 'docx-to-pdf.html', 'xlsx-to-pdf.html'].includes(currentFile) ? 'active' : ''}" id="convertPdfTrigger">
+            <a href="javascript:void(0)" class="nav-link-item ${['pdf-to-docx.html', 'pdf-to-xlsx.html', 'pdf-to-jpg.html', 'jpg-to-pdf.html', 'docx-to-pdf.html', 'xlsx-to-pdf.html'].includes(currentFile) ? 'active' : ''}" id="convertPdfTrigger">
               <span data-i18n="nav.convert">CONVERT PDF</span> <span class="nav-chevron" id="convertChevron">▾</span>
             </a>
             <div class="convert-dropdown-menu" id="convertDropdownMenu">
@@ -73,13 +73,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 <div class="item-text">
                   <span class="item-title" data-i18n="tool.jpg_pdf">JPG to PDF</span>
                   <span class="item-desc">Convert images to PDF</span>
-                </div>
-              </a>
-              <a href="${pagesUrl}scan-pdf.html" class="dropdown-item-link">
-                <div class="item-icon icon-scan-pdf" style="background: #0284C7; color: #fff;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
-                <div class="item-text">
-                  <span class="item-title" data-i18n="tool.scan_pdf">Scan to PDF</span>
-                  <span class="item-desc">Camera document scan</span>
                 </div>
               </a>
               <a href="${pagesUrl}docx-to-pdf.html" class="dropdown-item-link">
@@ -171,9 +164,6 @@ document.addEventListener('DOMContentLoaded', function () {
             <div class="mega-col-title" data-i18n="mega.convert_to">CONVERT TO PDF</div>
             <a href="${pagesUrl}jpg-to-pdf.html" class="mega-item-link">
               <span class="mega-item-icon icon-jpg-pdf"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><circle cx="9.5" cy="12.5" r="1.5"/><path d="M16 18l-3-3-4 4"/></svg></span> <span data-i18n="tool.jpg_pdf">JPG to PDF</span>
-            </a>
-            <a href="${pagesUrl}scan-pdf.html" class="mega-item-link">
-              <span class="mega-item-icon icon-scan-pdf" style="background: #0284C7; color: #ffffff;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></span> <span data-i18n="tool.scan_pdf">Scan to PDF</span>
             </a>
             <a href="${pagesUrl}docx-to-pdf.html" class="mega-item-link">
               <span class="mega-item-icon icon-pdf-word" style="background: #2563EB; color: #ffffff;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><polyline points="7.5 13 9 17 11.5 14 14 17 15.5 13"/></svg></span> <span data-i18n="tool.docx_pdf">WORD to PDF</span>
@@ -459,10 +449,6 @@ document.addEventListener('DOMContentLoaded', function () {
         color: '#EAB308',
         svg: `<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#713f12" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><circle cx="9.5" cy="12.5" r="1.5"/><path d="M16 18l-3-3-4 4"/></svg>`
       },
-      'scan-pdf.html': {
-        color: '#0284C7',
-        svg: `<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>`
-      },
       'docx-to-pdf.html': {
         color: '#2563EB',
         svg: `<span style="font-weight:900;font-size:1.8rem;color:#ffffff;line-height:1;user-select:none;">W</span>`
@@ -598,7 +584,6 @@ document.addEventListener('DOMContentLoaded', function () {
             <a href="${pagesUrl}pdf-to-xlsx.html" class="mobile-nav-link" data-i18n="mobile_nav.pdf_xlsx">PDF to Excel</a>
             <a href="${pagesUrl}pdf-to-jpg.html" class="mobile-nav-link" data-i18n="mobile_nav.pdf_jpg">PDF to JPG</a>
             <a href="${pagesUrl}jpg-to-pdf.html" class="mobile-nav-link" data-i18n="mobile_nav.jpg_pdf">JPG to PDF</a>
-            <a href="${pagesUrl}scan-pdf.html" class="mobile-nav-link" data-i18n="mobile_nav.scan_pdf">Scan to PDF</a>
             <a href="${pagesUrl}docx-to-pdf.html" class="mobile-nav-link" data-i18n="mobile_nav.docx_pdf">Word to PDF</a>
             <a href="${pagesUrl}xlsx-to-pdf.html" class="mobile-nav-link" data-i18n="mobile_nav.xlsx_pdf">Excel to PDF</a>
             <div class="mobile-nav-divider"></div>
@@ -682,7 +667,6 @@ document.addEventListener('DOMContentLoaded', function () {
       'pdf-to-xlsx.html': 'Extract tables from PDF and convert to Excel (XLSX) spreadsheets.',
       'pdf-to-jpg.html': 'Convert PDF pages to high-quality JPG images. Free and offline.',
       'jpg-to-pdf.html': 'Convert JPG, PNG, and WEBP images to PDF documents. 100% client-side.',
-      'scan-pdf.html': 'Capture documents with your camera, correct perspective, and save as PDF 100% offline.',
       'docx-to-pdf.html': 'Convert Word (DOCX) documents to PDF format. Runs entirely in your browser.',
       'xlsx-to-pdf.html': 'Convert Excel (XLSX) spreadsheets to formatted PDF documents offline.',
       'ocr.html': 'OCR: Extract text from scanned PDFs and images to create searchable PDF documents.',

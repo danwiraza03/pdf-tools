@@ -31,7 +31,6 @@ const { runMergeCardControlsSuite } = require('./test_merge_card_controls');
 const { runMergeInsertSuite } = require('./test_merge_insert');
 const { runEditPdfNavSuite } = require('./test_edit_pdf_nav');
 const { runRedactPageSuite } = require('./test_redact_page');
-const { runScanPdfSuite } = require('./test_scan_pdf');
 const { runMergeLoadingStateSuite } = require('./test_merge_loading_state');
 const { runProtectedInputsAllPagesSuite } = require('./test_protected_inputs_all_pages');
 
@@ -375,13 +374,6 @@ async function main() {
         name: 'Standalone Redact PDF Security & UI Suite',
         run: async () => {
           await runRedactPageSuite(browser, BASE_URL);
-        }
-      },
-      {
-        id: 'scanpdf',
-        name: 'Standalone Scan to PDF Browser Suite',
-        run: async () => {
-          await runScanPdfSuite(browser, BASE_URL);
         }
       },
       {

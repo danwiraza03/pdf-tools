@@ -92,10 +92,6 @@ function getEligiblePages(rootDir) {
     {
       page: 'pages/jpg-to-pdf.html',
       reason: 'Halaman hanya menerima masukan berkas gambar (JPG, PNG, WebP), bukan dokumen PDF.'
-    },
-    {
-      page: 'pages/scan-pdf.html',
-      reason: 'Halaman hanya menerima masukan tangkapan kamera langsung atau berkas foto galeri gambar, bukan dokumen PDF.'
     }
   ];
 
