@@ -81,15 +81,7 @@ function getEligiblePages(rootDir) {
       page: 'index.html',
       reason: 'Halaman beranda (homepage) hanya merutekan berkas via PDFTools.FileUtils.setPendingFile ke halaman alat masing-masing dan tidak memuat/memproses PDF langsung.'
     },
-    {
-      page: 'pages/docx-to-pdf.html',
-      reason: 'Halaman hanya menerima masukan berkas Microsoft Word (.docx, .doc), bukan dokumen PDF.'
-    },
-    {
-      page: 'pages/xlsx-to-pdf.html',
-      reason: 'Halaman hanya menerima masukan lembar sebar Excel (.xlsx, .xls, .csv), bukan dokumen PDF.'
-    },
-    {
+{
       page: 'pages/jpg-to-pdf.html',
       reason: 'Halaman hanya menerima masukan berkas gambar (JPG, PNG, WebP), bukan dokumen PDF.'
     }

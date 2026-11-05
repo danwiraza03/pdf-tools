@@ -231,63 +231,7 @@
       icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><circle cx="9.5" cy="12.5" r="1.5"/><path d="M16 18l-3-3-4 4"/></svg>',
       keywords: ['jpg', 'png', 'webp', 'image', 'gambar', 'foto', 'convert', 'konversi', 'jadikan pdf']
     },
-    {
-      id: 'docx-to-pdf',
-      name: 'Word to PDF',
-      nameKey: 'tool.docx_pdf',
-      file: 'docx-to-pdf.html',
-      color: '#2563EB',
-      category: 'Convert to PDF',
-      categoryGroup: 'convert_to',
-      badge: 'Converter',
-      desc: 'Ubah berkas dokumen Word (.docx) menjadi berkas PDF berkualitas tinggi secara offline.',
-      descKey: 'tool.docx_pdf.desc',
-      icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><polyline points="7.5 13 9 17 11.5 14 14 17 15.5 13"/></svg>',
-      keywords: ['word', 'docx', 'doc to pdf', 'convert', 'konversi']
-    },
-    {
-      id: 'xlsx-to-pdf',
-      name: 'Excel to PDF',
-      nameKey: 'tool.xlsx_pdf',
-      file: 'xlsx-to-pdf.html',
-      color: '#15803D',
-      category: 'Convert to PDF',
-      categoryGroup: 'convert_to',
-      badge: 'Converter',
-      desc: 'Konversi spreadsheet Excel (.xlsx) menjadi tabel PDF rapi dan siap cetak.',
-      descKey: 'tool.xlsx_pdf.desc',
-      icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8.5" y1="12.5" x2="15.5" y2="17.5"/><line x1="15.5" y1="12.5" x2="8.5" y2="17.5"/></svg>',
-      keywords: ['excel', 'xlsx', 'excel to pdf', 'convert', 'tabel']
-    },
-    {
-      id: 'pdf-to-docx',
-      name: 'PDF to Word',
-      nameKey: 'tool.pdf_docx',
-      file: 'pdf-to-docx.html',
-      color: '#2563EB',
-      category: 'Convert from PDF',
-      categoryGroup: 'convert_from',
-      badge: 'DOCX',
-      desc: 'Konversi dokumen PDF menjadi berkas Microsoft Word (.docx) yang dapat diedit.',
-      descKey: 'tool.pdf_docx.desc',
-      icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>',
-      keywords: ['word', 'docx', 'doc', 'convert', 'konversi', 'edit text']
-    },
-    {
-      id: 'pdf-to-xlsx',
-      name: 'PDF to Excel',
-      nameKey: 'tool.pdf_xlsx',
-      file: 'pdf-to-xlsx.html',
-      color: '#15803D',
-      category: 'Convert from PDF',
-      categoryGroup: 'convert_from',
-      badge: 'XLSX',
-      desc: 'Ekstrak tabel dan data angka dari PDF langsung ke lembar kerja Excel (.xlsx).',
-      descKey: 'tool.pdf_xlsx.desc',
-      icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>',
-      keywords: ['excel', 'xlsx', 'xls', 'spreadsheet', 'tabel', 'angka', 'data']
-    },
-    {
+{
       id: 'pdf-to-jpg',
       name: 'PDF to JPG',
       nameKey: 'tool.pdf_jpg',
@@ -378,20 +322,15 @@
 
   // Convert menu items (subset of TOOLS_DATA)
   const CONVERT_TOOL_IDS = [
-    'pdf-to-docx',
-    'pdf-to-xlsx',
-    'pdf-to-jpg',
+'pdf-to-jpg',
     'jpg-to-pdf',
-    'docx-to-pdf',
-    'xlsx-to-pdf'
-  ];
+];
 
   // Mega menu structure configuration
   const MEGA_COLUMNS = [
     { title: 'ORGANIZE PDF', titleKey: 'mega.organize', toolIds: ['merge', 'split', 'remove-pages', 'reorder', 'rotate', 'crop'] },
     { title: 'OPTIMIZE PDF', titleKey: 'mega.optimize', toolIds: ['compress', 'ocr', 'grayscale', 'flatten', 'protect', 'redact'] },
-    { title: 'CONVERT TO PDF', titleKey: 'mega.convert_to', toolIds: ['jpg-to-pdf', 'docx-to-pdf', 'xlsx-to-pdf'] },
-    { title: 'CONVERT FROM PDF', titleKey: 'mega.convert_from', toolIds: ['pdf-to-docx', 'pdf-to-xlsx', 'pdf-to-jpg'] },
+    { title: 'CONVERT PDF', titleKey: 'mega.convert', toolIds: ['jpg-to-pdf', 'pdf-to-jpg'] },
     { title: 'EDIT PDF', titleKey: 'mega.edit', toolIds: ['studio', 'page-number', 'watermark', 'sign', 'form-fill', 'batch'] }
   ];
 
@@ -568,13 +507,7 @@
           { id: 'quickBtnStudio', file: 'viewer.html', nameKey: 'tool.studio', name: 'Edit PDF', color: '#9333EA', icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>' },
           { id: 'quickBtnMerge', file: 'merge.html', nameKey: 'tool.merge', name: 'Merge PDF', color: '#E11D48', icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 9l4-4 4 4M12 5v14M5 19h14"/></svg>' },
           { id: 'quickBtnCompress', file: 'compress.html', nameKey: 'tool.compress', name: 'Compress PDF', color: '#16A34A', icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14h6m0 0v6m0-6L3 21M20 10h-6m0 0V4m0 6l7-7"/></svg>' },
-          { id: 'quickBtnSplit', file: 'split.html', nameKey: 'tool.split', name: 'Split PDF', color: '#EA580C', icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4L8.12 15.88M14.47 14.48L20 20M8.12 8.12L12 12"/></svg>' },
-          { id: 'quickBtnPdfWord', file: 'pdf-to-docx.html', nameKey: 'tool.pdf_docx', name: 'PDF to Word', color: '#2563EB', icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>' },
-          { id: 'quickBtnPdfExcel', file: 'pdf-to-xlsx.html', nameKey: 'tool.pdf_xlsx', name: 'PDF to Excel', color: '#15803D', icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>' },
-          { id: 'quickBtnSign', file: 'sign.html', nameKey: 'tool.sign', name: 'Sign PDF', color: '#1E3A8A', icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 19.5c0 .8-.7 1.5-1.5 1.5H5.5c-.8 0-1.5-.7-1.5-1.5 0-.8.7-1.5 1.5-1.5h13c.8 0 1.5.7 1.5 1.5zM18.4 4.6a2 2 0 0 1 2.8 2.8L8.8 19.8l-4.2.9.9-4.2L18.4 4.6z"/></svg>' },
-          { id: 'quickBtnWordPdf', file: 'docx-to-pdf.html', nameKey: 'tool.docx_pdf', name: 'Word to PDF', color: '#2563EB', icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><polyline points="7.5 13 9 17 11.5 14 14 17 15.5 13"/></svg>' },
-          { id: 'quickBtnExcelPdf', file: 'xlsx-to-pdf.html', nameKey: 'tool.xlsx_pdf', name: 'Excel to PDF', color: '#15803D', icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8.5" y1="12.5" x2="15.5" y2="17.5"/><line x1="15.5" y1="12.5" x2="8.5" y2="17.5"/></svg>' },
-          { id: 'quickBtnBatch', file: 'batch.html', nameKey: 'tool.batch', name: 'Batch Process', color: '#0D9488', icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>' }
+          { id: 'quickBtnSplit', file: 'split.html', nameKey: 'tool.split', name: 'Split PDF', color: '#EA580C', icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4L8.12 15.88M14.47 14.48L20 20M8.12 8.12L12 12"/></svg>' },{ id: 'quickBtnSign', file: 'sign.html', nameKey: 'tool.sign', name: 'Sign PDF', color: '#1E3A8A', icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 19.5c0 .8-.7 1.5-1.5 1.5H5.5c-.8 0-1.5-.7-1.5-1.5 0-.8.7-1.5 1.5-1.5h13c.8 0 1.5.7 1.5 1.5zM18.4 4.6a2 2 0 0 1 2.8 2.8L8.8 19.8l-4.2.9.9-4.2L18.4 4.6z"/></svg>' },{ id: 'quickBtnBatch', file: 'batch.html', nameKey: 'tool.batch', name: 'Batch Process', color: '#0D9488', icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>' }
         ];
 
         const buttonsHtml = QUICK_TOOLS.map(t => `

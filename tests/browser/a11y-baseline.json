@@ -9,7 +9,6 @@
     "pages/batch.html": [],
     "pages/compress.html": [],
     "pages/crop.html": [],
-    "pages/docx-to-pdf.html": [],
     "pages/flatten.html": [],
     "pages/form-fill.html": [],
     "pages/grayscale.html": [],
@@ -17,17 +16,13 @@
     "pages/merge.html": [],
     "pages/ocr.html": [],
     "pages/page-number.html": [],
-    "pages/pdf-to-docx.html": [],
     "pages/pdf-to-jpg.html": [],
-    "pages/pdf-to-xlsx.html": [],
     "pages/protect.html": [],
     "pages/remove-pages.html": [],
     "pages/reorder.html": [],
     "pages/rotate.html": [],
     "pages/sign.html": [],
     "pages/split.html": [],
-    "pages/watermark.html": [],
-    "pages/xlsx-to-pdf.html": []
+    "pages/watermark.html": []
   }
 }
-

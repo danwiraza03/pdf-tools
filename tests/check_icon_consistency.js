@@ -17,7 +17,7 @@ const cmdPalette = fs.readFileSync(path.join(ROOT, 'js/components/command-palett
 const tools = [
   'merge', 'split', 'remove-pages', 'reorder', 'rotate', 'crop',
   'compress', 'ocr', 'grayscale', 'flatten',
-  'pdf-to-docx', 'docx-to-pdf', 'pdf-to-xlsx', 'xlsx-to-pdf', 'pdf-to-jpg', 'jpg-to-pdf',
+  'pdf-to-jpg', 'jpg-to-pdf',
   'viewer', 'page-number', 'watermark', 'form-fill', 'sign', 'protect', 'unlock', 'redact'
 ];
 

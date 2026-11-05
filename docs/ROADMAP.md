@@ -124,6 +124,7 @@ Berdasarkan tinjauan arsitektur dan prinsip privasi client-side, pemilik proyek 
    - ❌ **Integrasi Cloud Eksternal (Google Drive, Dropbox, OneDrive)**: Ditolak karena melanggar garansi zero-external-URL dan memerlukan server backend untuk alur OAuth.
    - ❌ **HTML to PDF dari URL Web**: Ditolak karena mengambil konten web luar melanggar kebijakan sandbox offline dan batasan CORS.
    - ❌ **PowerPoint to PDF**: Ditolak karena merender dokumen presentasi kompleks dengan akurat di browser tanpa engine Office asli tidak layak secara teknis.
+   - ❌ **Konversi Microsoft Office (Word & Excel) Client-Side**: Dihapus dan ditolak karena manipulasi format Office berbasis DOMParser/XML mentah di sisi peramban tidak dapat mempertahankan tata letak visual, gambar, tabel kompleks, dan fon secara akurat tanpa server native office engine.
    - ❌ **Konversi PDF/A Tanpa Validator**: Ditolak karena kepatuhan standar arsip PDF/A memerlukan validator spesifikasi ketat; mengklaim format tanpa pembuktian melanggar integritas klaim.
 
 ---

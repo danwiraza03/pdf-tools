@@ -174,15 +174,15 @@ async function runI18nBrowserSuite(existingBrowser, existingBaseUrl) {
         return Array.from(document.querySelectorAll('.mobile-nav-section')).map(s => s.textContent.trim());
       });
       const enPdfToWord = await page.evaluate(() => {
-        const link = document.querySelector('a.mobile-nav-link[href*="pdf-to-docx"]');
+        const link = document.querySelector('a.mobile-nav-link[href*="pdf-to-jpg"]');
         return link ? link.textContent.trim() : null;
       });
 
       console.log('  [EN Sections]:', enSections);
-      console.log('  [EN PDF to Word]:', enPdfToWord);
+      console.log('  [EN PDF to JPG]:', enPdfToWord);
 
       assert.deepStrictEqual(enSections, ['Convert', 'Edit & Organize', 'Security & Tools']);
-      assert.strictEqual(enPdfToWord, 'PDF to Word');
+      assert.strictEqual(enPdfToWord, 'PDF to JPG');
 
       // Switch to Indonesian and verify drawer title is still "PDF Tools (DN.)"
       await page.evaluate(() => window.PDFTools.i18n.setLang('id'));
@@ -195,15 +195,15 @@ async function runI18nBrowserSuite(existingBrowser, existingBaseUrl) {
         return Array.from(document.querySelectorAll('.mobile-nav-section')).map(s => s.textContent.trim());
       });
       const idPdfToWord = await page.evaluate(() => {
-        const link = document.querySelector('a.mobile-nav-link[href*="pdf-to-docx"]');
+        const link = document.querySelector('a.mobile-nav-link[href*="pdf-to-jpg"]');
         return link ? link.textContent.trim() : null;
       });
 
       console.log('  [ID Sections]:', idSections);
-      console.log('  [ID PDF to Word]:', idPdfToWord);
+      console.log('  [ID PDF to JPG]:', idPdfToWord);
 
       assert.deepStrictEqual(idSections, ['Konversi', 'Edit & Atur', 'Keamanan & Alat'], `Expected Indonesian sections, got: ${JSON.stringify(idSections)}`);
-      assert.strictEqual(idPdfToWord, 'PDF ke Word', `Expected 'PDF ke Word', got '${idPdfToWord}'`);
+      assert.strictEqual(idPdfToWord, 'PDF ke JPG', `Expected 'PDF ke JPG', got '${idPdfToWord}'`);
 
       await context.close();
       console.log('  ✓ Mobile nav drawer links & section titles properly translated in Indonesian and English.');

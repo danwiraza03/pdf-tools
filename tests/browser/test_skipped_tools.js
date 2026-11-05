@@ -28,92 +28,16 @@ async function extractTextFromPdfBytes(bytes) {
  */
 async function runSkippedToolsTests(browser, baseUrl) {
   console.log('\n====================================================');
-  console.log('>>> [BROWSER TEST] 6 Previously Skipped Tools Audit');
+  console.log('>>> [BROWSER TEST] 4 Modern Core Tools Audit');
   console.log('====================================================');
 
   const page = await browser.newPage();
 
   try {
     // -----------------------------------------------------------------------
-    // 1. Word to PDF (DOCX)
-    // -----------------------------------------------------------------------
-    console.log('\n--- [1/6] Word to PDF (DOCX to PDF) ---');
-    const docxText = 'Playwright Word to PDF Test Content';
-    const docxBytes = await createSampleDocx(docxText);
-
-    await page.goto(`${baseUrl}/pages/docx-to-pdf.html`, { waitUntil: 'domcontentloaded' });
-    await page.waitForFunction(() => !!(window.PDFTools && window.PDFTools.DocxToPdf));
-
-    const docxPdfBase64 = await page.evaluate(async (base64) => {
-      const bin = atob(base64);
-      const bytes = new Uint8Array(bin.length);
-      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-      const file = new File([bytes], 'sample.docx', { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
-
-      const pdfBlob = await window.PDFTools.DocxToPdf.convertToPdf(file, {
-        pageSize: 'A4',
-        orientation: 'portrait',
-        margins: 36
-      }, () => {});
-
-      const arrBuf = await pdfBlob.arrayBuffer();
-      const u8 = new Uint8Array(arrBuf);
-      let binOut = '';
-      const chunk = 8192;
-      for (let i = 0; i < u8.length; i += chunk) {
-        binOut += String.fromCharCode.apply(null, u8.subarray(i, i + chunk));
-      }
-      return btoa(binOut);
-    }, Buffer.from(docxBytes).toString('base64'));
-
-    const docxPdfBytes = Buffer.from(docxPdfBase64, 'base64');
-    const docxVerification = await extractTextFromPdfBytes(docxPdfBytes);
-    assert(docxVerification.numPages >= 1, 'Word to PDF must produce at least 1 page');
-    assert(docxVerification.text.includes(docxText), `Converted PDF must contain: "${docxText}"`);
-    console.log(`  ✓ Word to PDF berhasil dikonversi via DOMParser browser. Teks terverifikasi: "${docxText}"`);
-
-    // -----------------------------------------------------------------------
-    // 2. Excel to PDF (XLSX)
-    // -----------------------------------------------------------------------
-    console.log('\n--- [2/6] Excel to PDF (XLSX to PDF) ---');
-    const xlsxText = 'Playwright Excel Test Value';
-    const xlsxBytes = await createSampleXlsx(xlsxText);
-
-    await page.goto(`${baseUrl}/pages/xlsx-to-pdf.html`, { waitUntil: 'domcontentloaded' });
-    await page.waitForFunction(() => !!(window.PDFTools && window.PDFTools.XlsxToPdf));
-
-    const xlsxPdfBase64 = await page.evaluate(async (base64) => {
-      const bin = atob(base64);
-      const bytes = new Uint8Array(bin.length);
-      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-      const file = new File([bytes], 'sample.xlsx', { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-
-      const pdfBlob = await window.PDFTools.XlsxToPdf.convertToPdf(file, {
-        pageSize: 'A4',
-        orientation: 'landscape',
-        fitToPage: true
-      }, () => {});
-
-      const arrBuf = await pdfBlob.arrayBuffer();
-      const u8 = new Uint8Array(arrBuf);
-      let binOut = '';
-      const chunk = 8192;
-      for (let i = 0; i < u8.length; i += chunk) {
-        binOut += String.fromCharCode.apply(null, u8.subarray(i, i + chunk));
-      }
-      return btoa(binOut);
-    }, Buffer.from(xlsxBytes).toString('base64'));
-
-    const xlsxPdfBytes = Buffer.from(xlsxPdfBase64, 'base64');
-    const xlsxVerification = await extractTextFromPdfBytes(xlsxPdfBytes);
-    assert(xlsxVerification.numPages >= 1, 'Excel to PDF must produce at least 1 page');
-    assert(xlsxVerification.text.includes(xlsxText), `Converted PDF must contain: "${xlsxText}"`);
-    console.log(`  ✓ Excel to PDF berhasil dikonversi via DOMParser browser. Nilai sel terverifikasi: "${xlsxText}"`);
-
-    // -----------------------------------------------------------------------
     // 3. PDF to JPG (Decode image, verify dimensions, non-white text area)
     // -----------------------------------------------------------------------
-    console.log('\n--- [3/6] PDF to JPG ---');
+    console.log('\n--- [1/4] PDF to JPG ---');
     const pageW = 600;
     const pageH = 400;
     const pdfToImgBytes = await createTestPdf({
@@ -197,7 +121,7 @@ async function runSkippedToolsTests(browser, baseUrl) {
     // -----------------------------------------------------------------------
     // 2. PDF to Grayscale (Pre-check input is color, verify result pixels R=G=B)
     // -----------------------------------------------------------------------
-    console.log('\n--- [4/6] PDF to Grayscale ---');
+    console.log('\n--- [2/4] PDF to Grayscale ---');
     const colorPdfBytes = await createColorPdf({ width: 600, height: 400 });
 
     await page.goto(`${baseUrl}/pages/grayscale.html`, { waitUntil: 'domcontentloaded' });
@@ -292,7 +216,7 @@ async function runSkippedToolsTests(browser, baseUrl) {
     // -----------------------------------------------------------------------
     // 5. OCR PDF (Tesseract WASM)
     // -----------------------------------------------------------------------
-    console.log('\n--- [5/6] OCR PDF (Tesseract WASM) ---');
+    console.log('\n--- [3/4] OCR PDF (Tesseract WASM) ---');
     await page.goto(`${baseUrl}/pages/ocr.html`, { waitUntil: 'domcontentloaded' });
     await page.waitForFunction(() => !!(window.PDFTools && window.PDFTools.OCR));
 
@@ -329,7 +253,7 @@ async function runSkippedToolsTests(browser, baseUrl) {
     // -----------------------------------------------------------------------
     // 6. Sign PDF (Pre-check input white, verify new image object, verify pixels not white)
     // -----------------------------------------------------------------------
-    console.log('\n--- [6/6] Sign PDF ---');
+    console.log('\n--- [4/4] Sign PDF ---');
     const signPdfBytes = await createTestPdf({
       text: 'DOCUMENT HEADER AT TOP',
       width: 600,

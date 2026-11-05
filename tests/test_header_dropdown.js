@@ -462,11 +462,11 @@ assert(
 );
 
 // ---------------------------------------------------------
-// 4. Active Route Preservation Test (e.g. pages/pdf-to-docx.html)
+// 4. Active Route Preservation Test (e.g. pages/pdf-to-jpg.html)
 // ---------------------------------------------------------
 console.log('\n--- 4. Testing Active Route Indicator Preservation ---');
 
-const docxDOM = setupMockDOM('http://127.0.0.1/pages/pdf-to-docx.html');
+const docxDOM = setupMockDOM('http://127.0.0.1/pages/pdf-to-jpg.html');
 const docxContext = vm.createContext({
   window: docxDOM.mockWindow,
   document: docxDOM.mockDoc,
@@ -483,7 +483,7 @@ const docxConvertMenu = docxDOM.mockDoc.getElementById('convertDropdownMenu');
 
 assert(
   docxConvertTrigger.classList.contains('active'),
-  'convertPdfTrigger starts with .active route indicator on pdf-to-docx.html'
+  'convertPdfTrigger starts with .active route indicator on pdf-to-jpg.html'
 );
 
 // Open menu

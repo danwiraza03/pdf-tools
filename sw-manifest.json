@@ -1,12 +1,12 @@
 {
-  "version": "pdf-tools-v358f220389",
+  "version": "pdf-tools-v978c13147e",
   "vendorVersion": "pdf-tools-vendor-v4461a35c2a",
-  "compositeHash": "358f220389254911fb19ace7d7f35aa0dacd26652ea4da8df63b47ab49e62c6c",
+  "compositeHash": "978c13147ea636870c41205871903d865edacb47bcaa83425f7a2b336b02cd62",
   "vendorHash": "4461a35c2a4ca00c66db6cf2a6300d46859944c7317337fc75f3ad1326f8fd28",
-  "builtAt": "2026-11-05T04:58:52.104Z",
-  "totalFiles": 96,
-  "totalBytes": 3860810,
-  "totalMB": "3.68",
+  "builtAt": "2026-11-05T05:30:53.603Z",
+  "totalFiles": 84,
+  "totalBytes": 3716193,
+  "totalMB": "3.54",
   "files": [
     {
       "url": "./css/home.css",
@@ -65,13 +65,13 @@
     },
     {
       "url": "./index.html",
-      "size": 47959,
-      "hash": "362b5457c450"
+      "size": 39057,
+      "hash": "68748242f980"
     },
     {
       "url": "./js/app.js",
-      "size": 64123,
-      "hash": "4a8d95246de9"
+      "size": 55438,
+      "hash": "640a8f0190fb"
     },
     {
       "url": "./js/components/dropzone.js",
@@ -80,8 +80,8 @@
     },
     {
       "url": "./js/components/header.js",
-      "size": 49324,
-      "hash": "b2ebd0aaca3c"
+      "size": 43873,
+      "hash": "f6e4417a39ca"
     },
     {
       "url": "./js/components/modal.js",
@@ -97,11 +97,6 @@
       "url": "./js/components/toast.js",
       "size": 3443,
       "hash": "c8688ece343a"
-    },
-    {
-      "url": "./js/core/docx-to-pdf.js",
-      "size": 11806,
-      "hash": "6542484e0abd"
     },
     {
       "url": "./js/core/jpg-to-pdf.js",
@@ -174,29 +169,14 @@
       "hash": "fd9e0df30add"
     },
     {
-      "url": "./js/core/pdf-to-docx.js",
-      "size": 10878,
-      "hash": "390f079e90f0"
-    },
-    {
       "url": "./js/core/pdf-to-jpg.js",
       "size": 3665,
       "hash": "5f75c5a323b3"
     },
     {
-      "url": "./js/core/pdf-to-xlsx.js",
-      "size": 13362,
-      "hash": "f098b9d07592"
-    },
-    {
       "url": "./js/core/pdf-watermark.js",
       "size": 21590,
       "hash": "817f1fd2ff66"
-    },
-    {
-      "url": "./js/core/xlsx-to-pdf.js",
-      "size": 11163,
-      "hash": "9bae4d6b3f80"
     },
     {
       "url": "./js/editor/pdf-coordinate-engine.js",
@@ -254,11 +234,6 @@
       "hash": "fdf612858cda"
     },
     {
-      "url": "./js/pages/docx-to-pdf.js",
-      "size": 5701,
-      "hash": "69f0a90cb69f"
-    },
-    {
       "url": "./js/pages/flatten.js",
       "size": 5845,
       "hash": "fe1b8e3366ca"
@@ -294,19 +269,9 @@
       "hash": "61b2dbe4938c"
     },
     {
-      "url": "./js/pages/pdf-to-docx.js",
-      "size": 6369,
-      "hash": "e38a9fe48dac"
-    },
-    {
       "url": "./js/pages/pdf-to-jpg.js",
       "size": 6947,
       "hash": "f8dcd9f72ed3"
-    },
-    {
-      "url": "./js/pages/pdf-to-xlsx.js",
-      "size": 6557,
-      "hash": "5a2a34d63984"
     },
     {
       "url": "./js/pages/protect.js",
@@ -349,11 +314,6 @@
       "hash": "064a58236cfa"
     },
     {
-      "url": "./js/pages/xlsx-to-pdf.js",
-      "size": 5710,
-      "hash": "a9bc95bd57cb"
-    },
-    {
       "url": "./js/utils/download.js",
       "size": 1238,
       "hash": "f9c578cc9176"
@@ -365,8 +325,8 @@
     },
     {
       "url": "./js/utils/i18n.js",
-      "size": 91884,
-      "hash": "1e34da8f1a36"
+      "size": 91967,
+      "hash": "92d3f1d1f727"
     },
     {
       "url": "./manifest.json",
@@ -387,11 +347,6 @@
       "url": "./pages/crop.html",
       "size": 14680,
       "hash": "85f4f1a4ed91"
-    },
-    {
-      "url": "./pages/docx-to-pdf.html",
-      "size": 11551,
-      "hash": "e38d1fb3851c"
     },
     {
       "url": "./pages/flatten.html",
@@ -429,19 +384,9 @@
       "hash": "ad7d59446b5e"
     },
     {
-      "url": "./pages/pdf-to-docx.html",
-      "size": 12767,
-      "hash": "727fa4f75e78"
-    },
-    {
       "url": "./pages/pdf-to-jpg.html",
       "size": 10679,
       "hash": "ec059471934a"
-    },
-    {
-      "url": "./pages/pdf-to-xlsx.html",
-      "size": 14117,
-      "hash": "986a3fc959d9"
     },
     {
       "url": "./pages/protect.html",
@@ -482,11 +427,6 @@
       "url": "./pages/watermark.html",
       "size": 43481,
       "hash": "5d275905b2f3"
-    },
-    {
-      "url": "./pages/xlsx-to-pdf.html",
-      "size": 11681,
-      "hash": "c4deef3e8628"
     }
   ]
 }

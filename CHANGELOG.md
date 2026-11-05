@@ -7,6 +7,7 @@ Format mengacu pada [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) 
 ### Dihapus
 
 - Fitur Scan to PDF.
+- Fitur konversi Microsoft Office client-side (Word ke PDF, PDF ke Word, Excel ke PDF, dan PDF ke Excel) demi menjaga standar akurasi dan kualitas dokumen murni tanpa server.
 
 ### Diperbaiki
 

@@ -129,8 +129,6 @@ eval(fs.readFileSync(path.join(ROOT_DIR, 'js/core/pdf-compress.js'), 'utf8'));
 eval(fs.readFileSync(path.join(ROOT_DIR, 'js/core/pdf-crop.js'), 'utf8'));
 eval(fs.readFileSync(path.join(ROOT_DIR, 'js/core/pdf-flatten.js'), 'utf8'));
 eval(fs.readFileSync(path.join(ROOT_DIR, 'js/core/jpg-to-pdf.js'), 'utf8'));
-eval(fs.readFileSync(path.join(ROOT_DIR, 'js/core/pdf-to-docx.js'), 'utf8'));
-eval(fs.readFileSync(path.join(ROOT_DIR, 'js/core/pdf-to-xlsx.js'), 'utf8'));
 eval(fs.readFileSync(path.join(ROOT_DIR, 'js/editor/pdf-coordinate-engine.js'), 'utf8'));
 eval(fs.readFileSync(path.join(ROOT_DIR, 'js/editor/redaction-engine.js'), 'utf8'));
 eval(fs.readFileSync(path.join(ROOT_DIR, 'js/core/pdf-studio.js'), 'utf8'));
@@ -516,84 +514,6 @@ async function runAudit() {
   } catch (err) {
     results.push({ id: 12, name: 'JPG to PDF', status: 'FAILED', details: err.message });
   }
-
-  // -------------------------------------------------------------------------
-  // 13. PDF to Word (DOCX): verifies text inside generated word/document.xml
-  // -------------------------------------------------------------------------
-  try {
-    const samplePdf = await createCustomPdf(['Heading Title Word', 'Paragraph content for docx export']);
-    const file = makeFile('to_word.pdf', samplePdf);
-
-    const docxBlob = await PDFTools.PdfToDocx.convertToDocx(file);
-    const arrBuf = await docxBlob.arrayBuffer();
-    const zip = await JSZip.loadAsync(arrBuf);
-
-    const docXml = await zip.file('word/document.xml').async('text');
-    assert(docXml.includes('Heading Title Word'), 'word/document.xml must contain "Heading Title Word"');
-    assert(docXml.includes('Paragraph content for docx export'), 'word/document.xml must contain paragraph content');
-
-    results.push({
-      id: 13,
-      name: 'PDF to Word (DOCX)',
-      status: 'PASSED',
-      details: 'Converted to DOCX; verified text inside word/document.xml'
-    });
-  } catch (err) {
-    results.push({ id: 13, name: 'PDF to Word (DOCX)', status: 'FAILED', details: err.message });
-  }
-
-  // -------------------------------------------------------------------------
-  // 14. Word to PDF (DOCX to PDF): Requires browser DOMParser
-  // -------------------------------------------------------------------------
-  results.push({
-    id: 14,
-    name: 'Word to PDF (DOCX)',
-    status: 'SKIPPED (butuh browser)',
-    details: 'Requires DOMParser and browser XML DOM to parse Word XML structure'
-  });
-
-  // -------------------------------------------------------------------------
-  // 15. PDF to Excel (XLSX): verifies cell values in xl/worksheets/sheet1.xml
-  // -------------------------------------------------------------------------
-  try {
-    const doc = await PDFDocument.create();
-    const page = doc.addPage([600, 400]);
-    page.drawText('Product', { x: 50, y: 350, size: 14 });
-    page.drawText('Price', { x: 200, y: 350, size: 14 });
-    page.drawText('Laptop', { x: 50, y: 310, size: 14 });
-    page.drawText('1200.50', { x: 200, y: 310, size: 14 });
-
-    const samplePdf = await doc.save();
-    const file = makeFile('to_excel.pdf', samplePdf);
-
-    const xlsxBlob = await PDFTools.PdfToXlsx.convertToXlsx(file);
-    const arrBuf = await xlsxBlob.arrayBuffer();
-    const zip = await JSZip.loadAsync(arrBuf);
-
-    const sheetXml = await zip.file('xl/worksheets/sheet1.xml').async('text');
-    assert(sheetXml.includes('Product'), 'sheet1.xml must contain "Product"');
-    assert(sheetXml.includes('Laptop'), 'sheet1.xml must contain "Laptop"');
-    assert(sheetXml.includes('1200.50'), 'sheet1.xml must contain "1200.50"');
-
-    results.push({
-      id: 15,
-      name: 'PDF to Excel (XLSX)',
-      status: 'PASSED',
-      details: 'Converted to XLSX; verified cell values in xl/worksheets/sheet1.xml'
-    });
-  } catch (err) {
-    results.push({ id: 15, name: 'PDF to Excel (XLSX)', status: 'FAILED', details: err.message });
-  }
-
-  // -------------------------------------------------------------------------
-  // 16. Excel to PDF (XLSX to PDF): Requires browser DOMParser
-  // -------------------------------------------------------------------------
-  results.push({
-    id: 16,
-    name: 'Excel to PDF (XLSX)',
-    status: 'SKIPPED (butuh browser)',
-    details: 'Requires DOMParser and browser XML DOM to parse spreadsheet XML'
-  });
 
   // -------------------------------------------------------------------------
   // 17. PDF to JPG: Requires browser HTML5 Canvas

@@ -21,11 +21,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://danwiraza03.github.io/pdf-tools/pages/docx-to-pdf.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://danwiraza03.github.io/pdf-tools/pages/flatten.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -61,17 +56,7 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://danwiraza03.github.io/pdf-tools/pages/pdf-to-docx.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://danwiraza03.github.io/pdf-tools/pages/pdf-to-jpg.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://danwiraza03.github.io/pdf-tools/pages/pdf-to-xlsx.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -112,11 +97,6 @@
   </url>
   <url>
     <loc>https://danwiraza03.github.io/pdf-tools/pages/watermark.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://danwiraza03.github.io/pdf-tools/pages/xlsx-to-pdf.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>

@@ -198,51 +198,7 @@
       desc: 'Proteksi dokumen PDF dengan kata sandi enkripsi kuat atau buka kunci berkas PDF Anda.',
       keywords: ['protect', 'lock', 'unlock', 'password', 'sandi', 'kunci', 'enkripsi', 'decrypt', 'aman']
     },
-    {
-      id: 'pdf-to-docx',
-      name: 'PDF to Word',
-      category: 'Convert',
-      color: '#2563EB',
-      icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>',
-      url: prefix + 'pdf-to-docx.html',
-      badge: 'DOCX',
-      desc: 'Konversi dokumen PDF menjadi berkas Microsoft Word (.docx) yang dapat diedit.',
-      keywords: ['word', 'docx', 'doc', 'convert', 'konversi', 'edit text']
-    },
-    {
-      id: 'docx-to-pdf',
-      name: 'Word to PDF',
-      category: 'Convert',
-      color: '#2563EB',
-      icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><polyline points="7.5 13 9 17 11.5 14 14 17 15.5 13"/></svg>',
-      url: prefix + 'docx-to-pdf.html',
-      badge: 'Converter',
-      desc: 'Ubah berkas dokumen Word (.docx) menjadi berkas PDF berkualitas tinggi secara offline.',
-      keywords: ['word', 'docx', 'doc to pdf', 'convert', 'konversi']
-    },
-    {
-      id: 'pdf-to-xlsx',
-      name: 'PDF to Excel',
-      category: 'Convert',
-      color: '#15803D',
-      icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>',
-      url: prefix + 'pdf-to-xlsx.html',
-      badge: 'XLSX',
-      desc: 'Ekstrak tabel dan data angka dari PDF langsung ke lembar kerja Excel (.xlsx).',
-      keywords: ['excel', 'xlsx', 'xls', 'spreadsheet', 'tabel', 'angka', 'data']
-    },
-    {
-      id: 'xlsx-to-pdf',
-      name: 'Excel to PDF',
-      category: 'Convert',
-      color: '#15803D',
-      icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8.5" y1="12.5" x2="15.5" y2="17.5"/><line x1="15.5" y1="12.5" x2="8.5" y2="17.5"/></svg>',
-      url: prefix + 'xlsx-to-pdf.html',
-      badge: 'Converter',
-      desc: 'Konversi spreadsheet Excel (.xlsx) menjadi tabel PDF rapi dan siap cetak.',
-      keywords: ['excel', 'xlsx', 'excel to pdf', 'convert', 'tabel']
-    },
-    {
+{
       id: 'sign',
       name: 'Sign PDF',
       category: 'Security',

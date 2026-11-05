@@ -23,12 +23,6 @@
     "baselineRequests": 22,
     "maxRequests": 27
   },
-  "pages/docx-to-pdf.html": {
-    "baselineBytes": 1191140,
-    "maxBytes": 1429368,
-    "baselineRequests": 17,
-    "maxRequests": 21
-  },
   "pages/flatten.html": {
     "baselineBytes": 2532671,
     "maxBytes": 3039206,
@@ -71,23 +65,11 @@
     "baselineRequests": 22,
     "maxRequests": 27
   },
-  "pages/pdf-to-docx.html": {
-    "baselineBytes": 895298,
-    "maxBytes": 1074358,
-    "baselineRequests": 17,
-    "maxRequests": 21
-  },
   "pages/pdf-to-jpg.html": {
     "baselineBytes": 1995730,
     "maxBytes": 2394876,
     "baselineRequests": 23,
     "maxRequests": 28
-  },
-  "pages/pdf-to-xlsx.html": {
-    "baselineBytes": 899325,
-    "maxBytes": 1079190,
-    "baselineRequests": 17,
-    "maxRequests": 21
   },
   "pages/protect.html": {
     "baselineBytes": 1232977,
@@ -136,11 +118,5 @@
     "maxBytes": 3298497,
     "baselineRequests": 27,
     "maxRequests": 33
-  },
-  "pages/xlsx-to-pdf.html": {
-    "baselineBytes": 1190635,
-    "maxBytes": 1428762,
-    "baselineRequests": 17,
-    "maxRequests": 21
   }
 }
