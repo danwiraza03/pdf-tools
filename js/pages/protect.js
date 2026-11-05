@@ -12,6 +12,10 @@
     let queuedFiles = [];
     let isBatchMode = false;
     let lastProcessedBytes = null;
+    let currentPdfjsDoc = null;
+    let currentPreviewPage = 1;
+    let totalPages = 1;
+    let activeRenderTask = null;
 
     const tabProtect = document.getElementById('tabProtect');
     const tabUnlock = document.getElementById('tabUnlock');
@@ -20,6 +24,15 @@
     const workspaceState = document.getElementById('workspaceState');
     const fileNameLabel = document.getElementById('fileNameLabel');
     const fileSizeLabel = document.getElementById('fileSizeLabel');
+
+    const protectPreviewCanvas = document.getElementById('protectPreviewCanvas');
+    const previewSkeleton = document.getElementById('previewSkeleton');
+    const lockedPreviewPlaceholder = document.getElementById('lockedPreviewPlaceholder');
+    const previewPageBadge = document.getElementById('previewPageBadge');
+    const previewNav = document.getElementById('previewNav');
+    const prevPreviewBtn = document.getElementById('prevPreviewBtn');
+    const nextPreviewBtn = document.getElementById('nextPreviewBtn');
+    const previewPageIndicator = document.getElementById('previewPageIndicator');
 
     const protectControls = document.getElementById('protectControls');
     const unlockControls = document.getElementById('unlockControls');
@@ -36,6 +49,111 @@
     const btnApplyUnlock = document.getElementById('btnApplyUnlock');
     const resetBtn = document.getElementById('resetBtn');
     const openStudioBtn = document.getElementById('openStudioBtn');
+
+    async function renderPreviewPage(pageNum) {
+      if (!currentPdfjsDoc || !protectPreviewCanvas) return;
+      if (activeRenderTask) {
+        try { activeRenderTask.cancel(); } catch (_) {}
+      }
+
+      try {
+        const page = await currentPdfjsDoc.getPage(pageNum);
+        const unscaledViewport = page.getViewport({ scale: 1.0 });
+        const containerWidth = 360;
+        const scale = Math.min(containerWidth / unscaledViewport.width, 1.5);
+        const viewport = page.getViewport({ scale });
+
+        protectPreviewCanvas.width = viewport.width;
+        protectPreviewCanvas.height = viewport.height;
+        const ctx = protectPreviewCanvas.getContext('2d');
+
+        activeRenderTask = page.render({
+          canvasContext: ctx,
+          viewport: viewport
+        });
+        await activeRenderTask.promise;
+
+        if (previewSkeleton) previewSkeleton.style.display = 'none';
+        if (lockedPreviewPlaceholder) lockedPreviewPlaceholder.style.display = 'none';
+        protectPreviewCanvas.style.display = 'block';
+
+        if (previewPageBadge) previewPageBadge.textContent = `Page ${pageNum}`;
+        if (previewPageIndicator) previewPageIndicator.textContent = `Page ${pageNum} / ${totalPages}`;
+        if (prevPreviewBtn) prevPreviewBtn.disabled = pageNum <= 1;
+        if (nextPreviewBtn) nextPreviewBtn.disabled = pageNum >= totalPages;
+      } catch (err) {
+        if (err && err.name !== 'RenderingCancelledException') {
+          console.error('Failed to render preview page:', err);
+        }
+      }
+    }
+
+    async function loadDocumentPreview(file) {
+      if (!file) return;
+      try {
+        if (previewSkeleton) previewSkeleton.style.display = 'flex';
+        if (protectPreviewCanvas) protectPreviewCanvas.style.display = 'none';
+        if (lockedPreviewPlaceholder) lockedPreviewPlaceholder.style.display = 'none';
+
+        const buffer = await file.arrayBuffer();
+        const bytes = new Uint8Array(buffer);
+
+        const isEncrypted = PDFTools.Protect && typeof PDFTools.Protect.hasEncryptDictionary === 'function'
+          ? PDFTools.Protect.hasEncryptDictionary(bytes)
+          : false;
+
+        if (isEncrypted && currentMode === 'unlock') {
+          if (previewSkeleton) previewSkeleton.style.display = 'none';
+          if (protectPreviewCanvas) protectPreviewCanvas.style.display = 'none';
+          if (lockedPreviewPlaceholder) lockedPreviewPlaceholder.style.display = 'flex';
+          if (previewPageBadge) previewPageBadge.textContent = 'Locked';
+          if (previewNav) previewNav.style.display = 'none';
+          return;
+        }
+
+        if (typeof pdfjsLib !== 'undefined') {
+          if (!pdfjsLib.GlobalWorkerOptions.workerSrc) {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = '../js/lib/pdf.worker.min.js';
+          }
+          const loadingTask = pdfjsLib.getDocument({ data: bytes });
+          currentPdfjsDoc = await loadingTask.promise;
+          totalPages = currentPdfjsDoc.numPages;
+          currentPreviewPage = 1;
+
+          if (totalPages > 1 && previewNav) {
+            previewNav.style.display = 'flex';
+          } else if (previewNav) {
+            previewNav.style.display = 'none';
+          }
+          await renderPreviewPage(1);
+        }
+      } catch (err) {
+        if (lockedPreviewPlaceholder) {
+          if (previewSkeleton) previewSkeleton.style.display = 'none';
+          if (protectPreviewCanvas) protectPreviewCanvas.style.display = 'none';
+          lockedPreviewPlaceholder.style.display = 'flex';
+          if (previewPageBadge) previewPageBadge.textContent = 'Locked';
+          if (previewNav) previewNav.style.display = 'none';
+        }
+      }
+    }
+
+    if (prevPreviewBtn) {
+      prevPreviewBtn.addEventListener('click', () => {
+        if (currentPreviewPage > 1) {
+          currentPreviewPage--;
+          renderPreviewPage(currentPreviewPage);
+        }
+      });
+    }
+    if (nextPreviewBtn) {
+      nextPreviewBtn.addEventListener('click', () => {
+        if (currentPreviewPage < totalPages) {
+          currentPreviewPage++;
+          renderPreviewPage(currentPreviewPage);
+        }
+      });
+    }
 
     function switchTab(mode) {
       currentMode = mode;
@@ -57,6 +175,9 @@
         dropzoneTitle.textContent = PDFTools.i18n ? PDFTools.i18n.t('protect.drop_title_unlock') : 'Drop protected PDF file to unlock';
         protectControls.style.display = 'none';
         unlockControls.style.display = 'block';
+      }
+      if (currentFile) {
+        loadDocumentPreview(currentFile);
       }
     }
 
@@ -94,6 +215,7 @@
 
           uploadState.style.display = 'none';
           workspaceState.style.display = 'block';
+          loadDocumentPreview(currentFile);
         }
       }
     });
@@ -113,6 +235,7 @@
         fileNameLabel.textContent = currentFile.name;
         fileSizeLabel.textContent = PDFTools.FileUtils.formatSize(currentFile.size);
         btnApplyProtect.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> <span>Encrypt & Download PDF</span>`;
+        loadDocumentPreview(currentFile);
       }
       if (PDFTools.Toast) {
         PDFTools.Toast.success(`${newFiles.length} ${PDFTools.i18n.t('toast.files_added')}`);
@@ -139,6 +262,7 @@
           fileSizeLabel.textContent = PDFTools.FileUtils.formatSize(currentFile.size);
           uploadState.style.display = 'none';
           workspaceState.style.display = 'block';
+          loadDocumentPreview(currentFile);
         }
       });
     }
@@ -190,6 +314,17 @@
           }
 
           PDFTools.Toast.success(PDFTools.i18n ? PDFTools.i18n.t('protect.success_protect') : 'PDF encrypted successfully with password!');
+
+          if (PDFTools.ChainedActions) {
+            const optionsPanel = document.querySelector('.workspace-options-panel');
+            if (optionsPanel) {
+              PDFTools.ChainedActions.render(optionsPanel, {
+                currentTool: 'protect',
+                fileName: `${baseName}_protected.pdf`,
+                getFile: () => outputBytes
+              });
+            }
+          }
         }
       } catch (err) {
         console.error(err);
@@ -223,6 +358,17 @@
         }
 
         PDFTools.Toast.success(PDFTools.i18n ? PDFTools.i18n.t('protect.success_unlock') : 'PDF unlocked successfully!');
+
+        if (PDFTools.ChainedActions) {
+          const optionsPanel = document.querySelector('.workspace-options-panel');
+          if (optionsPanel) {
+            PDFTools.ChainedActions.render(optionsPanel, {
+              currentTool: 'protect',
+              fileName: `${baseName}_unlocked.pdf`,
+              getFile: () => outputBytes
+            });
+          }
+        }
       } catch (err) {
         console.error(err);
         PDFTools.Toast.error(err.message || 'Incorrect password.');
@@ -250,6 +396,21 @@
     resetBtn.addEventListener('click', () => {
       currentFile = null;
       lastProcessedBytes = null;
+      currentPdfjsDoc = null;
+      if (activeRenderTask) {
+        try { activeRenderTask.cancel(); } catch (_) {}
+      }
+      if (protectPreviewCanvas) {
+        protectPreviewCanvas.style.display = 'none';
+        const ctx = protectPreviewCanvas.getContext('2d');
+        if (ctx) ctx.clearRect(0, 0, protectPreviewCanvas.width, protectPreviewCanvas.height);
+      }
+      if (previewSkeleton) previewSkeleton.style.display = 'flex';
+      if (lockedPreviewPlaceholder) lockedPreviewPlaceholder.style.display = 'none';
+      if (previewNav) previewNav.style.display = 'none';
+      const existingChained = document.querySelector('.chained-actions-wrapper');
+      if (existingChained) existingChained.remove();
+
       protectUserPassword.value = '';
       protectConfirmPassword.value = '';
       unlockPasswordInput.value = '';

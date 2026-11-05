@@ -88,6 +88,14 @@
 
         resultArea.classList.add('active');
 
+        if (PDFTools.ChainedActions && removeResult && removeResult.pdfBytes) {
+          PDFTools.ChainedActions.render(resultArea, {
+            currentTool: 'remove-pages',
+            fileName: `${currentFile.name.replace(/\.pdf$/i, '')}_edited.pdf`,
+            getFile: () => removeResult.pdfBytes
+          });
+        }
+
         if (PDFTools.RecentFiles && currentFile) {
           PDFTools.RecentFiles.add(currentFile.name, currentFile.size, 'Remove Pages', 'remove');
         }

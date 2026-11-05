@@ -4,6 +4,11 @@ Format mengacu pada [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) 
 
 ## [Unreleased]
 
+### Ditambahkan
+
+- **Chained Actions Antar-Alat**: Alur kerja berantai in-memory (`PDFTools.ChainedActions`) di layar hasil pemrosesan (Gabung, Kompres, Flatten, Hapus Halaman, Susun Ulang, Kunci PDF) yang memungkinkan pengguna meneruskan dokumen hasil langsung ke alat berikutnya tanpa perlu mengunduh dan mengunggah ulang.
+- **Profil Test Cepat Browser (`npm run test:browser:quick`)**: Profil pengujian cepat Playwright yang mengeksekusi 24 suite browser inti dalam durasi jauh lebih singkat untuk meningkatkan kecepatan iterasi pengembangan.
+
 ### Dihapus
 
 - Fitur Scan to PDF.
@@ -12,6 +17,7 @@ Format mengacu pada [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) 
 ### Diubah
 
 - **Tata Letak & Pratinjau Flatten PDF**: Pembaruan antarmuka Flatten PDF menggunakan struktur dua kolom responsif (`.two-col-workspace`) yang dilengkapi kanvas pratinjau langsung tiap halaman berbasis PDF.js, kontrol navigasi dokumen, dan pengaturan metode perataan yang intuitif.
+- **Tata Letak Dua Kolom Protect & Unlock PDF**: Pembaruan antarmuka `pages/protect.html` dengan struktur responsif `.two-col-workspace`, dilengkapi kanvas pratinjau halaman berbasis PDF.js, navigasi multi-halaman, serta placeholder status dokumen terkunci.
 - **Konsolidasi Panduan Alat Halaman**: Penambahan banner panduan dwibahasa pada halaman Hapus Halaman (`remove-pages.html`) dan Susun Ulang Halaman (`reorder.html`) dengan tautan cepat ke Gabung PDF untuk pengaturan multi-dokumen serta PDF Studio untuk penyuntingan visual lengkap.
 
 ### Diperbaiki

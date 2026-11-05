@@ -2177,6 +2177,14 @@
 
 
           PDFTools.Toast.success(PDFTools.i18n.t('result.merge_success', 'PDFs merged successfully!'));
+
+          if (PDFTools.ChainedActions) {
+            PDFTools.ChainedActions.render(resultArea, {
+              currentTool: 'merge',
+              fileName: 'merged.pdf',
+              getFile: () => mergedData
+            });
+          }
         } catch (err) {
           console.error('Merge error:', err);
           progress.hide();

@@ -110,84 +110,128 @@
       </div>
 
       <!-- Workspace State -->
-      <div id="workspaceState" style="display: none; max-width: 540px; margin: 0 auto;">
-        <div class="card" style="padding: 24px; display: flex; flex-direction: column; gap: 18px;">
-          <div style="display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 14px;">
-            <div id="docIcon" style="display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 10px; background: rgba(239, 68, 68, 0.12); color: var(--tool-color, #EF4444);">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <div id="workspaceState" style="display: none;">
+        <div class="two-col-workspace">
+          <!-- Left Column: Document Overview & Live Preview -->
+          <div class="workspace-preview-panel">
+            <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+              <h3 style="font-size: 1rem; font-weight: 700; margin: 0; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                <span data-i18n="protect.preview_title">Document Overview</span>
+              </h3>
+              <span id="previewPageBadge" class="badge" style="background: var(--bg-secondary); border: 1px solid var(--border-color); font-size: 0.75rem; padding: 2px 8px; border-radius: 12px; color: var(--text-muted);">Page 1</span>
             </div>
-            <div style="flex: 1; overflow: hidden;">
-              <div id="fileNameLabel" style="font-weight: 600; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">document.pdf</div>
-              <div id="fileSizeLabel" style="font-size: 0.8rem; color: var(--text-muted);">1.2 MB</div>
+
+            <!-- Preview Sheet Canvas / Locked Placeholder -->
+            <div style="width: 100%; max-width: 380px; aspect-ratio: 210/297; background: #ffffff; border-radius: 8px; box-shadow: var(--shadow-md, 0 4px 12px rgba(0,0,0,0.08)); border: 1px solid var(--border-color); position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+              <div id="previewSkeleton" style="display: flex; flex-direction: column; gap: 10px; width: 80%; padding: 20px;">
+                <div style="height: 12px; width: 60%; background: var(--bg-tertiary); border-radius: 4px;"></div>
+                <div style="height: 8px; width: 100%; background: var(--bg-tertiary); border-radius: 4px;"></div>
+                <div style="height: 8px; width: 90%; background: var(--bg-tertiary); border-radius: 4px;"></div>
+                <div style="height: 8px; width: 95%; background: var(--bg-tertiary); border-radius: 4px;"></div>
+                <div style="height: 8px; width: 75%; background: var(--bg-tertiary); border-radius: 4px;"></div>
+              </div>
+              <div id="lockedPreviewPlaceholder" style="display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; color: var(--text-secondary);">
+                <div style="width: 56px; height: 56px; border-radius: 50%; background: color-mix(in srgb, #EF4444, transparent 88%); display: flex; align-items: center; justify-content: center; color: #EF4444; margin-bottom: 12px;">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
+                <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary); margin-bottom: 4px;" data-i18n="protect.locked_doc_title">Protected Document</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted);" data-i18n="protect.locked_doc_desc">Enter password on the right to unlock and view content</div>
+              </div>
+              <canvas id="protectPreviewCanvas" style="display: none; max-width: 100%; max-height: 100%; object-fit: contain;"></canvas>
+            </div>
+
+            <!-- Page Navigation for multi-page documents -->
+            <div id="previewNav" style="display: none; align-items: center; justify-content: center; gap: 12px; margin-bottom: 16px;">
+              <button type="button" id="prevPreviewBtn" class="btn btn-ghost btn-sm" aria-label="Previous page" title="Previous page" style="padding: 6px 10px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+              </button>
+              <span id="previewPageIndicator" style="font-size: 0.84rem; font-weight: 600; min-width: 100px; text-align: center; color: var(--text-secondary);">Page 1 / 1</span>
+              <button type="button" id="nextPreviewBtn" class="btn btn-ghost btn-sm" aria-label="Next page" title="Next page" style="padding: 6px 10px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
+
+            <!-- File Details Card below preview -->
+            <div style="width: 100%; display: flex; align-items: center; gap: 12px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 10px; padding: 12px 14px;">
+              <div id="docIcon" style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 8px; background: rgba(239, 68, 68, 0.12); color: var(--tool-color, #EF4444); flex-shrink: 0;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              </div>
+              <div style="flex: 1; min-width: 0;">
+                <div id="fileNameLabel" style="font-weight: 700; font-size: 0.92rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">document.pdf</div>
+                <div id="fileSizeLabel" style="font-size: 0.8rem; color: var(--text-muted);">1.2 MB</div>
+              </div>
+              <button type="button" id="resetBtn" class="btn btn-ghost btn-sm" data-i18n="common.change_file">
+                Change File
+              </button>
             </div>
           </div>
 
-          <!-- Protect Section -->
-          <div id="protectControls">
-            <div style="display: flex; flex-direction: column; gap: 12px;">
-              <div>
-                <label class="form-label" style="font-size: 0.85rem; font-weight: 600;" data-i18n="protect.set_password">Set Open Password</label>
-                <input type="password" id="protectUserPassword" class="form-input" placeholder="Enter secure password" data-i18n-placeholder="protect.password_placeholder" style="width: 100%;">
+          <!-- Right Column: Security Controls & Actions -->
+          <div class="workspace-options-panel">
+            <!-- Protect Section -->
+            <div id="protectControls">
+              <div style="display: flex; flex-direction: column; gap: 14px;">
+                <div>
+                  <label for="protectUserPassword" class="form-label" style="font-size: 0.88rem; font-weight: 600; margin-bottom: 6px; display: block;" data-i18n="protect.set_password">Set Open Password</label>
+                  <input type="password" id="protectUserPassword" class="form-input" placeholder="Enter secure password" data-i18n-placeholder="protect.password_placeholder" style="width: 100%;">
+                </div>
+                <div>
+                  <label for="protectConfirmPassword" class="form-label" style="font-size: 0.88rem; font-weight: 600; margin-bottom: 6px; display: block;" data-i18n="protect.confirm_password">Confirm Password</label>
+                  <input type="password" id="protectConfirmPassword" class="form-input" placeholder="Re-type password" data-i18n-placeholder="protect.confirm_placeholder" style="width: 100%;">
+                </div>
               </div>
-              <div>
-                <label class="form-label" style="font-size: 0.85rem; font-weight: 600;" data-i18n="protect.confirm_password">Confirm Password</label>
-                <input type="password" id="protectConfirmPassword" class="form-input" placeholder="Re-type password" data-i18n-placeholder="protect.confirm_placeholder" style="width: 100%;">
+
+              <!-- Permissions Box -->
+              <div class="protect-permissions-box" style="margin-top: 14px;">
+                <div class="protect-perm-header">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                  <span data-i18n="protect.permissions_title">Document Restrictions & Permissions</span>
+                </div>
+                <div class="protect-perm-grid">
+                  <label class="protect-perm-label">
+                    <input type="checkbox" id="permPrinting" checked>
+                    <span data-i18n="protect.perm_printing">Allow Printing</span>
+                  </label>
+                  <label class="protect-perm-label">
+                    <input type="checkbox" id="permCopying">
+                    <span data-i18n="protect.perm_copying">Allow Copying Content</span>
+                  </label>
+                  <label class="protect-perm-label">
+                    <input type="checkbox" id="permModifying">
+                    <span data-i18n="protect.perm_modifying">Allow Modifying File</span>
+                  </label>
+                  <label class="protect-perm-label">
+                    <input type="checkbox" id="permAnnotating">
+                    <span data-i18n="protect.perm_annotating">Allow Comments & Forms</span>
+                  </label>
+                </div>
               </div>
+
+              <button type="button" id="btnApplyProtect" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 18px; display:inline-flex; align-items:center; justify-content:center; gap:8px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <span data-i18n="protect.download_btn">Encrypt & Download PDF</span>
+              </button>
             </div>
 
-            <!-- Permissions Box -->
-            <div class="protect-permissions-box">
-              <div class="protect-perm-header">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                <span data-i18n="protect.permissions_title">Document Restrictions & Permissions</span>
+            <!-- Unlock Section -->
+            <div id="unlockControls" style="display: none;">
+              <div>
+                <label for="unlockPasswordInput" class="form-label" style="font-size: 0.88rem; font-weight: 600; margin-bottom: 6px; display: block;" data-i18n="protect.enter_password">Enter Current PDF Password</label>
+                <input type="password" id="unlockPasswordInput" class="form-input" placeholder="Password to unlock" data-i18n-placeholder="protect.unlock_placeholder" style="width: 100%;">
               </div>
-              <div class="protect-perm-grid">
-                <label class="protect-perm-label">
-                  <input type="checkbox" id="permPrinting" checked>
-                  <span data-i18n="protect.perm_printing">Allow Printing</span>
-                </label>
-                <label class="protect-perm-label">
-                  <input type="checkbox" id="permCopying">
-                  <span data-i18n="protect.perm_copying">Allow Copying Content</span>
-                </label>
-                <label class="protect-perm-label">
-                  <input type="checkbox" id="permModifying">
-                  <span data-i18n="protect.perm_modifying">Allow Modifying File</span>
-                </label>
-                <label class="protect-perm-label">
-                  <input type="checkbox" id="permAnnotating">
-                  <span data-i18n="protect.perm_annotating">Allow Comments & Forms</span>
-                </label>
-              </div>
+              <button type="button" id="btnApplyUnlock" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 18px; background: #16A34A; border-color: #16A34A; display:inline-flex; align-items:center; justify-content:center; gap:8px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>
+                <span data-i18n="protect.unlock_btn">Unlock & Download PDF</span>
+              </button>
             </div>
 
-            <button type="button" id="btnApplyProtect" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 16px; display:inline-flex; align-items:center; justify-content:center; gap:8px;">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-              <span data-i18n="protect.download_btn">Encrypt & Download PDF</span>
+            <!-- Secondary Actions -->
+            <button type="button" id="openStudioBtn" class="btn btn-secondary btn-md" style="width: 100%; display: none; align-items: center; justify-content: center; gap: 8px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              <span data-i18n="action.open_studio">Open in PDF Studio</span>
             </button>
           </div>
-
-          <!-- Unlock Section -->
-          <div id="unlockControls" style="display: none;">
-            <div>
-              <label class="form-label" style="font-size: 0.85rem; font-weight: 600;" data-i18n="protect.enter_password">Enter Current PDF Password</label>
-              <input type="password" id="unlockPasswordInput" class="form-input" placeholder="Password to unlock" data-i18n-placeholder="protect.unlock_placeholder" style="width: 100%;">
-            </div>
-            <button type="button" id="btnApplyUnlock" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 16px; background: #16A34A; border-color: #16A34A; display:inline-flex; align-items:center; justify-content:center; gap:8px;">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>
-              <span data-i18n="protect.unlock_btn">Unlock & Download PDF</span>
-            </button>
-          </div>
-
-          <!-- Secondary Actions -->
-          <button type="button" id="openStudioBtn" class="btn btn-secondary btn-md" style="width: 100%; display: none; align-items: center; justify-content: center; gap: 8px;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-            <span data-i18n="action.open_studio">Open in PDF Studio</span>
-          </button>
-
-          <button type="button" id="resetBtn" class="btn btn-ghost btn-sm" style="width: 100%; margin-top: 6px;" data-i18n="common.change_file">
-            Choose Another File
-          </button>
         </div>
       </div>
     </div>
@@ -202,6 +246,8 @@
 
   <!-- Libraries -->
   <script src="../js/lib/pdf-lib.min.js"></script>
+  <script src="../js/lib/pdf.min.js"></script>
+  <script src="../js/lib/pdf.worker.min.js"></script>
   <script src="../js/lib/jszip.min.js"></script>
   <script src="../js/lib/FileSaver.min.js"></script>
   <script src="../js/utils/i18n.js"></script>

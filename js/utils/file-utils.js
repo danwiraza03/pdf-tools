@@ -398,3 +398,131 @@ PDFTools.RecentFiles = {
     } catch (e) {}
   }
 };
+
+/**
+ * Chained Actions: Seamless in-memory document pipeline across standalone tools
+ */
+PDFTools.ChainedActions = {
+  render: function (target, options) {
+    if (typeof document === 'undefined') return;
+    const container = typeof target === 'string' ? document.querySelector(target) : target;
+    if (!container) return;
+
+    const existing = container.querySelector('.chained-actions-wrapper');
+    if (existing) existing.remove();
+
+    const currentTool = (options && options.currentTool) || '';
+    const getFile = options && options.getFile;
+    const baseFileName = (options && options.fileName) || 'document.pdf';
+
+    const allActions = [
+      {
+        id: 'compress',
+        href: 'compress.html',
+        i18nKey: 'chained.compress',
+        defaultLabel: 'Compress PDF',
+        color: '#3B82F6',
+        svg: '<path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m8 17 4 4 4-4"/>'
+      },
+      {
+        id: 'sign',
+        href: 'sign.html',
+        i18nKey: 'chained.sign',
+        defaultLabel: 'Sign PDF',
+        color: '#10B981',
+        svg: '<path d="M20 19.5v.5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8.5L20 7.5V12"/><path d="M14 2v6h6"/><path d="M12 18v-4"/><path d="m9 15 3-3 3 3"/>'
+      },
+      {
+        id: 'protect',
+        href: 'protect.html',
+        i18nKey: 'chained.protect',
+        defaultLabel: 'Protect PDF',
+        color: '#EF4444',
+        svg: '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>'
+      },
+      {
+        id: 'watermark',
+        href: 'watermark.html',
+        i18nKey: 'chained.watermark',
+        defaultLabel: 'Add Watermark',
+        color: '#EC4899',
+        svg: '<circle cx="12" cy="12" r="10"/><path d="M12 8v8"/><path d="M8 12h8"/>'
+      },
+      {
+        id: 'flatten',
+        href: 'flatten.html',
+        i18nKey: 'chained.flatten',
+        defaultLabel: 'Flatten PDF',
+        color: '#6366F1',
+        svg: '<path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/>'
+      }
+    ];
+
+    const filtered = allActions.filter(a => a.id !== currentTool).slice(0, 4);
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'chained-actions-wrapper';
+    wrapper.style.cssText = 'margin-top: 24px; padding: 18px 20px; border-radius: var(--radius-lg, 14px); background: var(--bg-card); border: 1px solid var(--border-color); text-align: left; box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.03));';
+
+    const header = document.createElement('div');
+    header.style.cssText = 'display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;';
+    
+    const titleText = (PDFTools.i18n && PDFTools.i18n.t('chained.title')) || 'Continue with this document in:';
+    const subText = (PDFTools.i18n && PDFTools.i18n.t('chained.subtitle')) || 'Zero re-upload • Kept in browser memory';
+
+    header.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 0.9rem; color: var(--text-primary);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--primary-color);"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg>
+        <span data-i18n="chained.title">${titleText}</span>
+      </div>
+      <span style="font-size: 0.78rem; color: var(--text-muted);" data-i18n="chained.subtitle">${subText}</span>
+    `;
+    wrapper.appendChild(header);
+
+    const buttonsContainer = document.createElement('div');
+    buttonsContainer.style.cssText = 'display: flex; gap: 10px; flex-wrap: wrap;';
+
+    filtered.forEach(action => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn btn-secondary btn-sm';
+      btn.style.cssText = 'display: inline-flex; align-items: center; gap: 6px; font-weight: 600; padding: 8px 14px;';
+      const labelText = (PDFTools.i18n && PDFTools.i18n.t(action.i18nKey)) || action.defaultLabel;
+      btn.innerHTML = `
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: ${action.color};">
+          ${action.svg}
+        </svg>
+        <span data-i18n="${action.i18nKey}">${labelText}</span>
+      `;
+
+      btn.addEventListener('click', async () => {
+        try {
+          btn.disabled = true;
+          let file = typeof getFile === 'function' ? await getFile() : null;
+          if (!file) {
+            btn.disabled = false;
+            return;
+          }
+          if (file instanceof Uint8Array || file instanceof ArrayBuffer) {
+            file = new Blob([file], { type: 'application/pdf' });
+          }
+          if (file instanceof Blob && !(file instanceof File)) {
+            file = new File([file], baseFileName, { type: 'application/pdf' });
+          }
+          if (PDFTools.FileUtils && PDFTools.FileUtils.setPendingFile) {
+            await PDFTools.FileUtils.setPendingFile(file);
+          }
+          window.location.href = action.href;
+        } catch (err) {
+          console.error('Failed to handoff file:', err);
+          btn.disabled = false;
+        }
+      });
+
+      buttonsContainer.appendChild(btn);
+    });
+
+    wrapper.appendChild(buttonsContainer);
+    container.appendChild(wrapper);
+  }
+};

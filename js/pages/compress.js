@@ -173,6 +173,14 @@
         });
 
         resultArea.classList.add('active');
+        if (PDFTools.ChainedActions && compressedResults.length > 0) {
+          const first = compressedResults.find(r => r.bytes) || compressedResults[0];
+          PDFTools.ChainedActions.render(resultArea, {
+            currentTool: 'compress',
+            fileName: first ? first.file.name : 'compressed.pdf',
+            getFile: () => (first ? new File([first.bytes], first.file.name, { type: 'application/pdf' }) : null)
+          });
+        }
         PDFTools.Toast.success(totalSavedPercent > 0 ? PDFTools.i18n.t('result.compress_success') : 'Files are already at optimal size!');
       } catch (err) {
         console.error(err);

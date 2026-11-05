@@ -188,6 +188,7 @@ async function main() {
       },
       {
         name: 'Page Weight & On-Demand OCR Lazy Loading Audit',
+        heavy: true,
         run: async () => {
           const weightResult = await runPageWeightSuite(browser, BASE_URL);
           if (!weightResult || !weightResult.success) {
@@ -197,6 +198,7 @@ async function main() {
       },
       {
         name: 'Mobile Responsive Header & Navigation Audit',
+        heavy: true,
         run: async () => {
           const headerResult = await runMobileHeaderSuite(browser, server);
           if (!headerResult || !headerResult.success) {
@@ -207,6 +209,7 @@ async function main() {
       },
       {
         name: 'Mobile Touch Drag vs Vertical Scroll Interaction Audit',
+        heavy: true,
         run: async () => {
           const interactionResult = await runMobileInteractionSuite(browser, BASE_URL);
           if (!interactionResult || !interactionResult.success) {
@@ -217,6 +220,7 @@ async function main() {
       },
       {
         name: 'Mobile iPhone 13 Audit: Zero Horizontal Overflow & Errors',
+        heavy: true,
         run: async () => {
           const mobileAuditResult = await runMobileOverflowAndConsoleAudit(browser, BASE_URL);
           if (!mobileAuditResult || !mobileAuditResult.success) {
@@ -233,6 +237,7 @@ async function main() {
       },
       {
         name: 'Watermark Image UI Suite & iPhone 13 WebKit Mobile Verification',
+        heavy: true,
         run: async () => {
           await runWatermarkUiSuite(browser, BASE_URL);
           const wmUiRes = await runWatermarkUiWebKitMobile(BASE_URL);
@@ -241,6 +246,7 @@ async function main() {
       },
       {
         name: 'Watermark Rotation & Opacity Unified Controls Suite',
+        heavy: true,
         run: async () => {
           await runRotationOpacitySuite(browser, BASE_URL);
           const wmRotRes = await runRotationOpacityWebKitMobile(BASE_URL);
@@ -316,6 +322,7 @@ async function main() {
       {
         id: 'a11y',
         name: 'Automated Axe-Core Accessibility & Dialog Focus Suite',
+        heavy: true,
         run: async () => {
           await runA11ySuite(browser, BASE_URL);
         }
@@ -385,8 +392,9 @@ async function main() {
       }
     ];
 
-    // Filter by --only argument if provided
+    // Filter by --quick or --only argument if provided
     let targetSuites = suites;
+    const isQuick = process.argv.includes('--quick');
     const onlyArg = process.argv.find(a => a.startsWith('--only=') || a === '--only');
     let onlyFilter = null;
     if (onlyArg) {
@@ -399,6 +407,12 @@ async function main() {
         }
       }
     }
+
+    if (isQuick) {
+      targetSuites = targetSuites.filter(s => !s.heavy);
+      console.log(`⚡ [QUICK PROFILE] Menjalankan ${targetSuites.length} suite pengujian inti cepat (melewati audit visual & mobile berat)...\n`);
+    }
+
     if (onlyFilter) {
       const filters = onlyFilter.split(',').map(f => f.trim().toLowerCase()).filter(Boolean);
       targetSuites = suites.filter(s =>

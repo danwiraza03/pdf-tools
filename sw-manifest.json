@@ -1,12 +1,12 @@
 {
-  "version": "pdf-tools-v8b1e5dedb2",
+  "version": "pdf-tools-v32279c24be",
   "vendorVersion": "pdf-tools-vendor-v4461a35c2a",
-  "compositeHash": "8b1e5dedb238def4f8e55b9e52c32bd20a9521174f9872a8fd1c5d3873233fc2",
+  "compositeHash": "32279c24beb683dd63dd1a3888ab901b951f4bcded8b8683a1d442760add00e8",
   "vendorHash": "4461a35c2a4ca00c66db6cf2a6300d46859944c7317337fc75f3ad1326f8fd28",
-  "builtAt": "2026-11-05T05:48:16.211Z",
+  "builtAt": "2026-11-05T06:08:58.128Z",
   "totalFiles": 84,
-  "totalBytes": 3731123,
-  "totalMB": "3.56",
+  "totalBytes": 3751168,
+  "totalMB": "3.58",
   "files": [
     {
       "url": "./css/home.css",
@@ -225,8 +225,8 @@
     },
     {
       "url": "./js/pages/compress.js",
-      "size": 16849,
-      "hash": "32bea0eec85a"
+      "size": 17302,
+      "hash": "95c60a79e58b"
     },
     {
       "url": "./js/pages/crop.js",
@@ -235,8 +235,8 @@
     },
     {
       "url": "./js/pages/flatten.js",
-      "size": 10469,
-      "hash": "debe6cbe689e"
+      "size": 10816,
+      "hash": "67468bdde7b8"
     },
     {
       "url": "./js/pages/form-fill.js",
@@ -255,8 +255,8 @@
     },
     {
       "url": "./js/pages/merge.js",
-      "size": 93944,
-      "hash": "8c525e4688ce"
+      "size": 94185,
+      "hash": "cdddc60d9ca3"
     },
     {
       "url": "./js/pages/ocr.js",
@@ -275,8 +275,8 @@
     },
     {
       "url": "./js/pages/protect.js",
-      "size": 13835,
-      "hash": "bb3021862b86"
+      "size": 20412,
+      "hash": "d0dc0e3c3419"
     },
     {
       "url": "./js/pages/redact.js",
@@ -285,13 +285,13 @@
     },
     {
       "url": "./js/pages/remove-pages.js",
-      "size": 5390,
-      "hash": "ea95829367a3"
+      "size": 5719,
+      "hash": "43bbd491dcec"
     },
     {
       "url": "./js/pages/reorder.js",
-      "size": 5681,
-      "hash": "dabaf695e559"
+      "size": 5984,
+      "hash": "31f110ccc01f"
     },
     {
       "url": "./js/pages/rotate.js",
@@ -320,13 +320,13 @@
     },
     {
       "url": "./js/utils/file-utils.js",
-      "size": 14675,
-      "hash": "210b2e6105d1"
+      "size": 20250,
+      "hash": "73bf532f4a1c"
     },
     {
       "url": "./js/utils/i18n.js",
-      "size": 92528,
-      "hash": "75681e696bc4"
+      "size": 93620,
+      "hash": "04640b647782"
     },
     {
       "url": "./manifest.json",
@@ -390,8 +390,8 @@
     },
     {
       "url": "./pages/protect.html",
-      "size": 13172,
-      "hash": "fec4214013cb"
+      "size": 18300,
+      "hash": "1d10a991db7a"
     },
     {
       "url": "./pages/redact.html",

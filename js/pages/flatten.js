@@ -218,6 +218,15 @@
         const baseName = selectedFile.name.replace(/\.pdf$/i, '');
         PDFTools.Download.save(flattenedBytes, `${baseName}_flattened.pdf`);
         PDFTools.Toast.success('PDF flattened & downloaded successfully!');
+
+        const optionsPanel = document.querySelector('.workspace-options-panel');
+        if (PDFTools.ChainedActions && optionsPanel) {
+          PDFTools.ChainedActions.render(optionsPanel, {
+            currentTool: 'flatten',
+            fileName: `${baseName}_flattened.pdf`,
+            getFile: () => flattenedBytes
+          });
+        }
       } catch (err) {
         console.error(err);
         PDFTools.Toast.error(err.message || 'Failed to flatten PDF.');

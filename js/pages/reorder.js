@@ -89,6 +89,14 @@
         actionBar.classList.remove('active');
         resultArea.classList.add('active');
 
+        if (PDFTools.ChainedActions && reorderedPdfBytes) {
+          PDFTools.ChainedActions.render(resultArea, {
+            currentTool: 'reorder',
+            fileName: `${currentFile.name.replace(/\.pdf$/i, '')}_reordered.pdf`,
+            getFile: () => reorderedPdfBytes
+          });
+        }
+
         if (PDFTools.RecentFiles && currentFile) {
           PDFTools.RecentFiles.add(currentFile.name, currentFile.size, 'Reorder Pages', 'reorder');
         }
