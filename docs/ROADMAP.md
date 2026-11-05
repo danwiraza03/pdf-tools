@@ -111,7 +111,7 @@ Berdasarkan tinjauan arsitektur dan prinsip privasi client-side, pemilik proyek 
 3. **Gelombang 1 (Milestone v1.2.0)**:
    - **Redaksi Mandiri (`pages/redact.html`)**: Membawa mesin redaksi permanen yang sudah teruji (`js/editor/redaction-engine.js`) ke halaman mandiri 6 bagian.
    - **Kompresi Seimbang**: Kompresi berbasis downsampling gambar internal tanpa merusak ketajaman teks vektor yang dapat dicari/diseleksi.
-   - **Scan to PDF**: Konversi tangkapan kamera perangkat lokal menjadi dokumen PDF bersih tanpa server.
+   - **Tangkapan Kamera Lokal**: Dihapus atas keputusan pemilik.
 4. **Fitur yang Ditunda (Deferred)**:
    - **Bandingkan PDF Mandiri (`pages/compare.html`)**: Ditunda ke milestone berikutnya.
    - **Ekstrak Gambar (`pages/extract-images.html`)**: Ditunda ke milestone berikutnya.
@@ -135,7 +135,7 @@ flowchart TD
     subgraph V12["Milestone v1.2.0 (Gelombang 1)"]
         M1["Halaman Mandiri Redact PDF<br/>(pages/redact.html)"]
         M2["Kompresi Mode Seimbang<br/>(Preserve Text Vector)"]
-        M3["Scan to PDF Lokal<br/>(Camera Capture to PDF)"]
+        M3["Fitur Kamera Lokal<br/>(Dihapus atas keputusan pemilik)"]
     end
     subgraph V13["Milestone v1.3.0+ (Ditunda)"]
         M4["Bandingkan PDF Mandiri<br/>(pages/compare.html)"]
@@ -154,9 +154,9 @@ flowchart TD
 2. **Kompresi yang Mempertahankan Teks (Mode Seimbang)**:
    - Kompresi stream gambar internal dokumen tanpa merasterisasi teks vektor atau menghapus text-layer.
    - *Status*: **Selesai**.
-3. **Scan to PDF**:
+3. **Tangkapan Kamera ke PDF**:
    - Mengambil tangkapan kamera perangkat pengguna atau gambar dokumen lokal untuk dikompilasi menjadi PDF multi-halaman.
-   - *Status*: **Selesai**.
+   - *Status*: **Dihapus atas keputusan pemilik**.
 
 ### Fitur Ditunda (Target v1.3.0+)
 

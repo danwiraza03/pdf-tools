@@ -4,6 +4,10 @@ Format mengacu pada [Keep a Changelog](https://keepachangelog.com/id-ID/1.1.0/) 
 
 ## [Unreleased]
 
+### Dihapus
+
+- Fitur Scan to PDF.
+
 ### Diperbaiki
 
 - PDF yang hanya dibatasi izinnya (misalnya dilarang mencetak atau menyalin) kini langsung diproses di semua alat; sebelumnya beberapa alat, seperti Kompres, menampilkan galat.
