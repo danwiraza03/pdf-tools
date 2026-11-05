@@ -184,25 +184,33 @@ async function runProtectedInputsAllPagesSuite(browser, baseUrl) {
           return { pageCount: doc.getPageCount() };
         }, fixtures.variantC_base64);
 
-        const modalC = page.locator('.pdftools-modal-backdrop');
+        const modalC = page.locator('.pdftools-modal-backdrop.active');
         await modalC.waitFor({ state: 'visible', timeout: 5000 });
         console.log(`  ✓ (b) Dialog password muncul sesuai ketentuan.`);
 
         // Masukkan password salah
-        const input = page.locator('.pdftools-modal-input');
-        await input.fill(WRONG_PASSWORD);
-        await page.click('.pdftools-modal-confirm');
+        const inputWrong = modalC.locator('.pdftools-modal-input');
+        await inputWrong.fill(WRONG_PASSWORD);
+        await modalC.locator('.pdftools-modal-confirm').click();
 
-        const errorEl = page.locator('.pdftools-modal-error');
+        // Tunggu transisi modal ke attempt 2
+        await page.waitForTimeout(350);
+
+        const modalC2 = page.locator('.pdftools-modal-backdrop.active');
+        await modalC2.waitFor({ state: 'visible', timeout: 5000 });
+        const errorEl = modalC2.locator('.pdftools-modal-error');
         await errorEl.waitFor({ state: 'visible', timeout: 5000 });
         const errorText = await errorEl.textContent();
         assert(errorText.toLowerCase().includes('salah') || errorText.toLowerCase().includes('incorrect'), `${pageItem.path} (b): Pesan password salah harus muncul jelas`);
         console.log(`  ✓ (b) Pesan password salah ditampilkan: "${errorText.trim()}".`);
 
-        // Masukkan password benar
-        await input.fill(CORRECT_PASSWORD);
-        await page.click('.pdftools-modal-confirm');
-        await modalC.waitFor({ state: 'hidden', timeout: 10000 });
+        // Masukkan password benar pada modal aktif
+        const inputCorrect = modalC2.locator('.pdftools-modal-input');
+        await inputCorrect.fill(CORRECT_PASSWORD);
+        await modalC2.locator('.pdftools-modal-confirm').click();
+
+        // Tunggu seluruh modal backdrop tertutup
+        await page.waitForFunction(() => !document.querySelector('.pdftools-modal-backdrop.active'), { timeout: 10000 });
 
         const resC = await decryptPromise;
         assert.strictEqual(resC.pageCount, 2, `${pageItem.path} (b): Dokumen harus berhasil didekripsi setelah password benar`);
